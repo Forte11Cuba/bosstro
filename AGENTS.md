@@ -110,7 +110,12 @@ python3 tool/launcher_icon/build_sources.py && dart run flutter_launcher_icons  
 4. **Replace / log out:** unload from Rust, install the new key, and only then write storage; on
    failure reload the previous key.
 5. The UI shows the npub. The nsec is shown only once on Create new account, for backup, and from
-   Settings → Backup, behind a warning and a confirmation.
+   Settings → Backup, behind a warning and a confirmation. Every screen that shows or takes the
+   nsec (Log in, Create new account, Backup) sets FLAG_SECURE while it is open (`SecureWindow`):
+   no screenshot, recording or recent-apps thumbnail. The nsec is never copied like an id: it goes
+   through `copySecretKey` (marked `EXTRA_IS_SENSITIVE`, so Android 13+ hides the preview and
+   keyboards keep it out of their history) and is cleared from the clipboard after 60 s if it is
+   still there (`SensitiveClipboard`, `MainActivity.kt`). It is never selectable text either.
 6. The solver key is not a trading identity: never use the nsec of `app` or Mostrix's
    `nsec_privkey` as the solver key, or both roles are linked publicly. Log in and Create new
    account say so.

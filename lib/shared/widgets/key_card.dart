@@ -40,7 +40,10 @@ class KeyCard extends StatelessWidget {
                 style: TextStyle(fontSize: 12, color: pal.textSecondary),
               ),
               const SizedBox(height: 6),
-              SelectableText(
+              // Not selectable: a tap on the key is the card's copy, and a
+              // text selection would copy a secret key through the system
+              // menu, without the sensitive flag.
+              Text(
                 value,
                 style: TextStyle(
                   fontFamily: AppFonts.mono,

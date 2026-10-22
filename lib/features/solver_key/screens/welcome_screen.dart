@@ -12,7 +12,7 @@ import 'package:bosstro/shared/widgets/warning_note.dart';
 
 /// Welcome (D9): "Log in" (primary) and "Create new account" (secondary).
 /// What a solver without a key sees at launch.
-class WelcomeScreen extends ConsumerWidget {
+class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
 
   /// The Bosstro emblem, built from `icons/bosstro.png`.
@@ -21,7 +21,28 @@ class WelcomeScreen extends ConsumerWidget {
   static const double _emblemSide = 120;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
+  /// Set while a screen pushed from here is open. A second tap that lands
+  /// before the first push shows (a slow phone, a double tap) is ignored:
+  /// two Create new account screens would each generate their own nsec, and
+  /// backing out of the top one would show another key.
+  bool _navigating = false;
+
+  Future<void> _open(String route) async {
+    if (_navigating) return;
+    _navigating = true;
+    try {
+      await context.push(route);
+    } finally {
+      if (mounted) _navigating = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final pal = ShellPalette.of(context);
     final l10n = AppLocalizations.of(context);
     final unreadable = ref.watch(storedKeyUnreadableProvider);
@@ -45,8 +66,8 @@ class WelcomeScreen extends ConsumerWidget {
                   children: [
                     ExcludeSemantics(
                       child: Image.asset(
-                        emblemAsset,
-                        height: _emblemSide,
+                        WelcomeScreen.emblemAsset,
+                        height: WelcomeScreen._emblemSide,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -93,12 +114,12 @@ class WelcomeScreen extends ConsumerWidget {
                 children: [
                   PrimaryButton(
                     label: l10n.welcomeLogIn,
-                    onPressed: () => context.push(AppRoute.login),
+                    onPressed: () => _open(AppRoute.login),
                   ),
                   const SizedBox(height: 10),
                   SecondaryButton(
                     label: l10n.welcomeCreateAccount,
-                    onPressed: () => context.push(AppRoute.createAccount),
+                    onPressed: () => _open(AppRoute.createAccount),
                   ),
                 ],
               ),

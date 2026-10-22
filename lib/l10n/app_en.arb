@@ -96,7 +96,7 @@
   "@welcomeCreateAccount": {
     "description": "Welcome secondary action: generate a new solver key"
   },
-  "welcomeKeyUnreadable": "The saved key could not be read on this phone. Log in again with your secret key.",
+  "welcomeKeyUnreadable": "The saved key could not be read on this phone. Log in again with your secret key. Logging in with another key replaces the saved one.",
   "@welcomeKeyUnreadable": {
     "description": "Welcome: shown when the stored solver key could not be read or loaded at startup. Nothing was deleted"
   },
@@ -303,5 +303,9 @@
   "logOutFailed": "Could not log out. Try again.",
   "@logOutFailed": {
     "description": "Error when removing the key failed"
+  },
+  "secretKeyCopied": "Secret key copied. It is cleared from the clipboard in 60 seconds.",
+  "@secretKeyCopied": {
+    "description": "Snackbar after copying the secret key: it is marked sensitive and cleared from the clipboard after 60 seconds"
   }
 }

@@ -15,6 +15,7 @@ import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/primary_button.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 import 'package:bosstro/shared/widgets/secret_field.dart';
+import 'package:bosstro/shared/widgets/secure_window.dart';
 import 'package:bosstro/shared/widgets/warning_note.dart';
 
 /// Log in (D9): the solver's nsec, pasted, typed or scanned, then the npub
@@ -109,60 +110,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final npub = _npub;
     final confirming = npub != null;
 
-    return PopScope(
-      // Back from the confirmation returns to the key, not to Welcome.
-      canPop: !confirming,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && confirming && !_busy) _backToKey();
-      },
-      child: Scaffold(
-        backgroundColor: pal.bg,
-        appBar: redesignAppBar(
-          context,
-          title: l10n.loginTitle,
-          onBack:
-              confirming ? (_busy ? null : _backToKey) : () => context.pop(),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            redesignSidePadding,
-            8,
-            redesignSidePadding,
-            24,
+    // Secure: the key typed in the field can be shown.
+    return SecureWindow(
+      child: PopScope(
+        // Back from the confirmation returns to the key, not to Welcome.
+        canPop: !confirming,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop && confirming && !_busy) _backToKey();
+        },
+        child: Scaffold(
+          backgroundColor: pal.bg,
+          appBar: redesignAppBar(
+            context,
+            title: l10n.loginTitle,
+            onBack:
+                confirming ? (_busy ? null : _backToKey) : () => context.pop(),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children:
-                confirming
-                    ? _confirmation(pal, l10n, npub)
-                    : _keyEntry(pal, l10n),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              redesignSidePadding,
+              8,
+              redesignSidePadding,
+              24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children:
+                  confirming
+                      ? _confirmation(pal, l10n, npub)
+                      : _keyEntry(pal, l10n),
+            ),
           ),
-        ),
-        bottomNavigationBar: ActionBar(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (_saveError case final error?) ...[
-                Text(
-                  error,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: pal.dangerText),
+          bottomNavigationBar: ActionBar(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_saveError case final error?) ...[
+                  Text(
+                    error,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: pal.dangerText),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                PrimaryButton(
+                  label:
+                      confirming ? l10n.loginConfirmAnswer : l10n.loginContinue,
+                  busy: _busy,
+                  onPressed: confirming ? _confirm : _continue,
                 ),
-                const SizedBox(height: 10),
+                if (confirming)
+                  TextLink(
+                    label: l10n.loginConfirmBack,
+                    onPressed: _busy ? null : _backToKey,
+                  ),
               ],
-              PrimaryButton(
-                label:
-                    confirming ? l10n.loginConfirmAnswer : l10n.loginContinue,
-                busy: _busy,
-                onPressed: confirming ? _confirm : _continue,
-              ),
-              if (confirming)
-                TextLink(
-                  label: l10n.loginConfirmBack,
-                  onPressed: _busy ? null : _backToKey,
-                ),
-            ],
+            ),
           ),
         ),
       ),

@@ -7,8 +7,8 @@ import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart'
 import 'package:bosstro/features/solver_key/widgets/key_widgets.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/key_card.dart';
-import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
+import 'package:bosstro/shared/widgets/secure_window.dart';
 import 'package:bosstro/shared/widgets/warning_note.dart';
 
 /// Settings → Backup: the stored secret key, whole, to write down. Reached
@@ -29,46 +29,48 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   Widget build(BuildContext context) {
     final pal = ShellPalette.of(context);
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      backgroundColor: pal.bg,
-      appBar: redesignAppBar(
-        context,
-        title: l10n.backupTitle,
-        onBack: () => context.pop(),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          redesignSidePadding,
-          8,
-          redesignSidePadding,
-          24,
+    return SecureWindow(
+      child: Scaffold(
+        backgroundColor: pal.bg,
+        appBar: redesignAppBar(
+          context,
+          title: l10n.backupTitle,
+          onBack: () => context.pop(),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            StepBody(l10n.backupBody),
-            const SizedBox(height: 18),
-            FutureBuilder<String?>(
-              future: _secret,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const SizedBox.shrink();
-                }
-                final secret = snapshot.data;
-                if (snapshot.hasError || secret == null) {
-                  return WarningNote(text: l10n.backupUnavailable);
-                }
-                return KeyCard(
-                  label: l10n.secretKeyLabel,
-                  value: secret,
-                  copyLabel: l10n.copySecretKey,
-                  onCopy: () => copyId(context, secret),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            WarningNote(text: l10n.traderKeyWarning),
-          ],
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            redesignSidePadding,
+            8,
+            redesignSidePadding,
+            24,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              StepBody(l10n.backupBody),
+              const SizedBox(height: 18),
+              FutureBuilder<String?>(
+                future: _secret,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const SizedBox.shrink();
+                  }
+                  final secret = snapshot.data;
+                  if (snapshot.hasError || secret == null) {
+                    return WarningNote(text: l10n.backupUnavailable);
+                  }
+                  return KeyCard(
+                    label: l10n.secretKeyLabel,
+                    value: secret,
+                    copyLabel: l10n.copySecretKey,
+                    onCopy: () => copySecretKey(context, ref, secret),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              WarningNote(text: l10n.traderKeyWarning),
+            ],
+          ),
         ),
       ),
     );

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/services/solver_key_service.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
+import 'package:bosstro/shared/providers/device_security_providers.dart';
 import 'package:bosstro/shared/widgets/input_source_action.dart';
 import 'package:bosstro/shared/widgets/key_card.dart';
 import 'package:bosstro/shared/widgets/mostro_qr.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
+import 'package:bosstro/shared/widgets/snackbar.dart';
 
 /// The copy for each refusal of a key (Rust returns markers, Dart words).
 String keyErrorText(AppLocalizations l10n, SolverKeyError error) =>
@@ -18,6 +22,21 @@ String keyErrorText(AppLocalizations l10n, SolverKeyError error) =>
       // Only the safe replace can meet it, and it unloads first.
       SolverKeyError.alreadyLoaded => l10n.keySaveFailed,
     };
+
+/// Copies a secret key the way a secret is copied, never like an id
+/// (`copyId`): marked sensitive, so Android 13+ hides it in the copy preview
+/// and keyboards keep it out of their history, and cleared from the
+/// clipboard after a minute. The snackbar says so (DS-CMP-15).
+Future<void> copySecretKey(
+  BuildContext context,
+  WidgetRef ref,
+  String secret,
+) async {
+  final copied = AppLocalizations.of(context).secretKeyCopied;
+  HapticFeedback.selectionClick();
+  await ref.read(sensitiveClipboardProvider).copy(secret);
+  if (context.mounted) showMostroSnackBar(context, copied);
+}
 
 /// A step's title on the key screens: 17/w600, a header for screen readers.
 class StepHeading extends StatelessWidget {

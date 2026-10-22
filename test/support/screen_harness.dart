@@ -9,9 +9,13 @@ import 'package:bosstro/core/services/solver_key_service.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/providers/core_providers.dart';
+import 'package:bosstro/shared/providers/device_security_providers.dart';
+
+import 'fake_device_security.dart';
 
 import 'fake_solver_key.dart';
 
+export 'fake_device_security.dart';
 export 'fake_solver_key.dart';
 
 /// The version the fake Rust core reports.
@@ -47,6 +51,7 @@ List<Override> fakeCoreOverrides({
   bool signedIn = true,
   FakeKeyBackend? backend,
   bool storedKeyUnreadable = false,
+  FakeDeviceSecurity? device,
 }) {
   final keys =
       backend ??
@@ -61,6 +66,7 @@ List<Override> fakeCoreOverrides({
       () => SolverKeyNotifier(signedIn ? sampleKey : null),
     ),
     storedKeyUnreadableProvider.overrideWithValue(storedKeyUnreadable),
+    deviceSecurityProvider.overrideWithValue(device ?? FakeDeviceSecurity()),
   ];
 }
 

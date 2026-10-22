@@ -88,7 +88,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeKeyUnreadable =>
-      'The saved key could not be read on this phone. Log in again with your secret key.';
+      'The saved key could not be read on this phone. Log in again with your secret key. Logging in with another key replaces the saved one.';
 
   @override
   String get traderKeyWarning =>
@@ -255,4 +255,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logOutFailed => 'Could not log out. Try again.';
+
+  @override
+  String get secretKeyCopied =>
+      'Secret key copied. It is cleared from the clipboard in 60 seconds.';
 }

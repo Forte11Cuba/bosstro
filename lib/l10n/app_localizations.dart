@@ -245,7 +245,7 @@ abstract class AppLocalizations {
   /// Welcome: shown when the stored solver key could not be read or loaded at startup. Nothing was deleted
   ///
   /// In en, this message translates to:
-  /// **'The saved key could not be read on this phone. Log in again with your secret key.'**
+  /// **'The saved key could not be read on this phone. Log in again with your secret key. Logging in with another key replaces the saved one.'**
   String get welcomeKeyUnreadable;
 
   /// Warning on Log in and Create new account: the solver key must not be the trader identity's key
@@ -553,6 +553,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not log out. Try again.'**
   String get logOutFailed;
+
+  /// Snackbar after copying the secret key: it is marked sensitive and cleared from the clipboard after 60 seconds
+  ///
+  /// In en, this message translates to:
+  /// **'Secret key copied. It is cleared from the clipboard in 60 seconds.'**
+  String get secretKeyCopied;
 }
 
 class _AppLocalizationsDelegate

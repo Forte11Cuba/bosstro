@@ -9,9 +9,9 @@ import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart'
 import 'package:bosstro/features/solver_key/widgets/key_widgets.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/key_card.dart';
-import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/primary_button.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
+import 'package:bosstro/shared/widgets/secure_window.dart';
 import 'package:bosstro/shared/widgets/warning_note.dart';
 
 /// Create new account (D9): a new nsec, shown once with a backup
@@ -73,84 +73,88 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
     final l10n = AppLocalizations.of(context);
     final account = _account;
 
-    return PopScope(
-      // The npub step is terminal: the key is stored, Welcome is behind.
-      canPop: !_showingNpub && !_busy,
-      child: Scaffold(
-        backgroundColor: pal.bg,
-        appBar: redesignAppBar(
-          context,
-          title: l10n.createTitle,
-          onBack: _showingNpub || _busy ? null : () => context.pop(),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            redesignSidePadding,
-            8,
-            redesignSidePadding,
-            24,
+    // The whole flow is secure: its first step shows the new nsec.
+    return SecureWindow(
+      child: PopScope(
+        // The npub step is terminal: the key is stored, Welcome is behind.
+        canPop: !_showingNpub && !_busy,
+        child: Scaffold(
+          backgroundColor: pal.bg,
+          appBar: redesignAppBar(
+            context,
+            title: l10n.createTitle,
+            onBack: _showingNpub || _busy ? null : () => context.pop(),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children:
-                account == null
-                    ? [
-                      StepHeading(l10n.createNpubHeading),
-                      const SizedBox(height: 8),
-                      StepBody(l10n.createNpubBody),
-                      const SizedBox(height: 18),
-                      NpubShare(npub: _npub),
-                    ]
-                    : [
-                      StepHeading(l10n.createKeyHeading),
-                      const SizedBox(height: 8),
-                      StepBody(l10n.createKeyBody),
-                      const SizedBox(height: 18),
-                      KeyCard(
-                        label: l10n.secretKeyLabel,
-                        value: account.nsec,
-                        copyLabel: l10n.copySecretKey,
-                        onCopy: () => copyId(context, account.nsec),
-                      ),
-                      const SizedBox(height: 12),
-                      WarningNote(text: l10n.traderKeyWarning),
-                      const SizedBox(height: 12),
-                      _BackupConfirmation(
-                        label: l10n.createBackupConfirm,
-                        value: _savedBackup,
-                        onChanged:
-                            _busy
-                                ? null
-                                : (value) =>
-                                    setState(() => _savedBackup = value),
-                      ),
-                    ],
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              redesignSidePadding,
+              8,
+              redesignSidePadding,
+              24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children:
+                  account == null
+                      ? [
+                        StepHeading(l10n.createNpubHeading),
+                        const SizedBox(height: 8),
+                        StepBody(l10n.createNpubBody),
+                        const SizedBox(height: 18),
+                        NpubShare(npub: _npub),
+                      ]
+                      : [
+                        StepHeading(l10n.createKeyHeading),
+                        const SizedBox(height: 8),
+                        StepBody(l10n.createKeyBody),
+                        const SizedBox(height: 18),
+                        KeyCard(
+                          label: l10n.secretKeyLabel,
+                          value: account.nsec,
+                          copyLabel: l10n.copySecretKey,
+                          onCopy:
+                              () => copySecretKey(context, ref, account.nsec),
+                        ),
+                        const SizedBox(height: 12),
+                        WarningNote(text: l10n.traderKeyWarning),
+                        const SizedBox(height: 12),
+                        _BackupConfirmation(
+                          label: l10n.createBackupConfirm,
+                          value: _savedBackup,
+                          onChanged:
+                              _busy
+                                  ? null
+                                  : (value) =>
+                                      setState(() => _savedBackup = value),
+                        ),
+                      ],
+            ),
           ),
-        ),
-        bottomNavigationBar: ActionBar(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (_error case final error?) ...[
-                Text(
-                  error,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: pal.dangerText),
-                ),
-                const SizedBox(height: 10),
-              ],
-              _showingNpub
-                  ? PrimaryButton(
-                    label: l10n.createDone,
-                    onPressed: () => context.go(AppRoute.pending),
-                  )
-                  : PrimaryButton(
-                    label: l10n.createContinue,
-                    busy: _busy,
-                    onPressed: _savedBackup ? _continue : null,
+          bottomNavigationBar: ActionBar(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_error case final error?) ...[
+                  Text(
+                    error,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: pal.dangerText),
                   ),
-            ],
+                  const SizedBox(height: 10),
+                ],
+                _showingNpub
+                    ? PrimaryButton(
+                      label: l10n.createDone,
+                      onPressed: () => context.go(AppRoute.pending),
+                    )
+                    : PrimaryButton(
+                      label: l10n.createContinue,
+                      busy: _busy,
+                      onPressed: _savedBackup ? _continue : null,
+                    ),
+              ],
+            ),
           ),
         ),
       ),

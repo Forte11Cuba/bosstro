@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/services/solver_key_service.dart';
+import 'package:bosstro/features/solver_key/screens/create_account_screen.dart';
+import 'package:bosstro/features/solver_key/screens/login_screen.dart';
 import 'package:bosstro/features/solver_key/screens/qr_scan_screen.dart';
 
 import '../../support/screen_harness.dart';
@@ -417,6 +419,196 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Could not log out. Try again.'), findsOneWidget);
       expect(backend.core.loaded, sampleNsec);
+    });
+  });
+
+  group('Welcome', () {
+    Future<FakeKeyBackend> openWelcome(WidgetTester tester) async {
+      setSurface(tester, width: 400, height: 800);
+      final backend = FakeKeyBackend();
+      await pumpApp(
+        tester,
+        location: AppRoute.welcome,
+        locale: const Locale('en'),
+        textScale: 1,
+        overrides: fakeCoreOverrides(signedIn: false, backend: backend),
+      );
+      return backend;
+    }
+
+    // A slow phone or a double tap: two Create new account screens would
+    // each generate their own nsec, and backing out of the top one would
+    // show another key.
+    testWidgets('a double tap opens Create new account once', (tester) async {
+      await openWelcome(tester);
+      await tester.tap(find.text('Create new account'));
+      await tester.tap(find.text('Create new account'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CreateAccountScreen, skipOffstage: false), findsOne);
+
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(CreateAccountScreen, skipOffstage: false),
+        findsNothing,
+      );
+      expect(find.text('Resolve Mostro disputes'), findsOneWidget);
+    });
+
+    testWidgets('a double tap opens Log in once', (tester) async {
+      await openWelcome(tester);
+      await tester.tap(find.text('Log in'));
+      await tester.tap(find.text('Log in'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen, skipOffstage: false), findsOne);
+    });
+
+    testWidgets('after coming back, the buttons work again', (tester) async {
+      await openWelcome(tester);
+      await tester.tap(find.text('Create new account'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Log in'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOne);
+    });
+
+    testWidgets('an unreadable saved key says another key replaces it', (
+      tester,
+    ) async {
+      setSurface(tester, width: 400, height: 800);
+      await pumpApp(
+        tester,
+        location: AppRoute.welcome,
+        locale: const Locale('en'),
+        textScale: 1,
+        overrides: fakeCoreOverrides(
+          signedIn: false,
+          storedKeyUnreadable: true,
+        ),
+      );
+      expect(
+        find.textContaining('Logging in with another key replaces'),
+        findsOne,
+      );
+    });
+  });
+
+  group('the secret key is protected', () {
+    /// Every text copied through Flutter's own clipboard call.
+    List<String> recordPlainCopies(WidgetTester tester) {
+      final copies = <String>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copies.add((call.arguments as Map)['text'] as String);
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      return copies;
+    }
+
+    testWidgets('Create new account: secure window, sensitive copy', (
+      tester,
+    ) async {
+      setSurface(tester, width: 400, height: 900);
+      final device = FakeDeviceSecurity();
+      final plain = recordPlainCopies(tester);
+      await pumpApp(
+        tester,
+        location: AppRoute.welcome,
+        locale: const Locale('en'),
+        textScale: 1,
+        overrides: fakeCoreOverrides(signedIn: false, device: device),
+      );
+      await tester.tap(find.text('Create new account'));
+      await tester.pumpAndSettle();
+      expect(device.calls, ['secure:true']);
+
+      await tester.tap(find.text(sampleNsec));
+      await tester.pump();
+      expect(device.calls, contains('copy:$sampleNsec'));
+      expect(plain, isNot(contains(sampleNsec)));
+      expect(find.textContaining('cleared from the clipboard'), findsOne);
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(device.calls.last, 'secure:false');
+    });
+
+    testWidgets('Backup: secure window, sensitive copy', (tester) async {
+      setSurface(tester, width: 400, height: 800);
+      final device = FakeDeviceSecurity();
+      final plain = recordPlainCopies(tester);
+      await pumpApp(
+        tester,
+        location: AppRoute.settings,
+        locale: const Locale('en'),
+        textScale: 1,
+        overrides: fakeCoreOverrides(device: device),
+      );
+      await tester.tap(find.text('Back up secret key'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Show secret key'));
+      await tester.pumpAndSettle();
+      expect(device.calls, ['secure:true']);
+
+      await tester.tap(find.text(sampleNsec));
+      await tester.pump();
+      expect(device.calls, contains('copy:$sampleNsec'));
+      expect(plain, isEmpty);
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(device.calls.last, 'secure:false');
+    });
+
+    testWidgets('Log in: secure window while open', (tester) async {
+      setSurface(tester, width: 400, height: 800);
+      final device = FakeDeviceSecurity();
+      await pumpApp(
+        tester,
+        location: AppRoute.welcome,
+        locale: const Locale('en'),
+        textScale: 1,
+        overrides: fakeCoreOverrides(signedIn: false, device: device),
+      );
+      await tester.tap(find.text('Log in'));
+      await tester.pumpAndSettle();
+      expect(device.calls, ['secure:true']);
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(device.calls, ['secure:true', 'secure:false']);
+    });
+
+    testWidgets('the npub is still copied as plain text', (tester) async {
+      setSurface(tester, width: 400, height: 800);
+      final device = FakeDeviceSecurity();
+      final plain = recordPlainCopies(tester);
+      await pumpApp(
+        tester,
+        location: AppRoute.settings,
+        locale: const Locale('en'),
+        textScale: 1,
+        overrides: fakeCoreOverrides(device: device),
+      );
+      await tester.tap(find.text('Your npub'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(sampleNpub));
+      await tester.pump();
+      expect(plain, [sampleNpub]);
+      expect(device.calls, isNot(contains('copy:$sampleNpub')));
     });
   });
 }

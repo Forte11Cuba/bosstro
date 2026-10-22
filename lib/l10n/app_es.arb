@@ -24,7 +24,7 @@
   "welcomeBody": "Toma las disputas de un nodo, habla con el comprador y el vendedor, y ciérralas desde tu teléfono.",
   "welcomeLogIn": "Iniciar sesión",
   "welcomeCreateAccount": "Crear cuenta nueva",
-  "welcomeKeyUnreadable": "No se pudo leer la clave guardada en este teléfono. Vuelve a iniciar sesión con tu clave secreta.",
+  "welcomeKeyUnreadable": "No se pudo leer la clave guardada en este teléfono. Vuelve a iniciar sesión con tu clave secreta. Si entras con otra clave, reemplaza la guardada.",
   "traderKeyWarning": "Nunca uses la clave con la que operas. Una clave de solver que también es de trading vincula públicamente ambos roles.",
   "loginTitle": "Iniciar sesión",
   "loginHeading": "Tu clave secreta de solver",
@@ -75,5 +75,6 @@
   "logOutTitle": "¿Cerrar sesión?",
   "logOutBody": "Tu clave secreta se borrará de este teléfono. Sin un respaldo no podrás volver a iniciar sesión en esta cuenta.",
   "logOutAnswer": "Cerrar sesión",
-  "logOutFailed": "No se pudo cerrar la sesión. Inténtalo de nuevo."
+  "logOutFailed": "No se pudo cerrar la sesión. Inténtalo de nuevo.",
+  "secretKeyCopied": "Clave secreta copiada. Se borra del portapapeles en 60 segundos."
 }

@@ -88,7 +88,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get welcomeKeyUnreadable =>
-      'No se pudo leer la clave guardada en este teléfono. Vuelve a iniciar sesión con tu clave secreta.';
+      'No se pudo leer la clave guardada en este teléfono. Vuelve a iniciar sesión con tu clave secreta. Si entras con otra clave, reemplaza la guardada.';
 
   @override
   String get traderKeyWarning =>
@@ -256,4 +256,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get logOutFailed => 'No se pudo cerrar la sesión. Inténtalo de nuevo.';
+
+  @override
+  String get secretKeyCopied =>
+      'Clave secreta copiada. Se borra del portapapeles en 60 segundos.';
 }
