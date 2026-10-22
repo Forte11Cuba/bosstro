@@ -1,0 +1,254 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('es'),
+  ];
+
+  /// The app's name. A brand: keep it unchanged in every locale
+  ///
+  /// In en, this message translates to:
+  /// **'Bosstro'**
+  String get appName;
+
+  /// Bottom bar destination: disputes waiting for a solver to take them
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get navPending;
+
+  /// Bottom bar destination: disputes this solver took and is resolving
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get navInProgress;
+
+  /// Bottom bar destination: settings
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// Tab app bar status line, before the solver chooses a Mostro node
+  ///
+  /// In en, this message translates to:
+  /// **'No node selected'**
+  String get noNodeSelected;
+
+  /// Header of the Pending tab
+  ///
+  /// In en, this message translates to:
+  /// **'Pending disputes'**
+  String get pendingTitle;
+
+  /// Empty state title of the Pending tab
+  ///
+  /// In en, this message translates to:
+  /// **'No disputes to solve'**
+  String get pendingEmptyTitle;
+
+  /// Empty state explanation of the Pending tab
+  ///
+  /// In en, this message translates to:
+  /// **'When a trade on this node opens a dispute, it shows up here for a solver to take.'**
+  String get pendingEmptyBody;
+
+  /// Header of the In progress tab: disputes this solver took
+  ///
+  /// In en, this message translates to:
+  /// **'Your disputes'**
+  String get inProgressTitle;
+
+  /// Empty state title of the In progress tab
+  ///
+  /// In en, this message translates to:
+  /// **'No disputes in progress'**
+  String get inProgressEmptyTitle;
+
+  /// Empty state explanation of the In progress tab
+  ///
+  /// In en, this message translates to:
+  /// **'Disputes you take show up here, with a chat for the buyer and one for the seller.'**
+  String get inProgressEmptyBody;
+
+  /// Header of the Settings tab
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Settings group header: information about the app
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsGroupAbout;
+
+  /// Settings row label: the app version, read from the Rust core
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get settingsVersion;
+
+  /// Snackbar confirming a value was copied to the clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
+
+  /// Data row label of an id (a dispute's or an order's)
+  ///
+  /// In en, this message translates to:
+  /// **'ID'**
+  String get idLabel;
+
+  /// Screen reader hint of a row that copies an id
+  ///
+  /// In en, this message translates to:
+  /// **'Copy ID'**
+  String get copyIdHint;
+
+  /// Easter egg shown when the mascot is tapped on 31 October, the whitepaper's anniversary — and Halloween
+  ///
+  /// In en, this message translates to:
+  /// **'31 October 2008: nine pages, nobody\'s permission. Happy Halloween.'**
+  String get easterEggWhitepaper;
+
+  /// Easter egg shown when the mascot is tapped on 3 January: the headline Satoshi embedded in the genesis block. A quotation — keep it in English, unchanged, in every locale
+  ///
+  /// In en, this message translates to:
+  /// **'The Times 03/Jan/2009 Chancellor on brink of second bailout for banks'**
+  String get easterEggGenesis;
+
+  /// Easter egg shown when the mascot is tapped on 22 May, Bitcoin Pizza Day
+  ///
+  /// In en, this message translates to:
+  /// **'22 May 2010: 10,000 BTC for two pizzas. Hope they were good.'**
+  String get easterEggPizzaDay;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'es'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

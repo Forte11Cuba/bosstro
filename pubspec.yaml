@@ -1,0 +1,98 @@
+name: bosstro
+description: "Bosstro — the Mostro dispute solver's mobile app"
+publish_to: 'none'
+
+# Bump together with rust/Cargo.toml `version` (rust/src/api/mod.rs tests it).
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.7.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Bridge: Rust core ↔ Flutter UI. Same exact pin as ../app and rust/Cargo.toml
+  # (scripts/frb-generate.sh refuses to generate when they disagree).
+  flutter_rust_bridge: 2.11.1
+  rust:
+    path: rust_builder
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # Internationalization
+  intl: ^0.20.2
+
+  # Injectable clock: the mascot's seasons read it, so tests can pin a date
+  clock: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  # Generates the Android launcher icons from icons/bosstro-1024.png
+  flutter_launcher_icons: ^0.14.2
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/images/
+    - assets/images/mascot/
+    - assets/fonts/outfit/OFL.txt
+    - assets/fonts/manrope/OFL.txt
+    - assets/fonts/noto_flags/LICENSE.txt
+
+  # Brand typography, bundled so the app never fetches fonts at runtime (the
+  # same assets as ../app). Outfit is the UI face; Manrope sets the figures
+  # (amounts, sats), whose tabular digits line up. Both are OFL-1.1: the
+  # licences ship as assets and are registered with the LicenseRegistry at
+  # startup (lib/core/font_licenses.dart).
+  fonts:
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/outfit/Outfit-Regular.ttf
+        - asset: assets/fonts/outfit/Outfit-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/outfit/Outfit-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/outfit/Outfit-Bold.ttf
+          weight: 700
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/manrope/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/manrope/Manrope-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/manrope/Manrope-Bold.ttf
+          weight: 700
+    # The flags of Noto Color Emoji (OFL), a fallback in both themes
+    # (DS-TYP-8). Copied from ../app, which builds it with
+    # tool/flags_font/build_font.py.
+    - family: NotoFlags
+      fonts:
+        - asset: assets/fonts/noto_flags/NotoFlags.ttf
+
+# Launcher icon: a variant of ../app's (D11, A8), so the two apps can be told
+# apart when both are installed. icons/bosstro.png is the art; every other
+# format in icons/ is built from it by:
+#   python3 tool/launcher_icon/build_sources.py
+# and the icons regenerated from it with:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "icons/bosstro-1024.png"
+  adaptive_icon_foreground: "icons/bosstro-1024.png"
+  # Launchers mask the adaptive layer to about its central two thirds; this
+  # inset keeps the gold ring inside the mask instead of clipping it.
+  adaptive_icon_foreground_inset: 20
+  # The emblem's own background, so the disc merges into the adaptive icon.
+  adaptive_icon_background: "#111722"

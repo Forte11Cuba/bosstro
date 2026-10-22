@@ -1,0 +1,14 @@
+# flutter_rust_bridge v2 configuration
+# Docs: https://cjycode.com/flutter_rust_bridge/
+#
+# To regenerate Dart bindings after changing Rust API:
+#   ./scripts/frb-generate.sh
+#
+# Install the codegen tool at the version pinned in pubspec.yaml — a mismatched
+# CLI generates bindings that fail to compile (see issue #205):
+#   cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
+
+rust_input: "crate::api"
+rust_root: "rust"
+dart_output: "lib/src/rust"
+dart_entrypoint_class_name: "RustLib"

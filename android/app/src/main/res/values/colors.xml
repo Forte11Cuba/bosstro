@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The emblem's own background (icons/bosstro.png). -->
+    <color name="ic_launcher_background">#111722</color>
+    <!-- Behind the launch screen logo: the app's dark page background, in light
+         and dark mode alike, so the logo hands over to the app without a flash. -->
+    <color name="splash_background">#12161F</color>
+</resources>

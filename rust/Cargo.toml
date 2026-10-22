@@ -1,0 +1,34 @@
+[package]
+name = "rust"
+version = "0.1.0"
+license = "AGPL-3.0-or-later"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+# `frb_expand` is set by flutter_rust_bridge's macros during codegen expansion.
+# Declare it so `cargo clippy -- -D warnings` does not flag it as an unknown cfg.
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
+
+[dependencies]
+# Same exact pin as pubspec.yaml and ../app (scripts/frb-generate.sh checks it).
+flutter_rust_bridge = "=2.11.1"
+
+# Nostr & Mostro protocol. Same versions as ../app, so transport v2, the chat
+# envelope and attachments can be ported from it without a version gap.
+nostr-sdk = { version = "0.45", default-features = false }
+# nostr-sdk 0.45 no longer carries the NIP feature flags: they live on `nostr`
+# itself and none are on by default (feature unification applies them to
+# nostr-sdk's copy too).
+nostr = { version = "0.45", default-features = false, features = ["std", "nip44"] }
+mostro-core = "0.17.3"
+
+# Error handling
+anyhow = "1"
+
+# Async runtime and persistence. Android only for the MVP, so no wasm split.
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net"] }
+sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros", "migrate"] }

@@ -1,0 +1,211 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least-privilege token: jobs only read source and report their own status.
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Same versions as ../app. FRB_VERSION is checked against pubspec.yaml and
+  # rust/Cargo.toml by scripts/frb-generate.sh.
+  FLUTTER_VERSION: "3.41.9"
+  FRB_VERSION: "2.11.1"
+  CARGO_EXPAND_VERSION: "1.0.123"
+
+jobs:
+  rust:
+    name: Rust (build / test / clippy)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Pinned (not @stable) so a newer stable clippy can't introduce lints
+      # that break `-D warnings` on unrelated PRs. Bump this deliberately.
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.97.0
+        with:
+          components: clippy
+
+      - name: Cache cargo registry and target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Build
+        run: cargo build --locked
+
+      - name: Test
+        run: cargo test --locked
+
+      - name: Clippy (deny warnings)
+        run: cargo clippy --locked -- -D warnings
+
+  flutter:
+    name: Flutter (generated code / analyze / test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # flutter_rust_bridge_codegen needs Rust to regenerate the bindings for
+      # the drift check below. rustfmt is not in the action's minimal profile;
+      # without it codegen writes rust/src/frb_generated.rs unformatted and the
+      # drift check reports the whole file.
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.97.0
+        with:
+          components: rustfmt
+
+      - name: Cache cargo registry and target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      # Codegen shells out to `cargo expand`, so cargo-expand must be present
+      # alongside the codegen binary.
+      - name: Cache codegen tools
+        id: tools-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/flutter_rust_bridge_codegen
+            ~/.cargo/bin/cargo-expand
+          key: frb-tools-${{ runner.os }}-frb${{ env.FRB_VERSION }}-expand${{ env.CARGO_EXPAND_VERSION }}
+
+      - name: Install codegen tools
+        if: steps.tools-cache.outputs.cache-hit != 'true'
+        run: |
+          cargo install flutter_rust_bridge_codegen --version ${{ env.FRB_VERSION }} --locked
+          cargo install cargo-expand --version ${{ env.CARGO_EXPAND_VERSION }} --locked
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Generate Rust bridge bindings
+        run: ./scripts/frb-generate.sh
+
+      # Fail if any locale is missing a key of the English template. The
+      # report is "{}" when everything is translated (l10n.yaml).
+      - name: Check localizations are fully translated
+        run: |
+          flutter gen-l10n
+          report=lib/l10n/untranslated_messages.txt
+          if [ ! -f "$report" ]; then
+            echo "::error::Expected untranslated-messages report was not generated."
+            exit 1
+          fi
+          if [ "$(tr -d '[:space:]' < "$report")" != "{}" ]; then
+            echo "::error::Untranslated localization keys found (see below):"
+            cat "$report"
+            exit 1
+          fi
+
+      # Generated code is committed. The two steps above regenerated it from
+      # this PR's sources, so any difference means the PR changed rust/src/api/
+      # or an .arb without committing the regenerated output.
+      - name: Check generated code is committed
+        run: |
+          paths=(lib/src/rust rust/src/frb_generated.rs lib/l10n)
+          if [ -n "$(git status --porcelain -- "${paths[@]}")" ]; then
+            echo "::error::Generated code is out of date. Run ./scripts/frb-generate.sh and flutter gen-l10n, then commit the result."
+            git status --short -- "${paths[@]}"
+            git diff --stat -- "${paths[@]}"
+            exit 1
+          fi
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+  # The *auto* rules of .specify/DESIGN_SYSTEM.md on the code the pull request
+  # touches under lib/. The checker's own tests run in the flutter job
+  # (test/ci/design_check_test.dart).
+  design:
+    name: Design guide
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          # The diff is taken from the merge base with the target branch.
+          fetch-depth: 0
+
+      # Only its Dart SDK is used; the checker needs no packages.
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Check changed UI code against the design guide
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: dart tool/design_check.dart --base "origin/$BASE_REF"
+
+  # The only target (A2). Compiles the Kotlin side, the plugin graph and the
+  # Rust core for every Android ABI through cargokit.
+  android:
+    name: Android (debug APK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # cargokit builds through rustup's default toolchain and adds missing
+      # targets itself; adding them here keeps that out of the Gradle build.
+      - name: Install Rust Android targets
+        uses: dtolnay/rust-toolchain@1.97.0
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Cache cargo registry and target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Build debug APK
+        run: flutter build apk --debug

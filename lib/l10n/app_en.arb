@@ -1,0 +1,83 @@
+{
+  "@@locale": "en",
+  "appName": "Bosstro",
+  "@appName": {
+    "description": "The app's name. A brand: keep it unchanged in every locale"
+  },
+  "navPending": "Pending",
+  "@navPending": {
+    "description": "Bottom bar destination: disputes waiting for a solver to take them"
+  },
+  "navInProgress": "In progress",
+  "@navInProgress": {
+    "description": "Bottom bar destination: disputes this solver took and is resolving"
+  },
+  "navSettings": "Settings",
+  "@navSettings": {
+    "description": "Bottom bar destination: settings"
+  },
+  "noNodeSelected": "No node selected",
+  "@noNodeSelected": {
+    "description": "Tab app bar status line, before the solver chooses a Mostro node"
+  },
+  "pendingTitle": "Pending disputes",
+  "@pendingTitle": {
+    "description": "Header of the Pending tab"
+  },
+  "pendingEmptyTitle": "No disputes to solve",
+  "@pendingEmptyTitle": {
+    "description": "Empty state title of the Pending tab"
+  },
+  "pendingEmptyBody": "When a trade on this node opens a dispute, it shows up here for a solver to take.",
+  "@pendingEmptyBody": {
+    "description": "Empty state explanation of the Pending tab"
+  },
+  "inProgressTitle": "Your disputes",
+  "@inProgressTitle": {
+    "description": "Header of the In progress tab: disputes this solver took"
+  },
+  "inProgressEmptyTitle": "No disputes in progress",
+  "@inProgressEmptyTitle": {
+    "description": "Empty state title of the In progress tab"
+  },
+  "inProgressEmptyBody": "Disputes you take show up here, with a chat for the buyer and one for the seller.",
+  "@inProgressEmptyBody": {
+    "description": "Empty state explanation of the In progress tab"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Header of the Settings tab"
+  },
+  "settingsGroupAbout": "About",
+  "@settingsGroupAbout": {
+    "description": "Settings group header: information about the app"
+  },
+  "settingsVersion": "Version",
+  "@settingsVersion": {
+    "description": "Settings row label: the app version, read from the Rust core"
+  },
+  "copied": "Copied",
+  "@copied": {
+    "description": "Snackbar confirming a value was copied to the clipboard"
+  },
+  "idLabel": "ID",
+  "@idLabel": {
+    "description": "Data row label of an id (a dispute's or an order's)"
+  },
+  "copyIdHint": "Copy ID",
+  "@copyIdHint": {
+    "description": "Screen reader hint of a row that copies an id"
+  },
+  "easterEggWhitepaper": "31 October 2008: nine pages, nobody's permission. Happy Halloween.",
+  "@easterEggWhitepaper": {
+    "description": "Easter egg shown when the mascot is tapped on 31 October, the whitepaper's anniversary — and Halloween"
+  },
+  "easterEggGenesis": "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks",
+  "@easterEggGenesis": {
+    "description": "Easter egg shown when the mascot is tapped on 3 January: the headline Satoshi embedded in the genesis block. A quotation — keep it in English, unchanged, in every locale"
+  },
+  "easterEggPizzaDay": "22 May 2010: 10,000 BTC for two pizzas. Hope they were good.",
+  "@easterEggPizzaDay": {
+    "description": "Easter egg shown when the mascot is tapped on 22 May, Bitcoin Pizza Day"
+  }
+}

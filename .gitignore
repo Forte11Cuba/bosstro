@@ -1,0 +1,48 @@
+# Local agent guidelines (not published)
+CLAUDE.md
+
+# Flutter
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+
+# Generated code is COMMITTED, not ignored: lib/src/rust/ (./scripts/frb-generate.sh) and
+# lib/l10n/app_localizations*.dart (flutter gen-l10n). See AGENTS.md → "Generated code".
+
+# l10n untranslated-keys report (regenerated via: flutter gen-l10n; must be empty)
+lib/l10n/untranslated_messages.txt
+
+# Rust
+rust/target/
+rust_builder/target/
+# NOTE: rust/Cargo.lock IS committed so every build resolves the same dependency tree.
+
+# General
+.DS_Store
+.idea/
+*.log
+.env
+.env.*
+*.iml
+
+# Signing keys. The release key must never be committed: leaked, anyone can ship an
+# "update" to every user.
+*.jks
+*.keystore
+android/key.properties
+
+# Platform
+android/.gradle/
+android/local.properties
+android/app/debug
+android/app/profile
+android/.kotlin/
+
+# Golden diff output written by flutter test on a mismatch
+**/test/**/failures/
+
+# Merge / patch artifacts
+*.orig
+*.rej
