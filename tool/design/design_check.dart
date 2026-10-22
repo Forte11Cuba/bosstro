@@ -123,7 +123,7 @@ List<Violation> scan(String path, String source, {Set<int>? lines}) {
   }
 
   // A declaration with one changed line is read whole: touching a legacy
-  // screen leaves the class or function it touched free of breaks (#657).
+  // screen leaves the class or function it touched free of breaks (MostroP2P/app#657).
   final touched =
       lines == null
           ? null
@@ -356,7 +356,7 @@ List<Violation> scan(String path, String source, {Set<int>? lines}) {
 
   // What the rules below catch is an absence: a Material widget with no
   // style of its own takes the theme's defaults, and the theme still holds
-  // v1's (#657). Each constructor must pass the named argument.
+  // v1's (MostroP2P/app#657). Each constructor must pass the named argument.
   void requireArg(
     RegExp constructor,
     RegExp argument,

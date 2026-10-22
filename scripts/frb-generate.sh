@@ -4,7 +4,7 @@
 #
 # A mismatched CLI writes lib/src/rust/frb_generated.dart against a different API surface
 # than the resolved Dart package. The result is a build failure that names a Dart parameter
-# and never mentions versions (../app issue #205).
+# and never mentions versions (MostroP2P/app#205).
 #
 # The output is committed: commit it together with the rust/src/api/ change that caused it
 # (AGENTS.md → "Generated code"; ci.yml fails when it drifts).

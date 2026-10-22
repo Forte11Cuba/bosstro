@@ -484,7 +484,7 @@ final book = OrderBookPalette.of(context);
 
   /// What makes a screen look like v1 is mostly what it leaves out: a
   /// Material widget with no style of its own takes the theme's defaults,
-  /// and the theme still carries v1's (#657).
+  /// and the theme still carries v1's (MostroP2P/app#657).
   group('DS-CMP-17: Material buttons carry their own style', () {
     test('flags a button that leaves its style to the theme', () {
       expect(
@@ -564,7 +564,7 @@ final b = redesignAppBar(context, title: t);
     });
   });
 
-  /// Measured under the app theme (#673): every decoration below still
+  /// Measured under the app theme (MostroP2P/app#673): every decoration below still
   /// paints v1's #252A3A fill and #9A9A9C underline. `border:` is only the
   /// fallback for states the theme leaves unset, and the theme sets
   /// `enabledBorder`, `focusedBorder` and `filled: true`.
@@ -630,11 +630,11 @@ final c = TextField(decoration: _fieldDecoration(pal));
     });
   });
 
-  /// The code of #657 (Cashu "Receive": scan or paste a token), the pull
+  /// The code of MostroP2P/app#657 (Cashu "Receive": scan or paste a token), the pull
   /// request that passed the first version of this check while looking like
   /// v1: a theme-default scaffold and app bar, the v1 color layer, two
   /// stadium-shaped outlined buttons and a theme-default field.
-  test('catches what made #657 look like v1', () {
+  test('catches what made MostroP2P/app#657 look like v1', () {
     expect(
       breaks('''
 Future<String?> _scanToken() {
@@ -755,7 +755,7 @@ final g = Theme.of(context).textTheme.merge(other);
 
   /// A break is reported on the line of the widget call. A pull request that
   /// edits an argument of a theme-default button leaves that line untouched,
-  /// and the first version of the check let it through (#657). Outside a
+  /// and the first version of the check let it through (MostroP2P/app#657). Outside a
   /// class, the top-level function or variable is read whole, like a class.
   group('a call a changed line falls inside', () {
     const source = '''
@@ -846,11 +846,11 @@ enum _Kind { a, b }
     });
   });
 
-  /// The Cashu wallet screen as #657 left it: the pull request changed one
+  /// The Cashu wallet screen as MostroP2P/app#657 left it: the pull request changed one
   /// icon and the `_receive` body inside a v1 screen, and the check, reading
   /// only those lines, approved a theme-default scaffold, app bar, two
   /// stadium buttons, a v1 card radius and an 18-sp headline.
-  test('catches the legacy screen #657 changed one line of', () {
+  test('catches the legacy screen MostroP2P/app#657 changed one line of', () {
     const source = '''
 class _CashuWalletScreenState extends ConsumerState<CashuWalletScreen> {
   Future<void> _receive() async {

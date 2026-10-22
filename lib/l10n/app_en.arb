@@ -28,7 +28,7 @@
   "@pendingEmptyTitle": {
     "description": "Empty state title of the Pending tab"
   },
-  "pendingEmptyBody": "When a trade on this node opens a dispute, it shows up here for a solver to take.",
+  "pendingEmptyBody": "When a trade on this node opens a dispute, it shows up here for you to take.",
   "@pendingEmptyBody": {
     "description": "Empty state explanation of the Pending tab"
   },

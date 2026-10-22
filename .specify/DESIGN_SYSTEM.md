@@ -172,7 +172,7 @@ and the only ones allowed:
 | DS-TYP-4 | **MUST.** A literal `fontSize` is one of the sizes above. No half points and nothing under 10. A `textTheme` role counts as its size: only the roles the theme sets on the scale (`bodyMedium` 14, `bodySmall` 12, `labelLarge` 14, `labelSmall` 11) are allowed. | auto |
 | DS-TYP-5 | **SHOULD.** Weights: 400 for running text, 500 for labels and secondary buttons, 600 for titles, primary buttons and emphasis (the default for emphasis), 700 for hero figures. Write `FontWeight.wNNN`. | review |
 | DS-TYP-6 | **SHOULD.** Multi-line body text uses a line height of 1.4–1.5. Letter spacing is reserved for caps labels (0.3–0.6) and large figures (negative). | review |
-| DS-TYP-7 | **MUST.** Text scaling is never disabled or clamped: no `TextScaler.noScaling`, and no `MediaQuery` override of `textScaler`. A button label stays on one line and may shrink to fit (`FittedBox(fit: BoxFit.scaleDown)`, as `OrderPrimaryButton` does). Body text wraps. | auto, review |
+| DS-TYP-7 | **MUST.** Text scaling is never disabled or clamped: no `TextScaler.noScaling`, and no `MediaQuery` override of `textScaler`. A button label stays on one line and may shrink to fit (`FittedBox(fit: BoxFit.scaleDown)`, as `PrimaryButton` does). Body text wraps. | auto, review |
 
 A role the theme does not define (`titleMedium`, `titleLarge`, `labelMedium`) falls back to
 Material defaults and is not allowed.

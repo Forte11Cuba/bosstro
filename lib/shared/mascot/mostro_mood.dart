@@ -23,7 +23,7 @@ enum MostroMood {
   /// A trade just completed. Jumps, with sparkles.
   celebrating,
 
-  // ── Trade steps (#770 part 3), from `TradeUpdate` alone ──────────────────
+  // ── Trade steps (MostroP2P/app#770 part 3), from `TradeUpdate` alone ──────────────────
 
   /// The seller's hold invoice is paid: the sats are in escrow. Settles in.
   escrowLocked,
@@ -56,7 +56,7 @@ enum MostroMood {
   /// The node refused an action (a `CantDo`). Shakes its head.
   refused,
 
-  // ── Easter eggs (#770 part 4) ────────────────────────────────────────────
+  // ── Easter eggs (MostroP2P/app#770 part 4) ────────────────────────────────────────────
 
   /// The first look of a morning session ([isMorning]). Waves.
   greeting,
@@ -185,7 +185,7 @@ String? seasonEmoji(MostroSeason season) => switch (season) {
 
 /// The sticker [mood] wears, by name, or null for the plain artwork.
 ///
-/// Until #770 a mood only moved the one artwork. Each one now also has its
+/// Until MostroP2P/app#770 a mood only moved the one artwork. Each one now also has its
 /// face from the Mostro sticker set, and keeps its motion on top. The
 /// stickers carry their own props (confetti, Zs, question marks), which
 /// read even at the header's 26 dp. Swapping the artwork is not motion, so
@@ -270,7 +270,7 @@ MostroMood pickMood(Iterable<MostroMood> moods) {
 ///
 /// A daemon message carries its own `created_at`, which a relay slow to
 /// deliver, or a sender's clock a little off ours, can push back by a minute
-/// or so. A history replay after a restore is days or months old (#474):
+/// or so. A history replay after a restore is days or months old (MostroP2P/app#474):
 /// celebrating that would be celebrating the past.
 const Duration mostroFreshEvent = Duration(minutes: 2);
 

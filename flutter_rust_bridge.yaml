@@ -5,7 +5,7 @@
 #   ./scripts/frb-generate.sh
 #
 # Install the codegen tool at the version pinned in pubspec.yaml — a mismatched
-# CLI generates bindings that fail to compile (see issue #205):
+# CLI generates bindings that fail to compile (see MostroP2P/app#205):
 #   cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
 
 rust_input: "crate::api"

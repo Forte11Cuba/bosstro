@@ -31,7 +31,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pendingEmptyBody =>
-      'Cuando una operación de este nodo abra una disputa, aparecerá aquí para que un solver la tome.';
+      'Cuando una operación de este nodo abra una disputa, aparecerá aquí para que la tomes.';
 
   @override
   String get inProgressTitle => 'Tus disputas';

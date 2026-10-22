@@ -7,7 +7,7 @@
   "noNodeSelected": "Ningún nodo seleccionado",
   "pendingTitle": "Disputas pendientes",
   "pendingEmptyTitle": "No hay disputas por resolver",
-  "pendingEmptyBody": "Cuando una operación de este nodo abra una disputa, aparecerá aquí para que un solver la tome.",
+  "pendingEmptyBody": "Cuando una operación de este nodo abra una disputa, aparecerá aquí para que la tomes.",
   "inProgressTitle": "Tus disputas",
   "inProgressEmptyTitle": "No hay disputas en curso",
   "inProgressEmptyBody": "Las disputas que tomes aparecen aquí, con un chat para el comprador y otro para el vendedor.",

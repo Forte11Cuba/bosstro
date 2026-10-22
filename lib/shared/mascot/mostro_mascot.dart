@@ -37,7 +37,7 @@ class MostroMascot extends StatefulWidget {
 
   /// Whether tapping earns a reaction. Only the one in the tabs' app bar
   /// ([HeaderMascot]) does: v1 put its easter egg in the order book's logo,
-  /// and since #770 every tab shows that same header.
+  /// and since MostroP2P/app#770 every tab shows that same header.
   final bool interactive;
 
   final double opacity;

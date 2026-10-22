@@ -143,7 +143,7 @@ abstract class AppLocalizations {
   /// Empty state explanation of the Pending tab
   ///
   /// In en, this message translates to:
-  /// **'When a trade on this node opens a dispute, it shows up here for a solver to take.'**
+  /// **'When a trade on this node opens a dispute, it shows up here for you to take.'**
   String get pendingEmptyBody;
 
   /// Header of the In progress tab: disputes this solver took
