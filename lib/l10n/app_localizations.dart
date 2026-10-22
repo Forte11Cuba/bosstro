@@ -217,6 +217,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'22 May 2010: 10,000 BTC for two pizzas. Hope they were good.'**
   String get easterEggPizzaDay;
+
+  /// Welcome screen headline
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Mostro disputes'**
+  String get welcomeTitle;
+
+  /// Welcome screen: what the app is for
+  ///
+  /// In en, this message translates to:
+  /// **'Take a node\'s disputes, talk with the buyer and the seller, and close them, from your phone.'**
+  String get welcomeBody;
+
+  /// Welcome primary action: log in with an existing solver secret key
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get welcomeLogIn;
+
+  /// Welcome secondary action: generate a new solver key
+  ///
+  /// In en, this message translates to:
+  /// **'Create new account'**
+  String get welcomeCreateAccount;
+
+  /// Welcome: shown when the stored solver key could not be read or loaded at startup. Nothing was deleted
+  ///
+  /// In en, this message translates to:
+  /// **'The saved key could not be read on this phone. Log in again with your secret key.'**
+  String get welcomeKeyUnreadable;
+
+  /// Warning on Log in and Create new account: the solver key must not be the trader identity's key
+  ///
+  /// In en, this message translates to:
+  /// **'Never use the key you trade with. A solver key that is also a trading key links both roles publicly.'**
+  String get traderKeyWarning;
+
+  /// App bar title of the Log in screen
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get loginTitle;
+
+  /// Log in: heading above the secret key field
+  ///
+  /// In en, this message translates to:
+  /// **'Your solver secret key'**
+  String get loginHeading;
+
+  /// Log in: what to enter
+  ///
+  /// In en, this message translates to:
+  /// **'Paste or scan the secret key (nsec) whose npub your node operator registered as a solver.'**
+  String get loginBody;
+
+  /// Placeholder of the secret key field; the nsec prefix, keep as is
+  ///
+  /// In en, this message translates to:
+  /// **'nsec1…'**
+  String get secretKeyHint;
+
+  /// Tooltip: reveal the secret key typed in the field
+  ///
+  /// In en, this message translates to:
+  /// **'Show key'**
+  String get showSecretKey;
+
+  /// Tooltip: hide the secret key typed in the field
+  ///
+  /// In en, this message translates to:
+  /// **'Hide key'**
+  String get hideSecretKey;
+
+  /// Action under a field: paste from the clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get pasteAction;
+
+  /// Action under a field: scan a QR code with the camera
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR'**
+  String get scanQrAction;
+
+  /// Error under the field when Paste finds nothing
+  ///
+  /// In en, this message translates to:
+  /// **'The clipboard is empty.'**
+  String get clipboardEmpty;
+
+  /// Log in: check the entered key and show its npub
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get loginContinue;
+
+  /// Log in error: nothing entered
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your secret key.'**
+  String get keyErrorEmpty;
+
+  /// Log in error: an npub was entered instead of an nsec
+  ///
+  /// In en, this message translates to:
+  /// **'That is a public key (npub). Logging in needs the secret key (nsec).'**
+  String get keyErrorPublicKey;
+
+  /// Log in error: not an nsec nor a hex secret key
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a valid secret key. Enter an nsec1… key or its 64-character hex form.'**
+  String get keyErrorInvalid;
+
+  /// Log in confirmation step: question above the npub the entered key stands for
+  ///
+  /// In en, this message translates to:
+  /// **'Is this the npub registered as a solver?'**
+  String get loginConfirmHeading;
+
+  /// Log in confirmation step: why to compare the npub
+  ///
+  /// In en, this message translates to:
+  /// **'Compare it with the npub your node operator added. If it is not the same, this key cannot resolve disputes on that node.'**
+  String get loginConfirmBody;
+
+  /// Log in confirmation: confirm the npub and log in. Repeats the opener's verb
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, log in'**
+  String get loginConfirmAnswer;
+
+  /// Log in confirmation: go back and enter another key
+  ///
+  /// In en, this message translates to:
+  /// **'No, use another key'**
+  String get loginConfirmBack;
+
+  /// Error when loading or storing the solver key failed
+  ///
+  /// In en, this message translates to:
+  /// **'The key could not be saved on this phone. Try again.'**
+  String get keySaveFailed;
+
+  /// Label of a public key in npub form; keep as is
+  ///
+  /// In en, this message translates to:
+  /// **'npub'**
+  String get npubLabel;
+
+  /// Label of the secret key card
+  ///
+  /// In en, this message translates to:
+  /// **'Secret key (nsec)'**
+  String get secretKeyLabel;
+
+  /// Action / screen reader label: copy the npub
+  ///
+  /// In en, this message translates to:
+  /// **'Copy npub'**
+  String get copyNpub;
+
+  /// Action / screen reader label: copy the secret key
+  ///
+  /// In en, this message translates to:
+  /// **'Copy secret key'**
+  String get copySecretKey;
+
+  /// Action: share the npub through the system share sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Share npub'**
+  String get shareNpub;
+
+  /// Screen reader label of the npub QR code
+  ///
+  /// In en, this message translates to:
+  /// **'QR code of your npub'**
+  String get npubQrLabel;
+
+  /// App bar title of the QR scanner
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR'**
+  String get scanTitle;
+
+  /// QR scanner: instruction over the camera preview
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at the QR code of your secret key.'**
+  String get scanHint;
+
+  /// QR scanner: the camera could not start (no camera or permission refused)
+  ///
+  /// In en, this message translates to:
+  /// **'The camera is not available. Go back and paste the key instead.'**
+  String get scanUnavailable;
+
+  /// App bar title of Create new account
+  ///
+  /// In en, this message translates to:
+  /// **'Create new account'**
+  String get createTitle;
+
+  /// Create new account, step 1: heading
+  ///
+  /// In en, this message translates to:
+  /// **'Your new secret key'**
+  String get createKeyHeading;
+
+  /// Create new account, step 1: why the secret key must be saved
+  ///
+  /// In en, this message translates to:
+  /// **'It is the only way to log in to this account. Write it down somewhere safe and private: anyone who has it can resolve disputes as you.'**
+  String get createKeyBody;
+
+  /// Create new account, step 1: checkbox the solver ticks before continuing
+  ///
+  /// In en, this message translates to:
+  /// **'I saved my secret key somewhere safe'**
+  String get createBackupConfirm;
+
+  /// Create new account, step 1: go on once the backup is confirmed
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get createContinue;
+
+  /// Create new account, step 2: heading
+  ///
+  /// In en, this message translates to:
+  /// **'Your npub'**
+  String get createNpubHeading;
+
+  /// Create new account, step 2: what to do with the npub
+  ///
+  /// In en, this message translates to:
+  /// **'Send this npub to your node operator so they register you as a solver. Until then you can see the disputes but not take them.'**
+  String get createNpubBody;
+
+  /// Create new account, step 2: finish and open the tabs
+  ///
+  /// In en, this message translates to:
+  /// **'Go to disputes'**
+  String get createDone;
+
+  /// Settings group header: the solver's key
+  ///
+  /// In en, this message translates to:
+  /// **'Solver key'**
+  String get settingsGroupKey;
+
+  /// Settings row: the solver's npub; opens it with its QR
+  ///
+  /// In en, this message translates to:
+  /// **'Your npub'**
+  String get settingsNpub;
+
+  /// Settings row: show the secret key for backup
+  ///
+  /// In en, this message translates to:
+  /// **'Back up secret key'**
+  String get settingsBackup;
+
+  /// Settings row: remove the key from this phone
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get settingsLogOut;
+
+  /// Dialog before showing the secret key
+  ///
+  /// In en, this message translates to:
+  /// **'Show your secret key?'**
+  String get backupWarnTitle;
+
+  /// Dialog before showing the secret key: the risk
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone who sees it can resolve disputes as you. Make sure nobody is looking at your screen.'**
+  String get backupWarnBody;
+
+  /// Dialog answer: show the secret key
+  ///
+  /// In en, this message translates to:
+  /// **'Show secret key'**
+  String get backupWarnAnswer;
+
+  /// Dialog way out
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// App bar title of the backup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Secret key backup'**
+  String get backupTitle;
+
+  /// Backup screen: what the secret key is for
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it somewhere safe and private. It is the only way to log in to this account on another phone.'**
+  String get backupBody;
+
+  /// Backup screen: the stored key could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'The secret key could not be read on this phone.'**
+  String get backupUnavailable;
+
+  /// Log out confirmation title
+  ///
+  /// In en, this message translates to:
+  /// **'Log out?'**
+  String get logOutTitle;
+
+  /// Log out confirmation: what happens
+  ///
+  /// In en, this message translates to:
+  /// **'Your secret key will be removed from this phone. Without a backup you cannot log in to this account again.'**
+  String get logOutBody;
+
+  /// Log out confirmation answer (destructive). Repeats the opener's verb
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logOutAnswer;
+
+  /// Error when removing the key failed
+  ///
+  /// In en, this message translates to:
+  /// **'Could not log out. Try again.'**
+  String get logOutFailed;
 }
 
 class _AppLocalizationsDelegate

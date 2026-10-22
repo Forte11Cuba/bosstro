@@ -22,14 +22,16 @@ ARB files (`lib/l10n/app_en.arb` is the source).
 | D1 | Rust core + Flutter UI. No Nostr and no cryptography in Dart. |
 | D2 | Architecture comes from `app`; admin flows come from Mostrix (a behavioural reference, not code to extract). |
 | D3 | The only key is the solver's key. The Mostro daemon's nsec never enters the app; *Add dispute solver* stays in Mostrix. |
-| D4 | The solver's secret (nsec or 12 words) is stored in `flutter_secure_storage` v10 (Android Keystore). No biometric lock for now. |
+| D4 | The solver's nsec is stored in `flutter_secure_storage` v10 (Android Keystore). No biometric lock for now. |
 | D5 | One active node at a time, chosen with a node selector. |
 | D6 | Every dispute row stores `mostro_pubkey`. |
 | D7 | Screens follow Mostrix's admin flows; components and style follow `app`. |
 | D8 | `app`'s design guide is the rule (`.specify/DESIGN_SYSTEM.md`, with Bosstro's amendments). |
-| D9 | Onboarding: *Log in* (12 words or an nsec) or *Create new account* (generates 12 words). |
-| D10 | 12 words derive the solver key on the Mostro identity path `m/44'/1237'/38383'/0/0`, the same path Mostrix and `app` use. Never the generic NIP-06 path, never a trade index ≥ 1. |
+| D9 | Onboarding: *Log in* with an nsec, or *Create new account* (generates an nsec). No 12 words — as Mostrix, which loads the solver key only as an nsec. |
+| D10 | No mnemonic derivation for the solver key, so no derivation path. In Mostrix the only mnemonic-derived key is the trader identity, which must not be reused as the solver key. |
 | D11 | Brand from `app`: the Mostro mascot and logo. The launcher icon is Bosstro's own emblem (`icons/bosstro.png`, the mascot as a judge), so the two apps cannot be confused on one phone. |
+| D12 | Solver permissions are *Read* (take and chat) or *Read-Write* (also settle / cancel, and take over an `in-progress` dispute held by a Read solver). Bosstro learns the permission from the daemon's answers and caches it per node. |
+| D13 | Serbero (the assistant Read solver) is supported: its `send-dm` messages and handoffs are read only from trusted senders. |
 | A1 | License AGPL-3.0-or-later (code is copied from `app`, which is AGPL). |
 | A2 | Android only for the MVP. The bridge layout stays multi-platform so iOS can come later; no web target. |
 | A3 | l10n: `en` and `es` for the MVP. |
@@ -91,20 +93,27 @@ python3 tool/launcher_icon/build_sources.py && dart run flutter_launcher_icons  
 
 ## Key handling
 
-1. **Storage:** the secret as the user gave it — an nsec or 12 words — in two secure-storage
-   entries, `bosstro_solver_secret` and `bosstro_solver_secret_kind` (`nsec` | `mnemonic`), with
-   `flutter_secure_storage` v10. One `FlutterSecureStorage` instance, in
-   `lib/core/services/solver_key_service.dart`.
-2. **Bridge:** the secret crosses the bridge once per launch as `Uint8List`, never as `String`;
-   Dart overwrites the buffer right after the call.
-3. **Rust:** the input is held in `zeroize::Zeroizing` until it becomes `Keys`, then dropped.
+1. **Storage:** one secure-storage entry, `bosstro_solver_nsec`, with `flutter_secure_storage`
+   v10 (Keystore-backed ciphers, not the deprecated `encryptedSharedPreferences`). One
+   `FlutterSecureStorage` instance, in `lib/core/services/solver_key_service.dart`, with
+   `resetOnError: false`: the plugin's default wipes the whole store when it cannot decrypt, which
+   would silently delete the only key. An unreadable entry is reported and left as it is.
+   **Accepted input:** a bech32 `nsec1…` or a 64-character hex secret, as Mostrix's Change Admin
+   Key (`validate_nsec`); a leading `nostr:` is dropped, an `npub1…` is named as the wrong key.
+   The entry keeps the key as the solver gave it.
+2. **Bridge:** the nsec crosses the bridge as `Uint8List`, never as `String`; Dart overwrites
+   the buffer right after the call (`_withSecretBytes`). Known limits: the Strings it comes from
+   (text field, clipboard, storage plugin) are immutable in Dart and live until collected, and
+   flutter_rust_bridge copies the bytes into its own message buffer, which is not wiped.
+3. **Rust:** the input is held in `zeroize::Zeroizing` until it is parsed into `Keys`, then dropped.
    Rust never writes the secret to disk and never logs it. Keys live in a `SolverSlot`.
 4. **Replace / log out:** unload from Rust, install the new key, and only then write storage; on
    failure reload the previous key.
-5. The nsec is never shown after login; the UI shows the npub. The 12 words can be shown again
-   from Settings → Backup, behind a warning.
-6. Solving and trading should use different words: the same words in `app` give the same
-   identity key and link both roles publicly. Create new account and the backup screen say so.
+5. The UI shows the npub. The nsec is shown only once on Create new account, for backup, and from
+   Settings → Backup, behind a warning and a confirmation.
+6. The solver key is not a trading identity: never use the nsec of `app` or Mostrix's
+   `nsec_privkey` as the solver key, or both roles are linked publicly. Log in and Create new
+   account say so.
 7. The login screen shows the resulting npub to confirm before the first take.
 8. Known limit: the Android Keystore cannot sign with secp256k1, so the key is in process memory
    while the app runs, until an external signer (NIP-46 / NIP-55) is supported.
@@ -119,10 +128,16 @@ python3 tool/launcher_icon/build_sources.py && dart run flutter_launcher_icons  
 - **Dispute chat:** <https://mostro.network/protocol/dispute_chat.html>, keyed between the solver
   key and each party's trade key.
 - **Attachments:** Blossom + ChaCha20-Poly1305, ported from `app`.
-- **"Am I a solver on this node?"** mostrod has no read-only query. The only signal is the answer
-  to `AdminTakeDispute`: `CantDo(InvalidPubkey)` on an `initiated` dispute means `NotSolver`, on an
-  `in-progress` one `DisputeTakenByOther`. The result is cached per node. **Never probe** by
-  taking a dispute: a successful take assigns it to you.
+- **"Am I a solver on this node?"** mostrod has no read-only query. The signal is the answer to
+  `AdminTakeDispute`: `CantDo(InvalidPubkey)` on an `initiated` dispute means `NotSolver`; on an
+  `in-progress` one, `CannotTakeOver` (held by a write solver, or this key is Read). `NotAuthorized`
+  on settle or cancel means this key is Read on that node. Status and permission are cached per
+  node. **Never probe** another solver's dispute by taking it; re-taking your own is safe and is
+  the recovery path for a lost answer.
+- **Auto-close:** a cooperative cancel or a seller release closes the dispute with no DM to the
+  solver (38386 `seller-refunded` / `settled`); taken disputes are reconciled from 38386.
+- **Serbero:** kind 14 `send-dm` messages to the solver key, read only from trusted senders, never
+  treated as protocol actions.
 
 ## Style
 
@@ -146,4 +161,6 @@ One PR per phase; long phases split into phased PRs. Conventional commits, branc
 `flutter analyze && flutter test` and `dart tool/design_check.dart` green.
 
 Phases: 0 scaffold · 1 solver key · 2 nodes and relays · 3 pending disputes · 4 take dispute ·
-5 dispute detail and chat · 6 resolution · 7 notifications · 8 release.
+5 dispute detail and chat · 5b Serbero · 6 resolution · 7 notifications · 8 release.
+
+Mostrix is read at tag **v0.3.8** or later.
