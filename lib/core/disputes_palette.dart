@@ -33,6 +33,12 @@ class DisputesPalette {
     required this.bubbleInk,
     required this.bubbleMeta,
     required this.bubbleYouLabel,
+    required this.observedBuyerFill,
+    required this.observedBuyerBorder,
+    required this.observedBuyerLabel,
+    required this.observedSellerFill,
+    required this.observedSellerBorder,
+    required this.observedSellerLabel,
     required this.composerFill,
     required this.composerBorder,
     required this.composerFocusBorder,
@@ -84,6 +90,19 @@ class DisputesPalette {
   /// The "You" sender label, on the solver's bubble.
   final Color bubbleYouLabel;
 
+  /// The chat between the parties, read with a chat key (phase 5c): the
+  /// buyer's bubbles on a lime tint, the seller's on the sell tint, as
+  /// ../app colors the two sides of an order (amendment 8 to DS-COL-9: here
+  /// lime and sell name a side, not the solver's turn or a danger). The
+  /// side is always named in words too (DS-COL-10). Text and time are
+  /// [bubbleInk] and [bubbleMeta].
+  final Color observedBuyerFill;
+  final Color observedBuyerBorder;
+  final Color observedBuyerLabel;
+  final Color observedSellerFill;
+  final Color observedSellerBorder;
+  final Color observedSellerLabel;
+
   /// The message field (DS-CMP-11): boxed, radius 14.
   final Color composerFill;
   final Color composerBorder;
@@ -113,6 +132,12 @@ class DisputesPalette {
     bubbleInk: Color(0xFFEEF1F6),
     bubbleMeta: Color(0xFF8B97AD),
     bubbleYouLabel: Color(0xFFC6F09A),
+    observedBuyerFill: Color(0x1F92D64F), // lime 12%
+    observedBuyerBorder: Color(0x3392D64F), // lime 20%
+    observedBuyerLabel: Color(0xFFC6F09A),
+    observedSellerFill: Color(0x1FFF8B8B), // sell 12%
+    observedSellerBorder: Color(0x33FF8B8B), // sell 20%
+    observedSellerLabel: Color(0xFFFFB4B4),
     composerFill: Color(0xFF1A2030),
     composerBorder: Color(0x14FFFFFF), // white 8%
     composerFocusBorder: Color(0x8092D64F), // lime 50%
@@ -142,6 +167,12 @@ class DisputesPalette {
     bubbleInk: Color(0xFF12161F),
     bubbleMeta: Color(0xFF5A6474),
     bubbleYouLabel: Color(0xFF3E6B1C),
+    observedBuyerFill: Color(0x2492D64F), // lime 14%
+    observedBuyerBorder: Color(0x4D5C9130), // rgba(92,145,48,0.30)
+    observedBuyerLabel: Color(0xFF3E6B1C),
+    observedSellerFill: Color(0x24FF8B8B), // sell 14%
+    observedSellerBorder: Color(0x4D9A2F2A), // rgba(154,47,42,0.30)
+    observedSellerLabel: Color(0xFF9A2F2A),
     composerFill: Color(0xFFFFFFFF),
     composerBorder: Color(0x1F12161F), // ink 12%
     composerFocusBorder: Color(0xFF5C9130),

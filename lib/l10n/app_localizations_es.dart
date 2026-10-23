@@ -1212,4 +1212,126 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get attachmentViewerZoomHint => 'Pellizca para ampliar';
+
+  @override
+  String get observerTitle => 'Chat entre las partes';
+
+  @override
+  String observerSharedByBuyer(String date) {
+    return 'El comprador compartió la clave del chat el $date.';
+  }
+
+  @override
+  String observerSharedBySeller(String date) {
+    return 'El vendedor compartió la clave del chat el $date.';
+  }
+
+  @override
+  String get observerPastedKey =>
+      'Pegaste una clave del chat para esta disputa.';
+
+  @override
+  String get observerStoredOnly =>
+      'Mensajes guardados de una lectura anterior. Pega de nuevo la clave del chat para buscar nuevos.';
+
+  @override
+  String get observerNoKey =>
+      'Ninguna de las partes ha compartido todavía la clave de su chat. Si una te la envía por otro medio, pégala aquí.';
+
+  @override
+  String get observerReadAction => 'Leer el chat entre las partes';
+
+  @override
+  String get observerPasteAction => 'Pegar una clave del chat';
+
+  @override
+  String get observerRefresh => 'Actualizar';
+
+  @override
+  String get observerReadOnlyBuyer =>
+      'Solo lectura, con la clave que compartió el comprador.';
+
+  @override
+  String get observerReadOnlySeller =>
+      'Solo lectura, con la clave que compartió el vendedor.';
+
+  @override
+  String get observerReadOnlyBoth =>
+      'Solo lectura, con la clave que compartieron las partes.';
+
+  @override
+  String get observerReadOnlyPasted =>
+      'Solo lectura, con una clave que pegaste.';
+
+  @override
+  String get observerReadOnlyStored =>
+      'Solo lectura: mensajes de una lectura anterior.';
+
+  @override
+  String get observerNoKeyTitle => 'Todavía no hay clave del chat';
+
+  @override
+  String get observerOpensNothingTitle =>
+      'La clave no abre ningún mensaje de esta disputa';
+
+  @override
+  String observerOpensNothingBody(String date) {
+    return 'Ningún mensaje del comprador o del vendedor de esta disputa desde el $date se abre con ella. Puede ser la clave de otra operación, o que no escribieran en ese tiempo.';
+  }
+
+  @override
+  String get observerReadFailedTitle => 'No se pudo consultar a los relays';
+
+  @override
+  String get observerReadFailedBody =>
+      'Revisa la conexión e inténtalo de nuevo.';
+
+  @override
+  String get observerNoPartyKeysTitle => 'No se conoce a las partes';
+
+  @override
+  String get observerNoPartyKeysBody =>
+      'El nodo no indicó las claves de operación del comprador y del vendedor, así que ningún mensaje puede mostrarse como suyo.';
+
+  @override
+  String get observerPasteTitle => 'Pegar una clave del chat';
+
+  @override
+  String get observerPasteBody =>
+      'Una parte puede enviarte la clave de su chat con la otra parte. Con ella lees ese chat; nunca puedes escribir en él.';
+
+  @override
+  String get observerPasteHint => '64 caracteres hexadecimales';
+
+  @override
+  String get observerPasteConfirm => 'Leer el chat';
+
+  @override
+  String get observerInvalidKey =>
+      'Eso no es una clave del chat: son 64 caracteres hexadecimales, solos o tras «Shared key: ».';
+
+  @override
+  String observerOpensNothingShort(String date) {
+    return 'La clave no abre ningún mensaje de esta disputa desde el $date.';
+  }
+
+  @override
+  String get observerNotYours => 'Esta disputa ya no es tuya en este nodo.';
+
+  @override
+  String get observerFileLocked => 'No se puede abrir con la clave del chat.';
+
+  @override
+  String get observerFileAdviceBuyer =>
+      'Pide al comprador que te lo envíe en su chat contigo.';
+
+  @override
+  String get observerFileAdviceSeller =>
+      'Pide al vendedor que te lo envíe en su chat contigo.';
+
+  @override
+  String get observerFileImage => 'Imagen';
+
+  @override
+  String get observerFileOther => 'Archivo';
 }

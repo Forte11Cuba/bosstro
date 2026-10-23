@@ -2137,6 +2137,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pinch to zoom'**
   String get attachmentViewerZoomHint;
+
+  /// Title of the dispute's buyer–seller chat, read with a chat key (Info card and its screen)
+  ///
+  /// In en, this message translates to:
+  /// **'Chat between the parties'**
+  String get observerTitle;
+
+  /// Info card: the buyer sent this solver the key of the buyer–seller chat
+  ///
+  /// In en, this message translates to:
+  /// **'The buyer shared their chat key on {date}.'**
+  String observerSharedByBuyer(String date);
+
+  /// Info card: the seller sent this solver the key of the buyer–seller chat
+  ///
+  /// In en, this message translates to:
+  /// **'The seller shared their chat key on {date}.'**
+  String observerSharedBySeller(String date);
+
+  /// Info card: a chat key pasted by the solver is held (until the app closes)
+  ///
+  /// In en, this message translates to:
+  /// **'You pasted a chat key for this dispute.'**
+  String get observerPastedKey;
+
+  /// Info card: messages are stored but no key is held any more (a pasted key is forgotten when the app closes)
+  ///
+  /// In en, this message translates to:
+  /// **'Messages kept from an earlier read. Paste the chat key again to look for new ones.'**
+  String get observerStoredOnly;
+
+  /// Info card and empty screen: no chat key is known for this dispute
+  ///
+  /// In en, this message translates to:
+  /// **'Neither party has shared their chat key yet. If one sends it to you another way, paste it here.'**
+  String get observerNoKey;
+
+  /// Info card action: open the buyer–seller chat
+  ///
+  /// In en, this message translates to:
+  /// **'Read the chat between the parties'**
+  String get observerReadAction;
+
+  /// Action: paste the key of the buyer–seller chat that a party sent
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a chat key'**
+  String get observerPasteAction;
+
+  /// Action: ask the relays for the buyer–seller chat again
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get observerRefresh;
+
+  /// Note pinned under the buyer–seller chat, in place of a message field: there is none, the chat is read only
+  ///
+  /// In en, this message translates to:
+  /// **'Read only, with the key the buyer shared.'**
+  String get observerReadOnlyBuyer;
+
+  /// Note pinned under the buyer–seller chat, in place of a message field: there is none, the chat is read only
+  ///
+  /// In en, this message translates to:
+  /// **'Read only, with the key the seller shared.'**
+  String get observerReadOnlySeller;
+
+  /// Note pinned under the buyer–seller chat, in place of a message field: there is none, the chat is read only
+  ///
+  /// In en, this message translates to:
+  /// **'Read only, with the key both parties shared.'**
+  String get observerReadOnlyBoth;
+
+  /// Note pinned under the buyer–seller chat, in place of a message field: there is none, the chat is read only
+  ///
+  /// In en, this message translates to:
+  /// **'Read only, with a key you pasted.'**
+  String get observerReadOnlyPasted;
+
+  /// Note pinned under the buyer–seller chat when no key is held any more
+  ///
+  /// In en, this message translates to:
+  /// **'Read only: messages from an earlier read.'**
+  String get observerReadOnlyStored;
+
+  /// Empty buyer–seller chat: no key is known
+  ///
+  /// In en, this message translates to:
+  /// **'No chat key yet'**
+  String get observerNoKeyTitle;
+
+  /// The chat key opened nothing of this dispute's buyer or seller
+  ///
+  /// In en, this message translates to:
+  /// **'The key opens no message of this dispute'**
+  String get observerOpensNothingTitle;
+
+  /// Why the chat key opened nothing; the date is where the read starts (a week before the dispute opened)
+  ///
+  /// In en, this message translates to:
+  /// **'No message of this dispute\'s buyer or seller since {date} opens with it. It may be another trade\'s key, or they did not write in that time.'**
+  String observerOpensNothingBody(String date);
+
+  /// Reading the buyer–seller chat failed
+  ///
+  /// In en, this message translates to:
+  /// **'The relays could not be asked'**
+  String get observerReadFailedTitle;
+
+  /// Reading the buyer–seller chat failed
+  ///
+  /// In en, this message translates to:
+  /// **'Check the connection and try again.'**
+  String get observerReadFailedBody;
+
+  /// The node's answer to the take named no trade key, so no message can be attributed
+  ///
+  /// In en, this message translates to:
+  /// **'The parties are not known'**
+  String get observerNoPartyKeysTitle;
+
+  /// The node's answer to the take named no trade key, so no message can be attributed
+  ///
+  /// In en, this message translates to:
+  /// **'The node did not name the trade keys of the buyer and the seller, so no message can be shown as theirs.'**
+  String get observerNoPartyKeysBody;
+
+  /// Title of the dialog that takes a chat key
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a chat key'**
+  String get observerPasteTitle;
+
+  /// Body of the dialog that takes a chat key
+  ///
+  /// In en, this message translates to:
+  /// **'A party can send you the key of their chat with the other party. With it you read that chat; you can never write in it.'**
+  String get observerPasteBody;
+
+  /// Placeholder of the chat key field
+  ///
+  /// In en, this message translates to:
+  /// **'64 hexadecimal characters'**
+  String get observerPasteHint;
+
+  /// Answer of the dialog that takes a chat key: check it and read
+  ///
+  /// In en, this message translates to:
+  /// **'Read the chat'**
+  String get observerPasteConfirm;
+
+  /// Error under the chat key field: not the format
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a chat key: it is 64 hexadecimal characters, alone or after “Shared key: ”.'**
+  String get observerInvalidKey;
+
+  /// Error under the chat key field: it opened nothing
+  ///
+  /// In en, this message translates to:
+  /// **'The key opens no message of this dispute since {date}.'**
+  String observerOpensNothingShort(String date);
+
+  /// Error: the dispute is not held by this key on the active node
+  ///
+  /// In en, this message translates to:
+  /// **'This dispute is no longer yours on this node.'**
+  String get observerNotYours;
+
+  /// A file in the buyer–seller chat: the chat key does not decrypt files
+  ///
+  /// In en, this message translates to:
+  /// **'It cannot be opened with a chat key.'**
+  String get observerFileLocked;
+
+  /// A file the buyer sent in the buyer–seller chat: how the solver can get it
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the buyer to send it to you in your chat with them.'**
+  String get observerFileAdviceBuyer;
+
+  /// A file the seller sent in the buyer–seller chat: how the solver can get it
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the seller to send it to you in your chat with them.'**
+  String get observerFileAdviceSeller;
+
+  /// Type of a file that cannot be opened: an image
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get observerFileImage;
+
+  /// Type of a file that cannot be opened, when it declares none
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get observerFileOther;
 }
 
 class _AppLocalizationsDelegate

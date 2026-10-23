@@ -57,6 +57,7 @@ use nostr_sdk::prelude::{
 };
 use tokio::sync::{broadcast, mpsc};
 
+use super::observer::{ObservedRecord, ObservedRef, PastedKeys};
 use super::{
     allowed_signers, channel_keys, sender_of, subscription_since, ChannelRef, ChatRecord,
     RateLimits, SeenOuter, MAX_AUTHORS_PER_REQ, MAX_MESSAGE_BYTES,
@@ -74,7 +75,7 @@ use crate::nostr::live_subs::LiveSubs;
 /// Capacity of the update channel toward Dart.
 const UPDATE_CAPACITY: usize = 256;
 
-fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+pub(crate) fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     mutex
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner)
@@ -88,12 +89,13 @@ pub(crate) enum ChatStore {
     Memory(MemoryChat),
 }
 
-/// [`ChatStore::Memory`]: the messages, and the attachment cache (encrypted
-/// blobs by hash).
+/// [`ChatStore::Memory`]: the messages, the attachment cache (encrypted
+/// blobs by hash) and the observed chats (phase 5c).
 #[derive(Default)]
 pub(crate) struct MemoryChat {
     messages: Mutex<HashMap<ChannelRef, Vec<ChatRecord>>>,
     blobs: Mutex<HashMap<String, Vec<u8>>>,
+    observed: Mutex<HashMap<ObservedRef, Vec<ObservedRecord>>>,
 }
 
 impl ChatStore {
@@ -117,7 +119,10 @@ impl ChatStore {
                 if rows.iter().any(|r| r.message_id == record.message_id) {
                     return Ok(false);
                 }
-                rows.push(record.clone());
+                rows.push(ChatRecord {
+                    seq: super::next_seq(),
+                    ..record.clone()
+                });
                 Ok(true)
             }
         }
@@ -204,6 +209,36 @@ impl ChatStore {
             ChatStore::Memory(m) => Ok(lock(&m.blobs).get(sha256).cloned()),
         }
     }
+
+    /// Keep one message of an observed chat, unless that chat has its id.
+    pub(crate) async fn insert_observed(&self, record: &ObservedRecord) -> anyhow::Result<bool> {
+        match self {
+            ChatStore::Db(db) => db.insert_observed_message(record).await,
+            ChatStore::Memory(m) => {
+                let mut map = lock(&m.observed);
+                let rows = map.entry(record.conversation.clone()).or_default();
+                if rows.iter().any(|r| r.message_id == record.message_id) {
+                    return Ok(false);
+                }
+                rows.push(record.clone());
+                Ok(true)
+            }
+        }
+    }
+
+    /// Every stored message of one observed chat.
+    pub(crate) async fn list_observed(
+        &self,
+        observed: &ObservedRef,
+    ) -> anyhow::Result<Vec<ObservedRecord>> {
+        match self {
+            ChatStore::Db(db) => db.list_observed_messages(observed).await,
+            ChatStore::Memory(m) => Ok(lock(&m.observed)
+                .get(observed)
+                .cloned()
+                .unwrap_or_default()),
+        }
+    }
 }
 
 // ── Channels ──────────────────────────────────────────────────────────────────
@@ -256,7 +291,7 @@ struct Shared {
 }
 
 /// The party's trade key the take named, if it parses.
-fn party_key(row: &DisputeRecord, party: ChatParty) -> Option<PublicKey> {
+pub(crate) fn party_key(row: &DisputeRecord, party: ChatParty) -> Option<PublicKey> {
     let taken = row.taken.as_ref()?;
     let hex = match party {
         ChatParty::Buyer => taken.buyer_pubkey.as_deref(),
@@ -308,7 +343,7 @@ struct Target {
 }
 
 pub(crate) struct Router {
-    client: Arc<Client>,
+    pub(crate) client: Arc<Client>,
     subs: &'static LiveSubs,
     feed: Arc<Feed>,
     pub(crate) store: ChatStore,
@@ -336,6 +371,9 @@ pub(crate) struct Router {
     sync_lock: tokio::sync::Mutex<()>,
     /// Serialises read → write of one message's row.
     ingest_lock: tokio::sync::Mutex<()>,
+    /// The shared keys the solver pasted (phase 5c), in memory only: every
+    /// one not of the loaded key goes when the key changes or unloads.
+    pub(crate) pasted: Mutex<PastedKeys>,
 }
 
 impl Router {
@@ -364,6 +402,7 @@ impl Router {
             started: crate::rt::time::Instant::now(),
             sync_lock: tokio::sync::Mutex::new(()),
             ingest_lock: tokio::sync::Mutex::new(()),
+            pasted: Mutex::new(PastedKeys::new()),
         })
     }
 
@@ -466,6 +505,10 @@ impl Router {
             _ => None,
         };
         *lock(&self.target) = target.clone();
+        // A pasted key belongs to the key that pasted it: a log out or
+        // another key forgets it.
+        let solver = target.as_ref().map(|t| t.keys.public_key().to_hex());
+        lock(&self.pasted).retain(|observed, _| Some(&observed.solver_pubkey) == solver.as_ref());
 
         let mut wanted: HashMap<ChannelRef, Wanted> = HashMap::new();
         if let Some(target) = &target {
@@ -697,6 +740,7 @@ impl Router {
             created_at: message.created_at.as_secs() as i64,
             received_at: crate::rt::unix_now(),
             delivery: ChatDelivery::Sent,
+            seq: 0,
         };
         let changed = {
             let _guard = self.ingest_lock.lock().await;
@@ -847,6 +891,7 @@ impl Router {
             created_at: opened.created_at.as_secs() as i64,
             received_at: crate::rt::unix_now(),
             delivery: ChatDelivery::Sending,
+            seq: 0,
         };
         lock(&self.in_flight).insert(record.message_id.clone());
         {
@@ -939,7 +984,8 @@ impl Router {
         Ok(sent)
     }
 
-    /// The conversation as the chat shows it: oldest first, ties by id.
+    /// The conversation as the chat shows it: oldest first, a second's ties
+    /// in arrival order ([`sorted_views`]).
     pub(crate) async fn messages(
         &self,
         channel: &ChannelRef,
@@ -951,18 +997,23 @@ impl Router {
     }
 }
 
-/// `records` oldest first (ties by id), as views.
+/// `records` oldest first, as views. Messages of the same second (the
+/// resolution of `created_at`) go in the order they arrived here: by
+/// `received_at`, then the order they were stored in (`seq`); the random
+/// inner id only decides between rows that predate `seq`.
 fn sorted_views(records: &[ChatRecord], in_flight: impl Fn(&str) -> bool) -> Vec<ChatMessageView> {
-    let mut views: Vec<ChatMessageView> = records
-        .iter()
-        .map(|r| r.view(in_flight(&r.message_id)))
-        .collect();
-    views.sort_by(|a, b| {
+    let mut sorted: Vec<&ChatRecord> = records.iter().collect();
+    sorted.sort_by(|a, b| {
         a.created_at
             .cmp(&b.created_at)
-            .then_with(|| a.id.cmp(&b.id))
+            .then_with(|| a.received_at.cmp(&b.received_at))
+            .then_with(|| a.seq.cmp(&b.seq))
+            .then_with(|| a.message_id.cmp(&b.message_id))
     });
-    views
+    sorted
+        .into_iter()
+        .map(|r| r.view(in_flight(&r.message_id)))
+        .collect()
 }
 
 // ── The process-wide router ───────────────────────────────────────────────────
@@ -1656,6 +1707,49 @@ pub(crate) mod tests {
         let all = b.messages(DISPUTE_A, ChatParty::Seller).await;
         assert_eq!(all.len(), 1, "the retry replaced it");
         assert_eq!(all[0].id, later.id);
+    }
+
+    /// Messages of the same second show in the order they arrived, not by
+    /// their random ids: three stored in arrival order read in that order,
+    /// in memory and in SQLite.
+    #[tokio::test]
+    async fn messages_of_the_same_second_keep_their_arrival_order() {
+        let path = crate::db::sqlite::tests::temp_db_path();
+        let storage: &'static crate::db::sqlite::SqliteStorage = Box::leak(Box::new(
+            crate::db::sqlite::SqliteStorage::open(path.to_str().unwrap())
+                .await
+                .unwrap(),
+        ));
+        for store in [ChatStore::memory(), ChatStore::Db(storage)] {
+            let b = bench_with(Store::memory(), store).await;
+            let channel = b.channel(DISPUTE_A, ChatParty::Buyer);
+            // Ids against the arrival order, so sorting by id would invert it.
+            let arrived = [
+                ("ff", ChatSender::Buyer, "Hola, ya te hice la transferencia"),
+                ("88", ChatSender::You, "Gracias, lo reviso"),
+                ("00", ChatSender::Buyer, "Te mando el comprobante"),
+            ];
+            for (id, sender, text) in arrived {
+                let record = ChatRecord {
+                    channel: channel.clone(),
+                    message_id: id.into(),
+                    sender,
+                    content: text.into(),
+                    created_at: 1_700_000_000,
+                    received_at: 1_700_000_001,
+                    delivery: ChatDelivery::Sent,
+                    seq: 0,
+                };
+                assert!(b.router.store.insert(&record).await.unwrap());
+            }
+            let shown: Vec<String> = b
+                .messages(DISPUTE_A, ChatParty::Buyer)
+                .await
+                .into_iter()
+                .map(|m| m.id)
+                .collect();
+            assert_eq!(shown, ["ff", "88", "00"]);
+        }
     }
 
     /// Nothing secret reaches the database: neither the solver's key, nor

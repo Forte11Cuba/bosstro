@@ -20,7 +20,10 @@
 //!
 //! - [`router`] follows the channels of the active node and key, receives,
 //!   stores and sends.
+//! - [`observer`] reads, never writes, the buyer ↔ seller chat of a dispute
+//!   this key holds, with the key a party shared (phase 5c).
 
+pub mod observer;
 pub mod router;
 
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -144,6 +147,11 @@ pub struct ChatRecord {
     /// This device's clock when it was accepted or sent.
     pub received_at: i64,
     pub delivery: ChatDelivery,
+    /// The order it was stored in, set by the store on insert (what is
+    /// passed in is ignored): it sorts messages of the same second in the
+    /// order they arrived. 0 on a row stored before it existed (web).
+    #[serde(default)]
+    pub seq: i64,
 }
 
 impl ChatRecord {
@@ -188,6 +196,23 @@ pub fn attachment_of(content: &str) -> Option<ChatAttachment> {
         width: a.width,
         height: a.height,
     })
+}
+
+/// The next arrival order for a store that has no counter of its own (the
+/// web's and memory's): microseconds of the clock, and always more than the
+/// last one this process gave.
+pub fn next_seq() -> i64 {
+    use std::sync::atomic::{AtomicI64, Ordering};
+    static LAST: AtomicI64 = AtomicI64::new(0);
+    let now = crate::rt::unix_now().saturating_mul(1_000_000);
+    let mut last = LAST.load(Ordering::Relaxed);
+    loop {
+        let next = now.max(last + 1);
+        match LAST.compare_exchange(last, next, Ordering::Relaxed, Ordering::Relaxed) {
+            Ok(_) => return next,
+            Err(seen) => last = seen,
+        }
+    }
 }
 
 /// The spec's cursor rule: `min(accepted, local_now)` (Mostrix
@@ -393,6 +418,7 @@ mod tests {
             created_at: 10_000_000,
             received_at: 1_000,
             delivery: ChatDelivery::Sent,
+            seq: 0,
         };
         assert_eq!(record.cursor(), 1_000);
         // And the subscription starts before the clock, whatever is stored.
@@ -433,6 +459,7 @@ mod tests {
             created_at: 1,
             received_at: 1,
             delivery: ChatDelivery::Sending,
+            seq: 0,
         };
         assert_eq!(record.view(true).delivery, ChatDelivery::Sending);
         assert_eq!(record.view(false).delivery, ChatDelivery::Failed);

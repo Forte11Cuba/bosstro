@@ -11,6 +11,7 @@ import 'package:bosstro/features/disputes/providers/pending_providers.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/features/nodes/providers/relay_providers.dart';
+import 'package:bosstro/features/observer/providers/observer_providers.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/providers/core_providers.dart';
@@ -20,12 +21,14 @@ import 'fake_chat.dart';
 import 'fake_device_security.dart';
 import 'fake_disputes.dart';
 import 'fake_nodes.dart';
+import 'fake_observer.dart';
 import 'fake_solver_key.dart';
 
 export 'fake_chat.dart';
 export 'fake_device_security.dart';
 export 'fake_disputes.dart';
 export 'fake_nodes.dart';
+export 'fake_observer.dart';
 export 'fake_solver_key.dart';
 
 /// The version the fake Rust core reports.
@@ -68,6 +71,7 @@ List<Override> fakeCoreOverrides({
   FakeRelaysCore? relays,
   FakeDisputesCore? disputes,
   FakeChatCore? chat,
+  FakeObserverCore? observer,
 }) {
   final nodeCore = nodes ?? FakeNodesCore(active: mostroNodePubkey);
   final keys =
@@ -92,6 +96,7 @@ List<Override> fakeCoreOverrides({
           FakeDisputesCore(node: null, followNode: () => nodeCore.active),
     ),
     chatCoreProvider.overrideWithValue(chat ?? FakeChatCore()),
+    observerCoreProvider.overrideWithValue(observer ?? FakeObserverCore()),
   ];
 }
 

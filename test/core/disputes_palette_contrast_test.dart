@@ -65,6 +65,22 @@ void main() {
         expectAA('viewer retry', shell.limeText, shell.bg);
       });
 
+      test('the chat between the parties: each side on its tint', () {
+        for (final (name, fill, label) in [
+          ('buyer', pal.observedBuyerFill, pal.observedBuyerLabel),
+          ('seller', pal.observedSellerFill, pal.observedSellerLabel),
+        ]) {
+          final bubble = flatten(fill, shell.bg);
+          expectAA('$name label', label, bubble);
+          // The text and a locked file's name; the time, the file's type
+          // and the advice.
+          expectAA('$name text', pal.bubbleInk, bubble);
+          expectAA('$name meta', pal.bubbleMeta, bubble);
+        }
+        // The read-only note, pinned on the page.
+        expectAA('note', shell.textSecondary, flatten(shell.inset, shell.bg));
+      });
+
       test('the message field', () {
         final fill = flatten(pal.composerFill, shell.bg);
         expectAA('text', pal.bubbleInk, fill);

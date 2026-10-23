@@ -8,6 +8,7 @@ use crate::api::disputes::{DisputeInitiator, DisputeStatus};
 use crate::api::relays::{RelayInfo, RelaySource, RelayStatus};
 use crate::db::{settings_keys, Storage};
 use crate::api::chat::{ChatDelivery, ChatParty, ChatSender};
+use crate::chat::observer::{ObservedRecord, ObservedRef};
 use crate::chat::{ChannelRef, ChatRecord};
 use crate::disputes::{DisputeRecord, TakenDispute};
 
@@ -295,7 +296,36 @@ pub(crate) fn message(channel: &ChannelRef, id: &str, created_at: i64) -> ChatRe
         created_at,
         received_at: created_at,
         delivery: ChatDelivery::Sent,
+        seq: 0,
     }
+}
+
+/// A stored message without the arrival order the store gave it.
+fn unseq(record: ChatRecord) -> ChatRecord {
+    ChatRecord { seq: 0, ..record }
+}
+
+/// Three messages of the same second stored in the order they arrived keep
+/// it: their `seq` grows with each insert (a copy takes none), whatever their
+/// ids say.
+pub(crate) async fn chat_messages_keep_their_arrival_order(storage: &impl Storage) {
+    let buyer = channel("aa", DISPUTE_A, ChatParty::Buyer, "ss");
+    let arrived = ["m3", "m1", "m2"];
+    for id in arrived {
+        assert!(storage
+            .insert_chat_message(&message(&buyer, id, 100))
+            .await
+            .unwrap());
+    }
+    assert!(!storage
+        .insert_chat_message(&message(&buyer, "m3", 100))
+        .await
+        .unwrap());
+    let mut rows = storage.list_chat_messages(&buyer).await.unwrap();
+    rows.sort_by_key(|r| r.seq);
+    let order: Vec<&str> = rows.iter().map(|r| r.message_id.as_str()).collect();
+    assert_eq!(order, arrived);
+    assert!(rows.windows(2).all(|w| w[0].seq < w[1].seq), "strictly growing");
 }
 
 pub(crate) async fn chat_messages_round_trip(storage: &impl Storage) {
@@ -310,7 +340,7 @@ pub(crate) async fn chat_messages_round_trip(storage: &impl Storage) {
     copy.content = "something else".into();
     assert!(!storage.insert_chat_message(&copy).await.unwrap());
     assert_eq!(
-        storage.get_chat_message(&buyer, "m1").await.unwrap(),
+        storage.get_chat_message(&buyer, "m1").await.unwrap().map(unseq),
         Some(first.clone())
     );
 
@@ -341,11 +371,12 @@ pub(crate) async fn chat_messages_round_trip(storage: &impl Storage) {
     let mut rows = storage.list_chat_messages(&buyer).await.unwrap();
     rows.sort_by(|a, b| a.message_id.cmp(&b.message_id));
     assert_eq!(rows.len(), 2);
-    assert_eq!(rows[0], first);
+    assert_eq!(unseq(rows[0].clone()), first);
     assert_eq!(storage.chat_cursor(&buyer).await.unwrap(), Some(200));
 
     storage.delete_chat_message(&buyer, "m2").await.unwrap();
-    assert_eq!(storage.list_chat_messages(&buyer).await.unwrap(), vec![first]);
+    let rows = storage.list_chat_messages(&buyer).await.unwrap();
+    assert_eq!(rows.into_iter().map(unseq).collect::<Vec<_>>(), vec![first]);
     assert_eq!(storage.chat_cursor(&buyer).await.unwrap(), Some(100));
 }
 
@@ -399,6 +430,79 @@ pub(crate) async fn the_chat_cursor_never_passes_the_clock_of_acceptance(storage
     storage.insert_chat_message(&early).await.unwrap();
     storage.insert_chat_message(&future).await.unwrap();
     assert_eq!(storage.chat_cursor(&seller).await.unwrap(), Some(2_000));
+}
+
+pub(crate) fn observed_ref(node: &str, dispute: &str, solver: &str) -> ObservedRef {
+    ObservedRef {
+        mostro_pubkey: node.into(),
+        dispute_id: dispute.into(),
+        solver_pubkey: solver.into(),
+    }
+}
+
+pub(crate) fn observed(chat: &ObservedRef, id: &str, sender: ChatParty) -> ObservedRecord {
+    ObservedRecord {
+        conversation: chat.clone(),
+        message_id: id.into(),
+        sender,
+        content: format!("observed {id}"),
+        created_at: 100,
+        received_at: 200,
+    }
+}
+
+/// An observed chat keeps each message once, by its inner id, with its
+/// verified sender.
+pub(crate) async fn observed_messages_round_trip(storage: &impl Storage) {
+    let chat = observed_ref("aa", DISPUTE_A, "ss");
+    assert!(storage.list_observed_messages(&chat).await.unwrap().is_empty());
+    let buyer = observed(&chat, "o1", ChatParty::Buyer);
+    let seller = observed(&chat, "o2", ChatParty::Seller);
+    assert!(storage.insert_observed_message(&buyer).await.unwrap());
+    assert!(storage.insert_observed_message(&seller).await.unwrap());
+    // A re-read of the same message is a copy: not stored twice, not replaced.
+    let mut copy = buyer.clone();
+    copy.content = "something else".into();
+    copy.received_at = 999;
+    assert!(!storage.insert_observed_message(&copy).await.unwrap());
+    let mut rows = storage.list_observed_messages(&chat).await.unwrap();
+    rows.sort_by(|a, b| a.message_id.cmp(&b.message_id));
+    assert_eq!(rows, vec![buyer, seller]);
+}
+
+/// Observed chats of two nodes, disputes and solver keys share nothing
+/// (D6), and none of them is ever read as one of the solver's own chats, or
+/// the other way round.
+pub(crate) async fn observed_chats_never_mix_with_each_other_or_the_chat(storage: &impl Storage) {
+    let chats = [
+        observed_ref("aa", DISPUTE_A, "ss"),
+        observed_ref("aa", DISPUTE_B, "ss"),
+        observed_ref("bb", DISPUTE_A, "ss"),
+        observed_ref("aa", DISPUTE_A, "tt"),
+    ];
+    for (n, chat) in chats.iter().enumerate() {
+        let record = observed(chat, &format!("o{n}"), ChatParty::Buyer);
+        assert!(storage.insert_observed_message(&record).await.unwrap());
+    }
+    for (n, chat) in chats.iter().enumerate() {
+        let rows = storage.list_observed_messages(chat).await.unwrap();
+        assert_eq!(rows.len(), 1, "{chat:?}");
+        assert_eq!(rows[0].message_id, format!("o{n}"));
+    }
+    // The solver's own chats of the same dispute and key hold none of them.
+    for party in [ChatParty::Buyer, ChatParty::Seller] {
+        let own = channel("aa", DISPUTE_A, party, "ss");
+        assert!(storage.list_chat_messages(&own).await.unwrap().is_empty());
+    }
+    // And a message of the solver's chat is not an observed one.
+    let own = channel("aa", DISPUTE_A, ChatParty::Seller, "tt");
+    storage
+        .insert_chat_message(&message(&own, "m1", 10))
+        .await
+        .unwrap();
+    let rows = storage.list_observed_messages(&chats[3]).await.unwrap();
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].message_id, "o3");
 }
 
 /// The attachment cache: kept by hash, read back whole, bounded oldest first.

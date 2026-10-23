@@ -21,12 +21,15 @@ class SecureWindow extends ConsumerStatefulWidget {
 }
 
 class _SecureWindowState extends ConsumerState<SecureWindow> {
-  /// Kept from [initState]: `ref` is not read in [dispose].
-  late final DeviceSecurity _device = ref.read(deviceSecurityProvider);
+  /// Read in [initState] whatever the count: `ref` cannot be read in
+  /// [dispose], and a window mounted over another secure one (the chat key
+  /// dialog, then the chat it opens) does not touch it before.
+  late final DeviceSecurity _device;
 
   @override
   void initState() {
     super.initState();
+    _device = ref.read(deviceSecurityProvider);
     if (SecureWindow._active++ == 0) _device.setSecure(true);
   }
 
