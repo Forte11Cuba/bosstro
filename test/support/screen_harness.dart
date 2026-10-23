@@ -6,16 +6,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bosstro/core/app.dart';
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/services/solver_key_service.dart';
+import 'package:bosstro/features/nodes/models/node_display.dart';
+import 'package:bosstro/features/nodes/providers/node_providers.dart';
+import 'package:bosstro/features/nodes/providers/relay_providers.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/providers/core_providers.dart';
 import 'package:bosstro/shared/providers/device_security_providers.dart';
 
 import 'fake_device_security.dart';
-
+import 'fake_nodes.dart';
 import 'fake_solver_key.dart';
 
 export 'fake_device_security.dart';
+export 'fake_nodes.dart';
 export 'fake_solver_key.dart';
 
 /// The version the fake Rust core reports.
@@ -46,13 +50,17 @@ class FakeKeyBackend {
 
 /// Overrides for everything that would call into the native library, which
 /// widget tests run without. Signed in with [sampleKey] unless [signedIn]
-/// is false.
+/// is false; on the Mostro node unless [nodes] says otherwise (pass a
+/// `FakeNodesCore()` for a solver who has not chosen one).
 List<Override> fakeCoreOverrides({
   bool signedIn = true,
   FakeKeyBackend? backend,
   bool storedKeyUnreadable = false,
   FakeDeviceSecurity? device,
+  FakeNodesCore? nodes,
+  FakeRelaysCore? relays,
 }) {
+  final nodeCore = nodes ?? FakeNodesCore(active: mostroNodePubkey);
   final keys =
       backend ??
       FakeKeyBackend(
@@ -67,6 +75,9 @@ List<Override> fakeCoreOverrides({
     ),
     storedKeyUnreadableProvider.overrideWithValue(storedKeyUnreadable),
     deviceSecurityProvider.overrideWithValue(device ?? FakeDeviceSecurity()),
+    nodesCoreProvider.overrideWithValue(nodeCore),
+    activeNodeProvider.overrideWith(() => ActiveNodeNotifier(nodeCore.active)),
+    relaysCoreProvider.overrideWithValue(relays ?? FakeRelaysCore()),
   ];
 }
 
@@ -90,6 +101,7 @@ Future<void> pumpApp(
   Brightness brightness = Brightness.dark,
   double textScale = 2,
   List<Override>? overrides,
+  bool settle = true,
 }) async {
   tester.platformDispatcher.localesTestValue = [locale];
   tester.platformDispatcher.textScaleFactorTestValue = textScale;
@@ -104,7 +116,11 @@ Future<void> pumpApp(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump();
+  }
 }
 
 /// Pumps [child] alone in a themed, localized app.

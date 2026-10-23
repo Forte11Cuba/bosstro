@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/settings_palette.dart';
+import 'package:bosstro/features/nodes/models/node_display.dart';
+import 'package:bosstro/features/nodes/providers/node_providers.dart';
+import 'package:bosstro/features/nodes/providers/relay_providers.dart';
 import 'package:bosstro/features/settings/widgets/settings_row.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/features/solver_key/widgets/key_widgets.dart';
@@ -16,9 +19,9 @@ import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 import 'package:bosstro/shared/widgets/tab_app_bar.dart';
 
-/// Settings tab: the solver key (npub, backup, log out) and the app's
-/// version. Node, relays, permission and trusted senders arrive with their
-/// phases.
+/// Settings tab: the active node and its relays, the solver key (npub,
+/// backup, log out) and the app's version. Permission and trusted senders
+/// arrive with their phases.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -28,6 +31,9 @@ class SettingsScreen extends ConsumerWidget {
     final pal = ShellPalette.of(context);
     final settings = SettingsPalette.of(context);
     final key = ref.watch(solverKeyProvider);
+    final active = ref.watch(activeNodeProvider);
+    final entry = ref.watch(activeNodeEntryProvider);
+    final link = ref.watch(relayLinkProvider);
 
     return ColoredBox(
       color: pal.bg,
@@ -42,6 +48,45 @@ class SettingsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                GroupHeader(
+                  title: l10n.settingsGroupNode,
+                  color: settings.groupHeader,
+                ),
+                const SizedBox(height: 8),
+                OrderDataCard(
+                  rows: [
+                    SettingsRow(
+                      icon: Icons.dns_outlined,
+                      label: l10n.settingsNode,
+                      value:
+                          active == null
+                              ? l10n.settingsNodeNone
+                              : entry != null
+                              ? nodeDisplayName(entry)
+                              : shortOrderId(active),
+                      onTap: () => context.push(AppRoute.settingsNode),
+                    ),
+                    if (active != null)
+                      SettingsRow(
+                        icon: Icons.info_outline_rounded,
+                        label: l10n.settingsNodeInfo,
+                        onTap: () => context.push(AppRoute.nodeInfo(active)),
+                      ),
+                    SettingsRow(
+                      icon: Icons.cell_tower_rounded,
+                      label: l10n.settingsRelays,
+                      value:
+                          link == null
+                              ? null
+                              : l10n.settingsRelaysValue(
+                                link.connected,
+                                link.total,
+                              ),
+                      onTap: () => context.push(AppRoute.relays),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
                 if (key != null) ...[
                   GroupHeader(
                     title: l10n.settingsGroupKey,

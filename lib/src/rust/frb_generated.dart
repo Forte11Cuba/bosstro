@@ -70,7 +70,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -451318101;
+  int get rustContentHash => -1262271590;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -130,15 +130,13 @@ abstract class RustLibApi extends BaseApi {
 
   Future<NodeInfo> crateApiNodeInfoNodeInfoDefault();
 
-  ProtocolSupport crateApiNodeInfoNodeInfoProtocolSupport({
-    required NodeInfo that,
-  });
-
   Future<ConnectionStateStream> crateApiRelaysOnConnectionStateChanged();
 
   Future<RelayStatusStream> crateApiRelaysOnRelayStatusChanged();
 
   String crateApiSolverPreviewNpub({required List<int> secret});
+
+  Future<ProtocolSupport> crateApiNodeInfoProtocolSupportDefault();
 
   Future<List<MostroNodeEntry>> crateApiNodesRefreshMostroNodeMetadata();
 
@@ -725,34 +723,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "node_info_default", argNames: []);
 
   @override
-  ProtocolSupport crateApiNodeInfoNodeInfoProtocolSupport({
-    required NodeInfo that,
-  }) {
-    return handler.executeSync(
-      SyncTask(
-        callFfi: () {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_box_autoadd_node_info(that, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_protocol_support,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiNodeInfoNodeInfoProtocolSupportConstMeta,
-        argValues: [that],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiNodeInfoNodeInfoProtocolSupportConstMeta =>
-      const TaskConstMeta(
-        debugName: "node_info_protocol_support",
-        argNames: ["that"],
-      );
-
-  @override
   Future<ConnectionStateStream> crateApiRelaysOnConnectionStateChanged() {
     return handler.executeNormal(
       NormalTask(
@@ -761,7 +731,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 20,
             port: port_,
           );
         },
@@ -792,7 +762,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 21,
             port: port_,
           );
         },
@@ -818,7 +788,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(secret, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -833,6 +803,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiSolverPreviewNpubConstMeta =>
       const TaskConstMeta(debugName: "preview_npub", argNames: ["secret"]);
+
+  @override
+  Future<ProtocolSupport> crateApiNodeInfoProtocolSupportDefault() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 23,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_protocol_support,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiNodeInfoProtocolSupportDefaultConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiNodeInfoProtocolSupportDefaultConstMeta =>
+      const TaskConstMeta(debugName: "protocol_support_default", argNames: []);
 
   @override
   Future<List<MostroNodeEntry>> crateApiNodesRefreshMostroNodeMetadata() {
@@ -1304,8 +1301,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   NodeInfo dco_decode_node_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 27)
-      throw Exception('unexpected arr length: expect 27 but see ${arr.length}');
+    if (arr.length != 28)
+      throw Exception('unexpected arr length: expect 28 but see ${arr.length}');
     return NodeInfo(
       pubkey: dco_decode_String(arr[0]),
       lastUpdated: dco_decode_i_64(arr[1]),
@@ -1323,17 +1320,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       pow: dco_decode_opt_box_autoadd_u_32(arr[13]),
       powFirstContact: dco_decode_opt_box_autoadd_u_32(arr[14]),
       protocolVersion: dco_decode_opt_box_autoadd_u_32(arr[15]),
-      bondEnabled: dco_decode_opt_box_autoadd_bool(arr[16]),
-      holdInvoiceExpirationWindow: dco_decode_opt_box_autoadd_i_64(arr[17]),
-      holdInvoiceCltvDelta: dco_decode_opt_box_autoadd_u_32(arr[18]),
-      invoiceExpirationWindow: dco_decode_opt_box_autoadd_i_64(arr[19]),
-      lndVersion: dco_decode_opt_String(arr[20]),
-      lndNodePubkey: dco_decode_opt_String(arr[21]),
-      lndCommitHash: dco_decode_opt_String(arr[22]),
-      lndNodeAlias: dco_decode_opt_String(arr[23]),
-      lndChains: dco_decode_list_String(arr[24]),
-      lndNetworks: dco_decode_list_String(arr[25]),
-      lndUris: dco_decode_list_String(arr[26]),
+      protocolSupport: dco_decode_protocol_support(arr[16]),
+      bondEnabled: dco_decode_opt_box_autoadd_bool(arr[17]),
+      holdInvoiceExpirationWindow: dco_decode_opt_box_autoadd_i_64(arr[18]),
+      holdInvoiceCltvDelta: dco_decode_opt_box_autoadd_u_32(arr[19]),
+      invoiceExpirationWindow: dco_decode_opt_box_autoadd_i_64(arr[20]),
+      lndVersion: dco_decode_opt_String(arr[21]),
+      lndNodePubkey: dco_decode_opt_String(arr[22]),
+      lndCommitHash: dco_decode_opt_String(arr[23]),
+      lndNodeAlias: dco_decode_opt_String(arr[24]),
+      lndChains: dco_decode_list_String(arr[25]),
+      lndNetworks: dco_decode_list_String(arr[26]),
+      lndUris: dco_decode_list_String(arr[27]),
     );
   }
 
@@ -1769,6 +1767,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_pow = sse_decode_opt_box_autoadd_u_32(deserializer);
     var var_powFirstContact = sse_decode_opt_box_autoadd_u_32(deserializer);
     var var_protocolVersion = sse_decode_opt_box_autoadd_u_32(deserializer);
+    var var_protocolSupport = sse_decode_protocol_support(deserializer);
     var var_bondEnabled = sse_decode_opt_box_autoadd_bool(deserializer);
     var var_holdInvoiceExpirationWindow = sse_decode_opt_box_autoadd_i_64(
       deserializer,
@@ -1803,6 +1802,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       pow: var_pow,
       powFirstContact: var_powFirstContact,
       protocolVersion: var_protocolVersion,
+      protocolSupport: var_protocolSupport,
       bondEnabled: var_bondEnabled,
       holdInvoiceExpirationWindow: var_holdInvoiceExpirationWindow,
       holdInvoiceCltvDelta: var_holdInvoiceCltvDelta,
@@ -2327,6 +2327,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_box_autoadd_u_32(self.pow, serializer);
     sse_encode_opt_box_autoadd_u_32(self.powFirstContact, serializer);
     sse_encode_opt_box_autoadd_u_32(self.protocolVersion, serializer);
+    sse_encode_protocol_support(self.protocolSupport, serializer);
     sse_encode_opt_box_autoadd_bool(self.bondEnabled, serializer);
     sse_encode_opt_box_autoadd_i_64(
       self.holdInvoiceExpirationWindow,

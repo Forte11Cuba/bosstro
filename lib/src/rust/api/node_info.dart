@@ -6,7 +6,7 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `cached_of`, `info_from_tags`, `is_authentic`, `load_cached`, `newest`, `parse_bool`, `parse_node`, `split_csv`
+// These functions are ignored because they are not marked as `pub`: `cached_of`, `info_from_tags`, `is_authentic`, `load_cached`, `newest`, `parse_bool`, `parse_node`, `protocol_support_of`, `split_csv`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `CachedNodeInfo`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`
 
@@ -55,6 +55,9 @@ class NodeInfo {
   final int? pow;
   final int? powFirstContact;
   final int? protocolVersion;
+
+  /// Bosstro's verdict on `protocol_version` (transport v2 only).
+  final ProtocolSupport protocolSupport;
   final bool? bondEnabled;
   final PlatformInt64? holdInvoiceExpirationWindow;
   final int? holdInvoiceCltvDelta;
@@ -84,6 +87,7 @@ class NodeInfo {
     this.pow,
     this.powFirstContact,
     this.protocolVersion,
+    required this.protocolSupport,
     this.bondEnabled,
     this.holdInvoiceExpirationWindow,
     this.holdInvoiceCltvDelta,
@@ -99,10 +103,6 @@ class NodeInfo {
 
   static Future<NodeInfo> default_() =>
       RustLib.instance.api.crateApiNodeInfoNodeInfoDefault();
-
-  /// Bosstro's verdict on [`Self::protocol_version`].
-  ProtocolSupport protocolSupport() =>
-      RustLib.instance.api.crateApiNodeInfoNodeInfoProtocolSupport(that: this);
 
   @override
   int get hashCode =>
@@ -122,6 +122,7 @@ class NodeInfo {
       pow.hashCode ^
       powFirstContact.hashCode ^
       protocolVersion.hashCode ^
+      protocolSupport.hashCode ^
       bondEnabled.hashCode ^
       holdInvoiceExpirationWindow.hashCode ^
       holdInvoiceCltvDelta.hashCode ^
@@ -155,6 +156,7 @@ class NodeInfo {
           pow == other.pow &&
           powFirstContact == other.powFirstContact &&
           protocolVersion == other.protocolVersion &&
+          protocolSupport == other.protocolSupport &&
           bondEnabled == other.bondEnabled &&
           holdInvoiceExpirationWindow == other.holdInvoiceExpirationWindow &&
           holdInvoiceCltvDelta == other.holdInvoiceCltvDelta &&
@@ -178,5 +180,8 @@ enum ProtocolSupport {
   unsupported,
 
   /// The node does not say.
-  unknown,
+  unknown;
+
+  static Future<ProtocolSupport> default_() =>
+      RustLib.instance.api.crateApiNodeInfoProtocolSupportDefault();
 }

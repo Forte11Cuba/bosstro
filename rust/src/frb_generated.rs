@@ -38,7 +38,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -451318101;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1262271590;
 
 // Section: executor
 
@@ -747,38 +747,6 @@ fn wire__crate__api__node_info__node_info_default_impl(
         },
     )
 }
-fn wire__crate__api__node_info__node_info_protocol_support_impl(
-    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
-    rust_vec_len_: i32,
-    data_len_: i32,
-) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "node_info_protocol_support",
-            port: None,
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
-        },
-        move || {
-            let message = unsafe {
-                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
-                    ptr_,
-                    rust_vec_len_,
-                    data_len_,
-                )
-            };
-            let mut deserializer =
-                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <crate::api::node_info::NodeInfo>::sse_decode(&mut deserializer);
-            deserializer.end();
-            transform_result_sse::<_, ()>((move || {
-                let output_ok = Result::<_, ()>::Ok(
-                    crate::api::node_info::NodeInfo::protocol_support(&api_that),
-                )?;
-                Ok(output_ok)
-            })())
-        },
-    )
-}
 fn wire__crate__api__relays__on_connection_state_changed_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -876,6 +844,39 @@ fn wire__crate__api__solver__preview_npub_impl(
                 let output_ok = crate::api::solver::preview_npub(api_secret)?;
                 Ok(output_ok)
             })())
+        },
+    )
+}
+fn wire__crate__api__node_info__protocol_support_default_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "protocol_support_default",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok =
+                        Result::<_, ()>::Ok(crate::api::node_info::ProtocolSupport::default())?;
+                    Ok(output_ok)
+                })())
+            }
         },
     )
 }
@@ -1393,6 +1394,8 @@ impl SseDecode for crate::api::node_info::NodeInfo {
         let mut var_pow = <Option<u32>>::sse_decode(deserializer);
         let mut var_powFirstContact = <Option<u32>>::sse_decode(deserializer);
         let mut var_protocolVersion = <Option<u32>>::sse_decode(deserializer);
+        let mut var_protocolSupport =
+            <crate::api::node_info::ProtocolSupport>::sse_decode(deserializer);
         let mut var_bondEnabled = <Option<bool>>::sse_decode(deserializer);
         let mut var_holdInvoiceExpirationWindow = <Option<i64>>::sse_decode(deserializer);
         let mut var_holdInvoiceCltvDelta = <Option<u32>>::sse_decode(deserializer);
@@ -1421,6 +1424,7 @@ impl SseDecode for crate::api::node_info::NodeInfo {
             pow: var_pow,
             pow_first_contact: var_powFirstContact,
             protocol_version: var_protocolVersion,
+            protocol_support: var_protocolSupport,
             bond_enabled: var_bondEnabled,
             hold_invoice_expiration_window: var_holdInvoiceExpirationWindow,
             hold_invoice_cltv_delta: var_holdInvoiceCltvDelta,
@@ -1715,13 +1719,19 @@ fn pde_ffi_dispatcher_primary_impl(
         19 => {
             wire__crate__api__node_info__node_info_default_impl(port, ptr, rust_vec_len, data_len)
         }
-        21 => wire__crate__api__relays__on_connection_state_changed_impl(
+        20 => wire__crate__api__relays__on_connection_state_changed_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        22 => wire__crate__api__relays__on_relay_status_changed_impl(
+        21 => wire__crate__api__relays__on_relay_status_changed_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        23 => wire__crate__api__node_info__protocol_support_default_impl(
             port,
             ptr,
             rust_vec_len,
@@ -1767,12 +1777,7 @@ fn pde_ffi_dispatcher_sync_impl(
         3 => wire__crate__api__nodes__active_node_impl(ptr, rust_vec_len, data_len),
         6 => wire__crate__api__app_version_impl(ptr, rust_vec_len, data_len),
         8 => wire__crate__api__solver__create_solver_account_impl(ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__node_info__node_info_protocol_support_impl(
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        23 => wire__crate__api__solver__preview_npub_impl(ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__solver__preview_npub_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1925,6 +1930,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::node_info::NodeInfo {
             self.pow.into_into_dart().into_dart(),
             self.pow_first_contact.into_into_dart().into_dart(),
             self.protocol_version.into_into_dart().into_dart(),
+            self.protocol_support.into_into_dart().into_dart(),
             self.bond_enabled.into_into_dart().into_dart(),
             self.hold_invoice_expiration_window
                 .into_into_dart()
@@ -2281,6 +2287,7 @@ impl SseEncode for crate::api::node_info::NodeInfo {
         <Option<u32>>::sse_encode(self.pow, serializer);
         <Option<u32>>::sse_encode(self.pow_first_contact, serializer);
         <Option<u32>>::sse_encode(self.protocol_version, serializer);
+        <crate::api::node_info::ProtocolSupport>::sse_encode(self.protocol_support, serializer);
         <Option<bool>>::sse_encode(self.bond_enabled, serializer);
         <Option<i64>>::sse_encode(self.hold_invoice_expiration_window, serializer);
         <Option<u32>>::sse_encode(self.hold_invoice_cltv_delta, serializer);

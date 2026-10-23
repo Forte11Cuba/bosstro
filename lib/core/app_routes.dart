@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bosstro/features/disputes/screens/in_progress_screen.dart';
 import 'package:bosstro/features/disputes/screens/pending_screen.dart';
+import 'package:bosstro/features/nodes/screens/choose_node_screen.dart';
+import 'package:bosstro/features/nodes/screens/node_info_screen.dart';
+import 'package:bosstro/features/nodes/screens/relays_screen.dart';
 import 'package:bosstro/features/settings/screens/settings_screen.dart';
 import 'package:bosstro/features/shell/screens/home_shell.dart';
 import 'package:bosstro/features/solver_key/screens/backup_screen.dart';
@@ -23,6 +26,21 @@ abstract final class AppRoute {
   static const inProgress = '/in-progress';
   static const settings = '/settings';
   static const backup = '/settings/backup';
+
+  /// The node selector right after Log in or Create new account, before
+  /// the tabs (no way back).
+  static const chooseNode = '/choose-node';
+
+  /// The node selector from Settings → Node.
+  static const settingsNode = '/settings/node';
+  static const relays = '/settings/relays';
+
+  /// A node's instance info.
+  static String nodeInfo(String pubkey) => '/node/$pubkey';
+
+  /// Where a solver goes once they have a key: the tabs, or the node
+  /// selector first while no node is chosen (D5).
+  static String home({required bool hasNode}) => hasNode ? pending : chooseNode;
 
   /// The bottom bar's destinations, in order.
   static const tabs = [pending, inProgress, settings];
@@ -77,6 +95,16 @@ GoRouter buildRouter({
         path: AppRoute.scanQr,
         builder: (context, state) => const QrScanScreen(),
       ),
+      GoRoute(
+        path: AppRoute.chooseNode,
+        builder: (context, state) => const ChooseNodeScreen(onboarding: true),
+      ),
+      GoRoute(
+        path: '/node/:pubkey',
+        builder:
+            (context, state) =>
+                NodeInfoScreen(pubkey: state.pathParameters['pubkey']!),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => HomeShell(shell: shell),
         branches: [
@@ -107,6 +135,16 @@ GoRouter buildRouter({
                     // Over the shell: the backup has no bottom bar.
                     parentNavigatorKey: rootKey,
                     builder: (context, state) => const BackupScreen(),
+                  ),
+                  GoRoute(
+                    path: 'node',
+                    parentNavigatorKey: rootKey,
+                    builder: (context, state) => const ChooseNodeScreen(),
+                  ),
+                  GoRoute(
+                    path: 'relays',
+                    parentNavigatorKey: rootKey,
+                    builder: (context, state) => const RelaysScreen(),
                   ),
                 ],
               ),

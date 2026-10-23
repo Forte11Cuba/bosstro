@@ -36,6 +36,14 @@ dependencies:
   qr: ^3.0.2
   share_plus: ^12.0.1
 
+  # Where the database file lives (lib/core/services/app_storage.dart): the
+  # app data directory, the XDG data dir on Linux. Same packages as ../app.
+  path_provider: ^2.1.5
+  path: ^1.9.1
+
+  # Loading skeletons (DS-CMP-13), as ../app.
+  shimmer: ^3.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

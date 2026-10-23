@@ -74,6 +74,7 @@ void main() {
       location: AppRoute.pending,
       locale: const Locale('en'),
       textScale: 1,
+      overrides: fakeCoreOverrides(nodes: FakeNodesCore()),
     );
     expect(find.text('No node selected'), findsOneWidget);
   });

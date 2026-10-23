@@ -24,7 +24,7 @@ const FETCH_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(10);
 const FETCH_GRACE: std::time::Duration = std::time::Duration::from_millis(750);
 
 /// Which wire protocol the node speaks, against Bosstro's (transport v2 only).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum ProtocolSupport {
     /// `protocol_version` 2: what Bosstro speaks.
     Supported,
@@ -32,6 +32,7 @@ pub enum ProtocolSupport {
     /// talk to this node.
     Unsupported,
     /// The node does not say.
+    #[default]
     Unknown,
 }
 
@@ -62,6 +63,8 @@ pub struct NodeInfo {
     pub pow: Option<u32>,
     pub pow_first_contact: Option<u32>,
     pub protocol_version: Option<u32>,
+    /// Bosstro's verdict on `protocol_version` (transport v2 only).
+    pub protocol_support: ProtocolSupport,
     pub bond_enabled: Option<bool>,
     pub hold_invoice_expiration_window: Option<i64>,
     pub hold_invoice_cltv_delta: Option<u32>,
@@ -75,15 +78,12 @@ pub struct NodeInfo {
     pub lnd_uris: Vec<String>,
 }
 
-impl NodeInfo {
-    /// Bosstro's verdict on [`Self::protocol_version`].
-    #[flutter_rust_bridge::frb(sync)]
-    pub fn protocol_support(&self) -> ProtocolSupport {
-        match self.protocol_version {
-            Some(2) => ProtocolSupport::Supported,
-            Some(_) => ProtocolSupport::Unsupported,
-            None => ProtocolSupport::Unknown,
-        }
+/// Bosstro's verdict on a `protocol_version` tag.
+fn protocol_support_of(version: Option<u32>) -> ProtocolSupport {
+    match version {
+        Some(2) => ProtocolSupport::Supported,
+        Some(_) => ProtocolSupport::Unsupported,
+        None => ProtocolSupport::Unknown,
     }
 }
 
@@ -177,6 +177,7 @@ pub(crate) fn info_from_tags(
             _ => {}
         }
     }
+    info.protocol_support = protocol_support_of(info.protocol_version);
     info
 }
 
@@ -344,7 +345,7 @@ mod tests {
         assert_eq!(info.fee, Some(0.006));
         assert_eq!(info.pow, Some(0));
         assert_eq!(info.pow_first_contact, Some(8));
-        assert_eq!(info.protocol_support(), ProtocolSupport::Supported);
+        assert_eq!(info.protocol_support, ProtocolSupport::Supported);
         assert_eq!(info.bond_enabled, Some(true));
         assert_eq!(info.hold_invoice_expiration_window, Some(300));
         assert_eq!(info.hold_invoice_cltv_delta, Some(144));
@@ -368,13 +369,13 @@ mod tests {
         assert_eq!(info.pow, None);
         assert_eq!(info.bond_enabled, None);
         assert!(info.fiat_currencies_accepted.is_empty());
-        assert_eq!(info.protocol_support(), ProtocolSupport::Unknown);
+        assert_eq!(info.protocol_support, ProtocolSupport::Unknown);
     }
 
     #[test]
     fn protocol_v1_is_unsupported() {
         let info = info_from_tags("aa", 0, 0, &tags(&[&["protocol_version", "1"]]));
-        assert_eq!(info.protocol_support(), ProtocolSupport::Unsupported);
+        assert_eq!(info.protocol_support, ProtocolSupport::Unsupported);
     }
 
     #[test]
