@@ -35,7 +35,7 @@ ARB files (`lib/l10n/app_en.arb` is the source).
 | A1 | License AGPL-3.0-or-later (code is copied from `app`, which is AGPL). |
 | A2 | **Android is the target** the app is built for. **Linux and web** also build and run, for development and convenience, without the Android-only key protections: no screenshot blocking, no nsec copy (`PlatformCapabilities`), no QR scanning, and on the web the key sits in browser storage, much weaker than the Keystore. iOS can come later. |
 | A3 | l10n: `en` and `es` for the MVP. |
-| A4 | SQLCipher is a later phase; until then the database relies on the Android app sandbox. |
+| A4 | Storage per platform, as `../app`: SQLite (`sqlx`) on native, IndexedDB on the web, behind one `Storage` trait. SQLCipher is post-MVP; until then the database relies on the Android app sandbox (on Linux and the web it is not encrypted). |
 | A8 | Android `applicationId` / namespace `foundation.mostro.bosstro` (it must differ from `app`'s, or one install replaces the other). |
 
 ## Architecture — the golden rule
@@ -70,7 +70,7 @@ tool/                # design_check.dart, launcher_icon/build_sources.py
   functions tests can drive for every platform. A feature that needs a protection only Android has
   (FLAG_SECURE, the sensitive clipboard) is **off** elsewhere, never on without it.
 - Rust that differs on the web goes behind `cfg(target_arch = "wasm32")` (`rust/Cargo.toml`,
-  `rust/src/rt.rs`). Tokio's runtime and SQLite are native only. `cargo check` does not catch wasm
+  `rust/src/rt.rs`). Tokio's runtime and SQLite are native only; the web stores data in IndexedDB. `cargo check` does not catch wasm
   link errors; `./scripts/build-web.sh` does.
 
 ### Generated code

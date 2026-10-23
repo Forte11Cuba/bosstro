@@ -17,7 +17,7 @@ protocol, persistence) with a Flutter UI, bridged by
 
 ## Building
 
-Requirements: Flutter 3.41, Rust (rustup picks the version in `rust-toolchain.toml`), the Android
+Requirements: Flutter 3.47.7, Rust (rustup picks the version in `rust-toolchain.toml`), the Android
 SDK and NDK, and the bridge codegen at the pinned version:
 
 ```bash

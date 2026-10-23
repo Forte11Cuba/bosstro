@@ -16,6 +16,10 @@ analyzer:
     # flutter_rust_bridge generated bindings — do not analyze
     - lib/src/rust/**
     - lib/generated/**
+    - build/**
+    - android/**
+    - web/**
+    - linux/**
   errors:
     # Treat all infos as warnings, warnings as errors
     invalid_annotation_target: ignore
