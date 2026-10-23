@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bosstro/core/app_theme.dart';
+import 'package:bosstro/features/chat/attachments/upload_controller.dart';
 import 'package:bosstro/features/chat/providers/chat_providers.dart';
 import 'package:bosstro/features/chat/services/chat_core.dart';
 import 'package:bosstro/features/chat/widgets/chat_bubble.dart';
 import 'package:bosstro/features/chat/widgets/chat_composer.dart';
+import 'package:bosstro/features/chat/widgets/upload_bubble.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/list_empty_state.dart';
 import 'package:bosstro/shared/widgets/list_skeleton.dart';
@@ -64,8 +66,9 @@ class _Thread extends ConsumerWidget {
         body: l10n.chatNoPartyKeyBody,
       );
     }
+    final uploads = ref.watch(chatUploadsProvider(chat));
     final body =
-        thread.messages.isEmpty
+        thread.messages.isEmpty && uploads.isEmpty
             ? ListEmptyState(
               sticker: 'waving',
               title: switch (chat.party) {
@@ -136,6 +139,9 @@ class _MessagesState extends ConsumerState<_Messages> {
   Widget build(BuildContext context) {
     final messages = widget.thread.messages;
     final open = widget.thread.state == ChatChannelState.open;
+    // Files on their way out sit under the messages, newest last.
+    final uploads = ref.watch(chatUploadsProvider(widget.chat));
+    final controller = ref.read(chatUploadsProvider(widget.chat).notifier);
     return ListView.separated(
       reverse: true,
       padding: const EdgeInsets.fromLTRB(
@@ -144,12 +150,22 @@ class _MessagesState extends ConsumerState<_Messages> {
         redesignSidePadding,
         12,
       ),
-      itemCount: messages.length,
+      itemCount: uploads.length + messages.length,
       separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
-        final message = messages[messages.length - 1 - i];
+        if (i < uploads.length) {
+          final upload = uploads[uploads.length - 1 - i];
+          return UploadBubble(
+            key: ValueKey(upload.id),
+            upload: upload,
+            onRetry: () => controller.retry(upload.id),
+            onDiscard: () => controller.discard(upload.id),
+          );
+        }
+        final message = messages[messages.length - 1 - (i - uploads.length)];
         return ChatBubble(
           key: ValueKey(message.id),
+          chat: widget.chat,
           message: message,
           now: _now,
           onRetry: open ? () => _retry(message) : null,

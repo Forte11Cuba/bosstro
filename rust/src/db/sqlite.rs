@@ -317,6 +317,48 @@ impl Storage for SqliteStorage {
         .await?;
         Ok(row.0)
     }
+
+    async fn save_attachment_blob(&self, sha256: &str, blob: &[u8]) -> Result<()> {
+        sqlx::query(
+            "INSERT OR REPLACE INTO attachment_blobs (sha256, data, size, created_at)
+             VALUES (?, ?, ?, ?)",
+        )
+        .bind(sha256)
+        .bind(blob)
+        .bind(blob.len() as i64)
+        .bind(crate::rt::unix_now())
+        .execute(&self.pool)
+        .await?;
+        self.trim_attachment_blobs(crate::db::blob_cache::ATTACHMENT_CACHE_BYTES)
+            .await
+    }
+
+    async fn get_attachment_blob(&self, sha256: &str) -> Result<Option<Vec<u8>>> {
+        let row: Option<(Vec<u8>,)> =
+            sqlx::query_as("SELECT data FROM attachment_blobs WHERE sha256 = ?")
+                .bind(sha256)
+                .fetch_optional(&self.pool)
+                .await?;
+        Ok(row.map(|r| r.0))
+    }
+
+    /// The newest blobs stay, the oldest go (the row id breaks ties within
+    /// a second), in one statement, as ../app.
+    async fn trim_attachment_blobs(&self, cap: u64) -> Result<()> {
+        sqlx::query(
+            "DELETE FROM attachment_blobs WHERE sha256 IN (
+                 SELECT sha256 FROM (
+                     SELECT sha256,
+                            SUM(size) OVER (ORDER BY created_at DESC, rowid DESC) AS running
+                     FROM attachment_blobs
+                 ) WHERE running > ?
+             )",
+        )
+        .bind(i64::try_from(cap).unwrap_or(i64::MAX))
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
 }
 
 /// A row as a record, or `None` (logged) when it no longer reads — a status a
@@ -504,6 +546,11 @@ pub(crate) mod tests {
     }
 
     /// The Pending query uses the index, not a scan of the table.
+    #[tokio::test]
+    async fn attachment_blobs_are_cached_and_bounded() {
+        contract::attachment_blobs_are_cached_and_bounded(&store().await).await;
+    }
+
     #[tokio::test]
     async fn the_pending_query_uses_the_status_index() {
         let storage = store().await;

@@ -2,6 +2,7 @@
 //! subscriptions and the event readers `crate::api` builds on. Ported from
 //! ../app's `rust/src/nostr/`.
 
+pub mod blossom;
 pub mod first_answer;
 pub mod live_subs;
 pub mod relay_list;

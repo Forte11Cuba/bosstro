@@ -3,14 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/disputes_palette.dart';
+import 'package:bosstro/features/chat/attachments/attachment_flow.dart';
+import 'package:bosstro/features/chat/attachments/upload_controller.dart';
 import 'package:bosstro/features/chat/providers/chat_providers.dart';
 import 'package:bosstro/features/chat/services/chat_core.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 
-/// The message field of a dispute chat, pinned under the messages: a boxed
-/// multi-line field (DS-CMP-11) and a 48-dp send button. What the core
-/// refuses is said under the field, and the text stays there to fix.
+/// The message field of a dispute chat, pinned under the messages: a 48-dp
+/// attach button (an image from the gallery or the camera, or a PDF), a
+/// boxed multi-line field (DS-CMP-11) and a 48-dp send button. What the core
+/// refuses is said under the field, and the text stays there to fix; a file
+/// shows its own progress and failure in the conversation.
 class ChatComposer extends ConsumerStatefulWidget {
   const ChatComposer({super.key, required this.chat});
 
@@ -38,6 +42,24 @@ class _ChatComposerState extends ConsumerState<ChatComposer> {
   }
 
   bool get _canSend => !_busy && _controller.text.trim().isNotEmpty;
+
+  /// Picking or reading a file.
+  bool _picking = false;
+
+  Future<void> _attach() async {
+    if (_picking) return;
+    final file = await pickAttachmentToSend(
+      context,
+      ref,
+      party: widget.chat.party,
+      onBusy: (busy) => setState(() => _picking = busy),
+    );
+    if (file == null || !mounted) return;
+    // Not awaited: the upload shows its own progress in the conversation.
+    ref
+        .read(chatUploadsProvider(widget.chat).notifier)
+        .send(file.name, file.bytes);
+  }
 
   Future<void> _send() async {
     if (!_canSend) return;
@@ -84,7 +106,7 @@ class _ChatComposerState extends ConsumerState<ChatComposer> {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-          redesignSidePadding,
+          redesignSidePadding - 10,
           8,
           redesignSidePadding - 6,
           10,
@@ -92,6 +114,17 @@ class _ChatComposerState extends ConsumerState<ChatComposer> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            IconButton(
+              onPressed: _picking ? null : _attach,
+              tooltip: l10n.chatAttach,
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              icon: Icon(
+                Icons.attach_file_rounded,
+                size: 22,
+                color: _picking ? shell.textTertiary : shell.limeIcon,
+              ),
+            ),
+            const SizedBox(width: 2),
             Expanded(
               child: TextField(
                 controller: _controller,

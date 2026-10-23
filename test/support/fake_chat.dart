@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:bosstro/features/chat/services/chat_core.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
@@ -19,6 +20,24 @@ class FakeChatCore implements ChatCore {
   /// The texts sent and the ids retried, in order.
   final List<String> sent = [];
   final List<String> retried = [];
+
+  /// The files sent, by name, in order.
+  final List<String> filesSent = [];
+
+  /// What `sendAttachment` throws, when set; when null and [holdUploads]
+  /// is set, the upload waits until the test completes it.
+  ChatError? uploadError;
+  Completer<void>? holdUploads;
+
+  /// What `openAttachment` answers, by message id: an [OpenedAttachment],
+  /// or a [ChatError] to throw. Absent: it never answers (still loading).
+  final Map<String, Object> opened = {};
+
+  /// The message ids opened, in order.
+  final List<String> openedIds = [];
+
+  final StreamController<AttachmentProgress> progress =
+      StreamController.broadcast();
 
   final StreamController<ChatUpdate> changes = StreamController.broadcast();
 
@@ -110,6 +129,51 @@ class FakeChatCore implements ChatCore {
   @override
   Stream<ChatUpdate> updates() => changes.stream;
 
+  @override
+  Future<ChatMessageView> sendAttachment(
+    String disputeId,
+    ChatParty party,
+    Uint8List bytes,
+    String fileName,
+    String uploadId,
+  ) async {
+    progress.add(AttachmentProgress(id: uploadId, fraction: 0.3));
+    if (holdUploads case final hold?) await hold.future;
+    if (uploadError case final e?) throw e;
+    filesSent.add(fileName);
+    final message = sampleMessage(
+      id: 'file-${_next++}',
+      sender: ChatSender.you,
+      content: '{}',
+      delivery: ChatDelivery.sending,
+      attachment: ChatAttachment(
+        kind: ChatAttachmentKind.file,
+        fileName: fileName,
+        mimeType: 'application/pdf',
+        size: bytes.length,
+      ),
+    );
+    _append(disputeId, party, message);
+    return message;
+  }
+
+  @override
+  Future<OpenedAttachment> openAttachment(
+    String disputeId,
+    ChatParty party,
+    String messageId,
+  ) {
+    openedIds.add(messageId);
+    return switch (opened[messageId]) {
+      final OpenedAttachment file => Future.value(file),
+      final ChatError e => Future.error(e),
+      _ => Completer<OpenedAttachment>().future,
+    };
+  }
+
+  @override
+  Stream<AttachmentProgress> attachmentProgress() => progress.stream;
+
   /// Announce a change of one conversation, as the router does.
   void push(String disputeId, ChatParty party) => changes.add(
     ChatUpdate(mostroPubkey: node ?? '', disputeId: disputeId, party: party),
@@ -123,10 +187,35 @@ ChatMessageView sampleMessage({
   String content = 'Hola',
   int createdAt = 1700005000,
   ChatDelivery delivery = ChatDelivery.sent,
+  ChatAttachment? attachment,
 }) => ChatMessageView(
   id: id,
   sender: sender,
   content: content,
   createdAt: createdAt,
   delivery: delivery,
+  attachment: attachment,
 );
+
+/// An image attachment as a message declares it.
+ChatAttachment sampleImage({
+  String name = 'recibo.jpg',
+  int? w = 1200,
+  int? h = 900,
+}) => ChatAttachment(
+  kind: ChatAttachmentKind.image,
+  fileName: name,
+  mimeType: 'image/jpeg',
+  size: 245760,
+  width: w,
+  height: h,
+);
+
+/// A PDF attachment as a message declares it.
+ChatAttachment samplePdf({String name = 'extracto-bancario.pdf'}) =>
+    ChatAttachment(
+      kind: ChatAttachmentKind.file,
+      fileName: name,
+      mimeType: 'application/pdf',
+      size: 1468006,
+    );

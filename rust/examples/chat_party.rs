@@ -1,34 +1,60 @@
-//! A dispute party for the end-to-end chat test (`integration_test/`): plays
+//! A dispute party for the end-to-end chat tests (`integration_test/`): plays
 //! the buyer or the seller with their trade key, as a party's client does,
 //! through `mostro_core::chat`. Never against a real node or a real party.
 //!
 //! ```text
 //! cargo run --example chat_party -- <relay> <party secret hex> <solver pubkey hex> \
-//!     [--say <text>] [--expect <text>]
+//!     [--say <text>] [--expect <text>] \
+//!     [--blossom <url>] [--send-file <path>] [--expect-file <out path>]
 //! ```
 //!
 //! `--say` writes `text` to the solver. `--expect` waits (up to 60 s) until a
 //! message with exactly `text`, signed by the solver key, is on the relay,
 //! and fails otherwise. Prints what it reads as `solver: …` / `party: …`.
+//!
+//! Attachments, as ../app sends and opens them, written here from the format
+//! rather than from Bosstro's code, so the run checks one against the other:
+//! `--send-file` encrypts the file (JPEG, PNG or PDF) with ChaCha20-Poly1305
+//! under the raw ECDH x of the party's trade key and the solver's pubkey,
+//! uploads it to `--blossom` (a local test server, `blossom_server`) with a
+//! kind 24242 authorisation signed by a throwaway key, and writes ../app's
+//! JSON in the chat. `--expect-file` waits for the solver's newest
+//! attachment, downloads it, checks its hash against the URL, decrypts it and
+//! writes it to the path, printing its type.
 
 use std::time::Duration;
 
-use mostro_core::chat::{chat_filter, derive_chat_keys, unwrap_chat_message, wrap_chat_message};
+use base64::Engine;
+use chacha20poly1305::aead::{Aead, KeyInit};
+use chacha20poly1305::{ChaCha20Poly1305, Nonce};
+use mostro_core::chat::{
+    chat_filter, derive_chat_keys, unwrap_chat_message, wrap_chat_message, SharedKey,
+};
 use nostr_sdk::prelude::*;
+use rand::RngCore;
+use sha2::{Digest, Sha256};
+
+type Failure = Box<dyn std::error::Error>;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Failure> {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let usage = "chat_party <relay> <party secret hex> <solver pubkey hex> [--say T] [--expect T]";
+    let usage = "chat_party <relay> <party secret hex> <solver pubkey hex> [--say T] \
+                 [--expect T] [--blossom URL] [--send-file PATH] [--expect-file PATH]";
     let [relay, secret, solver, rest @ ..] = args.as_slice() else {
         return Err(usage.into());
     };
-    let (mut say, mut expect) = (None, None);
+    let (mut say, mut expect, mut blossom, mut send_file, mut expect_file) =
+        (None, None, None, None, None);
     let mut rest = rest.iter();
     while let Some(flag) = rest.next() {
+        let value = rest.next().cloned();
         match flag.as_str() {
-            "--say" => say = rest.next().cloned(),
-            "--expect" => expect = rest.next().cloned(),
+            "--say" => say = value,
+            "--expect" => expect = value,
+            "--blossom" => blossom = value,
+            "--send-file" => send_file = value,
+            "--expect-file" => expect_file = value,
             _ => return Err(usage.into()),
         }
     }
@@ -40,6 +66,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     client.add_relay(relay.as_str()).await?;
     client.connect().and_wait(Duration::from_secs(5)).await;
 
+    if let Some(path) = send_file {
+        let server = blossom.as_deref().ok_or("--send-file needs --blossom")?;
+        say = Some(upload_file(&party, &solver, &path, server).await?);
+    }
+
     if let Some(text) = say {
         let event = wrap_chat_message(&party, &conv, &sign, &text).await?;
         let output = client.send_event(&event).await?;
@@ -49,10 +80,47 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("sent: {text}");
     }
 
+    let allowed = [party.public_key(), solver];
+    if let Some(out) = expect_file {
+        for _ in 0..30 {
+            let events = client
+                .fetch_events(chat_filter(sign.public_key()))
+                .timeout(Duration::from_secs(5))
+                .await?;
+            // The solver's newest attachment.
+            let newest = events
+                .iter()
+                .filter_map(|e| {
+                    unwrap_chat_message(&conv, &sign.public_key(), &allowed, e, Timestamp::now())
+                        .ok()
+                })
+                .filter(|m| m.sender == solver)
+                .filter_map(|m| {
+                    let json: serde_json::Value = serde_json::from_str(&m.content).ok()?;
+                    let kind = json["type"].as_str()?;
+                    matches!(kind, "image_encrypted" | "file_encrypted")
+                        .then_some((m.created_at, json))
+                })
+                .max_by_key(|(at, _)| *at);
+            if let Some((_, json)) = newest {
+                let bytes = download_file(&party, &solver, &json).await?;
+                std::fs::write(&out, &bytes)?;
+                println!(
+                    "received {} ({} bytes, {}) to {out}",
+                    json["filename"],
+                    bytes.len(),
+                    sniff(&bytes).unwrap_or("unknown type")
+                );
+                return Ok(());
+            }
+            tokio::time::sleep(Duration::from_secs(2)).await;
+        }
+        return Err("the solver's file never arrived".into());
+    }
+
     let Some(expected) = expect else {
         return Ok(());
     };
-    let allowed = [party.public_key(), solver];
     for _ in 0..30 {
         let events = client
             .fetch_events(chat_filter(sign.public_key()))
@@ -80,4 +148,121 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         tokio::time::sleep(Duration::from_secs(2)).await;
     }
     Err(format!("the solver's message {expected:?} never arrived").into())
+}
+
+/// The file key: the raw ECDH x-coordinate, unhashed, as ../app.
+fn file_key(party: &Keys, solver: &PublicKey) -> Result<[u8; 32], Failure> {
+    let shared = SharedKey::derive(party.secret_key(), solver)?;
+    Ok(shared.keys().secret_key().to_secret_bytes())
+}
+
+fn sniff(bytes: &[u8]) -> Option<&'static str> {
+    if bytes.starts_with(&[0xFF, 0xD8, 0xFF]) {
+        Some("image/jpeg")
+    } else if bytes.starts_with(b"\x89PNG\r\n\x1a\n") {
+        Some("image/png")
+    } else if bytes.starts_with(b"%PDF-") {
+        Some("application/pdf")
+    } else {
+        None
+    }
+}
+
+fn hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// Encrypt and upload the file at `path`; the JSON message ../app writes.
+async fn upload_file(
+    party: &Keys,
+    solver: &PublicKey,
+    path: &str,
+    server: &str,
+) -> Result<String, Failure> {
+    let file = std::fs::read(path)?;
+    let mime = sniff(&file).ok_or("not a JPEG, PNG or PDF")?;
+    let mut nonce = [0u8; 12];
+    rand::rngs::OsRng.fill_bytes(&mut nonce);
+    let cipher = ChaCha20Poly1305::new(&file_key(party, solver)?.into());
+    let sealed = cipher
+        .encrypt(Nonce::from_slice(&nonce), file.as_slice())
+        .map_err(|e| format!("encryption failed: {e}"))?;
+    let blob = [nonce.as_slice(), &sealed].concat();
+    let sha = hex(&Sha256::digest(&blob));
+
+    let auth = EventBuilder::new(Kind::Custom(24242), "Upload attachment")
+        .tag(Tag::parse(["t", "upload"])?)
+        .tag(Tag::parse(["x", &sha])?)
+        .tag(Tag::parse([
+            "expiration",
+            &(Timestamp::now().as_secs() + 3600).to_string(),
+        ])?)
+        .finalize(&Keys::generate())?;
+    let server = server.trim_end_matches('/');
+    let response = reqwest::Client::new()
+        .put(format!("{server}/upload"))
+        .header("Content-Type", "application/octet-stream")
+        .header(
+            "Authorization",
+            format!(
+                "Nostr {}",
+                base64::engine::general_purpose::STANDARD.encode(auth.as_json())
+            ),
+        )
+        .body(blob.clone())
+        .send()
+        .await?;
+    if !response.status().is_success() {
+        return Err(format!("upload refused: {}", response.status()).into());
+    }
+
+    let name = std::path::Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("attachment");
+    let url = format!("{server}/{sha}");
+    let json = if mime == "application/pdf" {
+        serde_json::json!({
+            "type": "file_encrypted", "file_type": "document", "blossom_url": url,
+            "nonce": hex(&nonce), "mime_type": mime, "original_size": file.len(),
+            "filename": name, "encrypted_size": blob.len(),
+        })
+    } else {
+        let (width, height) = image::ImageReader::new(std::io::Cursor::new(&file))
+            .with_guessed_format()?
+            .into_dimensions()?;
+        serde_json::json!({
+            "type": "image_encrypted", "blossom_url": url, "nonce": hex(&nonce),
+            "mime_type": mime, "original_size": file.len(), "width": width,
+            "height": height, "filename": name, "encrypted_size": blob.len(),
+        })
+    };
+    println!("uploaded {name} ({} bytes) as {sha}", file.len());
+    Ok(json.to_string())
+}
+
+/// Download, verify and decrypt the file a JSON message names.
+async fn download_file(
+    party: &Keys,
+    solver: &PublicKey,
+    json: &serde_json::Value,
+) -> Result<Vec<u8>, Failure> {
+    let url = json["blossom_url"].as_str().ok_or("no blossom_url")?;
+    let named = url
+        .rsplit('/')
+        .next()
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    let blob = reqwest::get(url).await?.error_for_status()?.bytes().await?;
+    if hex(&Sha256::digest(&blob)) != named {
+        return Err("the blob does not match its hash".into());
+    }
+    if blob.len() < 28 {
+        return Err("the blob is too short".into());
+    }
+    let (nonce, sealed) = blob.split_at(12);
+    let cipher = ChaCha20Poly1305::new(&file_key(party, solver)?.into());
+    cipher
+        .decrypt(Nonce::from_slice(nonce), sealed)
+        .map_err(|e| format!("the file does not open with this key: {e}").into())
 }

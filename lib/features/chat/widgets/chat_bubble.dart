@@ -3,7 +3,10 @@ import 'package:intl/intl.dart';
 
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/disputes_palette.dart';
+import 'package:bosstro/features/chat/attachments/attachment_flow.dart';
+import 'package:bosstro/features/chat/providers/chat_providers.dart';
 import 'package:bosstro/features/chat/services/chat_core.dart';
+import 'package:bosstro/features/chat/widgets/attachment_content.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
 /// One chat message. This solver's own sit on the right on a lime tint, the
@@ -14,15 +17,23 @@ import 'package:bosstro/l10n/app_localizations.dart';
 /// The text is the party's own and is not trusted: it is shown as plain
 /// text, with no links, no markup and nothing tappable in it.
 ///
+/// An attachment (its text is ../app's JSON) shows the file instead: an
+/// image previewed once it is verified and decrypted, a PDF by its name and
+/// size, with Save.
+///
 /// A message of this key that was not sent says so under the bubble, on the
 /// page, with a retry ([onRetry]).
 class ChatBubble extends StatelessWidget {
   const ChatBubble({
     super.key,
+    required this.chat,
     required this.message,
     required this.now,
     this.onRetry,
   });
+
+  /// The conversation the message is in.
+  final ChatKey chat;
 
   final ChatMessageView message;
 
@@ -47,6 +58,35 @@ class ChatBubble extends StatelessWidget {
       ChatDelivery.sending => l10n.chatSending,
       _ => null,
     };
+    final attachment = message.attachment;
+    final reference = (
+      disputeId: chat.disputeId,
+      party: chat.party,
+      messageId: message.id,
+    );
+    final body = switch (attachment) {
+      // Plain text: never linkified or parsed.
+      null => Text(
+        message.content,
+        style: TextStyle(fontSize: 14, height: 1.4, color: pal.bubbleInk),
+      ),
+      ChatAttachment(kind: ChatAttachmentKind.image) => AttachmentImage(
+        reference: reference,
+        attachment: attachment,
+      ),
+      _ => AttachmentFileCard(reference: reference, attachment: attachment),
+    };
+    // What a screen reader says of the message's body.
+    final spoken = switch (attachment) {
+      null => message.content,
+      _ => l10n.attachmentFileLabel(
+        attachment.fileName,
+        attachmentDetails(
+          attachment,
+          Localizations.localeOf(context).toString(),
+        ),
+      ),
+    };
 
     final bubble = Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
@@ -61,24 +101,25 @@ class ChatBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            sender,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: mine ? pal.bubbleYouLabel : pal.bubbleMeta,
+          // Read in the message's label, not again on their own.
+          ExcludeSemantics(
+            child: Text(
+              sender,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: mine ? pal.bubbleYouLabel : pal.bubbleMeta,
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          // Plain text: never linkified or parsed.
-          Text(
-            message.content,
-            style: TextStyle(fontSize: 14, height: 1.4, color: pal.bubbleInk),
-          ),
+          SizedBox(height: attachment == null ? 4 : 8),
+          body,
           const SizedBox(height: 6),
-          Text(
-            delivery == null ? time : '$time · $delivery',
-            style: TextStyle(fontSize: 11, color: pal.bubbleMeta),
+          ExcludeSemantics(
+            child: Text(
+              delivery == null ? time : '$time · $delivery',
+              style: TextStyle(fontSize: 11, color: pal.bubbleMeta),
+            ),
           ),
         ],
       ),
@@ -95,16 +136,29 @@ class ChatBubble extends StatelessWidget {
               constraints: BoxConstraints(
                 maxWidth: constraints.maxWidth * 0.82,
               ),
-              child: MergeSemantics(
-                child: Semantics(
-                  label: l10n.chatMessageLabel(
-                    sender,
-                    delivery == null ? time : '$time, $delivery',
-                    message.content,
-                  ),
-                  child: ExcludeSemantics(child: bubble),
-                ),
-              ),
+              child:
+                  attachment == null
+                      ? MergeSemantics(
+                        child: Semantics(
+                          label: l10n.chatMessageLabel(
+                            sender,
+                            delivery == null ? time : '$time, $delivery',
+                            spoken,
+                          ),
+                          child: ExcludeSemantics(child: bubble),
+                        ),
+                      )
+                      // The file's own controls (open, save, retry) stay
+                      // reachable; the message is still read as one line.
+                      : Semantics(
+                        container: true,
+                        label: l10n.chatMessageLabel(
+                          sender,
+                          delivery == null ? time : '$time, $delivery',
+                          spoken,
+                        ),
+                        child: bubble,
+                      ),
             ),
             if (failed)
               // The retry goes under the words when both do not fit.

@@ -49,13 +49,26 @@ futures-util = { version = "0.3", default-features = false, features = ["std"] }
 # into `Keys` (whose `SecretKey` wipes itself on drop). Same crate as ../app.
 zeroize = "1"
 
+# Chat attachments (phase 5, `attachments/`, `crypto/file_enc.rs`,
+# `nostr/blossom.rs`): ChaCha20-Poly1305 blobs, the Blossom hash and its
+# kind 24242 authorisation header, and images re-encoded without metadata.
+# Same versions and features as ../app; all but `image` are already in the
+# tree through nostr.
+hex = "0.4"
+base64 = "0.22"
+chacha20poly1305 = "0.10"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+rand = { version = "0.8", features = ["getrandom"] }
+sha2 = "0.10"
+
 # Native only (Android, Linux): the Tokio runtime and SQLite do not compile to
 # wasm32. The web build gets its own block below, as in ../app.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time"] }
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros", "migrate"] }
-# Node pictures (node_pictures.rs). Same features as ../app's native block,
-# minus what only its attachments and push use.
+# Node pictures (node_pictures.rs) and the Blossom transfers of chat
+# attachments (nostr/blossom.rs). Same features as ../app's native block,
+# minus `json` (only its push uses it).
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
 
 # Web only (scripts/build-web.sh). Same crates and reasons as ../app.
@@ -69,7 +82,7 @@ wasmtimer = "0.4"
 wasm-bindgen-futures = "0.4"
 indexed_db_futures = "0.4"
 web-sys = { version = "0.3", features = ["console", "IdbKeyRange"] }
-# Node pictures through the browser's fetch (node_pictures.rs).
+# Node pictures and Blossom through the browser's fetch.
 reqwest = { version = "0.12", default-features = false, features = ["stream"] }
 # The getrandom versions under nostr, k256 and friends have no default backend on
 # wasm32-unknown-unknown and must be told to use the browser's crypto.

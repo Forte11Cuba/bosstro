@@ -1374,5 +1374,154 @@
   "openDisputeHint": "Open the dispute",
   "@openDisputeHint": {
     "description": "Screen-reader hint of a row in Your disputes"
+  },
+  "chatAttach": "Attach a file",
+  "@chatAttach": {
+    "description": "Tooltip and screen-reader label of the attach button in the chat"
+  },
+  "attachSheetTitle": "Attach",
+  "@attachSheetTitle": {
+    "description": "Title of the sheet that asks where a file comes from"
+  },
+  "attachSourcePhoto": "Photo from the gallery",
+  "@attachSourcePhoto": {
+    "description": "Attach sheet row: pick an image"
+  },
+  "attachSourceCamera": "Take a photo",
+  "@attachSourceCamera": {
+    "description": "Attach sheet row: open the camera"
+  },
+  "attachSourcePdf": "PDF document",
+  "@attachSourcePdf": {
+    "description": "Attach sheet row: pick a PDF"
+  },
+  "attachSheetNote": "The file is encrypted on this device. Only you and this party can open it. JPEG, PNG or PDF, up to 25 MB.",
+  "@attachSheetNote": {
+    "description": "Note at the foot of the attach sheet"
+  },
+  "attachConfirmTitle": "Send this file?",
+  "@attachConfirmTitle": {
+    "description": "Title of the confirmation before a file is sent"
+  },
+  "attachConfirmBuyer": "{name} ({size}) goes to the buyer, encrypted. A photo is sent without its location or camera details.",
+  "@attachConfirmBuyer": {
+    "description": "Body of the confirmation before a file is sent to the buyer",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "attachConfirmSeller": "{name} ({size}) goes to the seller, encrypted. A photo is sent without its location or camera details.",
+  "@attachConfirmSeller": {
+    "description": "Body of the confirmation before a file is sent to the seller",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentTooLarge": "The file is over 25 MB.",
+  "@attachmentTooLarge": {
+    "description": "A picked or received file is over the limit"
+  },
+  "attachmentUnsupported": "Only JPEG and PNG images and PDF documents can be sent.",
+  "@attachmentUnsupported": {
+    "description": "The picked file is not a JPEG, PNG or PDF"
+  },
+  "attachmentInvalidImage": "The image could not be read.",
+  "@attachmentInvalidImage": {
+    "description": "The image does not decode"
+  },
+  "attachmentReadFailed": "The file could not be read.",
+  "@attachmentReadFailed": {
+    "description": "The picked file could not be read, or the camera was refused"
+  },
+  "attachmentUploadFailed": "The file could not be uploaded. Check your connection and try again.",
+  "@attachmentUploadFailed": {
+    "description": "No file server took the upload"
+  },
+  "attachmentSendFailed": "The file could not be sent.",
+  "@attachmentSendFailed": {
+    "description": "Any other refusal of a file being sent"
+  },
+  "attachmentUploading": "Encrypting and sending…",
+  "@attachmentUploading": {
+    "description": "Status of a file being sent"
+  },
+  "attachmentDiscard": "Discard",
+  "@attachmentDiscard": {
+    "description": "Action on a file that was not sent: forget it"
+  },
+  "attachmentLoading": "Decrypting the file",
+  "@attachmentLoading": {
+    "description": "Screen-reader label of the skeleton shown while a file downloads and decrypts"
+  },
+  "attachmentNotVerified": "The file could not be verified.",
+  "@attachmentNotVerified": {
+    "description": "The downloaded file is not the one the message names, or does not open with the conversation's key"
+  },
+  "attachmentDownloadFailed": "The file could not be downloaded.",
+  "@attachmentDownloadFailed": {
+    "description": "The download of a file failed"
+  },
+  "attachmentUnsupportedReceived": "This type of file cannot be opened here.",
+  "@attachmentUnsupportedReceived": {
+    "description": "A received file is not a JPEG, PNG or PDF"
+  },
+  "attachmentOpenFailed": "The file could not be opened.",
+  "@attachmentOpenFailed": {
+    "description": "Any other failure to open a file"
+  },
+  "attachmentImageLabel": "Image {name}",
+  "@attachmentImageLabel": {
+    "description": "Screen-reader label of an image in the chat",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentOpenImage": "Open the image",
+  "@attachmentOpenImage": {
+    "description": "Screen-reader hint of an image in the chat"
+  },
+  "attachmentSave": "Save",
+  "@attachmentSave": {
+    "description": "Action: save the file where the solver chooses"
+  },
+  "attachmentSaveHint": "Save the file",
+  "@attachmentSaveHint": {
+    "description": "Screen-reader hint of a file in the chat"
+  },
+  "attachmentSaved": "Saved",
+  "@attachmentSaved": {
+    "description": "Confirmation that a file was saved"
+  },
+  "attachmentSaveFailed": "The file could not be saved.",
+  "@attachmentSaveFailed": {
+    "description": "Saving a file failed"
+  },
+  "attachmentFileLabel": "{name}, {details}",
+  "@attachmentFileLabel": {
+    "description": "Screen-reader label of a file in the chat",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentViewerZoomHint": "Pinch to zoom",
+  "@attachmentViewerZoomHint": {
+    "description": "Screen-reader hint of the full-screen image"
   }
 }

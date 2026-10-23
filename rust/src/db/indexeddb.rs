@@ -6,9 +6,11 @@
 //! bytes as a `Uint8Array`, with a small JSON index naming the URL, so a sync
 //! compares URLs without loading a picture), disputes by `node:dispute id` (a
 //! JSON document), chat messages by `node:dispute:party:solver:message id`
-//! (a JSON document). This backend has no compound writes: each method is one
-//! `put` or `delete` (a picture's bytes and index in one transaction), so it
-//! needs none of ../app's `web_lock`.
+//! (a JSON document), attachment blobs by their SHA-256 (the encrypted bytes
+//! as a `Uint8Array`, with a JSON index entry for the trim, as ../app). This
+//! backend has no compound writes: each method is one `put` or `delete` (a
+//! picture's or a blob's bytes and index in one transaction), so it needs
+//! none of ../app's `web_lock`.
 //!
 //! Its callers can still read, modify and write back: `api::nodes` does so
 //! with the registry's settings blobs (`CUSTOM_MOSTRO_NODES`,
@@ -26,6 +28,7 @@ use web_sys::wasm_bindgen::{JsCast, JsValue};
 
 use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
+use crate::db::blob_cache::{blobs_to_evict, BlobEntry, WEB_ATTACHMENT_CACHE_BYTES};
 use crate::db::Storage;
 use crate::api::chat::ChatDelivery;
 use crate::api::disputes::DisputeStatus;
@@ -33,21 +36,26 @@ use crate::chat::{ChannelRef, ChatRecord};
 use crate::disputes::DisputeRecord;
 
 /// Bumped when a store is added; `open_db` creates whatever is missing.
-/// 2: disputes (phase 3). 3: dispute_messages (phase 5).
-const DB_VERSION: u32 = 3;
+/// 2: disputes (phase 3). 3: dispute_messages (phase 5). 4: the attachment
+/// cache (phase 5, part 2).
+const DB_VERSION: u32 = 4;
 const SETTINGS_STORE: &str = "settings";
 const RELAYS_STORE: &str = "relays";
 const NODE_PICTURES_STORE: &str = "node_pictures";
 const NODE_PICTURE_INDEX_STORE: &str = "node_picture_index";
 const DISPUTES_STORE: &str = "disputes";
 const CHAT_STORE: &str = "dispute_messages";
-const ALL_STORES: [&str; 6] = [
+const ATTACHMENT_BLOBS_STORE: &str = "attachment_blobs";
+const ATTACHMENT_INDEX_STORE: &str = "attachment_blob_index";
+const ALL_STORES: [&str; 8] = [
     SETTINGS_STORE,
     RELAYS_STORE,
     NODE_PICTURES_STORE,
     NODE_PICTURE_INDEX_STORE,
     DISPUTES_STORE,
     CHAT_STORE,
+    ATTACHMENT_BLOBS_STORE,
+    ATTACHMENT_INDEX_STORE,
 ];
 
 /// The key of a dispute's record: one per node and dispute (D6).
@@ -436,6 +444,80 @@ impl Storage for IndexedDbStorage {
         self.delete_key(CHAT_STORE, &chat_key(channel, message_id))
             .await
     }
+
+    // ── Attachment cache — encrypted blobs only, with their index entry ─────
+
+    async fn save_attachment_blob(&self, sha256: &str, blob: &[u8]) -> Result<()> {
+        let index = serde_json::to_string(&BlobEntry {
+            sha256: sha256.to_string(),
+            size: blob.len() as u64,
+            created_at: crate::rt::unix_now(),
+        })?;
+        let data = web_sys::js_sys::Uint8Array::from(blob);
+        // The blob and its index entry commit together, so the trim never
+        // misses a blob nor deletes one it has no entry for.
+        let db = self.open_db().await?;
+        let stores = [ATTACHMENT_BLOBS_STORE, ATTACHMENT_INDEX_STORE];
+        let tx = db
+            .transaction_on_multi_with_mode(&stores, IdbTransactionMode::Readwrite)
+            .map_err(|e| js_err("tx open", e))?;
+        tx.object_store(ATTACHMENT_BLOBS_STORE)
+            .map_err(|e| js_err("store open", e))?
+            .put_key_val_owned(sha256, &data)
+            .map_err(|e| js_err("put", e))?;
+        tx.object_store(ATTACHMENT_INDEX_STORE)
+            .map_err(|e| js_err("store open", e))?
+            .put_key_val_owned(sha256, &JsValue::from_str(&index))
+            .map_err(|e| js_err("put", e))?;
+        tx.await.into_result().map_err(|e| js_err("tx commit", e))?;
+        self.trim_attachment_blobs(WEB_ATTACHMENT_CACHE_BYTES).await
+    }
+
+    async fn get_attachment_blob(&self, sha256: &str) -> Result<Option<Vec<u8>>> {
+        let db = self.open_db().await?;
+        let tx = db
+            .transaction_on_one_with_mode(ATTACHMENT_BLOBS_STORE, IdbTransactionMode::Readonly)
+            .map_err(|e| js_err("tx open", e))?;
+        let value = tx
+            .object_store(ATTACHMENT_BLOBS_STORE)
+            .map_err(|e| js_err("store open", e))?
+            .get_owned(sha256)
+            .map_err(|e| js_err("get", e))?
+            .await
+            .map_err(|e| js_err("get await", e))?;
+        Ok(value
+            .filter(JsCast::is_instance_of::<web_sys::js_sys::Uint8Array>)
+            .map(|v| web_sys::js_sys::Uint8Array::from(v).to_vec()))
+    }
+
+    /// Reads only the index; each evicted blob goes with its entry.
+    async fn trim_attachment_blobs(&self, cap: u64) -> Result<()> {
+        let entries = self
+            .get_all_strings(ATTACHMENT_INDEX_STORE)
+            .await?
+            .into_iter()
+            .filter_map(|json| serde_json::from_str::<BlobEntry>(&json).ok())
+            .collect();
+        let evicted = blobs_to_evict(entries, cap);
+        if evicted.is_empty() {
+            return Ok(());
+        }
+        let db = self.open_db().await?;
+        let stores = [ATTACHMENT_BLOBS_STORE, ATTACHMENT_INDEX_STORE];
+        let tx = db
+            .transaction_on_multi_with_mode(&stores, IdbTransactionMode::Readwrite)
+            .map_err(|e| js_err("tx open", e))?;
+        for name in stores {
+            let store = tx.object_store(name).map_err(|e| js_err("store open", e))?;
+            for sha256 in &evicted {
+                store
+                    .delete_owned(sha256.as_str())
+                    .map_err(|e| js_err("delete", e))?;
+            }
+        }
+        tx.await.into_result().map_err(|e| js_err("tx commit", e))?;
+        Ok(())
+    }
 }
 
 /// The same checks as the SQLite backend's, in a browser
@@ -507,6 +589,11 @@ mod tests {
     async fn the_chat_cursor_never_passes_the_clock_of_acceptance() {
         contract::the_chat_cursor_never_passes_the_clock_of_acceptance(&store("chat_cursor").await)
             .await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn attachment_blobs_are_cached_and_bounded() {
+        contract::attachment_blobs_are_cached_and_bounded(&store("blobs").await).await;
     }
 
     /// A take written before phase 4 named its solver (none was, but a row

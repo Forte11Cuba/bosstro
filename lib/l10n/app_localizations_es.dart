@@ -1110,4 +1110,106 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get openDisputeHint => 'Abrir la disputa';
+
+  @override
+  String get chatAttach => 'Adjuntar un archivo';
+
+  @override
+  String get attachSheetTitle => 'Adjuntar';
+
+  @override
+  String get attachSourcePhoto => 'Foto de la galería';
+
+  @override
+  String get attachSourceCamera => 'Hacer una foto';
+
+  @override
+  String get attachSourcePdf => 'Documento PDF';
+
+  @override
+  String get attachSheetNote =>
+      'El archivo se cifra en este dispositivo. Solo tú y esta parte pueden abrirlo. JPEG, PNG o PDF, hasta 25 MB.';
+
+  @override
+  String get attachConfirmTitle => '¿Enviar este archivo?';
+
+  @override
+  String attachConfirmBuyer(String name, String size) {
+    return '$name ($size) se envía cifrado al comprador. Una foto se envía sin su ubicación ni los datos de la cámara.';
+  }
+
+  @override
+  String attachConfirmSeller(String name, String size) {
+    return '$name ($size) se envía cifrado al vendedor. Una foto se envía sin su ubicación ni los datos de la cámara.';
+  }
+
+  @override
+  String get attachmentTooLarge => 'El archivo pasa de 25 MB.';
+
+  @override
+  String get attachmentUnsupported =>
+      'Solo se pueden enviar imágenes JPEG y PNG y documentos PDF.';
+
+  @override
+  String get attachmentInvalidImage => 'No se pudo leer la imagen.';
+
+  @override
+  String get attachmentReadFailed => 'No se pudo leer el archivo.';
+
+  @override
+  String get attachmentUploadFailed =>
+      'No se pudo subir el archivo. Revisa tu conexión y vuelve a intentarlo.';
+
+  @override
+  String get attachmentSendFailed => 'No se pudo enviar el archivo.';
+
+  @override
+  String get attachmentUploading => 'Cifrando y enviando…';
+
+  @override
+  String get attachmentDiscard => 'Descartar';
+
+  @override
+  String get attachmentLoading => 'Descifrando el archivo';
+
+  @override
+  String get attachmentNotVerified => 'El archivo no se pudo verificar.';
+
+  @override
+  String get attachmentDownloadFailed => 'No se pudo descargar el archivo.';
+
+  @override
+  String get attachmentUnsupportedReceived =>
+      'Este tipo de archivo no se puede abrir aquí.';
+
+  @override
+  String get attachmentOpenFailed => 'No se pudo abrir el archivo.';
+
+  @override
+  String attachmentImageLabel(String name) {
+    return 'Imagen $name';
+  }
+
+  @override
+  String get attachmentOpenImage => 'Abrir la imagen';
+
+  @override
+  String get attachmentSave => 'Guardar';
+
+  @override
+  String get attachmentSaveHint => 'Guardar el archivo';
+
+  @override
+  String get attachmentSaved => 'Guardado';
+
+  @override
+  String get attachmentSaveFailed => 'No se pudo guardar el archivo.';
+
+  @override
+  String attachmentFileLabel(String name, String details) {
+    return '$name, $details';
+  }
+
+  @override
+  String get attachmentViewerZoomHint => 'Pellizca para ampliar';
 }

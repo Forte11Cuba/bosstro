@@ -1106,4 +1106,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openDisputeHint => 'Open the dispute';
+
+  @override
+  String get chatAttach => 'Attach a file';
+
+  @override
+  String get attachSheetTitle => 'Attach';
+
+  @override
+  String get attachSourcePhoto => 'Photo from the gallery';
+
+  @override
+  String get attachSourceCamera => 'Take a photo';
+
+  @override
+  String get attachSourcePdf => 'PDF document';
+
+  @override
+  String get attachSheetNote =>
+      'The file is encrypted on this device. Only you and this party can open it. JPEG, PNG or PDF, up to 25 MB.';
+
+  @override
+  String get attachConfirmTitle => 'Send this file?';
+
+  @override
+  String attachConfirmBuyer(String name, String size) {
+    return '$name ($size) goes to the buyer, encrypted. A photo is sent without its location or camera details.';
+  }
+
+  @override
+  String attachConfirmSeller(String name, String size) {
+    return '$name ($size) goes to the seller, encrypted. A photo is sent without its location or camera details.';
+  }
+
+  @override
+  String get attachmentTooLarge => 'The file is over 25 MB.';
+
+  @override
+  String get attachmentUnsupported =>
+      'Only JPEG and PNG images and PDF documents can be sent.';
+
+  @override
+  String get attachmentInvalidImage => 'The image could not be read.';
+
+  @override
+  String get attachmentReadFailed => 'The file could not be read.';
+
+  @override
+  String get attachmentUploadFailed =>
+      'The file could not be uploaded. Check your connection and try again.';
+
+  @override
+  String get attachmentSendFailed => 'The file could not be sent.';
+
+  @override
+  String get attachmentUploading => 'Encrypting and sending…';
+
+  @override
+  String get attachmentDiscard => 'Discard';
+
+  @override
+  String get attachmentLoading => 'Decrypting the file';
+
+  @override
+  String get attachmentNotVerified => 'The file could not be verified.';
+
+  @override
+  String get attachmentDownloadFailed => 'The file could not be downloaded.';
+
+  @override
+  String get attachmentUnsupportedReceived =>
+      'This type of file cannot be opened here.';
+
+  @override
+  String get attachmentOpenFailed => 'The file could not be opened.';
+
+  @override
+  String attachmentImageLabel(String name) {
+    return 'Image $name';
+  }
+
+  @override
+  String get attachmentOpenImage => 'Open the image';
+
+  @override
+  String get attachmentSave => 'Save';
+
+  @override
+  String get attachmentSaveHint => 'Save the file';
+
+  @override
+  String get attachmentSaved => 'Saved';
+
+  @override
+  String get attachmentSaveFailed => 'The file could not be saved.';
+
+  @override
+  String attachmentFileLabel(String name, String details) {
+    return '$name, $details';
+  }
+
+  @override
+  String get attachmentViewerZoomHint => 'Pinch to zoom';
 }
