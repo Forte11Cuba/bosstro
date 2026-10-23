@@ -116,6 +116,10 @@
   "@loginBody": {
     "description": "Log in: what to enter"
   },
+  "loginBodyPaste": "Paste the secret key (nsec) whose npub your node operator registered as a solver.",
+  "@loginBodyPaste": {
+    "description": "Log in: what to enter, where there is no QR scanner (Linux, web)"
+  },
   "secretKeyHint": "nsec1…",
   "@secretKeyHint": {
     "description": "Placeholder of the secret key field; the nsec prefix, keep as is"

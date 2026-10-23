@@ -272,6 +272,12 @@ abstract class AppLocalizations {
   /// **'Paste or scan the secret key (nsec) whose npub your node operator registered as a solver.'**
   String get loginBody;
 
+  /// Log in: what to enter, where there is no QR scanner (Linux, web)
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the secret key (nsec) whose npub your node operator registered as a solver.'**
+  String get loginBodyPaste;
+
   /// Placeholder of the secret key field; the nsec prefix, keep as is
   ///
   /// In en, this message translates to:

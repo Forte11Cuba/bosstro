@@ -20,6 +20,8 @@ env:
   FLUTTER_VERSION: "3.41.9"
   FRB_VERSION: "2.11.1"
   CARGO_EXPAND_VERSION: "1.0.123"
+  # Same as ../app's web build.
+  WASM_PACK_VERSION: "0.15.0"
 
 jobs:
   rust:
@@ -168,8 +170,8 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: dart tool/design_check.dart --base "origin/$BASE_REF"
 
-  # The only target (A2). Compiles the Kotlin side, the plugin graph and the
-  # Rust core for every Android ABI through cargokit.
+  # The target the app is built for (A2). Compiles the Kotlin side, the plugin
+  # graph and the Rust core for every Android ABI through cargokit.
   android:
     name: Android (debug APK)
     runs-on: ubuntu-latest
@@ -209,3 +211,102 @@ jobs:
 
       - name: Build debug APK
         run: flutter build apk --debug
+
+  # Linux desktop: a development and convenience target, without the Android-only
+  # key protections (PlatformCapabilities). Compiles the GTK runner, the plugin
+  # graph and the Rust core through cargokit.
+  linux:
+    name: Linux (debug build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # libsecret: flutter_secure_storage_linux keeps the solver key in the
+      # desktop keyring.
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev libsecret-1-dev libjsoncpp-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.97.0
+
+      - name: Cache cargo registry and target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Build Linux app
+        run: flutter build linux --debug
+
+  # Web: the Rust core compiled to wasm with shared memory (scripts/build-web.sh,
+  # which selects nightly itself for -Z build-std), then the Flutter bundle.
+  web:
+    name: Web (build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Nightly first, so the pinned toolchain (rust-toolchain.toml) stays the
+      # default for everything but the wasm build.
+      - name: Install Rust nightly (wasm)
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-unknown
+          components: rust-src
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.97.0
+
+      - name: Cache cargo registry and target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Cache wasm-pack
+        id: wasm-pack-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/wasm-pack
+          key: wasm-pack-${{ runner.os }}-${{ env.WASM_PACK_VERSION }}
+
+      - name: Install wasm-pack
+        if: steps.wasm-pack-cache.outputs.cache-hit != 'true'
+        run: cargo install wasm-pack --version "$WASM_PACK_VERSION" --locked
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      # Fails loudly when the emitted memory is not shared: otherwise that only
+      # shows up at runtime, as a blank page.
+      - name: Build Rust core to wasm (shared memory)
+        run: ./scripts/build-web.sh
+
+      # --pwa-strategy=none: Flutter's service worker would take the same scope
+      # as coi-serviceworker.min.js and evict the isolation shim (as in ../app).
+      - name: Build web app
+        run: flutter build web --pwa-strategy=none

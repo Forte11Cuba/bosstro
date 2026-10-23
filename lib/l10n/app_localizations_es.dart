@@ -105,6 +105,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Pega o escanea la clave secreta (nsec) cuyo npub tu operador de nodo registró como solver.';
 
   @override
+  String get loginBodyPaste =>
+      'Pega la clave secreta (nsec) cuyo npub tu operador de nodo registró como solver.';
+
+  @override
   String get secretKeyHint => 'nsec1…';
 
   @override
