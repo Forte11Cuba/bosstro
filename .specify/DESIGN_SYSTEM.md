@@ -453,16 +453,9 @@ Applied in place above; listed here so a reviewer coming from `app` sees what di
    the one DS-A11Y-4 and DS-L10N-2 test.
 7. **Radius tokens by role** (§4): `pill`, `modal`, `block`, `pageCta`, `cta`, `tile`,
    `thumbnail`; `app`'s v1 names are never defined (DS-SHP-4).
-8. **One hue per role in every chat, as Mostrix** (amends DS-COL-8 and DS-COL-9, maintainer
-   2026-10-23; Mostrix `chat_render.rs`: admin cyan, buyer green, seller magenta). **You** (the
-   solver) are lime, and lime names nothing else in a chat (`bubbleMine*`). The **buyer** is teal
-   and the **seller** magenta, in the solver's chat with that party and in the chat between the
-   parties alike (`DisputesPalette.buyer*` / `seller*`, `party(buyer:)`). A party is never red
-   (red is danger and errors only, amendment 3) nor lime, and teal and magenta stay apart for
-   red-green colour blindness. Values (dark / light): fill `#3FC1D0` 12% / same; border `#3FC1D0`
-   25% / `#0E7C88` 40%; label `#8EE3EC` / `#0B5F69` (buyer); fill `#D46BE6` 12% / same; border
-   `#D46BE6` 25% / `#8E2FA0` 40%; label `#EBB0F5` / `#7D2290` (seller). No canonical value had
-   these roles; `disputes_palette_contrast_test.dart` holds every text on them at 4.5:1 and the
-   label hues away from lime and red. The role is always written too (DS-COL-10).
+8. **The chat between the parties** (amends DS-COL-9, maintainer 2026-10-23): in the observed chat
+   the buyer's bubbles take a lime tint and the seller's the sell tint, as `app` colors the two
+   sides of an order (`DisputesPalette.observed*`). There they name a side, not the solver's turn
+   or a danger; the side is always written too (DS-COL-10).
 9. **Glossary additions** (§9): chat key / clave del chat, chat between the parties.
 

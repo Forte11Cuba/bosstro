@@ -10,9 +10,8 @@ import 'package:bosstro/features/chat/widgets/attachment_content.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
 /// One chat message. This solver's own sit on the right on a lime tint, the
-/// party's on the left on its role's hue (the buyer teal, the seller
-/// magenta, amendment 8); the sender is always named in words too, never by
-/// color alone (DS-COL-10). The look is the disputes
+/// party's on the left on the card surface; the sender is always named in
+/// words too, never by color alone (DS-COL-10). The look is the disputes
 /// palette's, not ../app's legacy chat (amendment 2).
 ///
 /// The text is the party's own and is not trusted: it is shown as plain
@@ -49,8 +48,6 @@ class ChatBubble extends StatelessWidget {
     final pal = DisputesPalette.of(context);
     final shell = ShellPalette.of(context);
     final mine = message.sender == ChatSender.you;
-    // The party's hue is the conversation's: the buyer's in the buyer's.
-    final side = pal.party(buyer: chat.party == ChatParty.buyer);
     final sender = chatSenderLabel(l10n, message.sender);
     final time = chatTimeLabel(
       message.createdAt.toInt(),
@@ -94,9 +91,11 @@ class ChatBubble extends StatelessWidget {
     final bubble = Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       decoration: BoxDecoration(
-        color: mine ? pal.bubbleMineFill : side.fill,
+        color: mine ? pal.bubbleMineFill : pal.bubblePartyFill,
         borderRadius: BorderRadius.circular(AppRadius.block),
-        border: Border.all(color: mine ? pal.bubbleMineBorder : side.border),
+        border: Border.all(
+          color: mine ? pal.bubbleMineBorder : pal.bubblePartyBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +108,7 @@ class ChatBubble extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: mine ? pal.bubbleYouLabel : side.label,
+                color: mine ? pal.bubbleYouLabel : pal.bubbleMeta,
               ),
             ),
           ),

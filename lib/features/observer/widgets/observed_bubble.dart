@@ -10,9 +10,9 @@ import 'package:bosstro/features/observer/services/observer_core.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
 /// One message of the chat between the parties. The buyer's sit on the
-/// left in the buyer's hue (teal), the seller's on the right in the seller's
-/// (magenta): the same hues as in the solver's own chats, as Mostrix
-/// (amendment 8); the side is named in words too (DS-COL-10). The text is the party's own and is shown as plain text: no
+/// left on a lime tint, the seller's on the right on the sell tint, as ../app
+/// colors the two sides of an order; the side is named in words too
+/// (DS-COL-10). The text is the party's own and is shown as plain text: no
 /// links, no markup, nothing tappable.
 ///
 /// A file shows by its name and type and cannot be opened: ../app encrypts
@@ -36,7 +36,6 @@ class ObservedBubble extends StatelessWidget {
     final sender = buyer ? l10n.chatSenderBuyer : l10n.chatSenderSeller;
     final time = chatTimeLabel(message.createdAt.toInt(), now, locale);
     final attachment = message.attachment;
-    final side = pal.party(buyer: buyer);
 
     final body = switch (attachment) {
       // Plain text: never linkified or parsed.
@@ -57,9 +56,11 @@ class ObservedBubble extends StatelessWidget {
     final bubble = Container(
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       decoration: BoxDecoration(
-        color: side.fill,
+        color: buyer ? pal.observedBuyerFill : pal.observedSellerFill,
         borderRadius: BorderRadius.circular(AppRadius.block),
-        border: Border.all(color: side.border),
+        border: Border.all(
+          color: buyer ? pal.observedBuyerBorder : pal.observedSellerBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +71,7 @@ class ObservedBubble extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: side.label,
+              color: buyer ? pal.observedBuyerLabel : pal.observedSellerLabel,
             ),
           ),
           SizedBox(height: attachment == null ? 4 : 8),

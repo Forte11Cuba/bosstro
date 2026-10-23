@@ -28,15 +28,17 @@ class DisputesPalette {
     required this.segmentInk,
     required this.bubbleMineFill,
     required this.bubbleMineBorder,
+    required this.bubblePartyFill,
+    required this.bubblePartyBorder,
     required this.bubbleInk,
     required this.bubbleMeta,
     required this.bubbleYouLabel,
-    required this.buyerFill,
-    required this.buyerBorder,
-    required this.buyerLabel,
-    required this.sellerFill,
-    required this.sellerBorder,
-    required this.sellerLabel,
+    required this.observedBuyerFill,
+    required this.observedBuyerBorder,
+    required this.observedBuyerLabel,
+    required this.observedSellerFill,
+    required this.observedSellerBorder,
+    required this.observedSellerLabel,
     required this.composerFill,
     required this.composerBorder,
     required this.composerFocusBorder,
@@ -70,16 +72,13 @@ class DisputesPalette {
   final Color segmentActiveInk;
   final Color segmentInk;
 
-  /// Chat bubbles: one hue per role, on every screen, as Mostrix's chat
-  /// (`chat_render.rs`: admin cyan, buyer green, seller magenta) — amendment 8.
-  /// The solver's own sit on a lime tint ("you", nowhere else); the
-  /// buyer's on a teal tint, the seller's on a magenta one, in the solver's
-  /// chat with that party and in the chat between the parties alike. A party
-  /// is never red (danger) nor lime (you). The sender is always named in
-  /// words too (DS-COL-10). The legacy purple and hue bubbles of ../app are
-  /// not used (amendment 2).
+  /// Chat bubbles. The solver's own sit on a lime tint, the party's on the
+  /// card surface; the sender is always named in words too (DS-COL-10). The
+  /// legacy purple and hue bubbles of ../app are not used (amendment 2).
   final Color bubbleMineFill;
   final Color bubbleMineBorder;
+  final Color bubblePartyFill;
+  final Color bubblePartyBorder;
 
   /// Message text, on either bubble.
   final Color bubbleInk;
@@ -91,21 +90,18 @@ class DisputesPalette {
   /// The "You" sender label, on the solver's bubble.
   final Color bubbleYouLabel;
 
-  /// The buyer's bubbles (teal) and the seller's (magenta), with the
-  /// sender label in their hue. Text and time are [bubbleInk] and
-  /// [bubbleMeta].
-  final Color buyerFill;
-  final Color buyerBorder;
-  final Color buyerLabel;
-  final Color sellerFill;
-  final Color sellerBorder;
-  final Color sellerLabel;
-
-  /// The bubble colors of the buyer or the seller.
-  ({Color fill, Color border, Color label}) party({required bool buyer}) =>
-      buyer
-          ? (fill: buyerFill, border: buyerBorder, label: buyerLabel)
-          : (fill: sellerFill, border: sellerBorder, label: sellerLabel);
+  /// The chat between the parties, read with a chat key (phase 5c): the
+  /// buyer's bubbles on a lime tint, the seller's on the sell tint, as
+  /// ../app colors the two sides of an order (amendment 8 to DS-COL-9: here
+  /// lime and sell name a side, not the solver's turn or a danger). The
+  /// side is always named in words too (DS-COL-10). Text and time are
+  /// [bubbleInk] and [bubbleMeta].
+  final Color observedBuyerFill;
+  final Color observedBuyerBorder;
+  final Color observedBuyerLabel;
+  final Color observedSellerFill;
+  final Color observedSellerBorder;
+  final Color observedSellerLabel;
 
   /// The message field (DS-CMP-11): boxed, radius 14.
   final Color composerFill;
@@ -131,15 +127,17 @@ class DisputesPalette {
     segmentInk: Color(0xFF8B97AD),
     bubbleMineFill: Color(0x1F92D64F), // lime 12%
     bubbleMineBorder: Color(0x3392D64F), // lime 20%
+    bubblePartyFill: Color(0xFF1A2030),
+    bubblePartyBorder: Color(0x0FFFFFFF), // white 6%
     bubbleInk: Color(0xFFEEF1F6),
     bubbleMeta: Color(0xFF8B97AD),
     bubbleYouLabel: Color(0xFFC6F09A),
-    buyerFill: Color(0x1F3FC1D0), // teal #3FC1D0 12%
-    buyerBorder: Color(0x403FC1D0), // teal 25%
-    buyerLabel: Color(0xFF8EE3EC),
-    sellerFill: Color(0x1FD46BE6), // magenta #D46BE6 12%
-    sellerBorder: Color(0x40D46BE6), // magenta 25%
-    sellerLabel: Color(0xFFEBB0F5),
+    observedBuyerFill: Color(0x1F92D64F), // lime 12%
+    observedBuyerBorder: Color(0x3392D64F), // lime 20%
+    observedBuyerLabel: Color(0xFFC6F09A),
+    observedSellerFill: Color(0x1FFF8B8B), // sell 12%
+    observedSellerBorder: Color(0x33FF8B8B), // sell 20%
+    observedSellerLabel: Color(0xFFFFB4B4),
     composerFill: Color(0xFF1A2030),
     composerBorder: Color(0x14FFFFFF), // white 8%
     composerFocusBorder: Color(0x8092D64F), // lime 50%
@@ -164,15 +162,17 @@ class DisputesPalette {
     segmentInk: Color(0xFF5A6474),
     bubbleMineFill: Color(0x2492D64F), // lime 14%
     bubbleMineBorder: Color(0x4D5C9130), // rgba(92,145,48,0.30)
+    bubblePartyFill: Color(0xFFFFFFFF),
+    bubblePartyBorder: Color(0x1412161F), // ink 8%
     bubbleInk: Color(0xFF12161F),
     bubbleMeta: Color(0xFF5A6474),
     bubbleYouLabel: Color(0xFF3E6B1C),
-    buyerFill: Color(0x1F3FC1D0), // teal #3FC1D0 12%
-    buyerBorder: Color(0x660E7C88), // #0E7C88 40%
-    buyerLabel: Color(0xFF0B5F69),
-    sellerFill: Color(0x1FD46BE6), // magenta #D46BE6 12%
-    sellerBorder: Color(0x668E2FA0), // #8E2FA0 40%
-    sellerLabel: Color(0xFF7D2290),
+    observedBuyerFill: Color(0x2492D64F), // lime 14%
+    observedBuyerBorder: Color(0x4D5C9130), // rgba(92,145,48,0.30)
+    observedBuyerLabel: Color(0xFF3E6B1C),
+    observedSellerFill: Color(0x24FF8B8B), // sell 14%
+    observedSellerBorder: Color(0x4D9A2F2A), // rgba(154,47,42,0.30)
+    observedSellerLabel: Color(0xFF9A2F2A),
     composerFill: Color(0xFFFFFFFF),
     composerBorder: Color(0x1F12161F), // ink 12%
     composerFocusBorder: Color(0xFF5C9130),

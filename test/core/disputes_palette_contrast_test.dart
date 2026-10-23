@@ -1,4 +1,3 @@
-import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/core/disputes_palette.dart';
@@ -28,27 +27,20 @@ void main() {
 
       test('chat bubbles: text, time, sender and failure', () {
         final mine = flatten(pal.bubbleMineFill, shell.bg);
-        for (final (name, fill) in [
-          ('mine', mine),
-          ('buyer', flatten(pal.buyerFill, shell.bg)),
-          ('seller', flatten(pal.sellerFill, shell.bg)),
-        ]) {
+        final party = flatten(pal.bubblePartyFill, shell.bg);
+        for (final (name, fill) in [('mine', mine), ('party', party)]) {
           expectAA('$name text', pal.bubbleInk, fill);
           expectAA('$name meta', pal.bubbleMeta, fill);
         }
         expectAA('you', pal.bubbleYouLabel, mine);
-        expectAA('buyer', pal.buyerLabel, flatten(pal.buyerFill, shell.bg));
-        expectAA('seller', pal.sellerLabel, flatten(pal.sellerFill, shell.bg));
         // "Not sent" sits under the bubble, on the page.
         expectAA('not sent', shell.dangerText, shell.bg);
       });
 
       test('attachments: in the bubble, in the image frame, under it', () {
-        for (final (name, fill) in [
-          ('mine', flatten(pal.bubbleMineFill, shell.bg)),
-          ('buyer', flatten(pal.buyerFill, shell.bg)),
-          ('seller', flatten(pal.sellerFill, shell.bg)),
-        ]) {
+        final mine = flatten(pal.bubbleMineFill, shell.bg);
+        final party = flatten(pal.bubblePartyFill, shell.bg);
+        for (final (name, fill) in [('mine', mine), ('party', party)]) {
           // A file card's name, details and failure, on the bubble.
           expectAA('$name file name', pal.bubbleInk, fill);
           expectAA('$name problem', shell.textPrimary, fill);
@@ -73,41 +65,10 @@ void main() {
         expectAA('viewer retry', shell.limeText, shell.bg);
       });
 
-      // Amendment 8: one hue per role, as Mostrix. A party is never lime
-      // (that is "you") nor red (danger), and the two parties differ.
-      test('a party is neither lime nor red, and the parties differ', () {
-        double hue(Color c) => HSLColor.fromColor(c).hue;
-        double apart(double a, double b) {
-          final d = (a - b).abs() % 360;
-          return d > 180 ? 360 - d : d;
-        }
-
-        for (final (name, label) in [
-          ('buyer', pal.buyerLabel),
-          ('seller', pal.sellerLabel),
-        ]) {
-          for (final (other, color) in [
-            ('lime', shell.lime),
-            ('you', pal.bubbleYouLabel),
-            ('danger', shell.dangerText),
-          ]) {
-            expect(
-              apart(hue(label), hue(color)),
-              greaterThan(60),
-              reason: '$name is too close to $other',
-            );
-          }
-        }
-        expect(
-          apart(hue(pal.buyerLabel), hue(pal.sellerLabel)),
-          greaterThan(90),
-        );
-      });
-
       test('the chat between the parties: each side on its tint', () {
         for (final (name, fill, label) in [
-          ('buyer', pal.buyerFill, pal.buyerLabel),
-          ('seller', pal.sellerFill, pal.sellerLabel),
+          ('buyer', pal.observedBuyerFill, pal.observedBuyerLabel),
+          ('seller', pal.observedSellerFill, pal.observedSellerLabel),
         ]) {
           final bubble = flatten(fill, shell.bg);
           expectAA('$name label', label, bubble);
