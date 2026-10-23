@@ -1,9 +1,10 @@
 //! Kind 10002 (NIP-65) relay list published by a Mostro node.
 //!
 //! The daemon announces the relays it reads from and writes to as `r` tags.
-//! Both directions matter to a client — we read its Kind 38383 / Kind 14
-//! events where it writes, and it reads our Kind 14 messages where it reads
-//! — so every `r` tag is taken regardless of its read/write marker.
+//! Both directions matter to a client — we read its kind 38386 (disputes)
+//! and kind 14 events where it writes, and it reads our kind 14 messages
+//! where it reads — so every `r` tag is taken regardless of its read/write
+//! marker.
 //!
 //! Reference: <https://github.com/nostr-protocol/nips/blob/master/65.md>
 use nostr_sdk::prelude::*;

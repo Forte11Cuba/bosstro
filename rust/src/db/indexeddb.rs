@@ -4,9 +4,17 @@
 //! Each record is keyed the way the SQLite table keys its row: settings by
 //! key, relays by URL (a JSON document), node pictures by node pubkey (the
 //! bytes as a `Uint8Array`, with a small JSON index naming the URL, so a sync
-//! compares URLs without loading a picture). Every write here is a single
-//! `put` or `delete`, never a read-modify-write of a stored document, so
-//! ../app's `web_lock` (origin-wide locks for document patches) is not needed.
+//! compares URLs without loading a picture). This backend has no compound
+//! writes: each method is one `put` or `delete` (a picture's bytes and index
+//! in one transaction), so it needs none of ../app's `web_lock`.
+//!
+//! Its callers can still read, modify and write back: `api::nodes` does so
+//! with the registry's settings blobs (`CUSTOM_MOSTRO_NODES`,
+//! `MOSTRO_NODE_METADATA`), under `REGISTRY_LOCK`, which serialises only
+//! within one process — one browser tab. Two tabs of the app open at once
+//! can each read a blob and write it back, and one tab's change is lost.
+//! Accepted for the web (A2; AGENTS.md → "Accepted limits"); ../app's
+//! `web_lock` is the fix if it ever matters.
 use anyhow::{anyhow, Result};
 use indexed_db_futures::prelude::*;
 use web_sys::wasm_bindgen::{JsCast, JsValue};

@@ -76,6 +76,15 @@ tool/                # design_check.dart, launcher_icon/build_sources.py
   `rust/src/rt.rs`). Tokio's runtime and SQLite are native only; the web stores data in IndexedDB. `cargo check` does not catch wasm
   link errors; `./scripts/build-web.sh` does.
 
+### Accepted limits
+
+- **Web, two tabs:** the node registry reads, modifies and writes back its settings blobs
+  under a per-process lock (`rust/src/api/nodes.rs`, `REGISTRY_LOCK`). On the web each tab
+  is its own process over one IndexedDB database, so two tabs open at once can lose one
+  tab's change (a node added or a profile refreshed). Accepted for the web (A2); ../app's
+  `web_lock` (Web Locks API) is the fix if it ever matters.
+- The key-handling limits are listed under "Key handling" (2 and 8).
+
 ### Generated code
 
 - `lib/src/rust/`, `rust/src/frb_generated.rs` and `lib/l10n/app_localizations*.dart` are
