@@ -43,7 +43,7 @@ use tokio::sync::{broadcast, mpsc};
 use super::event::{parse_dispute_event, KIND_DISPUTE};
 use super::{merge, DisputeRecord, TakenDispute};
 use crate::api::disputes::{DisputeInitiator, DisputeStatus, DisputeUpdate};
-use crate::api::resolve::ResolvedAs;
+use crate::api::resolve::{BondSlash, ResolvedAs};
 use crate::db::Storage;
 use crate::nostr::live_subs::LiveSubs;
 
@@ -501,6 +501,7 @@ impl Feed {
         solver: &str,
         order_id: &str,
         resolved: ResolvedAs,
+        bond: BondSlash,
     ) -> anyhow::Result<()> {
         let row = {
             let _guard = self.ingest_lock.lock().await;
@@ -514,6 +515,7 @@ impl Feed {
                         && t.resolved_as.is_none() =>
                 {
                     t.resolved_as = Some(resolved);
+                    t.bond_slash = Some(bond);
                 }
                 _ => return Ok(()),
             }

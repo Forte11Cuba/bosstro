@@ -161,6 +161,7 @@ pub(crate) async fn disputes_round_trip(storage: &impl Storage) {
         buyer_pubkey: Some("22".into()),
         seller_pubkey: None,
         resolved_as: None,
+        bond_slash: None,
     });
     storage.save_dispute(&row).await.unwrap();
     assert_eq!(
@@ -209,6 +210,17 @@ pub(crate) async fn a_resolution_round_trips(storage: &impl Storage) {
                 .await
                 .unwrap(),
             vec![row.clone()]
+        );
+    }
+    // The bonds it slashed, every choice of them.
+    use crate::api::resolve::BondSlash;
+    for bond in [BondSlash::NoSlash, BondSlash::Buyer, BondSlash::Seller, BondSlash::Both] {
+        row.taken.as_mut().unwrap().bond_slash = Some(bond);
+        storage.save_dispute(&row).await.unwrap();
+        assert_eq!(
+            storage.get_dispute("aa", DISPUTE_A).await.unwrap(),
+            Some(row.clone()),
+            "{bond:?}"
         );
     }
     row.taken = None;
@@ -299,6 +311,7 @@ pub(crate) async fn takes_keep_their_solver(storage: &impl Storage) {
         buyer_pubkey: None,
         seller_pubkey: None,
         resolved_as: None,
+        bond_slash: None,
     };
     let mut mine = dispute("aa", DISPUTE_A);
     mine.status = DisputeStatus::InProgress;

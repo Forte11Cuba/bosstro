@@ -28,7 +28,7 @@ use nostr_sdk::prelude::{
 use tokio::sync::{mpsc, oneshot};
 
 use crate::api::disputes::DisputeStatus;
-use crate::api::resolve::{Resolution, ResolveResult};
+use crate::api::resolve::{BondSlash, Resolution, ResolveResult};
 use crate::api::take::TakeResult;
 use crate::disputes::feed::Feed;
 use crate::nostr::live_subs::LiveSubs;
@@ -64,6 +64,7 @@ pub(crate) enum Purpose {
     Resolve {
         resolution: Resolution,
         order_id: String,
+        bond: BondSlash,
     },
 }
 
@@ -373,12 +374,14 @@ impl Router {
             Purpose::Resolve {
                 resolution,
                 order_id,
+                bond,
             } => Reply::Resolve(
                 super::resolve::apply(
                     &self.feed,
                     &waiting.request,
                     *resolution,
                     order_id,
+                    *bond,
                     &opened.message,
                 )
                 .await,

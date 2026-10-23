@@ -149,10 +149,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AttachmentProgress dco_decode_attachment_progress(dynamic raw);
 
   @protected
+  BondSlash dco_decode_bond_slash(dynamic raw);
+
+  @protected
   bool dco_decode_bool(dynamic raw);
 
   @protected
   AttachmentProgress dco_decode_box_autoadd_attachment_progress(dynamic raw);
+
+  @protected
+  BondSlash dco_decode_box_autoadd_bond_slash(dynamic raw);
 
   @protected
   bool dco_decode_box_autoadd_bool(dynamic raw);
@@ -344,6 +350,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AttachmentProgress? dco_decode_opt_box_autoadd_attachment_progress(
     dynamic raw,
   );
+
+  @protected
+  BondSlash? dco_decode_opt_box_autoadd_bond_slash(dynamic raw);
 
   @protected
   bool? dco_decode_opt_box_autoadd_bool(dynamic raw);
@@ -589,12 +598,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  BondSlash sse_decode_bond_slash(SseDeserializer deserializer);
+
+  @protected
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
   AttachmentProgress sse_decode_box_autoadd_attachment_progress(
     SseDeserializer deserializer,
   );
+
+  @protected
+  BondSlash sse_decode_box_autoadd_bond_slash(SseDeserializer deserializer);
 
   @protected
   bool sse_decode_box_autoadd_bool(SseDeserializer deserializer);
@@ -824,6 +839,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   AttachmentProgress? sse_decode_opt_box_autoadd_attachment_progress(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  BondSlash? sse_decode_opt_box_autoadd_bond_slash(
     SseDeserializer deserializer,
   );
 
@@ -1124,11 +1144,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_bond_slash(BondSlash self, SseSerializer serializer);
+
+  @protected
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_attachment_progress(
     AttachmentProgress self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_bond_slash(
+    BondSlash self,
     SseSerializer serializer,
   );
 
@@ -1441,6 +1470,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_opt_box_autoadd_attachment_progress(
     AttachmentProgress? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_bond_slash(
+    BondSlash? self,
     SseSerializer serializer,
   );
 

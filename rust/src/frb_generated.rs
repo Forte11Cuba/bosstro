@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -306830104;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 2061052309;
 
 // Section: executor
 
@@ -465,6 +465,38 @@ fn wire__crate__api__app_version_impl(
                 let output_ok = Result::<_, ()>::Ok(crate::api::app_version())?;
                 Ok(output_ok)
             })())
+        },
+    )
+}
+fn wire__crate__api__resolve__bond_slash_default_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "bond_slash_default",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok(crate::api::resolve::BondSlash::default())?;
+                    Ok(output_ok)
+                })())
+            }
         },
     )
 }
@@ -1653,13 +1685,17 @@ fn wire__crate__api__resolve__resolve_dispute_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_dispute_id = <String>::sse_decode(&mut deserializer);
             let api_resolution = <crate::api::resolve::Resolution>::sse_decode(&mut deserializer);
+            let api_bond = <crate::api::resolve::BondSlash>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, crate::api::resolve::ResolveError>(
                     (move || async move {
-                        let output_ok =
-                            crate::api::resolve::resolve_dispute(api_dispute_id, api_resolution)
-                                .await?;
+                        let output_ok = crate::api::resolve::resolve_dispute(
+                            api_dispute_id,
+                            api_resolution,
+                            api_bond,
+                        )
+                        .await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -2233,6 +2269,20 @@ impl SseDecode for crate::api::chat::AttachmentProgress {
     }
 }
 
+impl SseDecode for crate::api::resolve::BondSlash {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::resolve::BondSlash::NoSlash,
+            1 => crate::api::resolve::BondSlash::Buyer,
+            2 => crate::api::resolve::BondSlash::Seller,
+            3 => crate::api::resolve::BondSlash::Both,
+            _ => unreachable!("Invalid variant for BondSlash: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2436,6 +2486,8 @@ impl SseDecode for crate::api::take::DisputeDetail {
         let mut var_isClosed = <bool>::sse_decode(deserializer);
         let mut var_resolvedAs =
             <Option<crate::api::resolve::ResolvedAs>>::sse_decode(deserializer);
+        let mut var_bondSlash = <Option<crate::api::resolve::BondSlash>>::sse_decode(deserializer);
+        let mut var_bondsEnabled = <bool>::sse_decode(deserializer);
         let mut var_buyerPayout = <Option<i64>>::sse_decode(deserializer);
         let mut var_sellerRefund = <Option<i64>>::sse_decode(deserializer);
         let mut var_unansweredResolution =
@@ -2459,6 +2511,8 @@ impl SseDecode for crate::api::take::DisputeDetail {
             seller_pubkey: var_sellerPubkey,
             is_closed: var_isClosed,
             resolved_as: var_resolvedAs,
+            bond_slash: var_bondSlash,
+            bonds_enabled: var_bondsEnabled,
             buyer_payout: var_buyerPayout,
             seller_refund: var_sellerRefund,
             unanswered_resolution: var_unansweredResolution,
@@ -2911,6 +2965,17 @@ impl SseDecode for Option<crate::api::chat::AttachmentProgress> {
     }
 }
 
+impl SseDecode for Option<crate::api::resolve::BondSlash> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::resolve::BondSlash>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<bool> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -3307,8 +3372,9 @@ impl SseDecode for crate::api::resolve::ResolveOutcome {
             3 => crate::api::resolve::ResolveOutcome::ReadOnlySolver,
             4 => crate::api::resolve::ResolveOutcome::TakenOver,
             5 => crate::api::resolve::ResolveOutcome::NotInDispute,
-            6 => crate::api::resolve::ResolveOutcome::Refused,
-            7 => crate::api::resolve::ResolveOutcome::NoAnswer,
+            6 => crate::api::resolve::ResolveOutcome::BondNotPosted,
+            7 => crate::api::resolve::ResolveOutcome::Refused,
+            8 => crate::api::resolve::ResolveOutcome::NoAnswer,
             _ => unreachable!("Invalid variant for ResolveOutcome: {}", inner),
         };
     }
@@ -3320,12 +3386,14 @@ impl SseDecode for crate::api::resolve::ResolveResult {
         let mut var_mostroPubkey = <String>::sse_decode(deserializer);
         let mut var_disputeId = <String>::sse_decode(deserializer);
         let mut var_resolution = <crate::api::resolve::Resolution>::sse_decode(deserializer);
+        let mut var_bond = <crate::api::resolve::BondSlash>::sse_decode(deserializer);
         let mut var_outcome = <crate::api::resolve::ResolveOutcome>::sse_decode(deserializer);
         let mut var_reason = <Option<String>>::sse_decode(deserializer);
         return crate::api::resolve::ResolveResult {
             mostro_pubkey: var_mostroPubkey,
             dispute_id: var_disputeId,
             resolution: var_resolution,
+            bond: var_bond,
             outcome: var_outcome,
             reason: var_reason,
         };
@@ -3551,103 +3619,104 @@ fn pde_ffi_dispatcher_primary_impl(
             wire__crate__api__nodes__add_custom_mostro_node_impl(port, ptr, rust_vec_len, data_len)
         }
         8 => wire__crate__api__relays__add_relay_impl(port, ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__node_info__cached_node_info_impl(port, ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__chat__chat_thread_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__take__dispute_detail_impl(port, ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__node_info__fetch_node_info_impl(port, ptr, rust_vec_len, data_len),
-        15 => wire__crate__api__nodes__forget_mostro_node_picture_impl(
+        10 => wire__crate__api__resolve__bond_slash_default_impl(port, ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__node_info__cached_node_info_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__chat__chat_thread_impl(port, ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__take__dispute_detail_impl(port, ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__node_info__fetch_node_info_impl(port, ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__nodes__forget_mostro_node_picture_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        16 => {
+        17 => {
             wire__crate__api__relays__get_connection_state_impl(port, ptr, rust_vec_len, data_len)
         }
-        17 => {
+        18 => {
             wire__crate__api__nodes__get_mostro_node_picture_impl(port, ptr, rust_vec_len, data_len)
         }
-        18 => wire__crate__api__relays__get_relays_impl(port, ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__take__in_progress_disputes_impl(port, ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__init_db_impl(port, ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__relays__initialize_relays_impl(port, ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__nodes__list_mostro_nodes_impl(port, ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__solver__load_solver_key_impl(port, ptr, rust_vec_len, data_len),
-        25 => {
+        19 => wire__crate__api__relays__get_relays_impl(port, ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__take__in_progress_disputes_impl(port, ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__init_db_impl(port, ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__relays__initialize_relays_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__nodes__list_mostro_nodes_impl(port, ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__solver__load_solver_key_impl(port, ptr, rust_vec_len, data_len),
+        26 => {
             wire__crate__api__node_info__node_info_default_impl(port, ptr, rust_vec_len, data_len)
         }
-        26 => wire__crate__api__observer__observed_chat_impl(port, ptr, rust_vec_len, data_len),
-        27 => {
+        27 => wire__crate__api__observer__observed_chat_impl(port, ptr, rust_vec_len, data_len),
+        28 => {
             wire__crate__api__chat__on_attachment_progress_impl(port, ptr, rust_vec_len, data_len)
         }
-        28 => wire__crate__api__chat__on_chat_updates_impl(port, ptr, rust_vec_len, data_len),
-        29 => wire__crate__api__relays__on_connection_state_changed_impl(
+        29 => wire__crate__api__chat__on_chat_updates_impl(port, ptr, rust_vec_len, data_len),
+        30 => wire__crate__api__relays__on_connection_state_changed_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        30 => {
+        31 => {
             wire__crate__api__disputes__on_dispute_updates_impl(port, ptr, rust_vec_len, data_len)
         }
-        31 => wire__crate__api__relays__on_relay_status_changed_impl(
+        32 => wire__crate__api__relays__on_relay_status_changed_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        32 => wire__crate__api__chat__open_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__observer__paste_shared_key_impl(port, ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__disputes__pending_disputes_impl(port, ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__node_info__protocol_support_default_impl(
+        33 => wire__crate__api__chat__open_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__observer__paste_shared_key_impl(port, ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__disputes__pending_disputes_impl(port, ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__node_info__protocol_support_default_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        37 => {
+        38 => {
             wire__crate__api__observer__read_observed_chat_impl(port, ptr, rust_vec_len, data_len)
         }
-        38 => wire__crate__api__take__recover_candidates_impl(port, ptr, rust_vec_len, data_len),
-        39 => wire__crate__api__nodes__refresh_mostro_node_metadata_impl(
+        39 => wire__crate__api__take__recover_candidates_impl(port, ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__nodes__refresh_mostro_node_metadata_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        40 => {
+        41 => {
             wire__crate__api__nodes__rehydrate_active_node_impl(port, ptr, rust_vec_len, data_len)
         }
-        41 => wire__crate__api__nodes__remove_custom_mostro_node_impl(
+        42 => wire__crate__api__nodes__remove_custom_mostro_node_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        42 => wire__crate__api__relays__remove_relay_impl(port, ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__resolve__resolve_dispute_impl(port, ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__chat__retry_chat_message_impl(port, ptr, rust_vec_len, data_len),
-        45 => wire__crate__api__nodes__select_active_node_impl(port, ptr, rust_vec_len, data_len),
-        46 => wire__crate__api__chat__send_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__chat__send_chat_message_impl(port, ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__take__solver_permission_default_impl(
+        43 => wire__crate__api__relays__remove_relay_impl(port, ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__resolve__resolve_dispute_impl(port, ptr, rust_vec_len, data_len),
+        45 => wire__crate__api__chat__retry_chat_message_impl(port, ptr, rust_vec_len, data_len),
+        46 => wire__crate__api__nodes__select_active_node_impl(port, ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__chat__send_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
+        48 => wire__crate__api__chat__send_chat_message_impl(port, ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__take__solver_permission_default_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        49 => wire__crate__api__solver__solver_pubkey_impl(port, ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__take__solver_standing_impl(port, ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__take__solver_status_default_impl(port, ptr, rust_vec_len, data_len),
-        52 => wire__crate__api__nodes__sync_mostro_node_pictures_impl(
+        50 => wire__crate__api__solver__solver_pubkey_impl(port, ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__take__solver_standing_impl(port, ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__take__solver_status_default_impl(port, ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__nodes__sync_mostro_node_pictures_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        53 => wire__crate__api__take__take_dispute_impl(port, ptr, rust_vec_len, data_len),
-        54 => wire__crate__api__solver__unload_solver_key_impl(port, ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__take__take_dispute_impl(port, ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__solver__unload_solver_key_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -3662,8 +3731,8 @@ fn pde_ffi_dispatcher_sync_impl(
     match func_id {
         6 => wire__crate__api__nodes__active_node_impl(ptr, rust_vec_len, data_len),
         9 => wire__crate__api__app_version_impl(ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__solver__create_solver_account_impl(ptr, rust_vec_len, data_len),
-        35 => wire__crate__api__solver__preview_npub_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__solver__create_solver_account_impl(ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__solver__preview_npub_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -3776,6 +3845,29 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::chat::AttachmentProgress>
     for crate::api::chat::AttachmentProgress
 {
     fn into_into_dart(self) -> crate::api::chat::AttachmentProgress {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::resolve::BondSlash {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::NoSlash => 0.into_dart(),
+            Self::Buyer => 1.into_dart(),
+            Self::Seller => 2.into_dart(),
+            Self::Both => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::resolve::BondSlash
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::resolve::BondSlash>
+    for crate::api::resolve::BondSlash
+{
+    fn into_into_dart(self) -> crate::api::resolve::BondSlash {
         self
     }
 }
@@ -4046,6 +4138,8 @@ impl flutter_rust_bridge::IntoDart for crate::api::take::DisputeDetail {
             self.seller_pubkey.into_into_dart().into_dart(),
             self.is_closed.into_into_dart().into_dart(),
             self.resolved_as.into_into_dart().into_dart(),
+            self.bond_slash.into_into_dart().into_dart(),
+            self.bonds_enabled.into_into_dart().into_dart(),
             self.buyer_payout.into_into_dart().into_dart(),
             self.seller_refund.into_into_dart().into_dart(),
             self.unanswered_resolution.into_into_dart().into_dart(),
@@ -4594,8 +4688,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::resolve::ResolveOutcome {
             Self::ReadOnlySolver => 3.into_dart(),
             Self::TakenOver => 4.into_dart(),
             Self::NotInDispute => 5.into_dart(),
-            Self::Refused => 6.into_dart(),
-            Self::NoAnswer => 7.into_dart(),
+            Self::BondNotPosted => 6.into_dart(),
+            Self::Refused => 7.into_dart(),
+            Self::NoAnswer => 8.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -4618,6 +4713,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::resolve::ResolveResult {
             self.mostro_pubkey.into_into_dart().into_dart(),
             self.dispute_id.into_into_dart().into_dart(),
             self.resolution.into_into_dart().into_dart(),
+            self.bond.into_into_dart().into_dart(),
             self.outcome.into_into_dart().into_dart(),
             self.reason.into_into_dart().into_dart(),
         ]
@@ -4989,6 +5085,24 @@ impl SseEncode for crate::api::chat::AttachmentProgress {
     }
 }
 
+impl SseEncode for crate::api::resolve::BondSlash {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::resolve::BondSlash::NoSlash => 0,
+                crate::api::resolve::BondSlash::Buyer => 1,
+                crate::api::resolve::BondSlash::Seller => 2,
+                crate::api::resolve::BondSlash::Both => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -5190,6 +5304,8 @@ impl SseEncode for crate::api::take::DisputeDetail {
         <Option<String>>::sse_encode(self.seller_pubkey, serializer);
         <bool>::sse_encode(self.is_closed, serializer);
         <Option<crate::api::resolve::ResolvedAs>>::sse_encode(self.resolved_as, serializer);
+        <Option<crate::api::resolve::BondSlash>>::sse_encode(self.bond_slash, serializer);
+        <bool>::sse_encode(self.bonds_enabled, serializer);
         <Option<i64>>::sse_encode(self.buyer_payout, serializer);
         <Option<i64>>::sse_encode(self.seller_refund, serializer);
         <Option<crate::api::resolve::Resolution>>::sse_encode(
@@ -5521,6 +5637,16 @@ impl SseEncode for Option<crate::api::chat::AttachmentProgress> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <crate::api::chat::AttachmentProgress>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::resolve::BondSlash> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::resolve::BondSlash>::sse_encode(value, serializer);
         }
     }
 }
@@ -5883,8 +6009,9 @@ impl SseEncode for crate::api::resolve::ResolveOutcome {
                 crate::api::resolve::ResolveOutcome::ReadOnlySolver => 3,
                 crate::api::resolve::ResolveOutcome::TakenOver => 4,
                 crate::api::resolve::ResolveOutcome::NotInDispute => 5,
-                crate::api::resolve::ResolveOutcome::Refused => 6,
-                crate::api::resolve::ResolveOutcome::NoAnswer => 7,
+                crate::api::resolve::ResolveOutcome::BondNotPosted => 6,
+                crate::api::resolve::ResolveOutcome::Refused => 7,
+                crate::api::resolve::ResolveOutcome::NoAnswer => 8,
                 _ => {
                     unimplemented!("");
                 }
@@ -5900,6 +6027,7 @@ impl SseEncode for crate::api::resolve::ResolveResult {
         <String>::sse_encode(self.mostro_pubkey, serializer);
         <String>::sse_encode(self.dispute_id, serializer);
         <crate::api::resolve::Resolution>::sse_encode(self.resolution, serializer);
+        <crate::api::resolve::BondSlash>::sse_encode(self.bond, serializer);
         <crate::api::resolve::ResolveOutcome>::sse_encode(self.outcome, serializer);
         <Option<String>>::sse_encode(self.reason, serializer);
     }

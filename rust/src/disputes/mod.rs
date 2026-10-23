@@ -13,7 +13,7 @@ pub mod feed;
 use anyhow::Result;
 
 use crate::api::disputes::{DisputeInitiator, DisputeStatus, DisputeSummary};
-use crate::api::resolve::ResolvedAs;
+use crate::api::resolve::{BondSlash, ResolvedAs};
 use crate::db::Storage;
 use event::ParsedDispute;
 
@@ -63,6 +63,11 @@ pub struct TakenDispute {
     /// while open, and for a dispute that closed some other way.
     #[serde(default)]
     pub resolved_as: Option<ResolvedAs>,
+    /// The bonds that resolution slashed (`None` while open, for a dispute
+    /// that closed some other way, and for one resolved before this was
+    /// kept).
+    #[serde(default)]
+    pub bond_slash: Option<BondSlash>,
 }
 
 impl DisputeStatus {
@@ -143,6 +148,37 @@ impl DisputeRecord {
             initiator: self.initiator,
             opened_at: self.opened_at,
             is_pending: self.is_pending(now),
+        }
+    }
+}
+
+impl BondSlash {
+    pub fn as_wire(self) -> &'static str {
+        match self {
+            BondSlash::NoSlash => "no-slash",
+            BondSlash::Buyer => "buyer",
+            BondSlash::Seller => "seller",
+            BondSlash::Both => "both",
+        }
+    }
+
+    pub fn from_wire(value: &str) -> Option<Self> {
+        Some(match value {
+            "no-slash" => BondSlash::NoSlash,
+            "buyer" => BondSlash::Buyer,
+            "seller" => BondSlash::Seller,
+            "both" => BondSlash::Both,
+            _ => return None,
+        })
+    }
+
+    /// mostro-core's `(slash_seller, slash_buyer)` for this choice.
+    pub fn slashes(self) -> (bool, bool) {
+        match self {
+            BondSlash::NoSlash => (false, false),
+            BondSlash::Buyer => (false, true),
+            BondSlash::Seller => (true, false),
+            BondSlash::Both => (true, true),
         }
     }
 }
@@ -307,6 +343,7 @@ pub(crate) mod tests {
             buyer_pubkey: Some("bb".into()),
             seller_pubkey: Some("cc".into()),
             resolved_as: None,
+            bond_slash: None,
         }
     }
 
