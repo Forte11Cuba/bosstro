@@ -339,6 +339,8 @@ one-to-one choice in their ARB files.
 | The solver's private key (`nsec1…`) | secret key | clave secreta | private key, clave privada |
 | The solver's public key (`npub1…`) | npub | npub | public key alone, clave pública alone |
 | The app's settings | settings | configuración | ajustes |
+| The key of a trade's chat a party gives the solver (as `app`) | chat key | clave del chat | shared key, clave compartida |
+| The buyer ↔ seller chat a solver reads | chat between the parties | chat entre las partes | observer, observador |
 
 ---
 
@@ -451,4 +453,9 @@ Applied in place above; listed here so a reviewer coming from `app` sees what di
    the one DS-A11Y-4 and DS-L10N-2 test.
 7. **Radius tokens by role** (§4): `pill`, `modal`, `block`, `pageCta`, `cta`, `tile`,
    `thumbnail`; `app`'s v1 names are never defined (DS-SHP-4).
+8. **The chat between the parties** (amends DS-COL-9, maintainer 2026-10-23): in the observed chat
+   the buyer's bubbles take a lime tint and the seller's the sell tint, as `app` colors the two
+   sides of an order (`DisputesPalette.observed*`). There they name a side, not the solver's turn
+   or a danger; the side is always written too (DS-COL-10).
+9. **Glossary additions** (§9): chat key / clave del chat, chat between the parties.
 
