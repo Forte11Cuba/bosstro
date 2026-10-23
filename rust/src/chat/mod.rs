@@ -20,7 +20,10 @@
 //!
 //! - [`router`] follows the channels of the active node and key, receives,
 //!   stores and sends.
+//! - [`observer`] reads, never writes, the buyer ↔ seller chat of a dispute
+//!   this key holds, with the key a party shared (phase 5c).
 
+pub mod observer;
 pub mod router;
 
 use std::collections::{HashMap, HashSet, VecDeque};

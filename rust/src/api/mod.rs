@@ -6,6 +6,7 @@ pub mod chat;
 pub mod disputes;
 pub mod node_info;
 pub mod nodes;
+pub mod observer;
 pub mod relays;
 pub mod solver;
 pub mod take;

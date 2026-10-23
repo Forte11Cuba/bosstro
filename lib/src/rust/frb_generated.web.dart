@@ -11,6 +11,7 @@ import 'api/chat.dart';
 import 'api/disputes.dart';
 import 'api/node_info.dart';
 import 'api/nodes.dart';
+import 'api/observer.dart';
 import 'api/relays.dart';
 import 'api/solver.dart';
 import 'api/take.dart';
@@ -195,6 +196,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   NodeInfo dco_decode_box_autoadd_node_info(dynamic raw);
 
   @protected
+  ObservedChat dco_decode_box_autoadd_observed_chat(dynamic raw);
+
+  @protected
   PendingDisputes dco_decode_box_autoadd_pending_disputes(dynamic raw);
 
   @protected
@@ -270,6 +274,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   InProgressDisputes dco_decode_in_progress_disputes(dynamic raw);
 
   @protected
+  KeyDisclosure dco_decode_key_disclosure(dynamic raw);
+
+  @protected
   List<String> dco_decode_list_String(dynamic raw);
 
   @protected
@@ -279,7 +286,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<DisputeSummary> dco_decode_list_dispute_summary(dynamic raw);
 
   @protected
+  List<KeyDisclosure> dco_decode_list_key_disclosure(dynamic raw);
+
+  @protected
   List<MostroNodeEntry> dco_decode_list_mostro_node_entry(dynamic raw);
+
+  @protected
+  List<ObservedMessage> dco_decode_list_observed_message(dynamic raw);
 
   @protected
   List<int> dco_decode_list_prim_u_8_loose(dynamic raw);
@@ -304,6 +317,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   NodeInfo dco_decode_node_info(dynamic raw);
+
+  @protected
+  ObservedChat dco_decode_observed_chat(dynamic raw);
+
+  @protected
+  ObservedMessage dco_decode_observed_message(dynamic raw);
+
+  @protected
+  ObserverError dco_decode_observer_error(dynamic raw);
 
   @protected
   OpenedAttachment dco_decode_opened_attachment(dynamic raw);
@@ -361,6 +383,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   NodeInfo? dco_decode_opt_box_autoadd_node_info(dynamic raw);
+
+  @protected
+  ObservedChat? dco_decode_opt_box_autoadd_observed_chat(dynamic raw);
 
   @protected
   PendingDisputes? dco_decode_opt_box_autoadd_pending_disputes(dynamic raw);
@@ -600,6 +625,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   NodeInfo sse_decode_box_autoadd_node_info(SseDeserializer deserializer);
 
   @protected
+  ObservedChat sse_decode_box_autoadd_observed_chat(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   PendingDisputes sse_decode_box_autoadd_pending_disputes(
     SseDeserializer deserializer,
   );
@@ -685,6 +715,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  KeyDisclosure sse_decode_key_disclosure(SseDeserializer deserializer);
+
+  @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
 
   @protected
@@ -698,7 +731,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<KeyDisclosure> sse_decode_list_key_disclosure(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<MostroNodeEntry> sse_decode_list_mostro_node_entry(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<ObservedMessage> sse_decode_list_observed_message(
     SseDeserializer deserializer,
   );
 
@@ -729,6 +772,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   NodeInfo sse_decode_node_info(SseDeserializer deserializer);
+
+  @protected
+  ObservedChat sse_decode_observed_chat(SseDeserializer deserializer);
+
+  @protected
+  ObservedMessage sse_decode_observed_message(SseDeserializer deserializer);
+
+  @protected
+  ObserverError sse_decode_observer_error(SseDeserializer deserializer);
 
   @protected
   OpenedAttachment sse_decode_opened_attachment(SseDeserializer deserializer);
@@ -802,6 +854,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   NodeInfo? sse_decode_opt_box_autoadd_node_info(SseDeserializer deserializer);
+
+  @protected
+  ObservedChat? sse_decode_opt_box_autoadd_observed_chat(
+    SseDeserializer deserializer,
+  );
 
   @protected
   PendingDisputes? sse_decode_opt_box_autoadd_pending_disputes(
@@ -1095,6 +1152,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_observed_chat(
+    ObservedChat self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_pending_disputes(
     PendingDisputes self,
     SseSerializer serializer,
@@ -1206,6 +1269,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_key_disclosure(KeyDisclosure self, SseSerializer serializer);
+
+  @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
 
   @protected
@@ -1221,8 +1287,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_key_disclosure(
+    List<KeyDisclosure> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_mostro_node_entry(
     List<MostroNodeEntry> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_observed_message(
+    List<ObservedMessage> self,
     SseSerializer serializer,
   );
 
@@ -1267,6 +1345,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_node_info(NodeInfo self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_observed_chat(ObservedChat self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_observed_message(
+    ObservedMessage self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_observer_error(ObserverError self, SseSerializer serializer);
 
   @protected
   void sse_encode_opened_attachment(
@@ -1358,6 +1448,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_opt_box_autoadd_node_info(
     NodeInfo? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_observed_chat(
+    ObservedChat? self,
     SseSerializer serializer,
   );
 

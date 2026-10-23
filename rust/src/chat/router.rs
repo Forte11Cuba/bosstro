@@ -57,6 +57,7 @@ use nostr_sdk::prelude::{
 };
 use tokio::sync::{broadcast, mpsc};
 
+use super::observer::{ObservedRecord, ObservedRef, PastedKeys};
 use super::{
     allowed_signers, channel_keys, sender_of, subscription_since, ChannelRef, ChatRecord,
     RateLimits, SeenOuter, MAX_AUTHORS_PER_REQ, MAX_MESSAGE_BYTES,
@@ -74,7 +75,7 @@ use crate::nostr::live_subs::LiveSubs;
 /// Capacity of the update channel toward Dart.
 const UPDATE_CAPACITY: usize = 256;
 
-fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+pub(crate) fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     mutex
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner)
@@ -88,12 +89,13 @@ pub(crate) enum ChatStore {
     Memory(MemoryChat),
 }
 
-/// [`ChatStore::Memory`]: the messages, and the attachment cache (encrypted
-/// blobs by hash).
+/// [`ChatStore::Memory`]: the messages, the attachment cache (encrypted
+/// blobs by hash) and the observed chats (phase 5c).
 #[derive(Default)]
 pub(crate) struct MemoryChat {
     messages: Mutex<HashMap<ChannelRef, Vec<ChatRecord>>>,
     blobs: Mutex<HashMap<String, Vec<u8>>>,
+    observed: Mutex<HashMap<ObservedRef, Vec<ObservedRecord>>>,
 }
 
 impl ChatStore {
@@ -204,6 +206,36 @@ impl ChatStore {
             ChatStore::Memory(m) => Ok(lock(&m.blobs).get(sha256).cloned()),
         }
     }
+
+    /// Keep one message of an observed chat, unless that chat has its id.
+    pub(crate) async fn insert_observed(&self, record: &ObservedRecord) -> anyhow::Result<bool> {
+        match self {
+            ChatStore::Db(db) => db.insert_observed_message(record).await,
+            ChatStore::Memory(m) => {
+                let mut map = lock(&m.observed);
+                let rows = map.entry(record.conversation.clone()).or_default();
+                if rows.iter().any(|r| r.message_id == record.message_id) {
+                    return Ok(false);
+                }
+                rows.push(record.clone());
+                Ok(true)
+            }
+        }
+    }
+
+    /// Every stored message of one observed chat.
+    pub(crate) async fn list_observed(
+        &self,
+        observed: &ObservedRef,
+    ) -> anyhow::Result<Vec<ObservedRecord>> {
+        match self {
+            ChatStore::Db(db) => db.list_observed_messages(observed).await,
+            ChatStore::Memory(m) => Ok(lock(&m.observed)
+                .get(observed)
+                .cloned()
+                .unwrap_or_default()),
+        }
+    }
 }
 
 // ── Channels ──────────────────────────────────────────────────────────────────
@@ -256,7 +288,7 @@ struct Shared {
 }
 
 /// The party's trade key the take named, if it parses.
-fn party_key(row: &DisputeRecord, party: ChatParty) -> Option<PublicKey> {
+pub(crate) fn party_key(row: &DisputeRecord, party: ChatParty) -> Option<PublicKey> {
     let taken = row.taken.as_ref()?;
     let hex = match party {
         ChatParty::Buyer => taken.buyer_pubkey.as_deref(),
@@ -308,7 +340,7 @@ struct Target {
 }
 
 pub(crate) struct Router {
-    client: Arc<Client>,
+    pub(crate) client: Arc<Client>,
     subs: &'static LiveSubs,
     feed: Arc<Feed>,
     pub(crate) store: ChatStore,
@@ -336,6 +368,9 @@ pub(crate) struct Router {
     sync_lock: tokio::sync::Mutex<()>,
     /// Serialises read → write of one message's row.
     ingest_lock: tokio::sync::Mutex<()>,
+    /// The shared keys the solver pasted (phase 5c), in memory only: every
+    /// one not of the loaded key goes when the key changes or unloads.
+    pub(crate) pasted: Mutex<PastedKeys>,
 }
 
 impl Router {
@@ -364,6 +399,7 @@ impl Router {
             started: crate::rt::time::Instant::now(),
             sync_lock: tokio::sync::Mutex::new(()),
             ingest_lock: tokio::sync::Mutex::new(()),
+            pasted: Mutex::new(PastedKeys::new()),
         })
     }
 
@@ -466,6 +502,10 @@ impl Router {
             _ => None,
         };
         *lock(&self.target) = target.clone();
+        // A pasted key belongs to the key that pasted it: a log out or
+        // another key forgets it.
+        let solver = target.as_ref().map(|t| t.keys.public_key().to_hex());
+        lock(&self.pasted).retain(|observed, _| Some(&observed.solver_pubkey) == solver.as_ref());
 
         let mut wanted: HashMap<ChannelRef, Wanted> = HashMap::new();
         if let Some(target) = &target {

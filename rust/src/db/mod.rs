@@ -1,7 +1,7 @@
 //! Persistent storage (A4), from ../app's `rust/src/db/`, trimmed to what
 //! Bosstro uses: the settings key-value store, the relays, the node pictures
 //! (phase 2), the disputes (phase 3), the dispute chat and its attachment
-//! cache (phase 5).
+//! cache (phase 5), the observed chats (phase 5c).
 //!
 //! One [`Storage`] trait, two backends picked at compile time
 //! (`app_db.rs`): SQLite through `sqlx` on native (Android, Linux),
@@ -27,6 +27,7 @@ use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
 use crate::api::disputes::DisputeStatus;
 use crate::api::chat::ChatDelivery;
+use crate::chat::observer::{ObservedRecord, ObservedRef};
 use crate::chat::{ChannelRef, ChatRecord};
 use crate::disputes::DisputeRecord;
 
@@ -181,6 +182,15 @@ pub trait Storage: Send + Sync {
             .map(ChatRecord::cursor)
             .max())
     }
+
+    // ── Observed chats (`crate::chat::observer`), apart from the chat ───────
+
+    /// Store `message` unless its observed chat already has that message id.
+    /// Returns whether it was stored (false: a copy).
+    async fn insert_observed_message(&self, message: &ObservedRecord) -> Result<bool>;
+    /// Every message of one observed chat, in no particular order. Another
+    /// one's never appear, and neither does any of the solver's own chats.
+    async fn list_observed_messages(&self, observed: &ObservedRef) -> Result<Vec<ObservedRecord>>;
 
     // ── Attachment cache (`crate::attachments`), encrypted blobs only ───────
 

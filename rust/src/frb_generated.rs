@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -301324594;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 368525016;
 
 // Section: executor
 
@@ -1031,6 +1031,42 @@ fn wire__crate__api__node_info__node_info_default_impl(
         },
     )
 }
+fn wire__crate__api__observer__observed_chat_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "observed_chat",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_dispute_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::observer::observed_chat(api_dispute_id).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__chat__on_attachment_progress_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -1242,6 +1278,44 @@ fn wire__crate__api__chat__open_chat_attachment_impl(
         },
     )
 }
+fn wire__crate__api__observer__paste_shared_key_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "paste_shared_key",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_dispute_id = <String>::sse_decode(&mut deserializer);
+            let api_key = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::observer::ObserverError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::observer::paste_shared_key(api_dispute_id, api_key).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__disputes__pending_disputes_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -1336,6 +1410,43 @@ fn wire__crate__api__node_info__protocol_support_default_impl(
                         Result::<_, ()>::Ok(crate::api::node_info::ProtocolSupport::default())?;
                     Ok(output_ok)
                 })())
+            }
+        },
+    )
+}
+fn wire__crate__api__observer__read_observed_chat_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "read_observed_chat",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_dispute_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::observer::ObserverError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::observer::read_observed_chat(api_dispute_id).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
             }
         },
     )
@@ -2404,6 +2515,18 @@ impl SseDecode for crate::api::take::InProgressDisputes {
     }
 }
 
+impl SseDecode for crate::api::observer::KeyDisclosure {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_party = <crate::api::chat::ChatParty>::sse_decode(deserializer);
+        let mut var_sharedAt = <i64>::sse_decode(deserializer);
+        return crate::api::observer::KeyDisclosure {
+            party: var_party,
+            shared_at: var_sharedAt,
+        };
+    }
+}
+
 impl SseDecode for Vec<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2444,6 +2567,20 @@ impl SseDecode for Vec<crate::api::disputes::DisputeSummary> {
     }
 }
 
+impl SseDecode for Vec<crate::api::observer::KeyDisclosure> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::observer::KeyDisclosure>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
 impl SseDecode for Vec<crate::api::nodes::MostroNodeEntry> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2451,6 +2588,20 @@ impl SseDecode for Vec<crate::api::nodes::MostroNodeEntry> {
         let mut ans_ = vec![];
         for idx_ in 0..len_ {
             ans_.push(<crate::api::nodes::MostroNodeEntry>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::observer::ObservedMessage> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::observer::ObservedMessage>::sse_decode(
                 deserializer,
             ));
         }
@@ -2605,6 +2756,66 @@ impl SseDecode for crate::api::node_info::NodeInfo {
             lnd_chains: var_lndChains,
             lnd_networks: var_lndNetworks,
             lnd_uris: var_lndUris,
+        };
+    }
+}
+
+impl SseDecode for crate::api::observer::ObservedChat {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_mostroPubkey = <String>::sse_decode(deserializer);
+        let mut var_disputeId = <String>::sse_decode(deserializer);
+        let mut var_disclosures =
+            <Vec<crate::api::observer::KeyDisclosure>>::sse_decode(deserializer);
+        let mut var_hasPastedKey = <bool>::sse_decode(deserializer);
+        let mut var_since = <i64>::sse_decode(deserializer);
+        let mut var_messages =
+            <Vec<crate::api::observer::ObservedMessage>>::sse_decode(deserializer);
+        return crate::api::observer::ObservedChat {
+            mostro_pubkey: var_mostroPubkey,
+            dispute_id: var_disputeId,
+            disclosures: var_disclosures,
+            has_pasted_key: var_hasPastedKey,
+            since: var_since,
+            messages: var_messages,
+        };
+    }
+}
+
+impl SseDecode for crate::api::observer::ObservedMessage {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_id = <String>::sse_decode(deserializer);
+        let mut var_sender = <crate::api::chat::ChatParty>::sse_decode(deserializer);
+        let mut var_content = <String>::sse_decode(deserializer);
+        let mut var_createdAt = <i64>::sse_decode(deserializer);
+        let mut var_attachment =
+            <Option<crate::api::chat::ChatAttachment>>::sse_decode(deserializer);
+        return crate::api::observer::ObservedMessage {
+            id: var_id,
+            sender: var_sender,
+            content: var_content,
+            created_at: var_createdAt,
+            attachment: var_attachment,
+        };
+    }
+}
+
+impl SseDecode for crate::api::observer::ObserverError {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::observer::ObserverError::NoKey,
+            1 => crate::api::observer::ObserverError::NoNode,
+            2 => crate::api::observer::ObserverError::NoRelays,
+            3 => crate::api::observer::ObserverError::UnknownDispute,
+            4 => crate::api::observer::ObserverError::NoPartyKeys,
+            5 => crate::api::observer::ObserverError::NoSharedKey,
+            6 => crate::api::observer::ObserverError::InvalidKey,
+            7 => crate::api::observer::ObserverError::KeyOpensNothing,
+            8 => crate::api::observer::ObserverError::FetchFailed,
+            _ => unreachable!("Invalid variant for ObserverError: {}", inner),
         };
     }
 }
@@ -2807,6 +3018,19 @@ impl SseDecode for Option<crate::api::node_info::NodeInfo> {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<crate::api::node_info::NodeInfo>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::observer::ObservedChat> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::observer::ObservedChat>::sse_decode(
+                deserializer,
+            ));
         } else {
             return None;
         }
@@ -3195,71 +3419,76 @@ fn pde_ffi_dispatcher_primary_impl(
         25 => {
             wire__crate__api__node_info__node_info_default_impl(port, ptr, rust_vec_len, data_len)
         }
-        26 => {
+        26 => wire__crate__api__observer__observed_chat_impl(port, ptr, rust_vec_len, data_len),
+        27 => {
             wire__crate__api__chat__on_attachment_progress_impl(port, ptr, rust_vec_len, data_len)
         }
-        27 => wire__crate__api__chat__on_chat_updates_impl(port, ptr, rust_vec_len, data_len),
-        28 => wire__crate__api__relays__on_connection_state_changed_impl(
+        28 => wire__crate__api__chat__on_chat_updates_impl(port, ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__relays__on_connection_state_changed_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        29 => {
+        30 => {
             wire__crate__api__disputes__on_dispute_updates_impl(port, ptr, rust_vec_len, data_len)
         }
-        30 => wire__crate__api__relays__on_relay_status_changed_impl(
+        31 => wire__crate__api__relays__on_relay_status_changed_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        31 => wire__crate__api__chat__open_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
-        32 => wire__crate__api__disputes__pending_disputes_impl(port, ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__node_info__protocol_support_default_impl(
-            port,
-            ptr,
-            rust_vec_len,
-            data_len,
-        ),
-        35 => wire__crate__api__take__recover_candidates_impl(port, ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__nodes__refresh_mostro_node_metadata_impl(
+        32 => wire__crate__api__chat__open_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
+        33 => wire__crate__api__observer__paste_shared_key_impl(port, ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__disputes__pending_disputes_impl(port, ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__node_info__protocol_support_default_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
         37 => {
+            wire__crate__api__observer__read_observed_chat_impl(port, ptr, rust_vec_len, data_len)
+        }
+        38 => wire__crate__api__take__recover_candidates_impl(port, ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__nodes__refresh_mostro_node_metadata_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        40 => {
             wire__crate__api__nodes__rehydrate_active_node_impl(port, ptr, rust_vec_len, data_len)
         }
-        38 => wire__crate__api__nodes__remove_custom_mostro_node_impl(
+        41 => wire__crate__api__nodes__remove_custom_mostro_node_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        39 => wire__crate__api__relays__remove_relay_impl(port, ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__chat__retry_chat_message_impl(port, ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__nodes__select_active_node_impl(port, ptr, rust_vec_len, data_len),
-        42 => wire__crate__api__chat__send_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__chat__send_chat_message_impl(port, ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__take__solver_permission_default_impl(
+        42 => wire__crate__api__relays__remove_relay_impl(port, ptr, rust_vec_len, data_len),
+        43 => wire__crate__api__chat__retry_chat_message_impl(port, ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__nodes__select_active_node_impl(port, ptr, rust_vec_len, data_len),
+        45 => wire__crate__api__chat__send_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
+        46 => wire__crate__api__chat__send_chat_message_impl(port, ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__take__solver_permission_default_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        45 => wire__crate__api__solver__solver_pubkey_impl(port, ptr, rust_vec_len, data_len),
-        46 => wire__crate__api__take__solver_standing_impl(port, ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__take__solver_status_default_impl(port, ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__nodes__sync_mostro_node_pictures_impl(
+        48 => wire__crate__api__solver__solver_pubkey_impl(port, ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__take__solver_standing_impl(port, ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__take__solver_status_default_impl(port, ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__nodes__sync_mostro_node_pictures_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        49 => wire__crate__api__take__take_dispute_impl(port, ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__solver__unload_solver_key_impl(port, ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__take__take_dispute_impl(port, ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__solver__unload_solver_key_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -3275,7 +3504,7 @@ fn pde_ffi_dispatcher_sync_impl(
         6 => wire__crate__api__nodes__active_node_impl(ptr, rust_vec_len, data_len),
         9 => wire__crate__api__app_version_impl(ptr, rust_vec_len, data_len),
         12 => wire__crate__api__solver__create_solver_account_impl(ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__solver__preview_npub_impl(ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__solver__preview_npub_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -3788,6 +4017,27 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::take::InProgressDisputes>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::observer::KeyDisclosure {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.party.into_into_dart().into_dart(),
+            self.shared_at.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::observer::KeyDisclosure
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::observer::KeyDisclosure>
+    for crate::api::observer::KeyDisclosure
+{
+    fn into_into_dart(self) -> crate::api::observer::KeyDisclosure {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::nodes::MostroNodeEntry {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -3902,6 +4152,83 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::node_info::NodeInfo>
     for crate::api::node_info::NodeInfo
 {
     fn into_into_dart(self) -> crate::api::node_info::NodeInfo {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::observer::ObservedChat {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.mostro_pubkey.into_into_dart().into_dart(),
+            self.dispute_id.into_into_dart().into_dart(),
+            self.disclosures.into_into_dart().into_dart(),
+            self.has_pasted_key.into_into_dart().into_dart(),
+            self.since.into_into_dart().into_dart(),
+            self.messages.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::observer::ObservedChat
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::observer::ObservedChat>
+    for crate::api::observer::ObservedChat
+{
+    fn into_into_dart(self) -> crate::api::observer::ObservedChat {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::observer::ObservedMessage {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.id.into_into_dart().into_dart(),
+            self.sender.into_into_dart().into_dart(),
+            self.content.into_into_dart().into_dart(),
+            self.created_at.into_into_dart().into_dart(),
+            self.attachment.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::observer::ObservedMessage
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::observer::ObservedMessage>
+    for crate::api::observer::ObservedMessage
+{
+    fn into_into_dart(self) -> crate::api::observer::ObservedMessage {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::observer::ObserverError {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::NoKey => 0.into_dart(),
+            Self::NoNode => 1.into_dart(),
+            Self::NoRelays => 2.into_dart(),
+            Self::UnknownDispute => 3.into_dart(),
+            Self::NoPartyKeys => 4.into_dart(),
+            Self::NoSharedKey => 5.into_dart(),
+            Self::InvalidKey => 6.into_dart(),
+            Self::KeyOpensNothing => 7.into_dart(),
+            Self::FetchFailed => 8.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::observer::ObserverError
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::observer::ObserverError>
+    for crate::api::observer::ObserverError
+{
+    fn into_into_dart(self) -> crate::api::observer::ObserverError {
         self
     }
 }
@@ -4663,6 +4990,14 @@ impl SseEncode for crate::api::take::InProgressDisputes {
     }
 }
 
+impl SseEncode for crate::api::observer::KeyDisclosure {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::chat::ChatParty>::sse_encode(self.party, serializer);
+        <i64>::sse_encode(self.shared_at, serializer);
+    }
+}
+
 impl SseEncode for Vec<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -4693,12 +5028,32 @@ impl SseEncode for Vec<crate::api::disputes::DisputeSummary> {
     }
 }
 
+impl SseEncode for Vec<crate::api::observer::KeyDisclosure> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::observer::KeyDisclosure>::sse_encode(item, serializer);
+        }
+    }
+}
+
 impl SseEncode for Vec<crate::api::nodes::MostroNodeEntry> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
             <crate::api::nodes::MostroNodeEntry>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::observer::ObservedMessage> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::observer::ObservedMessage>::sse_encode(item, serializer);
         }
     }
 }
@@ -4794,6 +5149,52 @@ impl SseEncode for crate::api::node_info::NodeInfo {
         <Vec<String>>::sse_encode(self.lnd_chains, serializer);
         <Vec<String>>::sse_encode(self.lnd_networks, serializer);
         <Vec<String>>::sse_encode(self.lnd_uris, serializer);
+    }
+}
+
+impl SseEncode for crate::api::observer::ObservedChat {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.mostro_pubkey, serializer);
+        <String>::sse_encode(self.dispute_id, serializer);
+        <Vec<crate::api::observer::KeyDisclosure>>::sse_encode(self.disclosures, serializer);
+        <bool>::sse_encode(self.has_pasted_key, serializer);
+        <i64>::sse_encode(self.since, serializer);
+        <Vec<crate::api::observer::ObservedMessage>>::sse_encode(self.messages, serializer);
+    }
+}
+
+impl SseEncode for crate::api::observer::ObservedMessage {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.id, serializer);
+        <crate::api::chat::ChatParty>::sse_encode(self.sender, serializer);
+        <String>::sse_encode(self.content, serializer);
+        <i64>::sse_encode(self.created_at, serializer);
+        <Option<crate::api::chat::ChatAttachment>>::sse_encode(self.attachment, serializer);
+    }
+}
+
+impl SseEncode for crate::api::observer::ObserverError {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::observer::ObserverError::NoKey => 0,
+                crate::api::observer::ObserverError::NoNode => 1,
+                crate::api::observer::ObserverError::NoRelays => 2,
+                crate::api::observer::ObserverError::UnknownDispute => 3,
+                crate::api::observer::ObserverError::NoPartyKeys => 4,
+                crate::api::observer::ObserverError::NoSharedKey => 5,
+                crate::api::observer::ObserverError::InvalidKey => 6,
+                crate::api::observer::ObserverError::KeyOpensNothing => 7,
+                crate::api::observer::ObserverError::FetchFailed => 8,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 
@@ -4963,6 +5364,16 @@ impl SseEncode for Option<crate::api::node_info::NodeInfo> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <crate::api::node_info::NodeInfo>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::observer::ObservedChat> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::observer::ObservedChat>::sse_encode(value, serializer);
         }
     }
 }

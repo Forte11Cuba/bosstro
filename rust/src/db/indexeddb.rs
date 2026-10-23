@@ -6,7 +6,8 @@
 //! bytes as a `Uint8Array`, with a small JSON index naming the URL, so a sync
 //! compares URLs without loading a picture), disputes by `node:dispute id` (a
 //! JSON document), chat messages by `node:dispute:party:solver:message id`
-//! (a JSON document), attachment blobs by their SHA-256 (the encrypted bytes
+//! (a JSON document), observed chat messages by `node:dispute:solver:message
+//! id` (a JSON document), attachment blobs by their SHA-256 (the encrypted bytes
 //! as a `Uint8Array`, with a JSON index entry for the trim, as ../app). This
 //! backend has no compound writes: each method is one `put` or `delete` (a
 //! picture's or a blob's bytes and index in one transaction), so it needs
@@ -32,13 +33,14 @@ use crate::db::blob_cache::{blobs_to_evict, BlobEntry, WEB_ATTACHMENT_CACHE_BYTE
 use crate::db::Storage;
 use crate::api::chat::ChatDelivery;
 use crate::api::disputes::DisputeStatus;
+use crate::chat::observer::{ObservedRecord, ObservedRef};
 use crate::chat::{ChannelRef, ChatRecord};
 use crate::disputes::DisputeRecord;
 
 /// Bumped when a store is added; `open_db` creates whatever is missing.
 /// 2: disputes (phase 3). 3: dispute_messages (phase 5). 4: the attachment
-/// cache (phase 5, part 2).
-const DB_VERSION: u32 = 4;
+/// cache (phase 5, part 2). 5: observed_messages (phase 5c).
+const DB_VERSION: u32 = 5;
 const SETTINGS_STORE: &str = "settings";
 const RELAYS_STORE: &str = "relays";
 const NODE_PICTURES_STORE: &str = "node_pictures";
@@ -47,7 +49,8 @@ const DISPUTES_STORE: &str = "disputes";
 const CHAT_STORE: &str = "dispute_messages";
 const ATTACHMENT_BLOBS_STORE: &str = "attachment_blobs";
 const ATTACHMENT_INDEX_STORE: &str = "attachment_blob_index";
-const ALL_STORES: [&str; 8] = [
+const OBSERVED_STORE: &str = "observed_messages";
+const ALL_STORES: [&str; 9] = [
     SETTINGS_STORE,
     RELAYS_STORE,
     NODE_PICTURES_STORE,
@@ -56,6 +59,7 @@ const ALL_STORES: [&str; 8] = [
     CHAT_STORE,
     ATTACHMENT_BLOBS_STORE,
     ATTACHMENT_INDEX_STORE,
+    OBSERVED_STORE,
 ];
 
 /// The key of a dispute's record: one per node and dispute (D6).
@@ -78,6 +82,16 @@ fn channel_prefix(channel: &ChannelRef) -> String {
 
 fn chat_key(channel: &ChannelRef, message_id: &str) -> String {
     format!("{}:{message_id}", channel_prefix(channel))
+}
+
+/// The key prefix of one observed chat's records: node, dispute and solver
+/// key. A message's key is the prefix and its id; the chat's records are the
+/// range `prefix:` ..< `prefix;`.
+fn observed_prefix(observed: &ObservedRef) -> String {
+    format!(
+        "{}:{}:{}",
+        observed.mostro_pubkey, observed.dispute_id, observed.solver_pubkey
+    )
 }
 
 /// What [`NODE_PICTURE_INDEX_STORE`] keeps of one node's picture.
@@ -445,6 +459,51 @@ impl Storage for IndexedDbStorage {
             .await
     }
 
+    // ── Observed chats ───────────────────────────────────────────────────────
+
+    async fn insert_observed_message(&self, message: &ObservedRecord) -> Result<bool> {
+        // Read, then write, as the chat: one read at a time per tab, and two
+        // tabs storing the same message write the same record.
+        let key = format!(
+            "{}:{}",
+            observed_prefix(&message.conversation),
+            message.message_id
+        );
+        if self.get_string(OBSERVED_STORE, &key).await?.is_some() {
+            return Ok(false);
+        }
+        let json = serde_json::to_string(message)?;
+        self.put_string(OBSERVED_STORE, &key, &json).await?;
+        Ok(true)
+    }
+
+    async fn list_observed_messages(&self, observed: &ObservedRef) -> Result<Vec<ObservedRecord>> {
+        let prefix = observed_prefix(observed);
+        let range = web_sys::IdbKeyRange::bound(
+            &JsValue::from_str(&format!("{prefix}:")),
+            &JsValue::from_str(&format!("{prefix};")),
+        )
+        .map_err(|e| js_err("key range", e))?;
+        let db = self.open_db().await?;
+        let tx = db
+            .transaction_on_one_with_mode(OBSERVED_STORE, IdbTransactionMode::Readonly)
+            .map_err(|e| js_err("tx open", e))?;
+        let store = tx
+            .object_store(OBSERVED_STORE)
+            .map_err(|e| js_err("store open", e))?;
+        let array = store
+            .get_all_with_key(&range)
+            .map_err(|e| js_err("get_all", e))?
+            .await
+            .map_err(|e| js_err("get_all await", e))?;
+        Ok(array
+            .iter()
+            .filter_map(|v| v.as_string())
+            .filter_map(|json| serde_json::from_str::<ObservedRecord>(&json).ok())
+            .filter(|row| &row.conversation == observed)
+            .collect())
+    }
+
     // ── Attachment cache — encrypted blobs only, with their index entry ─────
 
     async fn save_attachment_blob(&self, sha256: &str, blob: &[u8]) -> Result<()> {
@@ -589,6 +648,19 @@ mod tests {
     async fn the_chat_cursor_never_passes_the_clock_of_acceptance() {
         contract::the_chat_cursor_never_passes_the_clock_of_acceptance(&store("chat_cursor").await)
             .await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn observed_messages_round_trip() {
+        contract::observed_messages_round_trip(&store("observed").await).await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn observed_chats_never_mix_with_each_other_or_the_chat() {
+        contract::observed_chats_never_mix_with_each_other_or_the_chat(
+            &store("observed_mix").await,
+        )
+        .await;
     }
 
     #[wasm_bindgen_test]

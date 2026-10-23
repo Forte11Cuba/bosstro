@@ -13,6 +13,7 @@ use crate::api::disputes::{DisputeInitiator, DisputeStatus};
 use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
 use crate::db::Storage;
+use crate::chat::observer::{ObservedRecord, ObservedRef};
 use crate::chat::{ChannelRef, ChatRecord};
 use crate::disputes::{DisputeRecord, TakenDispute};
 
@@ -25,6 +26,11 @@ const DISPUTE_COLUMNS: &str = "mostro_pubkey, dispute_id, status, initiator, ope
 /// Every column of `dispute_messages`, in the order [`chat_from_row`] reads them.
 const CHAT_COLUMNS: &str = "mostro_pubkey, dispute_id, party, solver_pubkey, message_id, \
      sender, content, created_at, received_at, delivery";
+
+/// Every column of `observed_messages`, in the order [`observed_from_row`]
+/// reads them.
+const OBSERVED_COLUMNS: &str = "mostro_pubkey, dispute_id, solver_pubkey, message_id, sender, \
+     content, created_at, received_at";
 
 /// The condition that picks one channel's rows.
 const CHANNEL_WHERE: &str =
@@ -318,6 +324,46 @@ impl Storage for SqliteStorage {
         Ok(row.0)
     }
 
+    async fn insert_observed_message(&self, m: &ObservedRecord) -> Result<bool> {
+        let done = sqlx::query(&format!(
+            "INSERT OR IGNORE INTO observed_messages ({OBSERVED_COLUMNS})
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        ))
+        .bind(&m.conversation.mostro_pubkey)
+        .bind(&m.conversation.dispute_id)
+        .bind(&m.conversation.solver_pubkey)
+        .bind(&m.message_id)
+        .bind(m.sender.as_wire())
+        .bind(&m.content)
+        .bind(m.created_at)
+        .bind(m.received_at)
+        .execute(&self.pool)
+        .await?;
+        Ok(done.rows_affected() > 0)
+    }
+
+    async fn list_observed_messages(&self, observed: &ObservedRef) -> Result<Vec<ObservedRecord>> {
+        let rows = sqlx::query(&format!(
+            "SELECT {OBSERVED_COLUMNS} FROM observed_messages
+             WHERE mostro_pubkey = ? AND dispute_id = ? AND solver_pubkey = ?"
+        ))
+        .bind(&observed.mostro_pubkey)
+        .bind(&observed.dispute_id)
+        .bind(&observed.solver_pubkey)
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows
+            .iter()
+            .filter_map(|row| match observed_from_row(row) {
+                Ok(record) => Some(record),
+                Err(e) => {
+                    log::warn!("[db] skipping unreadable observed row: {e}");
+                    None
+                }
+            })
+            .collect())
+    }
+
     async fn save_attachment_blob(&self, sha256: &str, blob: &[u8]) -> Result<()> {
         sqlx::query(
             "INSERT OR REPLACE INTO attachment_blobs (sha256, data, size, created_at)
@@ -471,6 +517,24 @@ fn chat_from_row(row: &sqlx::sqlite::SqliteRow) -> Result<ChatRecord> {
     })
 }
 
+fn observed_from_row(row: &sqlx::sqlite::SqliteRow) -> Result<ObservedRecord> {
+    use crate::api::chat::ChatParty;
+    let sender: String = row.try_get("sender")?;
+    Ok(ObservedRecord {
+        conversation: ObservedRef {
+            mostro_pubkey: row.try_get("mostro_pubkey")?,
+            dispute_id: row.try_get("dispute_id")?,
+            solver_pubkey: row.try_get("solver_pubkey")?,
+        },
+        message_id: row.try_get("message_id")?,
+        sender: ChatParty::from_wire(&sender)
+            .ok_or_else(|| anyhow::anyhow!("unknown observed sender {sender:?}"))?,
+        content: row.try_get("content")?,
+        created_at: row.try_get("created_at")?,
+        received_at: row.try_get("received_at")?,
+    })
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
@@ -545,12 +609,22 @@ pub(crate) mod tests {
         contract::the_chat_cursor_never_passes_the_clock_of_acceptance(&store().await).await;
     }
 
-    /// The Pending query uses the index, not a scan of the table.
+    #[tokio::test]
+    async fn observed_messages_round_trip() {
+        contract::observed_messages_round_trip(&store().await).await;
+    }
+
+    #[tokio::test]
+    async fn observed_chats_never_mix_with_each_other_or_the_chat() {
+        contract::observed_chats_never_mix_with_each_other_or_the_chat(&store().await).await;
+    }
+
     #[tokio::test]
     async fn attachment_blobs_are_cached_and_bounded() {
         contract::attachment_blobs_are_cached_and_bounded(&store().await).await;
     }
 
+    /// The Pending query uses the index, not a scan of the table.
     #[tokio::test]
     async fn the_pending_query_uses_the_status_index() {
         let storage = store().await;
