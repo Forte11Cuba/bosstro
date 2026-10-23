@@ -29,6 +29,10 @@ mostro-core = "0.17.3"
 # Error handling
 anyhow = "1"
 
+# Wipes the solver's secret as it arrives over the bridge, until it is parsed
+# into `Keys` (whose `SecretKey` wipes itself on drop). Same crate as ../app.
+zeroize = "1"
+
 # Async runtime and persistence. Android only for the MVP, so no wasm split.
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "net"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync"] }
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros", "migrate"] }

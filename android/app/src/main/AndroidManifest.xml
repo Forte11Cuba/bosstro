@@ -4,6 +4,11 @@
     <!-- Network (Nostr relay connections, Blossom HTTP) -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Camera: scanning the QR of a secret key on Log in (mobile_scanner).
+         Optional: without a camera the key is pasted. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <!-- No Auto Backup and no device transfer: the solver key is Keystore-bound
          and must never be copied to Google. tools:replace keeps a merged
          library manifest from turning it back on. -->

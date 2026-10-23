@@ -66,6 +66,70 @@ class PrimaryButton extends StatelessWidget {
   }
 }
 
+/// The outlined secondary of a page (DS-CMP-4): the primary's shape, the
+/// `border` token and `textBody` ink, 15/w500. For a second path, not a way
+/// out — leaving without consequence is a [TextLink] (DS-CMP-20).
+class SecondaryButton extends StatelessWidget {
+  const SecondaryButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = ShellPalette.of(context);
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: pal.textBody,
+        side: BorderSide(color: pal.border),
+        minimumSize: const Size.fromHeight(48),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.pageCta),
+        ),
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      child: FittedBox(fit: BoxFit.scaleDown, child: Text(label, maxLines: 1)),
+    );
+  }
+}
+
+/// A way out that undoes nothing (DS-CMP-20): a centred text link in
+/// `textSecondary` under the screen's actions, at least 48 tall (DS-CMP-6).
+class TextLink extends StatelessWidget {
+  const TextLink({super.key, required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = ShellPalette.of(context);
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: pal.textSecondary,
+        minimumSize: const Size.fromHeight(48),
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      child: Text(label, textAlign: TextAlign.center),
+    );
+  }
+}
+
 /// The bar pinned under a screen (DS-SPC-5): nav surface, hairline on top,
 /// padding 12 / 18 / 18, inside the bottom safe area. It holds actions only.
 class ActionBar extends StatelessWidget {

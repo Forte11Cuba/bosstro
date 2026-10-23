@@ -79,5 +79,233 @@
   "easterEggPizzaDay": "22 May 2010: 10,000 BTC for two pizzas. Hope they were good.",
   "@easterEggPizzaDay": {
     "description": "Easter egg shown when the mascot is tapped on 22 May, Bitcoin Pizza Day"
+  },
+  "welcomeTitle": "Resolve Mostro disputes",
+  "@welcomeTitle": {
+    "description": "Welcome screen headline"
+  },
+  "welcomeBody": "Take a node's disputes, talk with the buyer and the seller, and close them, from your phone.",
+  "@welcomeBody": {
+    "description": "Welcome screen: what the app is for"
+  },
+  "welcomeLogIn": "Log in",
+  "@welcomeLogIn": {
+    "description": "Welcome primary action: log in with an existing solver secret key"
+  },
+  "welcomeCreateAccount": "Create new account",
+  "@welcomeCreateAccount": {
+    "description": "Welcome secondary action: generate a new solver key"
+  },
+  "welcomeKeyUnreadable": "The saved key could not be read on this phone. Log in again with your secret key. Logging in with another key replaces the saved one.",
+  "@welcomeKeyUnreadable": {
+    "description": "Welcome: shown when the stored solver key could not be read or loaded at startup. Nothing was deleted"
+  },
+  "traderKeyWarning": "Never use the key you trade with. A solver key that is also a trading key links both roles publicly.",
+  "@traderKeyWarning": {
+    "description": "Warning on Log in and Create new account: the solver key must not be the trader identity's key"
+  },
+  "loginTitle": "Log in",
+  "@loginTitle": {
+    "description": "App bar title of the Log in screen"
+  },
+  "loginHeading": "Your solver secret key",
+  "@loginHeading": {
+    "description": "Log in: heading above the secret key field"
+  },
+  "loginBody": "Paste or scan the secret key (nsec) whose npub your node operator registered as a solver.",
+  "@loginBody": {
+    "description": "Log in: what to enter"
+  },
+  "secretKeyHint": "nsec1…",
+  "@secretKeyHint": {
+    "description": "Placeholder of the secret key field; the nsec prefix, keep as is"
+  },
+  "showSecretKey": "Show key",
+  "@showSecretKey": {
+    "description": "Tooltip: reveal the secret key typed in the field"
+  },
+  "hideSecretKey": "Hide key",
+  "@hideSecretKey": {
+    "description": "Tooltip: hide the secret key typed in the field"
+  },
+  "pasteAction": "Paste",
+  "@pasteAction": {
+    "description": "Action under a field: paste from the clipboard"
+  },
+  "scanQrAction": "Scan QR",
+  "@scanQrAction": {
+    "description": "Action under a field: scan a QR code with the camera"
+  },
+  "clipboardEmpty": "The clipboard is empty.",
+  "@clipboardEmpty": {
+    "description": "Error under the field when Paste finds nothing"
+  },
+  "loginContinue": "Continue",
+  "@loginContinue": {
+    "description": "Log in: check the entered key and show its npub"
+  },
+  "keyErrorEmpty": "Enter your secret key.",
+  "@keyErrorEmpty": {
+    "description": "Log in error: nothing entered"
+  },
+  "keyErrorPublicKey": "That is a public key (npub). Logging in needs the secret key (nsec).",
+  "@keyErrorPublicKey": {
+    "description": "Log in error: an npub was entered instead of an nsec"
+  },
+  "keyErrorInvalid": "This is not a valid secret key. Enter an nsec1… key or its 64-character hex form.",
+  "@keyErrorInvalid": {
+    "description": "Log in error: not an nsec nor a hex secret key"
+  },
+  "loginConfirmHeading": "Is this the npub registered as a solver?",
+  "@loginConfirmHeading": {
+    "description": "Log in confirmation step: question above the npub the entered key stands for"
+  },
+  "loginConfirmBody": "Compare it with the npub your node operator added. If it is not the same, this key cannot resolve disputes on that node.",
+  "@loginConfirmBody": {
+    "description": "Log in confirmation step: why to compare the npub"
+  },
+  "loginConfirmAnswer": "Yes, log in",
+  "@loginConfirmAnswer": {
+    "description": "Log in confirmation: confirm the npub and log in. Repeats the opener's verb"
+  },
+  "loginConfirmBack": "No, use another key",
+  "@loginConfirmBack": {
+    "description": "Log in confirmation: go back and enter another key"
+  },
+  "keySaveFailed": "The key could not be saved on this phone. Try again.",
+  "@keySaveFailed": {
+    "description": "Error when loading or storing the solver key failed"
+  },
+  "npubLabel": "npub",
+  "@npubLabel": {
+    "description": "Label of a public key in npub form; keep as is"
+  },
+  "secretKeyLabel": "Secret key (nsec)",
+  "@secretKeyLabel": {
+    "description": "Label of the secret key card"
+  },
+  "copyNpub": "Copy npub",
+  "@copyNpub": {
+    "description": "Action / screen reader label: copy the npub"
+  },
+  "copySecretKey": "Copy secret key",
+  "@copySecretKey": {
+    "description": "Action / screen reader label: copy the secret key"
+  },
+  "shareNpub": "Share npub",
+  "@shareNpub": {
+    "description": "Action: share the npub through the system share sheet"
+  },
+  "npubQrLabel": "QR code of your npub",
+  "@npubQrLabel": {
+    "description": "Screen reader label of the npub QR code"
+  },
+  "scanTitle": "Scan QR",
+  "@scanTitle": {
+    "description": "App bar title of the QR scanner"
+  },
+  "scanHint": "Point the camera at the QR code of your secret key.",
+  "@scanHint": {
+    "description": "QR scanner: instruction over the camera preview"
+  },
+  "scanUnavailable": "The camera is not available. Go back and paste the key instead.",
+  "@scanUnavailable": {
+    "description": "QR scanner: the camera could not start (no camera or permission refused)"
+  },
+  "createTitle": "Create new account",
+  "@createTitle": {
+    "description": "App bar title of Create new account"
+  },
+  "createKeyHeading": "Your new secret key",
+  "@createKeyHeading": {
+    "description": "Create new account, step 1: heading"
+  },
+  "createKeyBody": "It is the only way to log in to this account. Write it down somewhere safe and private: anyone who has it can resolve disputes as you.",
+  "@createKeyBody": {
+    "description": "Create new account, step 1: why the secret key must be saved"
+  },
+  "createBackupConfirm": "I saved my secret key somewhere safe",
+  "@createBackupConfirm": {
+    "description": "Create new account, step 1: checkbox the solver ticks before continuing"
+  },
+  "createContinue": "Continue",
+  "@createContinue": {
+    "description": "Create new account, step 1: go on once the backup is confirmed"
+  },
+  "createNpubHeading": "Your npub",
+  "@createNpubHeading": {
+    "description": "Create new account, step 2: heading"
+  },
+  "createNpubBody": "Send this npub to your node operator so they register you as a solver. Until then you can see the disputes but not take them.",
+  "@createNpubBody": {
+    "description": "Create new account, step 2: what to do with the npub"
+  },
+  "createDone": "Go to disputes",
+  "@createDone": {
+    "description": "Create new account, step 2: finish and open the tabs"
+  },
+  "settingsGroupKey": "Solver key",
+  "@settingsGroupKey": {
+    "description": "Settings group header: the solver's key"
+  },
+  "settingsNpub": "Your npub",
+  "@settingsNpub": {
+    "description": "Settings row: the solver's npub; opens it with its QR"
+  },
+  "settingsBackup": "Back up secret key",
+  "@settingsBackup": {
+    "description": "Settings row: show the secret key for backup"
+  },
+  "settingsLogOut": "Log out",
+  "@settingsLogOut": {
+    "description": "Settings row: remove the key from this phone"
+  },
+  "backupWarnTitle": "Show your secret key?",
+  "@backupWarnTitle": {
+    "description": "Dialog before showing the secret key"
+  },
+  "backupWarnBody": "Anyone who sees it can resolve disputes as you. Make sure nobody is looking at your screen.",
+  "@backupWarnBody": {
+    "description": "Dialog before showing the secret key: the risk"
+  },
+  "backupWarnAnswer": "Show secret key",
+  "@backupWarnAnswer": {
+    "description": "Dialog answer: show the secret key"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Dialog way out"
+  },
+  "backupTitle": "Secret key backup",
+  "@backupTitle": {
+    "description": "App bar title of the backup screen"
+  },
+  "backupBody": "Keep it somewhere safe and private. It is the only way to log in to this account on another phone.",
+  "@backupBody": {
+    "description": "Backup screen: what the secret key is for"
+  },
+  "backupUnavailable": "The secret key could not be read on this phone.",
+  "@backupUnavailable": {
+    "description": "Backup screen: the stored key could not be read"
+  },
+  "logOutTitle": "Log out?",
+  "@logOutTitle": {
+    "description": "Log out confirmation title"
+  },
+  "logOutBody": "Your secret key will be removed from this phone. Without a backup you cannot log in to this account again.",
+  "@logOutBody": {
+    "description": "Log out confirmation: what happens"
+  },
+  "logOutAnswer": "Log out",
+  "@logOutAnswer": {
+    "description": "Log out confirmation answer (destructive). Repeats the opener's verb"
+  },
+  "logOutFailed": "Could not log out. Try again.",
+  "@logOutFailed": {
+    "description": "Error when removing the key failed"
+  },
+  "secretKeyCopied": "Secret key copied. It is cleared from the clipboard in 60 seconds.",
+  "@secretKeyCopied": {
+    "description": "Snackbar after copying the secret key: it is marked sensitive and cleared from the clipboard after 60 seconds"
   }
 }

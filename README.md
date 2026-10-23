@@ -12,8 +12,8 @@ the architecture of [Mostro v2](https://github.com/MostroP2P/app): a Rust core (
 protocol, persistence) with a Flutter UI, bridged by
 [flutter_rust_bridge](https://github.com/fzyzcjy/flutter_rust_bridge).
 
-> **Status:** phase 0 — scaffold. The three-tab shell runs and calls the Rust core; solver keys,
-> nodes and disputes arrive in the next phases.
+> **Status:** phase 1 — solver key. Log in with an nsec or create a new one; the key lives in
+> secure storage and in the Rust core. Nodes and disputes arrive in the next phases.
 
 ## Building
 

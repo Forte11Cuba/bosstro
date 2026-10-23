@@ -1949,6 +1949,7 @@ dependencies = [
  "nostr-sdk",
  "sqlx",
  "tokio",
+ "zeroize",
 ]
 
 [[package]]

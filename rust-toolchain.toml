@@ -1,0 +1,9 @@
+# The Rust that builds Bosstro, locally and in CI (.github/workflows/ci.yml pins the
+# same version). It must match: flutter_rust_bridge's codegen expands the crate with
+# this compiler, and the expansion leaks into the committed bindings (a derive's
+# helper names change between releases), so a different local Rust fails CI's
+# "generated code is committed" check. Bump both together.
+[toolchain]
+channel = "1.97.0"
+components = ["clippy", "rustfmt"]
+profile = "minimal"

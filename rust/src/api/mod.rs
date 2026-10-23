@@ -2,6 +2,8 @@
 //! (`rust_input` in `flutter_rust_bridge.yaml`). Any change here, even to a
 //! private item, needs `./scripts/frb-generate.sh`.
 
+pub mod solver;
+
 /// The crate version, which is also the app version (`pubspec.yaml` without
 /// the `+build` suffix). Settings shows it; it is the phase 0 proof that Dart
 /// reaches Rust through the bridge.

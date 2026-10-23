@@ -31,6 +31,10 @@ dependencies:
 
   # Injectable clock: the mascot's seasons read it, so tests can pin a date
   clock: ^1.1.1
+  flutter_secure_storage: ^10.0.0
+  mobile_scanner: ^7.2.0
+  qr: ^3.0.2
+  share_plus: ^12.0.1
 
 dev_dependencies:
   flutter_test:
@@ -38,6 +42,7 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   # Generates the Android launcher icons from icons/bosstro-1024.png
   flutter_launcher_icons: ^0.14.2
+  fake_async: ^1.3.3
 
 flutter:
   uses-material-design: true

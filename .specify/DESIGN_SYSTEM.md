@@ -336,6 +336,8 @@ one-to-one choice in their ARB files.
 | Settling a dispute (sats to the buyer) | pay the buyer | pagar al comprador | settle, liquidar |
 | Cancelling a dispute (sats back to the seller) | refund the seller | devolver al vendedor | cancel, reembolsar |
 | A Mostro daemon and its pubkey | node | nodo | instancia, servidor |
+| The solver's private key (`nsec1…`) | secret key | clave secreta | private key, clave privada |
+| The solver's public key (`npub1…`) | npub | npub | public key alone, clave pública alone |
 | The app's settings | settings | configuración | ajustes |
 
 ---
