@@ -168,3 +168,40 @@ pub async fn recover_candidates() -> Result<Option<Vec<DisputeSummary>>> {
 pub async fn solver_standing() -> Result<Option<SolverStanding>> {
     crate::mostro::standing::active().await
 }
+
+/// A dispute this key holds (or held until it closed), as its detail shows
+/// it: the 38386's public fields and what the node said in the take.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DisputeDetail {
+    pub mostro_pubkey: String,
+    pub dispute_id: String,
+    pub status: DisputeStatus,
+    pub initiator: DisputeInitiator,
+    pub opened_at: Option<i64>,
+    /// When the node gave it to this key (Unix seconds, this device's clock).
+    pub taken_at: i64,
+    pub order_id: Option<String>,
+    /// `buy` or `sell`, as the node writes it.
+    pub order_kind: Option<String>,
+    /// Sats.
+    pub amount: Option<i64>,
+    pub fiat_amount: Option<i64>,
+    pub fiat_code: Option<String>,
+    pub payment_method: Option<String>,
+    /// Percent over the market price.
+    pub premium: Option<i64>,
+    /// The node's fee, sats.
+    pub fee: Option<i64>,
+    /// The parties' trade keys (hex), when the node named them.
+    pub buyer_pubkey: Option<String>,
+    pub seller_pubkey: Option<String>,
+    /// Whether the dispute is over (its 38386 is terminal): the chats are
+    /// read only.
+    pub is_closed: bool,
+}
+
+/// The detail of `dispute_id` on the active node, when this key took it;
+/// `None` otherwise (another key's, a reopened one, or no node or key).
+pub async fn dispute_detail(dispute_id: String) -> Result<Option<DisputeDetail>> {
+    crate::mostro::take::detail(&dispute_id).await
+}

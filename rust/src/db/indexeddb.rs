@@ -5,7 +5,8 @@
 //! key, relays by URL (a JSON document), node pictures by node pubkey (the
 //! bytes as a `Uint8Array`, with a small JSON index naming the URL, so a sync
 //! compares URLs without loading a picture), disputes by `node:dispute id` (a
-//! JSON document). This backend has no compound writes: each method is one
+//! JSON document), chat messages by `node:dispute:party:solver:message id`
+//! (a JSON document). This backend has no compound writes: each method is one
 //! `put` or `delete` (a picture's bytes and index in one transaction), so it
 //! needs none of ../app's `web_lock`.
 //!
@@ -26,28 +27,49 @@ use web_sys::wasm_bindgen::{JsCast, JsValue};
 use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
 use crate::db::Storage;
+use crate::api::chat::ChatDelivery;
 use crate::api::disputes::DisputeStatus;
+use crate::chat::{ChannelRef, ChatRecord};
 use crate::disputes::DisputeRecord;
 
 /// Bumped when a store is added; `open_db` creates whatever is missing.
-/// 2: disputes (phase 3).
-const DB_VERSION: u32 = 2;
+/// 2: disputes (phase 3). 3: dispute_messages (phase 5).
+const DB_VERSION: u32 = 3;
 const SETTINGS_STORE: &str = "settings";
 const RELAYS_STORE: &str = "relays";
 const NODE_PICTURES_STORE: &str = "node_pictures";
 const NODE_PICTURE_INDEX_STORE: &str = "node_picture_index";
 const DISPUTES_STORE: &str = "disputes";
-const ALL_STORES: [&str; 5] = [
+const CHAT_STORE: &str = "dispute_messages";
+const ALL_STORES: [&str; 6] = [
     SETTINGS_STORE,
     RELAYS_STORE,
     NODE_PICTURES_STORE,
     NODE_PICTURE_INDEX_STORE,
     DISPUTES_STORE,
+    CHAT_STORE,
 ];
 
 /// The key of a dispute's record: one per node and dispute (D6).
 fn dispute_key(mostro_pubkey: &str, dispute_id: &str) -> String {
     format!("{mostro_pubkey}:{dispute_id}")
+}
+
+/// The key prefix of one chat channel's records: node, dispute, party and
+/// solver key. A message's key is the prefix and its id; the channel's
+/// records are the range `prefix:` ..< `prefix;`.
+fn channel_prefix(channel: &ChannelRef) -> String {
+    format!(
+        "{}:{}:{}:{}",
+        channel.mostro_pubkey,
+        channel.dispute_id,
+        channel.party.as_wire(),
+        channel.solver_pubkey
+    )
+}
+
+fn chat_key(channel: &ChannelRef, message_id: &str) -> String {
+    format!("{}:{message_id}", channel_prefix(channel))
 }
 
 /// What [`NODE_PICTURE_INDEX_STORE`] keeps of one node's picture.
@@ -342,6 +364,78 @@ impl Storage for IndexedDbStorage {
             .filter(|row| row.mostro_pubkey == mostro_pubkey && row.status == status)
             .collect())
     }
+
+    // ── Dispute chat ─────────────────────────────────────────────────────────
+
+    async fn insert_chat_message(&self, message: &ChatRecord) -> Result<bool> {
+        // Read, then write: the router serialises its writes (one tab). Two
+        // tabs storing the same message write the same record.
+        let key = chat_key(&message.channel, &message.message_id);
+        if self.get_string(CHAT_STORE, &key).await?.is_some() {
+            return Ok(false);
+        }
+        let json = serde_json::to_string(message)?;
+        self.put_string(CHAT_STORE, &key, &json).await?;
+        Ok(true)
+    }
+
+    async fn get_chat_message(
+        &self,
+        channel: &ChannelRef,
+        message_id: &str,
+    ) -> Result<Option<ChatRecord>> {
+        Ok(self
+            .get_string(CHAT_STORE, &chat_key(channel, message_id))
+            .await?
+            .and_then(|json| serde_json::from_str(&json).ok()))
+    }
+
+    async fn list_chat_messages(&self, channel: &ChannelRef) -> Result<Vec<ChatRecord>> {
+        let prefix = channel_prefix(channel);
+        let range = web_sys::IdbKeyRange::bound(
+            &JsValue::from_str(&format!("{prefix}:")),
+            &JsValue::from_str(&format!("{prefix};")),
+        )
+        .map_err(|e| js_err("key range", e))?;
+        let db = self.open_db().await?;
+        let tx = db
+            .transaction_on_one_with_mode(CHAT_STORE, IdbTransactionMode::Readonly)
+            .map_err(|e| js_err("tx open", e))?;
+        let store = tx
+            .object_store(CHAT_STORE)
+            .map_err(|e| js_err("store open", e))?;
+        let array = store
+            .get_all_with_key(&range)
+            .map_err(|e| js_err("get_all", e))?
+            .await
+            .map_err(|e| js_err("get_all await", e))?;
+        Ok(array
+            .iter()
+            .filter_map(|v| v.as_string())
+            .filter_map(|json| serde_json::from_str::<ChatRecord>(&json).ok())
+            .filter(|row| &row.channel == channel)
+            .collect())
+    }
+
+    async fn set_chat_delivery(
+        &self,
+        channel: &ChannelRef,
+        message_id: &str,
+        delivery: ChatDelivery,
+    ) -> Result<()> {
+        let Some(mut row) = self.get_chat_message(channel, message_id).await? else {
+            return Ok(());
+        };
+        row.delivery = delivery;
+        let json = serde_json::to_string(&row)?;
+        self.put_string(CHAT_STORE, &chat_key(channel, message_id), &json)
+            .await
+    }
+
+    async fn delete_chat_message(&self, channel: &ChannelRef, message_id: &str) -> Result<()> {
+        self.delete_key(CHAT_STORE, &chat_key(channel, message_id))
+            .await
+    }
 }
 
 /// The same checks as the SQLite backend's, in a browser
@@ -397,6 +491,22 @@ mod tests {
     #[wasm_bindgen_test]
     async fn takes_keep_their_solver() {
         contract::takes_keep_their_solver(&store("disputes_takes").await).await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn chat_messages_round_trip() {
+        contract::chat_messages_round_trip(&store("chat").await).await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn chat_channels_never_mix() {
+        contract::chat_channels_never_mix(&store("chat_mix").await).await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn the_chat_cursor_never_passes_the_clock_of_acceptance() {
+        contract::the_chat_cursor_never_passes_the_clock_of_acceptance(&store("chat_cursor").await)
+            .await;
     }
 
     /// A take written before phase 4 named its solver (none was, but a row

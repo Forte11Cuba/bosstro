@@ -123,7 +123,9 @@ pub async fn initialize_relays() -> Result<()> {
     crate::disputes::feed::start(pool.client()).await;
     // The node's answers to the solver key (phase 4), beside the feed.
     if let Some(feed) = crate::disputes::feed::feed() {
-        crate::mostro::replies::start(pool.client(), feed).await;
+        crate::mostro::replies::start(pool.client(), feed.clone()).await;
+        // The chats of the disputes this key holds (phase 5).
+        crate::chat::router::start(pool.client(), feed).await;
     }
 
     // Each time the pool comes online, the active node's relay list and

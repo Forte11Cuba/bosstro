@@ -5,6 +5,8 @@
 //! One [`Storage`] trait, two backends picked at compile time
 //! (`app_db.rs`): SQLite through `sqlx` on native (Android, Linux),
 //! IndexedDB on the web. Neither is encrypted (SQLCipher is post-MVP).
+//! No key is ever written here: the chat's channel keys live in memory
+//! (`crate::chat`).
 
 pub mod app_db;
 #[cfg(target_arch = "wasm32")]
@@ -21,6 +23,8 @@ use anyhow::Result;
 use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
 use crate::api::disputes::DisputeStatus;
+use crate::api::chat::ChatDelivery;
+use crate::chat::{ChannelRef, ChatRecord};
 use crate::disputes::DisputeRecord;
 
 /// Keys used in the generic key-value settings store.
@@ -138,4 +142,41 @@ pub trait Storage: Send + Sync {
         mostro_pubkey: &str,
         status: DisputeStatus,
     ) -> Result<Vec<DisputeRecord>>;
+
+    // ── Dispute chat (`crate::chat`), one row per channel and message ────────
+
+    /// Store `message` unless its channel already has that message id.
+    /// Returns whether it was stored (false: a copy).
+    async fn insert_chat_message(&self, message: &ChatRecord) -> Result<bool>;
+    /// One message of a channel, if stored.
+    async fn get_chat_message(
+        &self,
+        channel: &ChannelRef,
+        message_id: &str,
+    ) -> Result<Option<ChatRecord>>;
+    /// Every message of `channel`, in no particular order. Another channel's
+    /// never appear.
+    async fn list_chat_messages(&self, channel: &ChannelRef) -> Result<Vec<ChatRecord>>;
+    /// Set the delivery of one message. No-op when absent.
+    async fn set_chat_delivery(
+        &self,
+        channel: &ChannelRef,
+        message_id: &str,
+        delivery: ChatDelivery,
+    ) -> Result<()>;
+    /// Remove one message (a failed one replaced by its retry). No-op when
+    /// absent.
+    async fn delete_chat_message(&self, channel: &ChannelRef, message_id: &str) -> Result<()>;
+    /// Where `channel`'s subscription resumes: the newest
+    /// `min(created_at, received_at)` of its messages, never past the clock
+    /// of the device that accepted them; `None` without messages.
+    async fn chat_cursor(&self, channel: &ChannelRef) -> Result<Option<i64>> {
+        Ok(self
+            .list_chat_messages(channel)
+            .await?
+            .iter()
+            .map(ChatRecord::cursor)
+            .max())
+    }
 }
+

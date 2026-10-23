@@ -39,9 +39,10 @@ use super::replies::{self, Request};
 use crate::api::disputes::{DisputeStatus, DisputeSummary};
 use crate::api::node_info::ProtocolSupport;
 use crate::api::take::{
-    InProgressDisputes, SolverStatus, TakeError, TakeOutcome, TakeResult, TakenDisputeSummary,
+    DisputeDetail, InProgressDisputes, SolverStatus, TakeError, TakeOutcome, TakeResult, TakenDisputeSummary,
 };
 use crate::disputes::feed::Feed;
+use crate::db::Storage;
 use crate::disputes::{oldest_first, DisputeRecord, TakenDispute};
 
 /// How long a take waits for the node's answer: Mostrix's
@@ -499,6 +500,44 @@ pub(crate) fn not_held_by(rows: &[DisputeRecord], solver: &str, now: i64) -> Vec
     list
 }
 
+pub(crate) async fn detail(dispute_id: &str) -> anyhow::Result<Option<DisputeDetail>> {
+    let Some((node, solver)) = node_and_solver().await else {
+        return Ok(None);
+    };
+    let row = match crate::db::app_db::db() {
+        Some(db) => db.get_dispute(&node, dispute_id).await?,
+        None => match crate::disputes::feed::feed() {
+            Some(feed) => feed.row(&node, dispute_id).await?,
+            None => None,
+        },
+    };
+    Ok(row.as_ref().and_then(|row| detail_of(row, &solver)))
+}
+
+/// `row` as its detail, when `solver` took it.
+pub(crate) fn detail_of(row: &DisputeRecord, solver: &str) -> Option<DisputeDetail> {
+    let taken = row.taken.as_ref().filter(|t| t.solver_pubkey == solver)?;
+    Some(DisputeDetail {
+        mostro_pubkey: row.mostro_pubkey.clone(),
+        dispute_id: row.dispute_id.clone(),
+        status: row.status,
+        initiator: row.initiator,
+        opened_at: row.opened_at,
+        taken_at: taken.taken_at,
+        order_id: taken.order_id.clone(),
+        order_kind: taken.order_kind.clone(),
+        amount: taken.amount,
+        fiat_amount: taken.fiat_amount,
+        fiat_code: taken.fiat_code.clone(),
+        payment_method: taken.payment_method.clone(),
+        premium: taken.premium,
+        fee: taken.fee,
+        buyer_pubkey: taken.buyer_pubkey.clone(),
+        seller_pubkey: taken.seller_pubkey.clone(),
+        is_closed: row.status.is_terminal(),
+    })
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
@@ -711,6 +750,21 @@ pub(crate) mod tests {
             .map(|d| d.dispute_id)
             .collect();
         assert_eq!(candidates, vec!["other-key", "nobody"]);
+    }
+
+    #[test]
+    fn the_detail_is_only_for_the_key_that_took_it() {
+        use crate::disputes::tests::{row_with, taken};
+        let mut row = row_with(DisputeStatus::InProgress);
+        assert_eq!(detail_of(&row, &"ab".repeat(32)), None, "not taken");
+        row.taken = Some(taken());
+        let detail = detail_of(&row, &"ab".repeat(32)).unwrap();
+        assert_eq!(detail.amount, Some(50_000));
+        assert_eq!(detail.buyer_pubkey.as_deref(), Some("bb"));
+        assert!(!detail.is_closed);
+        assert_eq!(detail_of(&row, &"cd".repeat(32)), None, "another key");
+        row.status = DisputeStatus::Settled;
+        assert!(detail_of(&row, &"ab".repeat(32)).unwrap().is_closed);
     }
 
     #[test]

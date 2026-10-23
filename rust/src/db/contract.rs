@@ -7,6 +7,8 @@
 use crate::api::disputes::{DisputeInitiator, DisputeStatus};
 use crate::api::relays::{RelayInfo, RelaySource, RelayStatus};
 use crate::db::{settings_keys, Storage};
+use crate::api::chat::{ChatDelivery, ChatParty, ChatSender};
+use crate::chat::{ChannelRef, ChatRecord};
 use crate::disputes::{DisputeRecord, TakenDispute};
 
 pub(crate) fn relay(url: &str) -> RelayInfo {
@@ -273,4 +275,128 @@ pub(crate) async fn takes_keep_their_solver(storage: &impl Storage) {
         .unwrap();
     rows.sort_by(|a, b| a.dispute_id.cmp(&b.dispute_id));
     assert_eq!(rows, vec![other_key, mine]);
+}
+
+pub(crate) fn channel(node: &str, dispute: &str, party: ChatParty, solver: &str) -> ChannelRef {
+    ChannelRef {
+        mostro_pubkey: node.into(),
+        dispute_id: dispute.into(),
+        party,
+        solver_pubkey: solver.into(),
+    }
+}
+
+pub(crate) fn message(channel: &ChannelRef, id: &str, created_at: i64) -> ChatRecord {
+    ChatRecord {
+        channel: channel.clone(),
+        message_id: id.into(),
+        sender: channel.party.sender(),
+        content: format!("text of {id}"),
+        created_at,
+        received_at: created_at,
+        delivery: ChatDelivery::Sent,
+    }
+}
+
+pub(crate) async fn chat_messages_round_trip(storage: &impl Storage) {
+    let buyer = channel("aa", DISPUTE_A, ChatParty::Buyer, "ss");
+    assert!(storage.list_chat_messages(&buyer).await.unwrap().is_empty());
+    assert_eq!(storage.chat_cursor(&buyer).await.unwrap(), None);
+
+    let first = message(&buyer, "m1", 100);
+    assert!(storage.insert_chat_message(&first).await.unwrap());
+    // The same id again is a copy: not stored twice, not replaced.
+    let mut copy = first.clone();
+    copy.content = "something else".into();
+    assert!(!storage.insert_chat_message(&copy).await.unwrap());
+    assert_eq!(
+        storage.get_chat_message(&buyer, "m1").await.unwrap(),
+        Some(first.clone())
+    );
+
+    let mut mine = message(&buyer, "m2", 200);
+    mine.sender = ChatSender::You;
+    mine.delivery = ChatDelivery::Sending;
+    assert!(storage.insert_chat_message(&mine).await.unwrap());
+    storage
+        .set_chat_delivery(&buyer, "m2", ChatDelivery::Failed)
+        .await
+        .unwrap();
+    assert_eq!(
+        storage
+            .get_chat_message(&buyer, "m2")
+            .await
+            .unwrap()
+            .unwrap()
+            .delivery,
+        ChatDelivery::Failed
+    );
+    // Absent rows are not an error.
+    storage
+        .set_chat_delivery(&buyer, "nope", ChatDelivery::Sent)
+        .await
+        .unwrap();
+    storage.delete_chat_message(&buyer, "nope").await.unwrap();
+
+    let mut rows = storage.list_chat_messages(&buyer).await.unwrap();
+    rows.sort_by(|a, b| a.message_id.cmp(&b.message_id));
+    assert_eq!(rows.len(), 2);
+    assert_eq!(rows[0], first);
+    assert_eq!(storage.chat_cursor(&buyer).await.unwrap(), Some(200));
+
+    storage.delete_chat_message(&buyer, "m2").await.unwrap();
+    assert_eq!(storage.list_chat_messages(&buyer).await.unwrap(), vec![first]);
+    assert_eq!(storage.chat_cursor(&buyer).await.unwrap(), Some(100));
+}
+
+/// Two parties, two disputes, two nodes, two solver keys: four channels
+/// that share nothing (D6).
+pub(crate) async fn chat_channels_never_mix(storage: &impl Storage) {
+    let channels = [
+        channel("aa", DISPUTE_A, ChatParty::Buyer, "ss"),
+        channel("aa", DISPUTE_A, ChatParty::Seller, "ss"),
+        channel("aa", DISPUTE_B, ChatParty::Buyer, "ss"),
+        channel("bb", DISPUTE_A, ChatParty::Buyer, "ss"),
+        channel("aa", DISPUTE_A, ChatParty::Buyer, "tt"),
+    ];
+    for (n, c) in channels.iter().enumerate() {
+        // The same message id in every channel: still one row each.
+        assert!(storage
+            .insert_chat_message(&message(c, "same", 10 * (n as i64 + 1)))
+            .await
+            .unwrap());
+    }
+    for (n, c) in channels.iter().enumerate() {
+        let rows = storage.list_chat_messages(c).await.unwrap();
+        assert_eq!(rows.len(), 1, "{c:?}");
+        assert_eq!(&rows[0].channel, c);
+        assert_eq!(rows[0].created_at, 10 * (n as i64 + 1));
+        assert_eq!(
+            storage.chat_cursor(c).await.unwrap(),
+            Some(10 * (n as i64 + 1))
+        );
+    }
+    storage
+        .delete_chat_message(&channels[0], "same")
+        .await
+        .unwrap();
+    assert!(storage
+        .list_chat_messages(&channels[0])
+        .await
+        .unwrap()
+        .is_empty());
+    assert_eq!(storage.list_chat_messages(&channels[1]).await.unwrap().len(), 1);
+}
+
+/// A message dated in the future moves the cursor only to when it was
+/// accepted.
+pub(crate) async fn the_chat_cursor_never_passes_the_clock_of_acceptance(storage: &impl Storage) {
+    let seller = channel("aa", DISPUTE_A, ChatParty::Seller, "ss");
+    let mut early = message(&seller, "m1", 1_000);
+    early.received_at = 1_005;
+    let mut future = message(&seller, "m2", 9_999_999_999);
+    future.received_at = 2_000;
+    storage.insert_chat_message(&early).await.unwrap();
+    storage.insert_chat_message(&future).await.unwrap();
+    assert_eq!(storage.chat_cursor(&seller).await.unwrap(), Some(2_000));
 }

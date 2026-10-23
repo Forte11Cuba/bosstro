@@ -7,7 +7,7 @@ import '../frb_generated.dart';
 import 'disputes.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
 
 /// Send `AdminTakeDispute` for `dispute_id`, a stored dispute of the active
 /// node, and wait for the answer (15 s, as Mostrix). Whatever the answer
@@ -35,6 +35,111 @@ Future<List<DisputeSummary>?> recoverCandidates() =>
 /// This key's standing on the active node; `None` without a node or a key.
 Future<SolverStanding?> solverStanding() =>
     RustLib.instance.api.crateApiTakeSolverStanding();
+
+/// The detail of `dispute_id` on the active node, when this key took it;
+/// `None` otherwise (another key's, a reopened one, or no node or key).
+Future<DisputeDetail?> disputeDetail({required String disputeId}) =>
+    RustLib.instance.api.crateApiTakeDisputeDetail(disputeId: disputeId);
+
+/// A dispute this key holds (or held until it closed), as its detail shows
+/// it: the 38386's public fields and what the node said in the take.
+class DisputeDetail {
+  final String mostroPubkey;
+  final String disputeId;
+  final DisputeStatus status;
+  final DisputeInitiator initiator;
+  final PlatformInt64? openedAt;
+
+  /// When the node gave it to this key (Unix seconds, this device's clock).
+  final PlatformInt64 takenAt;
+  final String? orderId;
+
+  /// `buy` or `sell`, as the node writes it.
+  final String? orderKind;
+
+  /// Sats.
+  final PlatformInt64? amount;
+  final PlatformInt64? fiatAmount;
+  final String? fiatCode;
+  final String? paymentMethod;
+
+  /// Percent over the market price.
+  final PlatformInt64? premium;
+
+  /// The node's fee, sats.
+  final PlatformInt64? fee;
+
+  /// The parties' trade keys (hex), when the node named them.
+  final String? buyerPubkey;
+  final String? sellerPubkey;
+
+  /// Whether the dispute is over (its 38386 is terminal): the chats are
+  /// read only.
+  final bool isClosed;
+
+  const DisputeDetail({
+    required this.mostroPubkey,
+    required this.disputeId,
+    required this.status,
+    required this.initiator,
+    this.openedAt,
+    required this.takenAt,
+    this.orderId,
+    this.orderKind,
+    this.amount,
+    this.fiatAmount,
+    this.fiatCode,
+    this.paymentMethod,
+    this.premium,
+    this.fee,
+    this.buyerPubkey,
+    this.sellerPubkey,
+    required this.isClosed,
+  });
+
+  @override
+  int get hashCode =>
+      mostroPubkey.hashCode ^
+      disputeId.hashCode ^
+      status.hashCode ^
+      initiator.hashCode ^
+      openedAt.hashCode ^
+      takenAt.hashCode ^
+      orderId.hashCode ^
+      orderKind.hashCode ^
+      amount.hashCode ^
+      fiatAmount.hashCode ^
+      fiatCode.hashCode ^
+      paymentMethod.hashCode ^
+      premium.hashCode ^
+      fee.hashCode ^
+      buyerPubkey.hashCode ^
+      sellerPubkey.hashCode ^
+      isClosed.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DisputeDetail &&
+          runtimeType == other.runtimeType &&
+          mostroPubkey == other.mostroPubkey &&
+          disputeId == other.disputeId &&
+          status == other.status &&
+          initiator == other.initiator &&
+          openedAt == other.openedAt &&
+          takenAt == other.takenAt &&
+          orderId == other.orderId &&
+          orderKind == other.orderKind &&
+          amount == other.amount &&
+          fiatAmount == other.fiatAmount &&
+          fiatCode == other.fiatCode &&
+          paymentMethod == other.paymentMethod &&
+          premium == other.premium &&
+          fee == other.fee &&
+          buyerPubkey == other.buyerPubkey &&
+          sellerPubkey == other.sellerPubkey &&
+          isClosed == other.isClosed;
+}
 
 /// The disputes this key took on the active node and still holds.
 class InProgressDisputes {
