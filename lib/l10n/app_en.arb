@@ -1523,5 +1523,157 @@
   "attachmentViewerZoomHint": "Pinch to zoom",
   "@attachmentViewerZoomHint": {
     "description": "Screen-reader hint of the full-screen image"
+  },
+  "observerTitle": "Chat between the parties",
+  "@observerTitle": {
+    "description": "Title of the dispute's buyer–seller chat, read with a chat key (Info card and its screen)"
+  },
+  "observerSharedByBuyer": "The buyer shared their chat key on {date}.",
+  "@observerSharedByBuyer": {
+    "description": "Info card: the buyer sent this solver the key of the buyer–seller chat",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "observerSharedBySeller": "The seller shared their chat key on {date}.",
+  "@observerSharedBySeller": {
+    "description": "Info card: the seller sent this solver the key of the buyer–seller chat",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "observerPastedKey": "You pasted a chat key for this dispute.",
+  "@observerPastedKey": {
+    "description": "Info card: a chat key pasted by the solver is held (until the app closes)"
+  },
+  "observerStoredOnly": "Messages kept from an earlier read. Paste the chat key again to look for new ones.",
+  "@observerStoredOnly": {
+    "description": "Info card: messages are stored but no key is held any more (a pasted key is forgotten when the app closes)"
+  },
+  "observerNoKey": "Neither party has shared their chat key yet. If one sends it to you another way, paste it here.",
+  "@observerNoKey": {
+    "description": "Info card and empty screen: no chat key is known for this dispute"
+  },
+  "observerReadAction": "Read the chat between the parties",
+  "@observerReadAction": {
+    "description": "Info card action: open the buyer–seller chat"
+  },
+  "observerPasteAction": "Paste a chat key",
+  "@observerPasteAction": {
+    "description": "Action: paste the key of the buyer–seller chat that a party sent"
+  },
+  "observerRefresh": "Refresh",
+  "@observerRefresh": {
+    "description": "Action: ask the relays for the buyer–seller chat again"
+  },
+  "observerReadOnlyBuyer": "Read only, with the key the buyer shared.",
+  "@observerReadOnlyBuyer": {
+    "description": "Note pinned under the buyer–seller chat, in place of a message field: there is none, the chat is read only"
+  },
+  "observerReadOnlySeller": "Read only, with the key the seller shared.",
+  "@observerReadOnlySeller": {
+    "description": "Note pinned under the buyer–seller chat, in place of a message field: there is none, the chat is read only"
+  },
+  "observerReadOnlyBoth": "Read only, with the key both parties shared.",
+  "@observerReadOnlyBoth": {
+    "description": "Note pinned under the buyer–seller chat, in place of a message field: there is none, the chat is read only"
+  },
+  "observerReadOnlyPasted": "Read only, with a key you pasted.",
+  "@observerReadOnlyPasted": {
+    "description": "Note pinned under the buyer–seller chat, in place of a message field: there is none, the chat is read only"
+  },
+  "observerReadOnlyStored": "Read only: messages from an earlier read.",
+  "@observerReadOnlyStored": {
+    "description": "Note pinned under the buyer–seller chat when no key is held any more"
+  },
+  "observerNoKeyTitle": "No chat key yet",
+  "@observerNoKeyTitle": {
+    "description": "Empty buyer–seller chat: no key is known"
+  },
+  "observerOpensNothingTitle": "The key opens no message of this dispute",
+  "@observerOpensNothingTitle": {
+    "description": "The chat key opened nothing of this dispute's buyer or seller"
+  },
+  "observerOpensNothingBody": "No message of this dispute's buyer or seller since {date} opens with it. It may be another trade's key, or they did not write in that time.",
+  "@observerOpensNothingBody": {
+    "description": "Why the chat key opened nothing; the date is where the read starts (a week before the dispute opened)",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "observerReadFailedTitle": "The relays could not be asked",
+  "@observerReadFailedTitle": {
+    "description": "Reading the buyer–seller chat failed"
+  },
+  "observerReadFailedBody": "Check the connection and try again.",
+  "@observerReadFailedBody": {
+    "description": "Reading the buyer–seller chat failed"
+  },
+  "observerNoPartyKeysTitle": "The parties are not known",
+  "@observerNoPartyKeysTitle": {
+    "description": "The node's answer to the take named no trade key, so no message can be attributed"
+  },
+  "observerNoPartyKeysBody": "The node did not name the trade keys of the buyer and the seller, so no message can be shown as theirs.",
+  "@observerNoPartyKeysBody": {
+    "description": "The node's answer to the take named no trade key, so no message can be attributed"
+  },
+  "observerPasteTitle": "Paste a chat key",
+  "@observerPasteTitle": {
+    "description": "Title of the dialog that takes a chat key"
+  },
+  "observerPasteBody": "A party can send you the key of their chat with the other party. With it you read that chat; you can never write in it.",
+  "@observerPasteBody": {
+    "description": "Body of the dialog that takes a chat key"
+  },
+  "observerPasteHint": "64 hexadecimal characters",
+  "@observerPasteHint": {
+    "description": "Placeholder of the chat key field"
+  },
+  "observerPasteConfirm": "Read the chat",
+  "@observerPasteConfirm": {
+    "description": "Answer of the dialog that takes a chat key: check it and read"
+  },
+  "observerInvalidKey": "That is not a chat key: it is 64 hexadecimal characters, alone or after “Shared key: ”.",
+  "@observerInvalidKey": {
+    "description": "Error under the chat key field: not the format"
+  },
+  "observerOpensNothingShort": "The key opens no message of this dispute since {date}.",
+  "@observerOpensNothingShort": {
+    "description": "Error under the chat key field: it opened nothing",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "observerNotYours": "This dispute is no longer yours on this node.",
+  "@observerNotYours": {
+    "description": "Error: the dispute is not held by this key on the active node"
+  },
+  "observerFileLocked": "It cannot be opened with a chat key.",
+  "@observerFileLocked": {
+    "description": "A file in the buyer–seller chat: the chat key does not decrypt files"
+  },
+  "observerFileAdviceBuyer": "Ask the buyer to send it to you in your chat with them.",
+  "@observerFileAdviceBuyer": {
+    "description": "A file the buyer sent in the buyer–seller chat: how the solver can get it"
+  },
+  "observerFileAdviceSeller": "Ask the seller to send it to you in your chat with them.",
+  "@observerFileAdviceSeller": {
+    "description": "A file the seller sent in the buyer–seller chat: how the solver can get it"
+  },
+  "observerFileImage": "Image",
+  "@observerFileImage": {
+    "description": "Type of a file that cannot be opened: an image"
+  },
+  "observerFileOther": "File",
+  "@observerFileOther": {
+    "description": "Type of a file that cannot be opened, when it declares none"
   }
 }

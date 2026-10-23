@@ -1208,4 +1208,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attachmentViewerZoomHint => 'Pinch to zoom';
+
+  @override
+  String get observerTitle => 'Chat between the parties';
+
+  @override
+  String observerSharedByBuyer(String date) {
+    return 'The buyer shared their chat key on $date.';
+  }
+
+  @override
+  String observerSharedBySeller(String date) {
+    return 'The seller shared their chat key on $date.';
+  }
+
+  @override
+  String get observerPastedKey => 'You pasted a chat key for this dispute.';
+
+  @override
+  String get observerStoredOnly =>
+      'Messages kept from an earlier read. Paste the chat key again to look for new ones.';
+
+  @override
+  String get observerNoKey =>
+      'Neither party has shared their chat key yet. If one sends it to you another way, paste it here.';
+
+  @override
+  String get observerReadAction => 'Read the chat between the parties';
+
+  @override
+  String get observerPasteAction => 'Paste a chat key';
+
+  @override
+  String get observerRefresh => 'Refresh';
+
+  @override
+  String get observerReadOnlyBuyer =>
+      'Read only, with the key the buyer shared.';
+
+  @override
+  String get observerReadOnlySeller =>
+      'Read only, with the key the seller shared.';
+
+  @override
+  String get observerReadOnlyBoth =>
+      'Read only, with the key both parties shared.';
+
+  @override
+  String get observerReadOnlyPasted => 'Read only, with a key you pasted.';
+
+  @override
+  String get observerReadOnlyStored =>
+      'Read only: messages from an earlier read.';
+
+  @override
+  String get observerNoKeyTitle => 'No chat key yet';
+
+  @override
+  String get observerOpensNothingTitle =>
+      'The key opens no message of this dispute';
+
+  @override
+  String observerOpensNothingBody(String date) {
+    return 'No message of this dispute\'s buyer or seller since $date opens with it. It may be another trade\'s key, or they did not write in that time.';
+  }
+
+  @override
+  String get observerReadFailedTitle => 'The relays could not be asked';
+
+  @override
+  String get observerReadFailedBody => 'Check the connection and try again.';
+
+  @override
+  String get observerNoPartyKeysTitle => 'The parties are not known';
+
+  @override
+  String get observerNoPartyKeysBody =>
+      'The node did not name the trade keys of the buyer and the seller, so no message can be shown as theirs.';
+
+  @override
+  String get observerPasteTitle => 'Paste a chat key';
+
+  @override
+  String get observerPasteBody =>
+      'A party can send you the key of their chat with the other party. With it you read that chat; you can never write in it.';
+
+  @override
+  String get observerPasteHint => '64 hexadecimal characters';
+
+  @override
+  String get observerPasteConfirm => 'Read the chat';
+
+  @override
+  String get observerInvalidKey =>
+      'That is not a chat key: it is 64 hexadecimal characters, alone or after “Shared key: ”.';
+
+  @override
+  String observerOpensNothingShort(String date) {
+    return 'The key opens no message of this dispute since $date.';
+  }
+
+  @override
+  String get observerNotYours =>
+      'This dispute is no longer yours on this node.';
+
+  @override
+  String get observerFileLocked => 'It cannot be opened with a chat key.';
+
+  @override
+  String get observerFileAdviceBuyer =>
+      'Ask the buyer to send it to you in your chat with them.';
+
+  @override
+  String get observerFileAdviceSeller =>
+      'Ask the seller to send it to you in your chat with them.';
+
+  @override
+  String get observerFileImage => 'Image';
+
+  @override
+  String get observerFileOther => 'File';
 }

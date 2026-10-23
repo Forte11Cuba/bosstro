@@ -9,7 +9,9 @@ import 'package:bosstro/core/settings_palette.dart';
 /// Every state is set here (DS-CMP-19). Hidden, it is one line — Flutter
 /// obscures single-line fields only; shown, it wraps so the whole key can be
 /// checked. Suggestions, autocorrect and personalised learning are off: a
-/// keyboard must never learn a key.
+/// keyboard must never learn a key. With [canReveal] off there is no toggle:
+/// the key stays obscured, so it can be neither read back nor selected and
+/// copied (a chat key, phase 5c).
 class SecretField extends StatefulWidget {
   const SecretField({
     super.key,
@@ -20,6 +22,7 @@ class SecretField extends StatefulWidget {
     this.errorText,
     this.onChanged,
     this.onSubmitted,
+    this.canReveal = true,
   });
 
   final TextEditingController controller;
@@ -33,6 +36,9 @@ class SecretField extends StatefulWidget {
   final String? errorText;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+
+  /// Whether the show / hide toggle is offered.
+  final bool canReveal;
 
   @override
   State<SecretField> createState() => _SecretFieldState();
@@ -85,17 +91,20 @@ class _SecretFieldState extends State<SecretField> {
         errorText: widget.errorText,
         errorMaxLines: 3,
         errorStyle: TextStyle(fontSize: 12, color: book.dangerText),
-        suffixIcon: IconButton(
-          tooltip: _visible ? widget.hideLabel : widget.showLabel,
-          icon: Icon(
-            _visible
-                ? Icons.visibility_off_outlined
-                : Icons.visibility_outlined,
-            size: 20,
-            color: book.textSecondary,
-          ),
-          onPressed: () => setState(() => _visible = !_visible),
-        ),
+        suffixIcon:
+            !widget.canReveal
+                ? null
+                : IconButton(
+                  tooltip: _visible ? widget.hideLabel : widget.showLabel,
+                  icon: Icon(
+                    _visible
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20,
+                    color: book.textSecondary,
+                  ),
+                  onPressed: () => setState(() => _visible = !_visible),
+                ),
       ),
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
