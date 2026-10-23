@@ -26,8 +26,21 @@ nostr-sdk = { version = "0.45", default-features = false }
 nostr = { version = "0.45", default-features = false, features = ["std", "nip44"] }
 mostro-core = "0.17.3"
 
+# Serialization: the rows Storage keeps as JSON documents (relays, the node
+# registry's settings blobs), as in ../app.
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
 # Error handling
 anyhow = "1"
+
+# Logging. No logger is installed yet, so records go nowhere; the calls are
+# kept as in ../app for when one is.
+log = "0.4"
+
+# `Stream` for reading a relay query as it arrives (nostr/first_answer.rs).
+# Already in the tree through nostr-sdk. Same crate as ../app.
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
 
 # Wipes the solver's secret as it arrives over the bridge, until it is parsed
 # into `Keys` (whose `SecretKey` wipes itself on drop). Same crate as ../app.
@@ -36,16 +49,25 @@ zeroize = "1"
 # Native only (Android, Linux): the Tokio runtime and SQLite do not compile to
 # wasm32. The web build gets its own block below, as in ../app.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time"] }
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros", "migrate"] }
+# Node pictures (node_pictures.rs). Same features as ../app's native block,
+# minus what only its attachments and push use.
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
 
 # Web only (scripts/build-web.sh). Same crates and reasons as ../app.
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # tokio's sync primitives (the solver slot's locks) are runtime-agnostic and
 # compile to wasm; nothing else of tokio does.
 tokio = { version = "1", default-features = false, features = ["sync"] }
-# Browser-backed clock for `universal-time` (rt.rs).
+# Browser-backed clock for `universal-time` and the timers (rt.rs).
 wasmtimer = "0.4"
+# The web executor (rt::spawn) and the IndexedDB store (db/indexeddb.rs).
+wasm-bindgen-futures = "0.4"
+indexed_db_futures = "0.4"
+web-sys = { version = "0.3", features = ["console"] }
+# Node pictures through the browser's fetch (node_pictures.rs).
+reqwest = { version = "0.12", default-features = false, features = ["stream"] }
 # The getrandom versions under nostr, k256 and friends have no default backend on
 # wasm32-unknown-unknown and must be told to use the browser's crypto.
 getrandom = { version = "0.2", features = ["js"] }
@@ -54,3 +76,14 @@ getrandom_04 = { package = "getrandom", version = "0.4", features = ["wasm_js"] 
 # wasm32-unknown-unknown refuses to *link* until the final crate names a time
 # provider (rt.rs). `cargo check` does not catch it; the web build does.
 universal-time = { version = "0.3", default-features = false }
+
+# Tests only: `MockRelay` (an in-process relay) is behind nostr-sdk's
+# `local-relay` feature. Native only — it pulls in `tokio/net`. As ../app.
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+nostr-sdk = { version = "0.45", default-features = false, features = ["local-relay"] }
+# A throwaway HTTP server for the picture download tests (node_pictures.rs).
+tokio = { version = "1", features = ["net", "io-util", "test-util"] }
+
+# The IndexedDB backend's tests run in a browser (scripts/test-web-storage.sh).
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3"

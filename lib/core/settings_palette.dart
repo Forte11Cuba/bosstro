@@ -24,6 +24,16 @@ class SettingsPalette {
     required this.warnBg,
     required this.warnBorder,
     required this.warnInk,
+    required this.cardBorder,
+    required this.cardBorderSelected,
+    required this.radioBorder,
+    required this.trustedBg,
+    required this.trustedBorder,
+    required this.trustedInk,
+    required this.avatarLimeBg,
+    required this.avatarYellowBg,
+    required this.avatarLimeInk,
+    required this.avatarYellowInk,
   });
 
   /// Hairline between two rows of the same group card.
@@ -61,6 +71,26 @@ class SettingsPalette {
   final Color warnBorder;
   final Color warnInk;
 
+  /// A node card's hairline, and the active node's lime one. ../app's
+  /// `NodeSelectorPalette.border` / `.borderSelected`.
+  final Color cardBorder;
+  final Color cardBorderSelected;
+
+  /// The radio ring of a node that is not the active one.
+  final Color radioBorder;
+
+  /// `TRUSTED` chip on a node from the compiled-in registry.
+  final Color trustedBg;
+  final Color trustedBorder;
+  final Color trustedInk;
+
+  /// Fallback node avatar: the initial on a disc whose tint comes from the
+  /// node's name, never a generated identicon (../app).
+  final Color avatarLimeBg;
+  final Color avatarYellowBg;
+  final Color avatarLimeInk;
+  final Color avatarYellowInk;
+
   static const dark = SettingsPalette(
     rowDivider: Color(0x0DFFFFFF), // white 5%
     groupHeader: Color(0xFF808A9E),
@@ -78,6 +108,16 @@ class SettingsPalette {
     warnBg: Color(0x12F2D14B), // rgba(242,209,75,0.07)
     warnBorder: Color(0x2EF2D14B), // rgba(242,209,75,0.18)
     warnInk: Color(0xFFF7DE72),
+    cardBorder: Color(0x0FFFFFFF), // white 6%
+    cardBorderSelected: Color(0x4D92D64F), // rgba(146,214,79,0.30)
+    radioBorder: Color(0x29FFFFFF), // white 16%
+    trustedBg: Color(0x1F92D64F), // rgba(146,214,79,0.12)
+    trustedBorder: Color(0x4292D64F), // rgba(146,214,79,0.26)
+    trustedInk: Color(0xFFC6F09A),
+    avatarLimeBg: Color(0x2492D64F), // rgba(146,214,79,0.14)
+    avatarYellowBg: Color(0x24F2D14B), // rgba(242,209,75,0.14)
+    avatarLimeInk: Color(0xFFC6F09A),
+    avatarYellowInk: Color(0xFFF7DE72),
   );
 
   static const light = SettingsPalette(
@@ -97,6 +137,16 @@ class SettingsPalette {
     warnBg: Color(0x40F2D14B), // yellow 25%
     warnBorder: Color(0x73D8AF19), // rgba(216,175,25,0.45)
     warnInk: Color(0xFF7A5D00),
+    cardBorder: Color(0x1412161F), // ink 8%
+    cardBorderSelected: Color(0x735C9130), // rgba(92,145,48,0.45)
+    radioBorder: Color(0x3312161F), // ink 20%
+    trustedBg: Color(0x3392D64F), // lime 20%
+    trustedBorder: Color(0x665C9130), // rgba(92,145,48,0.40)
+    trustedInk: Color(0xFF3E6B1C),
+    avatarLimeBg: Color(0x3392D64F),
+    avatarYellowBg: Color(0x40F2D14B),
+    avatarLimeInk: Color(0xFF3E6B1C),
+    avatarYellowInk: Color(0xFF7A5D00),
   );
 
   static SettingsPalette of(BuildContext context) =>

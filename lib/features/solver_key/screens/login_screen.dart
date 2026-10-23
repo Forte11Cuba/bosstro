@@ -68,7 +68,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       await ref.read(solverKeyProvider.notifier).logIn(_secret.text);
       _secret.clear();
-      if (mounted) context.go(AppRoute.pending);
+      if (mounted) {
+        context.go(AppRoute.chooseNode);
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() => _saveError = AppLocalizations.of(context).keySaveFailed);

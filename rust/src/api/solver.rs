@@ -108,7 +108,7 @@ pub async fn solver_pubkey() -> Option<SolverKeyInfo> {
     SOLVER_SLOT.keys().await.as_ref().map(info_of)
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use super::*;
 

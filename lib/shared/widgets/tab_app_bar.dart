@@ -7,11 +7,19 @@ import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/mascot/header_mascot.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 
-/// Whether the active node answers, as the tab app bar shows it.
+/// How the app reaches the active node, as the tab app bar shows it: through
+/// the relays (phase 2), so it reads the relay pool's state.
 enum NodeLinkStatus {
-  /// No node chosen yet (phase 0 and a fresh install).
+  /// No node chosen yet.
   none,
+
+  /// At least one relay is connected.
   online,
+
+  /// None connected yet, one is trying.
+  connecting,
+
+  /// No relay answers.
   offline,
 }
 
@@ -47,7 +55,9 @@ class TabAppBar extends StatelessWidget {
     final top = math.max(28.0, MediaQuery.paddingOf(context).top + 8);
     final dot = switch (status) {
       NodeLinkStatus.online => pal.limeDot,
-      NodeLinkStatus.offline || NodeLinkStatus.none => pal.neutralDot,
+      NodeLinkStatus.connecting ||
+      NodeLinkStatus.offline ||
+      NodeLinkStatus.none => pal.neutralDot,
     };
     return Padding(
       padding: EdgeInsets.fromLTRB(

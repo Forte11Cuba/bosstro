@@ -4,6 +4,9 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
+import 'api/node_info.dart';
+import 'api/nodes.dart';
+import 'api/relays.dart';
 import 'api/solver.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -19,6 +22,53 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     required super.portManager,
   });
 
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_ConnectionStateStreamPtr =>
+      wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStreamPtr;
+
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_RelayStatusStreamPtr =>
+      wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStreamPtr;
+
+  @protected
+  AnyhowException dco_decode_AnyhowException(dynamic raw);
+
+  @protected
+  ConnectionStateStream
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    dynamic raw,
+  );
+
+  @protected
+  RelayStatusStream
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    dynamic raw,
+  );
+
+  @protected
+  ConnectionStateStream
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    dynamic raw,
+  );
+
+  @protected
+  RelayStatusStream
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    dynamic raw,
+  );
+
+  @protected
+  ConnectionStateStream
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    dynamic raw,
+  );
+
+  @protected
+  RelayStatusStream
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    dynamic raw,
+  );
+
   @protected
   String dco_decode_String(dynamic raw);
 
@@ -26,10 +76,49 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  bool dco_decode_box_autoadd_bool(dynamic raw);
+
+  @protected
+  ConnectionState dco_decode_box_autoadd_connection_state(dynamic raw);
+
+  @protected
+  double dco_decode_box_autoadd_f_64(dynamic raw);
+
+  @protected
+  PlatformInt64 dco_decode_box_autoadd_i_64(dynamic raw);
+
+  @protected
+  MostroNodePicture dco_decode_box_autoadd_mostro_node_picture(dynamic raw);
+
+  @protected
+  NodeInfo dco_decode_box_autoadd_node_info(dynamic raw);
+
+  @protected
+  RelayInfo dco_decode_box_autoadd_relay_info(dynamic raw);
+
+  @protected
   SolverKeyInfo dco_decode_box_autoadd_solver_key_info(dynamic raw);
 
   @protected
+  int dco_decode_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  ConnectionState dco_decode_connection_state(dynamic raw);
+
+  @protected
+  double dco_decode_f_64(dynamic raw);
+
+  @protected
   int dco_decode_i_32(dynamic raw);
+
+  @protected
+  PlatformInt64 dco_decode_i_64(dynamic raw);
+
+  @protected
+  List<String> dco_decode_list_String(dynamic raw);
+
+  @protected
+  List<MostroNodeEntry> dco_decode_list_mostro_node_entry(dynamic raw);
 
   @protected
   List<int> dco_decode_list_prim_u_8_loose(dynamic raw);
@@ -38,10 +127,63 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<RelayInfo> dco_decode_list_relay_info(dynamic raw);
+
+  @protected
+  MostroNodeEntry dco_decode_mostro_node_entry(dynamic raw);
+
+  @protected
+  MostroNodePicture dco_decode_mostro_node_picture(dynamic raw);
+
+  @protected
   NewSolverAccount dco_decode_new_solver_account(dynamic raw);
 
   @protected
+  NodeInfo dco_decode_node_info(dynamic raw);
+
+  @protected
+  String? dco_decode_opt_String(dynamic raw);
+
+  @protected
+  bool? dco_decode_opt_box_autoadd_bool(dynamic raw);
+
+  @protected
+  ConnectionState? dco_decode_opt_box_autoadd_connection_state(dynamic raw);
+
+  @protected
+  double? dco_decode_opt_box_autoadd_f_64(dynamic raw);
+
+  @protected
+  PlatformInt64? dco_decode_opt_box_autoadd_i_64(dynamic raw);
+
+  @protected
+  MostroNodePicture? dco_decode_opt_box_autoadd_mostro_node_picture(
+    dynamic raw,
+  );
+
+  @protected
+  NodeInfo? dco_decode_opt_box_autoadd_node_info(dynamic raw);
+
+  @protected
+  RelayInfo? dco_decode_opt_box_autoadd_relay_info(dynamic raw);
+
+  @protected
   SolverKeyInfo? dco_decode_opt_box_autoadd_solver_key_info(dynamic raw);
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  ProtocolSupport dco_decode_protocol_support(dynamic raw);
+
+  @protected
+  RelayInfo dco_decode_relay_info(dynamic raw);
+
+  @protected
+  RelaySource dco_decode_relay_source(dynamic raw);
+
+  @protected
+  RelayStatus dco_decode_relay_status(dynamic raw);
 
   @protected
   SolverKeyError dco_decode_solver_key_error(dynamic raw);
@@ -50,10 +192,55 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   SolverKeyInfo dco_decode_solver_key_info(dynamic raw);
 
   @protected
+  int dco_decode_u_32(dynamic raw);
+
+  @protected
   int dco_decode_u_8(dynamic raw);
 
   @protected
   void dco_decode_unit(dynamic raw);
+
+  @protected
+  BigInt dco_decode_usize(dynamic raw);
+
+  @protected
+  AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
+
+  @protected
+  ConnectionStateStream
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RelayStatusStream
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ConnectionStateStream
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RelayStatusStream
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ConnectionStateStream
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RelayStatusStream
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    SseDeserializer deserializer,
+  );
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
@@ -62,12 +249,57 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  bool sse_decode_box_autoadd_bool(SseDeserializer deserializer);
+
+  @protected
+  ConnectionState sse_decode_box_autoadd_connection_state(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  double sse_decode_box_autoadd_f_64(SseDeserializer deserializer);
+
+  @protected
+  PlatformInt64 sse_decode_box_autoadd_i_64(SseDeserializer deserializer);
+
+  @protected
+  MostroNodePicture sse_decode_box_autoadd_mostro_node_picture(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  NodeInfo sse_decode_box_autoadd_node_info(SseDeserializer deserializer);
+
+  @protected
+  RelayInfo sse_decode_box_autoadd_relay_info(SseDeserializer deserializer);
+
+  @protected
   SolverKeyInfo sse_decode_box_autoadd_solver_key_info(
     SseDeserializer deserializer,
   );
 
   @protected
+  int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  ConnectionState sse_decode_connection_state(SseDeserializer deserializer);
+
+  @protected
+  double sse_decode_f_64(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer);
+
+  @protected
+  PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
+
+  @protected
+  List<String> sse_decode_list_String(SseDeserializer deserializer);
+
+  @protected
+  List<MostroNodeEntry> sse_decode_list_mostro_node_entry(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<int> sse_decode_list_prim_u_8_loose(SseDeserializer deserializer);
@@ -76,12 +308,71 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<RelayInfo> sse_decode_list_relay_info(SseDeserializer deserializer);
+
+  @protected
+  MostroNodeEntry sse_decode_mostro_node_entry(SseDeserializer deserializer);
+
+  @protected
+  MostroNodePicture sse_decode_mostro_node_picture(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   NewSolverAccount sse_decode_new_solver_account(SseDeserializer deserializer);
+
+  @protected
+  NodeInfo sse_decode_node_info(SseDeserializer deserializer);
+
+  @protected
+  String? sse_decode_opt_String(SseDeserializer deserializer);
+
+  @protected
+  bool? sse_decode_opt_box_autoadd_bool(SseDeserializer deserializer);
+
+  @protected
+  ConnectionState? sse_decode_opt_box_autoadd_connection_state(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  double? sse_decode_opt_box_autoadd_f_64(SseDeserializer deserializer);
+
+  @protected
+  PlatformInt64? sse_decode_opt_box_autoadd_i_64(SseDeserializer deserializer);
+
+  @protected
+  MostroNodePicture? sse_decode_opt_box_autoadd_mostro_node_picture(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  NodeInfo? sse_decode_opt_box_autoadd_node_info(SseDeserializer deserializer);
+
+  @protected
+  RelayInfo? sse_decode_opt_box_autoadd_relay_info(
+    SseDeserializer deserializer,
+  );
 
   @protected
   SolverKeyInfo? sse_decode_opt_box_autoadd_solver_key_info(
     SseDeserializer deserializer,
   );
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  ProtocolSupport sse_decode_protocol_support(SseDeserializer deserializer);
+
+  @protected
+  RelayInfo sse_decode_relay_info(SseDeserializer deserializer);
+
+  @protected
+  RelaySource sse_decode_relay_source(SseDeserializer deserializer);
+
+  @protected
+  RelayStatus sse_decode_relay_status(SseDeserializer deserializer);
 
   @protected
   SolverKeyError sse_decode_solver_key_error(SseDeserializer deserializer);
@@ -90,10 +381,64 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   SolverKeyInfo sse_decode_solver_key_info(SseDeserializer deserializer);
 
   @protected
+  int sse_decode_u_32(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer);
 
   @protected
   void sse_decode_unit(SseDeserializer deserializer);
+
+  @protected
+  BigInt sse_decode_usize(SseDeserializer deserializer);
+
+  @protected
+  void sse_encode_AnyhowException(
+    AnyhowException self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    ConnectionStateStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    RelayStatusStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    ConnectionStateStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    RelayStatusStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    ConnectionStateStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    RelayStatusStream self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
@@ -102,13 +447,73 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_bool(bool self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_connection_state(
+    ConnectionState self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_f_64(double self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_i_64(
+    PlatformInt64 self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_mostro_node_picture(
+    MostroNodePicture self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_node_info(
+    NodeInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_relay_info(
+    RelayInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_solver_key_info(
     SolverKeyInfo self,
     SseSerializer serializer,
   );
 
   @protected
+  void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_connection_state(
+    ConnectionState self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_f_64(double self, SseSerializer serializer);
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_String(List<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_mostro_node_entry(
+    List<MostroNodeEntry> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_prim_u_8_loose(List<int> self, SseSerializer serializer);
@@ -120,8 +525,68 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_relay_info(
+    List<RelayInfo> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_mostro_node_entry(
+    MostroNodeEntry self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_mostro_node_picture(
+    MostroNodePicture self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_new_solver_account(
     NewSolverAccount self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_node_info(NodeInfo self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_String(String? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_bool(bool? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_connection_state(
+    ConnectionState? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_f_64(double? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_i_64(
+    PlatformInt64? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_mostro_node_picture(
+    MostroNodePicture? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_node_info(
+    NodeInfo? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_relay_info(
+    RelayInfo? self,
     SseSerializer serializer,
   );
 
@@ -130,6 +595,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     SolverKeyInfo? self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_protocol_support(
+    ProtocolSupport self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_relay_info(RelayInfo self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_relay_source(RelaySource self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_relay_status(RelayStatus self, SseSerializer serializer);
 
   @protected
   void sse_encode_solver_key_error(
@@ -141,10 +624,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_solver_key_info(SolverKeyInfo self, SseSerializer serializer);
 
   @protected
+  void sse_encode_u_32(int self, SseSerializer serializer);
+
+  @protected
   void sse_encode_u_8(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_usize(BigInt self, SseSerializer serializer);
 }
 
 // Section: wire_class
@@ -160,4 +649,72 @@ class RustLibWire implements BaseWire {
   /// The symbols are looked up in [dynamicLibrary].
   RustLibWire(ffi.DynamicLibrary dynamicLibrary)
     : _lookup = dynamicLibrary.lookup;
+
+  void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStreamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_bosstro_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream',
+      );
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream =
+      _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStreamPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStreamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_bosstro_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream',
+      );
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream =
+      _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStreamPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStreamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_bosstro_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream',
+      );
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream =
+      _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStreamPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStreamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_bosstro_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream',
+      );
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream =
+      _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStreamPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 }

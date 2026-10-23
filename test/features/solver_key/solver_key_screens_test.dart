@@ -96,7 +96,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('Continuar'));
         await tester.pumpAndSettle();
-        expect(find.text('Ir a las disputas'), findsOneWidget);
+        expect(find.text('Elegir tu nodo'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
 
@@ -238,7 +238,8 @@ void main() {
 
       await tester.tap(find.text('Yes, log in'));
       await tester.pumpAndSettle();
-      expect(find.text('Pending disputes'), findsOneWidget);
+      // Always the node selector next, even with a node already chosen.
+      expect(find.text('Choose your node'), findsOneWidget);
       expect(backend.log, ['unload', 'load:$sampleNsec', 'write']);
       expect(backend.store.entries[SolverKeyService.storageKey], sampleNsec);
     });
@@ -341,7 +342,12 @@ void main() {
       // The nsec is not on screen any more.
       expect(find.text(sampleNsec), findsNothing);
 
-      await tester.tap(find.text('Go to disputes'));
+      // Always the node selector next, the active node marked when there is
+      // one; choosing it leads to the tabs.
+      await tester.tap(find.text('Choose your node'));
+      await tester.pumpAndSettle();
+      expect(find.text('ACTIVE'), findsOneWidget);
+      await tester.tap(find.text('Mostro'));
       await tester.pumpAndSettle();
       expect(find.text('Pending disputes'), findsOneWidget);
     });

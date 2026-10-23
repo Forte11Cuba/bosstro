@@ -209,7 +209,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Send this npub to your node operator so they register you as a solver. Until then you can see the disputes but not take them.';
 
   @override
-  String get createDone => 'Go to disputes';
+  String get createDone => 'Choose your node';
 
   @override
   String get settingsGroupKey => 'Solver key';
@@ -263,4 +263,419 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get secretKeyCopied =>
       'Secret key copied. It is cleared from the clipboard in 60 seconds.';
+
+  @override
+  String linkOnline(int connected, int total) {
+    return 'Online · $connected/$total relays';
+  }
+
+  @override
+  String get linkConnecting => 'Connecting to relays…';
+
+  @override
+  String get linkOffline => 'Offline · no relay answers';
+
+  @override
+  String get chooseNodeTitle => 'Choose your node';
+
+  @override
+  String get chooseNodeBody =>
+      'Pick the Mostro node whose operator registered your key as a solver. You can switch nodes later in Settings.';
+
+  @override
+  String get chooseNodeAppBar => 'Node';
+
+  @override
+  String get nodeChipTrusted => 'Trusted';
+
+  @override
+  String get nodeChipCustom => 'Added by you';
+
+  @override
+  String get nodeChipActive => 'Active';
+
+  @override
+  String get nodeAddOwn => 'Add your own node';
+
+  @override
+  String get nodeInfoTooltip => 'Node info';
+
+  @override
+  String nodeSwitched(String name) {
+    return 'Now on $name';
+  }
+
+  @override
+  String get nodeSelectFailed => 'Could not switch to this node. Try again.';
+
+  @override
+  String get nodeListFailed =>
+      'The node list could not be loaded. Restart the app to try again.';
+
+  @override
+  String get addNodeTitle => 'Add a node';
+
+  @override
+  String get addNodeBody =>
+      'Paste the node\'s public key (npub or hex). Its operator can give it to you.';
+
+  @override
+  String get addNodePubkeyLabel => 'Public key';
+
+  @override
+  String get addNodeNameLabel => 'Name (optional)';
+
+  @override
+  String get addNodeAnswer => 'Add node';
+
+  @override
+  String get nodeErrorInvalidPubkey =>
+      'Enter a valid public key (npub or 64 hex characters).';
+
+  @override
+  String get nodeErrorPrivateKey =>
+      'That is a secret key — never share it. Enter the node\'s public key.';
+
+  @override
+  String get nodeErrorAlreadyExists => 'This node is already in the list.';
+
+  @override
+  String get nodeErrorActive =>
+      'This is your active node. Switch to another node before removing it.';
+
+  @override
+  String get nodeErrorStorage =>
+      'Your nodes could not be saved on this device.';
+
+  @override
+  String get nodeErrorGeneric => 'Something went wrong. Try again.';
+
+  @override
+  String get removeNodeAction => 'Remove node';
+
+  @override
+  String get removeNodeTitle => 'Remove this node?';
+
+  @override
+  String get removeNodeBody =>
+      'It leaves your list. You can add it again with its public key.';
+
+  @override
+  String get removeNodeAnswer => 'Remove node';
+
+  @override
+  String get nodeRemoved => 'Node removed';
+
+  @override
+  String get nodeInfoTitle => 'Node info';
+
+  @override
+  String get nodeInfoUse => 'Use this node';
+
+  @override
+  String get nodeInfoGroupNode => 'Node';
+
+  @override
+  String get nodeInfoPubkey => 'Public key';
+
+  @override
+  String get nodeInfoRegion => 'Region';
+
+  @override
+  String get nodeInfoWebsite => 'Website';
+
+  @override
+  String get nodeInfoAbout => 'About';
+
+  @override
+  String get nodeInfoEmptyTitle => 'No instance info yet';
+
+  @override
+  String get nodeInfoEmptyBody =>
+      'This node has not published its instance info on your relays, or they have not answered yet. It is asked for again each time you open this screen.';
+
+  @override
+  String get nodeInfoRefreshFailed =>
+      'The relays did not answer. This is the info last seen.';
+
+  @override
+  String get nodeInfoStale =>
+      'This info is more than 7 days old and may be out of date.';
+
+  @override
+  String nodeInfoUnsupported(int version) {
+    return 'This node speaks protocol v$version. Bosstro speaks only v2, so it cannot resolve disputes there.';
+  }
+
+  @override
+  String get nodeInfoUpdatedNow => 'Updated just now';
+
+  @override
+  String nodeInfoUpdatedMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Updated $count minutes ago',
+      one: 'Updated 1 minute ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nodeInfoUpdatedHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Updated $count hours ago',
+      one: 'Updated 1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nodeInfoUpdatedDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Updated $count days ago',
+      one: 'Updated 1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nodeInfoGroupProtocol => 'Protocol';
+
+  @override
+  String get nodeInfoProtocolVersion => 'Protocol version';
+
+  @override
+  String get nodeInfoTransport => 'Wire transport';
+
+  @override
+  String get nodeInfoGroupDaemon => 'Mostro daemon';
+
+  @override
+  String get nodeInfoVersion => 'Version';
+
+  @override
+  String get nodeInfoCommit => 'Commit';
+
+  @override
+  String get nodeInfoMaxOrder => 'Max order';
+
+  @override
+  String get nodeInfoMinOrder => 'Min order';
+
+  @override
+  String get nodeInfoExpirationHours => 'Order expiration';
+
+  @override
+  String get nodeInfoExpirationSeconds => 'Taken order expiration';
+
+  @override
+  String get nodeInfoHoldWindow => 'Hold invoice window';
+
+  @override
+  String get nodeInfoHoldCltv => 'Hold invoice CLTV delta';
+
+  @override
+  String get nodeInfoInvoiceWindow => 'Invoice window';
+
+  @override
+  String get nodeInfoMaxOrders => 'Max orders per response';
+
+  @override
+  String get nodeInfoFee => 'Fee';
+
+  @override
+  String get nodeInfoPow => 'Required PoW';
+
+  @override
+  String get nodeInfoPowFirst => 'PoW on first contact';
+
+  @override
+  String get nodeInfoBonds => 'Anti-abuse bonds';
+
+  @override
+  String get nodeInfoGroupLightning => 'Lightning node';
+
+  @override
+  String get nodeInfoAlias => 'Alias';
+
+  @override
+  String get nodeInfoLnPubkey => 'Node pubkey';
+
+  @override
+  String get nodeInfoLndVersion => 'LND version';
+
+  @override
+  String get nodeInfoChains => 'Chains';
+
+  @override
+  String get nodeInfoNetworks => 'Networks';
+
+  @override
+  String get nodeInfoUri => 'URI';
+
+  @override
+  String get nodeInfoGroupFiat => 'Fiat currencies';
+
+  @override
+  String get nodeInfoFiatAll => 'All currencies are accepted.';
+
+  @override
+  String get nodeInfoUnknown => 'Unknown';
+
+  @override
+  String get nodeInfoEnabled => 'Enabled';
+
+  @override
+  String get nodeInfoDisabled => 'Disabled';
+
+  @override
+  String unitSats(String amount) {
+    return '$amount sats';
+  }
+
+  @override
+  String unitHours(int count) {
+    return '$count h';
+  }
+
+  @override
+  String unitSeconds(int count) {
+    return '$count s';
+  }
+
+  @override
+  String unitBlocks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count blocks',
+      one: '1 block',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unitBits(int count) {
+    return '$count bits';
+  }
+
+  @override
+  String unitPercent(String value) {
+    return '$value %';
+  }
+
+  @override
+  String get relaysTitle => 'Relays';
+
+  @override
+  String get relaysBody =>
+      'Bosstro talks to your node through these relays. The relays your node announces are added for you.';
+
+  @override
+  String get relayStatusConnected => 'Connected';
+
+  @override
+  String get relayStatusConnecting => 'Connecting';
+
+  @override
+  String get relayStatusDisconnected => 'Disconnected';
+
+  @override
+  String get relayStatusError => 'Refused';
+
+  @override
+  String get relaySourceDefault => 'Default';
+
+  @override
+  String get relaySourceNode => 'From your node';
+
+  @override
+  String get relaySourceUser => 'Added by you';
+
+  @override
+  String get relayAdd => 'Add relay';
+
+  @override
+  String get addRelayTitle => 'Add a relay';
+
+  @override
+  String get addRelayLabel => 'Relay address';
+
+  @override
+  String get addRelayAnswer => 'Add relay';
+
+  @override
+  String get relayRemoveTooltip => 'Remove relay';
+
+  @override
+  String get removeRelayTitle => 'Remove this relay?';
+
+  @override
+  String get removeRelayBody =>
+      'Bosstro stops using it. A relay your node announced comes back only if you add it yourself.';
+
+  @override
+  String get removeRelayAnswer => 'Remove relay';
+
+  @override
+  String get relayErrorInvalidUrl =>
+      'Enter a relay address that starts with wss://.';
+
+  @override
+  String get relayErrorExists => 'This relay is already in the list.';
+
+  @override
+  String get relayErrorLast =>
+      'This is your last relay. Add another before removing it.';
+
+  @override
+  String get relaysNotRunningTitle => 'The relays did not start';
+
+  @override
+  String get relaysNotRunningBody =>
+      'Bosstro could not open its connection to the relays. Restart the app to try again.';
+
+  @override
+  String get settingsGroupNode => 'Node';
+
+  @override
+  String get settingsNode => 'Node';
+
+  @override
+  String get settingsNodeNone => 'Choose';
+
+  @override
+  String get settingsNodeInfo => 'Node info';
+
+  @override
+  String get settingsRelays => 'Relays';
+
+  @override
+  String settingsRelaysValue(int connected, int total) {
+    return '$connected/$total';
+  }
+
+  @override
+  String get pendingNoNodeTitle => 'Choose your node first';
+
+  @override
+  String get pendingNoNodeBody =>
+      'Disputes are read from one Mostro node at a time. Pick the node where you are a solver.';
+
+  @override
+  String get pendingNoNodeAction => 'Choose node';
+
+  @override
+  String get loadingNodes => 'Loading nodes';
+
+  @override
+  String get loadingNodeInfo => 'Loading node info';
+
+  @override
+  String get loadingRelays => 'Loading relays';
 }

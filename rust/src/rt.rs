@@ -1,14 +1,55 @@
-//! Platform runtime shims.
+//! Platform runtime shims, ported from ../app's `rt.rs`.
 //!
-//! Only the web build needs one so far: the clock `universal-time` reads.
-//! Ported from ../app's `rt.rs`; spawning and timers join it when the crate
-//! first needs them on both targets.
+//! Native builds run on the Tokio runtime; `wasm32` has none, so task spawning
+//! and timers are backed by `wasm-bindgen-futures` and `wasmtimer`. Call sites
+//! use `crate::rt::{spawn, time}` instead of the `tokio` equivalents so both
+//! targets compile from a single source.
+
+/// Spawn a detached background task.
+///
+/// All callers are fire-and-forget, so the join handle is dropped. On
+/// `wasm32` this delegates to `spawn_local` (no `Send` bound, since the
+/// single-threaded executor never moves the future across threads).
+#[cfg(not(target_arch = "wasm32"))]
+pub fn spawn<F>(future: F)
+where
+    F: std::future::Future<Output = ()> + Send + 'static,
+{
+    tokio::spawn(future);
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn spawn<F>(future: F)
+where
+    F: std::future::Future<Output = ()> + 'static,
+{
+    wasm_bindgen_futures::spawn_local(future);
+}
+
+/// Timer and clock primitives mirroring the subset of `std::time` /
+/// `tokio::time` the crate uses.
+///
+/// `std::time::SystemTime::now()` is unimplemented on
+/// `wasm32-unknown-unknown` and panics at runtime, so every wall-clock read
+/// goes through `crate::rt::time` (or [`unix_now`]).
+#[cfg(not(target_arch = "wasm32"))]
+pub mod time {
+    pub use std::time::{SystemTime, UNIX_EPOCH};
+    pub use tokio::time::{sleep, timeout, Duration, Instant};
+}
+
+#[cfg(target_arch = "wasm32")]
+pub mod time {
+    pub use std::time::Duration;
+    pub use wasmtimer::std::{Instant, SystemTime, UNIX_EPOCH};
+    pub use wasmtimer::tokio::{sleep, timeout};
+}
 
 /// Time provider for `universal-time`, which nostr 0.45 uses for every clock
 /// read. On `wasm32-unknown-unknown` that crate has no default source and the
 /// build fails at *link* time ("a time provider is required") until the final
 /// crate defines one, so this is invisible to `cargo check` and only shows up
-/// in `scripts/build-web.sh`.
+/// in `scripts/build-web.sh`. Backed by the same browser clock as [`time`].
 #[cfg(target_arch = "wasm32")]
 mod browser_clock {
     use std::sync::OnceLock;
@@ -37,4 +78,13 @@ mod browser_clock {
     }
 
     define_time_provider!(BrowserClock);
+}
+
+/// Current Unix time in whole seconds, on both native and wasm. 0 if the
+/// clock is before the epoch.
+pub fn unix_now() -> i64 {
+    time::SystemTime::now()
+        .duration_since(time::UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0)
 }

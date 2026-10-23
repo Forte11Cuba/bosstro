@@ -150,7 +150,8 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen> {
                 _showingNpub
                     ? PrimaryButton(
                       label: l10n.createDone,
-                      onPressed: () => context.go(AppRoute.pending),
+                      // Always the node selector next (D5).
+                      onPressed: () => context.go(AppRoute.chooseNode),
                     )
                     : PrimaryButton(
                       label: l10n.createContinue,

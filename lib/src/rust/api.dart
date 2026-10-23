@@ -10,3 +10,13 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 /// the `+build` suffix). Settings shows it; it is the phase 0 proof that Dart
 /// reaches Rust through the bridge.
 String appVersion() => RustLib.instance.api.crateApiAppVersion();
+
+/// Open the persistent store (A4). Call once at startup, before anything
+/// that reads or writes it: on native platforms `path` is the SQLite file
+/// (in the app data directory), on the web the IndexedDB database name.
+/// Later calls are no-ops.
+///
+/// Without it the app still runs, from memory: nothing node-related is kept
+/// across a restart.
+Future<void> initDb({required String path}) =>
+    RustLib.instance.api.crateApiInitDb(path: path);

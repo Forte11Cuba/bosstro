@@ -38,6 +38,27 @@ void main() {
         );
       });
 
+      test('node cards: the trusted chip and the avatar initials', () {
+        final card = shell.surface;
+        expectAA('trusted chip', pal.trustedInk, flatten(pal.trustedBg, card));
+        expectAA(
+          'lime initial',
+          pal.avatarLimeInk,
+          flatten(pal.avatarLimeBg, card),
+        );
+        expectAA(
+          'yellow initial',
+          pal.avatarYellowInk,
+          flatten(pal.avatarYellowBg, card),
+        );
+      });
+
+      test('relay status words on a card', () {
+        expectAA('connected', shell.limeInk, shell.surface);
+        expectAA('not connected', shell.textSecondary, shell.surface);
+        expectAA('refused', shell.dangerText, shell.surface);
+      });
+
       test('settings rows on a card', () {
         expectAA('row label', shell.textBody, shell.surface);
         expectAA('row value', shell.textSecondary, shell.surface);

@@ -244,9 +244,9 @@
   "@createNpubBody": {
     "description": "Create new account, step 2: what to do with the npub"
   },
-  "createDone": "Go to disputes",
+  "createDone": "Choose your node",
   "@createDone": {
-    "description": "Create new account, step 2: finish and open the tabs"
+    "description": "Last button of Create new account: opens the node selector"
   },
   "settingsGroupKey": "Solver key",
   "@settingsGroupKey": {
@@ -311,5 +311,540 @@
   "secretKeyCopied": "Secret key copied. It is cleared from the clipboard in 60 seconds.",
   "@secretKeyCopied": {
     "description": "Snackbar after copying the secret key: it is marked sensitive and cleared from the clipboard after 60 seconds"
+  },
+  "linkOnline": "Online · {connected}/{total} relays",
+  "@linkOnline": {
+    "description": "Tab app bar status line: the relays answer. connected = relays connected, total = relays in use",
+    "placeholders": {
+      "connected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "linkConnecting": "Connecting to relays…",
+  "@linkConnecting": {
+    "description": "Tab app bar status line while no relay is connected yet but one is trying"
+  },
+  "linkOffline": "Offline · no relay answers",
+  "@linkOffline": {
+    "description": "Tab app bar status line when no relay is connected"
+  },
+  "chooseNodeTitle": "Choose your node",
+  "@chooseNodeTitle": {
+    "description": "Header of the node selector, after logging in and from Configuración → Node"
+  },
+  "chooseNodeBody": "Pick the Mostro node whose operator registered your key as a solver. You can switch nodes later in Settings.",
+  "@chooseNodeBody": {
+    "description": "Explanation under the node selector's header"
+  },
+  "chooseNodeAppBar": "Node",
+  "@chooseNodeAppBar": {
+    "description": "App bar title of the node selector when opened from Settings"
+  },
+  "nodeChipTrusted": "Trusted",
+  "@nodeChipTrusted": {
+    "description": "Chip on a node from the compiled-in list of trusted Mostro communities"
+  },
+  "nodeChipCustom": "Added by you",
+  "@nodeChipCustom": {
+    "description": "Chip on a node the solver added by its public key"
+  },
+  "nodeChipActive": "Active",
+  "@nodeChipActive": {
+    "description": "Chip on the node the app is using now"
+  },
+  "nodeAddOwn": "Add your own node",
+  "@nodeAddOwn": {
+    "description": "Button under the node list: add a node by its public key"
+  },
+  "nodeInfoTooltip": "Node info",
+  "@nodeInfoTooltip": {
+    "description": "Tooltip and accessible label of the info button on a node card"
+  },
+  "nodeSwitched": "Now on {name}",
+  "@nodeSwitched": {
+    "description": "Snackbar after switching to another node",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nodeSelectFailed": "Could not switch to this node. Try again.",
+  "@nodeSelectFailed": {
+    "description": "Error when saving the active node failed"
+  },
+  "nodeListFailed": "The node list could not be loaded. Restart the app to try again.",
+  "@nodeListFailed": {
+    "description": "Error state of the node selector"
+  },
+  "addNodeTitle": "Add a node",
+  "@addNodeTitle": {
+    "description": "Title of the add-node dialog"
+  },
+  "addNodeBody": "Paste the node's public key (npub or hex). Its operator can give it to you.",
+  "@addNodeBody": {
+    "description": "Explanation in the add-node dialog"
+  },
+  "addNodePubkeyLabel": "Public key",
+  "@addNodePubkeyLabel": {
+    "description": "Label of the public key field in the add-node dialog"
+  },
+  "addNodeNameLabel": "Name (optional)",
+  "@addNodeNameLabel": {
+    "description": "Label of the optional name field in the add-node dialog"
+  },
+  "addNodeAnswer": "Add node",
+  "@addNodeAnswer": {
+    "description": "Add-node dialog confirmation"
+  },
+  "nodeErrorInvalidPubkey": "Enter a valid public key (npub or 64 hex characters).",
+  "@nodeErrorInvalidPubkey": {
+    "description": "Add-node error: not a public key"
+  },
+  "nodeErrorPrivateKey": "That is a secret key — never share it. Enter the node's public key.",
+  "@nodeErrorPrivateKey": {
+    "description": "Add-node error: an nsec was entered"
+  },
+  "nodeErrorAlreadyExists": "This node is already in the list.",
+  "@nodeErrorAlreadyExists": {
+    "description": "Add-node error: duplicate"
+  },
+  "nodeErrorActive": "This is your active node. Switch to another node before removing it.",
+  "@nodeErrorActive": {
+    "description": "Remove-node error: the node is active"
+  },
+  "nodeErrorStorage": "Your nodes could not be saved on this device.",
+  "@nodeErrorStorage": {
+    "description": "Node error: the local database is not available"
+  },
+  "nodeErrorGeneric": "Something went wrong. Try again.",
+  "@nodeErrorGeneric": {
+    "description": "Node error with no specific copy"
+  },
+  "removeNodeAction": "Remove node",
+  "@removeNodeAction": {
+    "description": "Action on the info screen of a node the solver added"
+  },
+  "removeNodeTitle": "Remove this node?",
+  "@removeNodeTitle": {
+    "description": "Remove-node confirmation title"
+  },
+  "removeNodeBody": "It leaves your list. You can add it again with its public key.",
+  "@removeNodeBody": {
+    "description": "Remove-node confirmation body"
+  },
+  "removeNodeAnswer": "Remove node",
+  "@removeNodeAnswer": {
+    "description": "Remove-node confirmation answer (destructive). Repeats the opener's verb"
+  },
+  "nodeRemoved": "Node removed",
+  "@nodeRemoved": {
+    "description": "Snackbar after removing a node"
+  },
+  "nodeInfoTitle": "Node info",
+  "@nodeInfoTitle": {
+    "description": "App bar title of the node info screen"
+  },
+  "nodeInfoUse": "Use this node",
+  "@nodeInfoUse": {
+    "description": "Primary action of the node info screen for a node that is not active"
+  },
+  "nodeInfoGroupNode": "Node",
+  "@nodeInfoGroupNode": {
+    "description": "Group header: the node's identity (public key, kind 0 profile)"
+  },
+  "nodeInfoPubkey": "Public key",
+  "@nodeInfoPubkey": {
+    "description": "Row label: the node's public key"
+  },
+  "nodeInfoRegion": "Region",
+  "@nodeInfoRegion": {
+    "description": "Row label: the region of a trusted community"
+  },
+  "nodeInfoWebsite": "Website",
+  "@nodeInfoWebsite": {
+    "description": "Row label: the website of the node's profile"
+  },
+  "nodeInfoAbout": "About",
+  "@nodeInfoAbout": {
+    "description": "Row label: the description in the node's profile"
+  },
+  "nodeInfoEmptyTitle": "No instance info yet",
+  "@nodeInfoEmptyTitle": {
+    "description": "Empty state of the node info screen: the node's kind 38385 event was not found"
+  },
+  "nodeInfoEmptyBody": "This node has not published its instance info on your relays, or they have not answered yet. It is asked for again each time you open this screen.",
+  "@nodeInfoEmptyBody": {
+    "description": "Empty state body of the node info screen"
+  },
+  "nodeInfoRefreshFailed": "The relays did not answer. This is the info last seen.",
+  "@nodeInfoRefreshFailed": {
+    "description": "Note when fetching the node info failed but a cached copy is shown"
+  },
+  "nodeInfoStale": "This info is more than 7 days old and may be out of date.",
+  "@nodeInfoStale": {
+    "description": "Warning when the node's instance info is older than 7 days"
+  },
+  "nodeInfoUnsupported": "This node speaks protocol v{version}. Bosstro speaks only v2, so it cannot resolve disputes there.",
+  "@nodeInfoUnsupported": {
+    "description": "Warning for a node that advertises a protocol other than v2",
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeInfoUpdatedNow": "Updated just now",
+  "@nodeInfoUpdatedNow": {
+    "description": "When the node last published its info: under a minute ago"
+  },
+  "nodeInfoUpdatedMinutes": "{count, plural, =1{Updated 1 minute ago} other{Updated {count} minutes ago}}",
+  "@nodeInfoUpdatedMinutes": {
+    "description": "When the node last published its info",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeInfoUpdatedHours": "{count, plural, =1{Updated 1 hour ago} other{Updated {count} hours ago}}",
+  "@nodeInfoUpdatedHours": {
+    "description": "When the node last published its info",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeInfoUpdatedDays": "{count, plural, =1{Updated 1 day ago} other{Updated {count} days ago}}",
+  "@nodeInfoUpdatedDays": {
+    "description": "When the node last published its info",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeInfoGroupProtocol": "Protocol",
+  "@nodeInfoGroupProtocol": {
+    "description": "Group header (Mostrix's Mostro Info tab)"
+  },
+  "nodeInfoProtocolVersion": "Protocol version",
+  "@nodeInfoProtocolVersion": {
+    "description": "Row label: kind 38385 protocol_version"
+  },
+  "nodeInfoTransport": "Wire transport",
+  "@nodeInfoTransport": {
+    "description": "Row label: the transport Bosstro uses with the node"
+  },
+  "nodeInfoGroupDaemon": "Mostro daemon",
+  "@nodeInfoGroupDaemon": {
+    "description": "Group header: the node's mostrod settings"
+  },
+  "nodeInfoVersion": "Version",
+  "@nodeInfoVersion": {
+    "description": "Row label: mostro_version"
+  },
+  "nodeInfoCommit": "Commit",
+  "@nodeInfoCommit": {
+    "description": "Row label: mostro_commit_hash or lnd_commit_hash"
+  },
+  "nodeInfoMaxOrder": "Max order",
+  "@nodeInfoMaxOrder": {
+    "description": "Row label: max_order_amount, in sats"
+  },
+  "nodeInfoMinOrder": "Min order",
+  "@nodeInfoMinOrder": {
+    "description": "Row label: min_order_amount, in sats"
+  },
+  "nodeInfoExpirationHours": "Order expiration",
+  "@nodeInfoExpirationHours": {
+    "description": "Row label: expiration_hours"
+  },
+  "nodeInfoExpirationSeconds": "Taken order expiration",
+  "@nodeInfoExpirationSeconds": {
+    "description": "Row label: expiration_seconds"
+  },
+  "nodeInfoHoldWindow": "Hold invoice window",
+  "@nodeInfoHoldWindow": {
+    "description": "Row label: hold_invoice_expiration_window, seconds"
+  },
+  "nodeInfoHoldCltv": "Hold invoice CLTV delta",
+  "@nodeInfoHoldCltv": {
+    "description": "Row label: hold_invoice_cltv_delta, blocks"
+  },
+  "nodeInfoInvoiceWindow": "Invoice window",
+  "@nodeInfoInvoiceWindow": {
+    "description": "Row label: invoice_expiration_window, seconds"
+  },
+  "nodeInfoMaxOrders": "Max orders per response",
+  "@nodeInfoMaxOrders": {
+    "description": "Row label: max_orders_per_response"
+  },
+  "nodeInfoFee": "Fee",
+  "@nodeInfoFee": {
+    "description": "Row label: the node's fee"
+  },
+  "nodeInfoPow": "Required PoW",
+  "@nodeInfoPow": {
+    "description": "Row label: pow, in bits"
+  },
+  "nodeInfoPowFirst": "PoW on first contact",
+  "@nodeInfoPowFirst": {
+    "description": "Row label: pow_first_contact, in bits"
+  },
+  "nodeInfoBonds": "Anti-abuse bonds",
+  "@nodeInfoBonds": {
+    "description": "Row label: bond_enabled"
+  },
+  "nodeInfoGroupLightning": "Lightning node",
+  "@nodeInfoGroupLightning": {
+    "description": "Group header: the node's LND"
+  },
+  "nodeInfoAlias": "Alias",
+  "@nodeInfoAlias": {
+    "description": "Row label: lnd_node_alias"
+  },
+  "nodeInfoLnPubkey": "Node pubkey",
+  "@nodeInfoLnPubkey": {
+    "description": "Row label: lnd_node_pubkey"
+  },
+  "nodeInfoLndVersion": "LND version",
+  "@nodeInfoLndVersion": {
+    "description": "Row label: lnd_version"
+  },
+  "nodeInfoChains": "Chains",
+  "@nodeInfoChains": {
+    "description": "Row label: lnd_chains"
+  },
+  "nodeInfoNetworks": "Networks",
+  "@nodeInfoNetworks": {
+    "description": "Row label: lnd_networks"
+  },
+  "nodeInfoUri": "URI",
+  "@nodeInfoUri": {
+    "description": "Row label: one of lnd_uris"
+  },
+  "nodeInfoGroupFiat": "Fiat currencies",
+  "@nodeInfoGroupFiat": {
+    "description": "Group header: fiat_currencies_accepted"
+  },
+  "nodeInfoFiatAll": "All currencies are accepted.",
+  "@nodeInfoFiatAll": {
+    "description": "When the node accepts every fiat currency"
+  },
+  "nodeInfoUnknown": "Unknown",
+  "@nodeInfoUnknown": {
+    "description": "A value the node does not publish"
+  },
+  "nodeInfoEnabled": "Enabled",
+  "@nodeInfoEnabled": {
+    "description": "bond_enabled true"
+  },
+  "nodeInfoDisabled": "Disabled",
+  "@nodeInfoDisabled": {
+    "description": "bond_enabled false"
+  },
+  "unitSats": "{amount} sats",
+  "@unitSats": {
+    "description": "An amount in satoshis. amount is formatted",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "unitHours": "{count} h",
+  "@unitHours": {
+    "description": "A duration in hours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unitSeconds": "{count} s",
+  "@unitSeconds": {
+    "description": "A duration in seconds",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unitBlocks": "{count, plural, =1{1 block} other{{count} blocks}}",
+  "@unitBlocks": {
+    "description": "A number of blocks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unitBits": "{count} bits",
+  "@unitBits": {
+    "description": "Proof-of-work difficulty in bits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "unitPercent": "{value} %",
+  "@unitPercent": {
+    "description": "A percentage. value is formatted",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "relaysTitle": "Relays",
+  "@relaysTitle": {
+    "description": "App bar title of the relays screen"
+  },
+  "relaysBody": "Bosstro talks to your node through these relays. The relays your node announces are added for you.",
+  "@relaysBody": {
+    "description": "Explanation at the top of the relays screen"
+  },
+  "relayStatusConnected": "Connected",
+  "@relayStatusConnected": {
+    "description": "A relay's status"
+  },
+  "relayStatusConnecting": "Connecting",
+  "@relayStatusConnecting": {
+    "description": "A relay's status"
+  },
+  "relayStatusDisconnected": "Disconnected",
+  "@relayStatusDisconnected": {
+    "description": "A relay's status"
+  },
+  "relayStatusError": "Refused",
+  "@relayStatusError": {
+    "description": "A relay's status: the relay refused the connection (banned)"
+  },
+  "relaySourceDefault": "Default",
+  "@relaySourceDefault": {
+    "description": "Where a relay came from: seeded on first launch"
+  },
+  "relaySourceNode": "From your node",
+  "@relaySourceNode": {
+    "description": "Where a relay came from: the node's relay list"
+  },
+  "relaySourceUser": "Added by you",
+  "@relaySourceUser": {
+    "description": "Where a relay came from: the solver added it"
+  },
+  "relayAdd": "Add relay",
+  "@relayAdd": {
+    "description": "Button on the relays screen"
+  },
+  "addRelayTitle": "Add a relay",
+  "@addRelayTitle": {
+    "description": "Title of the add-relay dialog"
+  },
+  "addRelayLabel": "Relay address",
+  "@addRelayLabel": {
+    "description": "Label of the field in the add-relay dialog"
+  },
+  "addRelayAnswer": "Add relay",
+  "@addRelayAnswer": {
+    "description": "Add-relay dialog confirmation"
+  },
+  "relayRemoveTooltip": "Remove relay",
+  "@relayRemoveTooltip": {
+    "description": "Tooltip and accessible label of a relay's remove button"
+  },
+  "removeRelayTitle": "Remove this relay?",
+  "@removeRelayTitle": {
+    "description": "Remove-relay confirmation title"
+  },
+  "removeRelayBody": "Bosstro stops using it. A relay your node announced comes back only if you add it yourself.",
+  "@removeRelayBody": {
+    "description": "Remove-relay confirmation body"
+  },
+  "removeRelayAnswer": "Remove relay",
+  "@removeRelayAnswer": {
+    "description": "Remove-relay confirmation answer (destructive). Repeats the opener's verb"
+  },
+  "relayErrorInvalidUrl": "Enter a relay address that starts with wss://.",
+  "@relayErrorInvalidUrl": {
+    "description": "Add-relay error: not a websocket URL"
+  },
+  "relayErrorExists": "This relay is already in the list.",
+  "@relayErrorExists": {
+    "description": "Add-relay error: duplicate"
+  },
+  "relayErrorLast": "This is your last relay. Add another before removing it.",
+  "@relayErrorLast": {
+    "description": "Remove-relay error: it is the only one"
+  },
+  "relaysNotRunningTitle": "The relays did not start",
+  "@relaysNotRunningTitle": {
+    "description": "Error state of the relays screen"
+  },
+  "relaysNotRunningBody": "Bosstro could not open its connection to the relays. Restart the app to try again.",
+  "@relaysNotRunningBody": {
+    "description": "Error state body of the relays screen"
+  },
+  "settingsGroupNode": "Node",
+  "@settingsGroupNode": {
+    "description": "Settings group header: the active node and its relays"
+  },
+  "settingsNode": "Node",
+  "@settingsNode": {
+    "description": "Settings row: opens the node selector; its value is the active node's name"
+  },
+  "settingsNodeNone": "Choose",
+  "@settingsNodeNone": {
+    "description": "Value of the Node row when no node is chosen"
+  },
+  "settingsNodeInfo": "Node info",
+  "@settingsNodeInfo": {
+    "description": "Settings row: opens the active node's info"
+  },
+  "settingsRelays": "Relays",
+  "@settingsRelays": {
+    "description": "Settings row: opens the relays screen"
+  },
+  "settingsRelaysValue": "{connected}/{total}",
+  "@settingsRelaysValue": {
+    "description": "Value of the Relays row: connected relays / relays in use",
+    "placeholders": {
+      "connected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingNoNodeTitle": "Choose your node first",
+  "@pendingNoNodeTitle": {
+    "description": "Pending tab empty state before a node is chosen"
+  },
+  "pendingNoNodeBody": "Disputes are read from one Mostro node at a time. Pick the node where you are a solver.",
+  "@pendingNoNodeBody": {
+    "description": "Pending tab empty state body before a node is chosen"
+  },
+  "pendingNoNodeAction": "Choose node",
+  "@pendingNoNodeAction": {
+    "description": "Pending tab empty state action: opens the node selector"
+  },
+  "loadingNodes": "Loading nodes",
+  "@loadingNodes": {
+    "description": "Screen-reader label of the node list skeleton"
+  },
+  "loadingNodeInfo": "Loading node info",
+  "@loadingNodeInfo": {
+    "description": "Screen-reader label of the node info skeleton"
+  },
+  "loadingRelays": "Loading relays",
+  "@loadingRelays": {
+    "description": "Screen-reader label of the relay list skeleton"
   }
 }
