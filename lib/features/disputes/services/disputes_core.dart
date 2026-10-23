@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:bosstro/src/rust/api/disputes.dart' as disputes_api;
 import 'package:bosstro/src/rust/api/disputes.dart'
     show DisputeSummary, DisputeUpdate, PendingDisputes;
+import 'package:bosstro/src/rust/api/resolve.dart' as resolve_api;
+import 'package:bosstro/src/rust/api/resolve.dart'
+    show Resolution, ResolveResult;
 import 'package:bosstro/src/rust/api/take.dart' as take_api;
 import 'package:bosstro/src/rust/api/take.dart'
     show DisputeDetail, InProgressDisputes, SolverStanding, TakeResult;
@@ -14,6 +17,13 @@ export 'package:bosstro/src/rust/api/disputes.dart'
         DisputeSummary,
         DisputeUpdate,
         PendingDisputes;
+export 'package:bosstro/src/rust/api/resolve.dart'
+    show
+        Resolution,
+        ResolveError,
+        ResolveOutcome,
+        ResolveResult,
+        ResolvedAs;
 export 'package:bosstro/src/rust/api/take.dart'
     show
         DisputeDetail,
@@ -26,8 +36,9 @@ export 'package:bosstro/src/rust/api/take.dart'
         TakeResult,
         TakenDisputeSummary;
 
-/// The Rust core's dispute feed and take (`rust/src/api/disputes.rs`,
-/// `rust/src/api/take.rs`). An interface so widget tests, which run without
+/// The Rust core's dispute feed, take and resolution
+/// (`rust/src/api/disputes.rs`, `rust/src/api/take.rs`,
+/// `rust/src/api/resolve.rs`). An interface so widget tests, which run without
 /// the native library, drive a fake.
 abstract interface class DisputesCore {
   /// The active node's pending disputes, oldest first, or null without an
@@ -55,6 +66,11 @@ abstract interface class DisputesCore {
   /// The detail of [disputeId] when this key took it on the active node;
   /// null otherwise (reopened, another key's, no node or key).
   Future<DisputeDetail?> detail(String disputeId);
+
+  /// Pay the buyer or refund the seller of [disputeId] and wait for the
+  /// node's answer. Throws a [ResolveError] when the request was not sent.
+  /// Never retried.
+  Future<ResolveResult> resolve(String disputeId, Resolution resolution);
 }
 
 class RustDisputesCore implements DisputesCore {
@@ -90,4 +106,8 @@ class RustDisputesCore implements DisputesCore {
   @override
   Future<DisputeDetail?> detail(String disputeId) =>
       take_api.disputeDetail(disputeId: disputeId);
+
+  @override
+  Future<ResolveResult> resolve(String disputeId, Resolution resolution) =>
+      resolve_api.resolveDispute(disputeId: disputeId, resolution: resolution);
 }

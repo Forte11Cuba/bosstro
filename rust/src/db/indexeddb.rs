@@ -624,6 +624,11 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
+    async fn a_resolution_round_trips() {
+        contract::a_resolution_round_trips(&store("resolutions").await).await;
+    }
+
+    #[wasm_bindgen_test]
     async fn disputes_never_mix_nodes() {
         contract::disputes_never_mix_nodes(&store("disputes_nodes").await).await;
     }

@@ -6,6 +6,7 @@
 import '../frb_generated.dart';
 import 'disputes.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'resolve.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
 
@@ -20,8 +21,8 @@ Future<TakeResult> takeDispute({required String disputeId}) =>
     RustLib.instance.api.crateApiTakeTakeDispute(disputeId: disputeId);
 
 /// The disputes this key holds on the active node (`in-progress`, taken by
-/// it), the one that has waited longest first; `None` without a node or a
-/// key.
+/// it), the one that has waited longest first, and those it held that closed;
+/// `None` without a node or a key.
 Future<InProgressDisputes?> inProgressDisputes() =>
     RustLib.instance.api.crateApiTakeInProgressDisputes();
 
@@ -73,9 +74,26 @@ class DisputeDetail {
   final String? buyerPubkey;
   final String? sellerPubkey;
 
-  /// Whether the dispute is over (its 38386 is terminal): the chats are
-  /// read only.
+  /// Whether the dispute is over (its 38386 is terminal, or this key's own
+  /// resolution closed it): the chats are read only, nothing can be
+  /// resolved.
   final bool isClosed;
+
+  /// How this key resolved it, when its own request closed it.
+  final ResolvedAs? resolvedAs;
+
+  /// What paying the buyer sends them, sats: the order amount less the
+  /// node's fee (mostrod's `do_payment` pays `amount - fee`).
+  final PlatformInt64? buyerPayout;
+
+  /// What refunding the seller gives back, sats: the seller's hold invoice,
+  /// the order amount plus the node's fee (`amount + fee`).
+  final PlatformInt64? sellerRefund;
+
+  /// A resolution this key sent that got no answer in time and is still
+  /// waited for (in this process only, for ten minutes): the node may have
+  /// acted on it. The detail warns before another is sent.
+  final Resolution? unansweredResolution;
 
   const DisputeDetail({
     required this.mostroPubkey,
@@ -95,6 +113,10 @@ class DisputeDetail {
     this.buyerPubkey,
     this.sellerPubkey,
     required this.isClosed,
+    this.resolvedAs,
+    this.buyerPayout,
+    this.sellerRefund,
+    this.unansweredResolution,
   });
 
   @override
@@ -115,7 +137,11 @@ class DisputeDetail {
       fee.hashCode ^
       buyerPubkey.hashCode ^
       sellerPubkey.hashCode ^
-      isClosed.hashCode;
+      isClosed.hashCode ^
+      resolvedAs.hashCode ^
+      buyerPayout.hashCode ^
+      sellerRefund.hashCode ^
+      unansweredResolution.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -138,21 +164,34 @@ class DisputeDetail {
           fee == other.fee &&
           buyerPubkey == other.buyerPubkey &&
           sellerPubkey == other.sellerPubkey &&
-          isClosed == other.isClosed;
+          isClosed == other.isClosed &&
+          resolvedAs == other.resolvedAs &&
+          buyerPayout == other.buyerPayout &&
+          sellerRefund == other.sellerRefund &&
+          unansweredResolution == other.unansweredResolution;
 }
 
-/// The disputes this key took on the active node and still holds.
+/// The disputes this key took on the active node: the ones it still holds,
+/// and the ones that closed while it held them.
 class InProgressDisputes {
   final String mostroPubkey;
+
+  /// `in-progress`, the one that has waited longest first.
   final List<TakenDisputeSummary> disputes;
+
+  /// Closed (settled, refunded, released, cancelled by the parties), the
+  /// one that closed last first. Read only.
+  final List<TakenDisputeSummary> closed;
 
   const InProgressDisputes({
     required this.mostroPubkey,
     required this.disputes,
+    required this.closed,
   });
 
   @override
-  int get hashCode => mostroPubkey.hashCode ^ disputes.hashCode;
+  int get hashCode =>
+      mostroPubkey.hashCode ^ disputes.hashCode ^ closed.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -160,14 +199,16 @@ class InProgressDisputes {
       other is InProgressDisputes &&
           runtimeType == other.runtimeType &&
           mostroPubkey == other.mostroPubkey &&
-          disputes == other.disputes;
+          disputes == other.disputes &&
+          closed == other.closed;
 }
 
-/// What this key may do on a node (D12), as its answers have shown. Phase 4
-/// never learns it: a take succeeds for a Read and a Read-Write solver
+/// What this key may do on a node (D12), as its answers have shown. A take
+/// never teaches it: a take succeeds for a Read and a Read-Write solver
 /// alike, and the take-over a Read solver cannot make is indistinguishable
-/// from recovering one's own dispute. Phase 6 learns it from settle and
-/// cancel.
+/// from recovering one's own dispute. Settle and cancel do (phase 6):
+/// `NotAuthorized` → Read; `AdminSettled`, `AdminCanceled` or
+/// `CooperativeCancelAccepted` → Read-Write.
 enum SolverPermission {
   unknown,
 
@@ -337,6 +378,9 @@ class TakenDisputeSummary {
   /// answer carries none).
   final String? fiatCode;
 
+  /// How this key resolved it, once closed by its own request.
+  final ResolvedAs? resolvedAs;
+
   const TakenDisputeSummary({
     required this.mostroPubkey,
     required this.disputeId,
@@ -347,6 +391,7 @@ class TakenDisputeSummary {
     this.amount,
     this.fiatAmount,
     this.fiatCode,
+    this.resolvedAs,
   });
 
   @override
@@ -359,7 +404,8 @@ class TakenDisputeSummary {
       takenAt.hashCode ^
       amount.hashCode ^
       fiatAmount.hashCode ^
-      fiatCode.hashCode;
+      fiatCode.hashCode ^
+      resolvedAs.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -374,5 +420,6 @@ class TakenDisputeSummary {
           takenAt == other.takenAt &&
           amount == other.amount &&
           fiatAmount == other.fiatAmount &&
-          fiatCode == other.fiatCode;
+          fiatCode == other.fiatCode &&
+          resolvedAs == other.resolvedAs;
 }

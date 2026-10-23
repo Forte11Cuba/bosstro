@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 368525016;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -306830104;
 
 // Section: executor
 
@@ -1629,6 +1629,45 @@ fn wire__crate__api__relays__remove_relay_impl(
         },
     )
 }
+fn wire__crate__api__resolve__resolve_dispute_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "resolve_dispute",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_dispute_id = <String>::sse_decode(&mut deserializer);
+            let api_resolution = <crate::api::resolve::Resolution>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::resolve::ResolveError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::resolve::resolve_dispute(api_dispute_id, api_resolution)
+                                .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__chat__retry_chat_message_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -2395,6 +2434,12 @@ impl SseDecode for crate::api::take::DisputeDetail {
         let mut var_buyerPubkey = <Option<String>>::sse_decode(deserializer);
         let mut var_sellerPubkey = <Option<String>>::sse_decode(deserializer);
         let mut var_isClosed = <bool>::sse_decode(deserializer);
+        let mut var_resolvedAs =
+            <Option<crate::api::resolve::ResolvedAs>>::sse_decode(deserializer);
+        let mut var_buyerPayout = <Option<i64>>::sse_decode(deserializer);
+        let mut var_sellerRefund = <Option<i64>>::sse_decode(deserializer);
+        let mut var_unansweredResolution =
+            <Option<crate::api::resolve::Resolution>>::sse_decode(deserializer);
         return crate::api::take::DisputeDetail {
             mostro_pubkey: var_mostroPubkey,
             dispute_id: var_disputeId,
@@ -2413,6 +2458,10 @@ impl SseDecode for crate::api::take::DisputeDetail {
             buyer_pubkey: var_buyerPubkey,
             seller_pubkey: var_sellerPubkey,
             is_closed: var_isClosed,
+            resolved_as: var_resolvedAs,
+            buyer_payout: var_buyerPayout,
+            seller_refund: var_sellerRefund,
+            unanswered_resolution: var_unansweredResolution,
         };
     }
 }
@@ -2508,9 +2557,11 @@ impl SseDecode for crate::api::take::InProgressDisputes {
         let mut var_mostroPubkey = <String>::sse_decode(deserializer);
         let mut var_disputes =
             <Vec<crate::api::take::TakenDisputeSummary>>::sse_decode(deserializer);
+        let mut var_closed = <Vec<crate::api::take::TakenDisputeSummary>>::sse_decode(deserializer);
         return crate::api::take::InProgressDisputes {
             mostro_pubkey: var_mostroPubkey,
             disputes: var_disputes,
+            closed: var_closed,
         };
     }
 }
@@ -3061,6 +3112,28 @@ impl SseDecode for Option<crate::api::relays::RelayInfo> {
     }
 }
 
+impl SseDecode for Option<crate::api::resolve::Resolution> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::resolve::Resolution>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::resolve::ResolvedAs> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::resolve::ResolvedAs>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<crate::api::solver::SolverKeyInfo> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -3186,6 +3259,88 @@ impl SseDecode for crate::api::relays::RelayStatus {
             2 => crate::api::relays::RelayStatus::Connecting,
             3 => crate::api::relays::RelayStatus::Error,
             _ => unreachable!("Invalid variant for RelayStatus: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::resolve::Resolution {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::resolve::Resolution::PayBuyer,
+            1 => crate::api::resolve::Resolution::RefundSeller,
+            _ => unreachable!("Invalid variant for Resolution: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::resolve::ResolveError {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::resolve::ResolveError::NoKey,
+            1 => crate::api::resolve::ResolveError::NoNode,
+            2 => crate::api::resolve::ResolveError::NoRelays,
+            3 => crate::api::resolve::ResolveError::SendFailed,
+            4 => crate::api::resolve::ResolveError::UnknownDispute,
+            5 => crate::api::resolve::ResolveError::NotYours,
+            6 => crate::api::resolve::ResolveError::NoOrderId,
+            7 => crate::api::resolve::ResolveError::Closed,
+            8 => crate::api::resolve::ResolveError::AlreadyResolving,
+            9 => crate::api::resolve::ResolveError::ProtocolUnsupported,
+            10 => crate::api::resolve::ResolveError::NodeInfoUnavailable,
+            _ => unreachable!("Invalid variant for ResolveError: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::resolve::ResolveOutcome {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::resolve::ResolveOutcome::PaidBuyer,
+            1 => crate::api::resolve::ResolveOutcome::RefundedSeller,
+            2 => crate::api::resolve::ResolveOutcome::CooperativelyCanceled,
+            3 => crate::api::resolve::ResolveOutcome::ReadOnlySolver,
+            4 => crate::api::resolve::ResolveOutcome::TakenOver,
+            5 => crate::api::resolve::ResolveOutcome::NotInDispute,
+            6 => crate::api::resolve::ResolveOutcome::Refused,
+            7 => crate::api::resolve::ResolveOutcome::NoAnswer,
+            _ => unreachable!("Invalid variant for ResolveOutcome: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::resolve::ResolveResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_mostroPubkey = <String>::sse_decode(deserializer);
+        let mut var_disputeId = <String>::sse_decode(deserializer);
+        let mut var_resolution = <crate::api::resolve::Resolution>::sse_decode(deserializer);
+        let mut var_outcome = <crate::api::resolve::ResolveOutcome>::sse_decode(deserializer);
+        let mut var_reason = <Option<String>>::sse_decode(deserializer);
+        return crate::api::resolve::ResolveResult {
+            mostro_pubkey: var_mostroPubkey,
+            dispute_id: var_disputeId,
+            resolution: var_resolution,
+            outcome: var_outcome,
+            reason: var_reason,
+        };
+    }
+}
+
+impl SseDecode for crate::api::resolve::ResolvedAs {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::resolve::ResolvedAs::PaidBuyer,
+            1 => crate::api::resolve::ResolvedAs::RefundedSeller,
+            2 => crate::api::resolve::ResolvedAs::CooperativelyCanceled,
+            _ => unreachable!("Invalid variant for ResolvedAs: {}", inner),
         };
     }
 }
@@ -3318,6 +3473,8 @@ impl SseDecode for crate::api::take::TakenDisputeSummary {
         let mut var_amount = <Option<i64>>::sse_decode(deserializer);
         let mut var_fiatAmount = <Option<i64>>::sse_decode(deserializer);
         let mut var_fiatCode = <Option<String>>::sse_decode(deserializer);
+        let mut var_resolvedAs =
+            <Option<crate::api::resolve::ResolvedAs>>::sse_decode(deserializer);
         return crate::api::take::TakenDisputeSummary {
             mostro_pubkey: var_mostroPubkey,
             dispute_id: var_disputeId,
@@ -3328,6 +3485,7 @@ impl SseDecode for crate::api::take::TakenDisputeSummary {
             amount: var_amount,
             fiat_amount: var_fiatAmount,
             fiat_code: var_fiatCode,
+            resolved_as: var_resolvedAs,
         };
     }
 }
@@ -3468,27 +3626,28 @@ fn pde_ffi_dispatcher_primary_impl(
             data_len,
         ),
         42 => wire__crate__api__relays__remove_relay_impl(port, ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__chat__retry_chat_message_impl(port, ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__nodes__select_active_node_impl(port, ptr, rust_vec_len, data_len),
-        45 => wire__crate__api__chat__send_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
-        46 => wire__crate__api__chat__send_chat_message_impl(port, ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__take__solver_permission_default_impl(
+        43 => wire__crate__api__resolve__resolve_dispute_impl(port, ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__chat__retry_chat_message_impl(port, ptr, rust_vec_len, data_len),
+        45 => wire__crate__api__nodes__select_active_node_impl(port, ptr, rust_vec_len, data_len),
+        46 => wire__crate__api__chat__send_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__chat__send_chat_message_impl(port, ptr, rust_vec_len, data_len),
+        48 => wire__crate__api__take__solver_permission_default_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        48 => wire__crate__api__solver__solver_pubkey_impl(port, ptr, rust_vec_len, data_len),
-        49 => wire__crate__api__take__solver_standing_impl(port, ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__take__solver_status_default_impl(port, ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__nodes__sync_mostro_node_pictures_impl(
+        49 => wire__crate__api__solver__solver_pubkey_impl(port, ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__take__solver_standing_impl(port, ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__take__solver_status_default_impl(port, ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__nodes__sync_mostro_node_pictures_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        52 => wire__crate__api__take__take_dispute_impl(port, ptr, rust_vec_len, data_len),
-        53 => wire__crate__api__solver__unload_solver_key_impl(port, ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__take__take_dispute_impl(port, ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__solver__unload_solver_key_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -3886,6 +4045,10 @@ impl flutter_rust_bridge::IntoDart for crate::api::take::DisputeDetail {
             self.buyer_pubkey.into_into_dart().into_dart(),
             self.seller_pubkey.into_into_dart().into_dart(),
             self.is_closed.into_into_dart().into_dart(),
+            self.resolved_as.into_into_dart().into_dart(),
+            self.buyer_payout.into_into_dart().into_dart(),
+            self.seller_refund.into_into_dart().into_dart(),
+            self.unanswered_resolution.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -4001,6 +4164,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::take::InProgressDisputes {
         [
             self.mostro_pubkey.into_into_dart().into_dart(),
             self.disputes.into_into_dart().into_dart(),
+            self.closed.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -4370,6 +4534,130 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::relays::RelayStatus>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::resolve::Resolution {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::PayBuyer => 0.into_dart(),
+            Self::RefundSeller => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::resolve::Resolution
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::resolve::Resolution>
+    for crate::api::resolve::Resolution
+{
+    fn into_into_dart(self) -> crate::api::resolve::Resolution {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::resolve::ResolveError {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::NoKey => 0.into_dart(),
+            Self::NoNode => 1.into_dart(),
+            Self::NoRelays => 2.into_dart(),
+            Self::SendFailed => 3.into_dart(),
+            Self::UnknownDispute => 4.into_dart(),
+            Self::NotYours => 5.into_dart(),
+            Self::NoOrderId => 6.into_dart(),
+            Self::Closed => 7.into_dart(),
+            Self::AlreadyResolving => 8.into_dart(),
+            Self::ProtocolUnsupported => 9.into_dart(),
+            Self::NodeInfoUnavailable => 10.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::resolve::ResolveError
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::resolve::ResolveError>
+    for crate::api::resolve::ResolveError
+{
+    fn into_into_dart(self) -> crate::api::resolve::ResolveError {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::resolve::ResolveOutcome {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::PaidBuyer => 0.into_dart(),
+            Self::RefundedSeller => 1.into_dart(),
+            Self::CooperativelyCanceled => 2.into_dart(),
+            Self::ReadOnlySolver => 3.into_dart(),
+            Self::TakenOver => 4.into_dart(),
+            Self::NotInDispute => 5.into_dart(),
+            Self::Refused => 6.into_dart(),
+            Self::NoAnswer => 7.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::resolve::ResolveOutcome
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::resolve::ResolveOutcome>
+    for crate::api::resolve::ResolveOutcome
+{
+    fn into_into_dart(self) -> crate::api::resolve::ResolveOutcome {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::resolve::ResolveResult {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.mostro_pubkey.into_into_dart().into_dart(),
+            self.dispute_id.into_into_dart().into_dart(),
+            self.resolution.into_into_dart().into_dart(),
+            self.outcome.into_into_dart().into_dart(),
+            self.reason.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::resolve::ResolveResult
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::resolve::ResolveResult>
+    for crate::api::resolve::ResolveResult
+{
+    fn into_into_dart(self) -> crate::api::resolve::ResolveResult {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::resolve::ResolvedAs {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::PaidBuyer => 0.into_dart(),
+            Self::RefundedSeller => 1.into_dart(),
+            Self::CooperativelyCanceled => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::resolve::ResolvedAs
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::resolve::ResolvedAs>
+    for crate::api::resolve::ResolvedAs
+{
+    fn into_into_dart(self) -> crate::api::resolve::ResolvedAs {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::solver::SolverKeyError {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
@@ -4558,6 +4846,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::take::TakenDisputeSummary {
             self.amount.into_into_dart().into_dart(),
             self.fiat_amount.into_into_dart().into_dart(),
             self.fiat_code.into_into_dart().into_dart(),
+            self.resolved_as.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -4900,6 +5189,13 @@ impl SseEncode for crate::api::take::DisputeDetail {
         <Option<String>>::sse_encode(self.buyer_pubkey, serializer);
         <Option<String>>::sse_encode(self.seller_pubkey, serializer);
         <bool>::sse_encode(self.is_closed, serializer);
+        <Option<crate::api::resolve::ResolvedAs>>::sse_encode(self.resolved_as, serializer);
+        <Option<i64>>::sse_encode(self.buyer_payout, serializer);
+        <Option<i64>>::sse_encode(self.seller_refund, serializer);
+        <Option<crate::api::resolve::Resolution>>::sse_encode(
+            self.unanswered_resolution,
+            serializer,
+        );
     }
 }
 
@@ -4987,6 +5283,7 @@ impl SseEncode for crate::api::take::InProgressDisputes {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.mostro_pubkey, serializer);
         <Vec<crate::api::take::TakenDisputeSummary>>::sse_encode(self.disputes, serializer);
+        <Vec<crate::api::take::TakenDisputeSummary>>::sse_encode(self.closed, serializer);
     }
 }
 
@@ -5398,6 +5695,26 @@ impl SseEncode for Option<crate::api::relays::RelayInfo> {
     }
 }
 
+impl SseEncode for Option<crate::api::resolve::Resolution> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::resolve::Resolution>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::resolve::ResolvedAs> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::resolve::ResolvedAs>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<crate::api::solver::SolverKeyInfo> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -5505,6 +5822,97 @@ impl SseEncode for crate::api::relays::RelayStatus {
                 crate::api::relays::RelayStatus::Disconnected => 1,
                 crate::api::relays::RelayStatus::Connecting => 2,
                 crate::api::relays::RelayStatus::Error => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::resolve::Resolution {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::resolve::Resolution::PayBuyer => 0,
+                crate::api::resolve::Resolution::RefundSeller => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::resolve::ResolveError {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::resolve::ResolveError::NoKey => 0,
+                crate::api::resolve::ResolveError::NoNode => 1,
+                crate::api::resolve::ResolveError::NoRelays => 2,
+                crate::api::resolve::ResolveError::SendFailed => 3,
+                crate::api::resolve::ResolveError::UnknownDispute => 4,
+                crate::api::resolve::ResolveError::NotYours => 5,
+                crate::api::resolve::ResolveError::NoOrderId => 6,
+                crate::api::resolve::ResolveError::Closed => 7,
+                crate::api::resolve::ResolveError::AlreadyResolving => 8,
+                crate::api::resolve::ResolveError::ProtocolUnsupported => 9,
+                crate::api::resolve::ResolveError::NodeInfoUnavailable => 10,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::resolve::ResolveOutcome {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::resolve::ResolveOutcome::PaidBuyer => 0,
+                crate::api::resolve::ResolveOutcome::RefundedSeller => 1,
+                crate::api::resolve::ResolveOutcome::CooperativelyCanceled => 2,
+                crate::api::resolve::ResolveOutcome::ReadOnlySolver => 3,
+                crate::api::resolve::ResolveOutcome::TakenOver => 4,
+                crate::api::resolve::ResolveOutcome::NotInDispute => 5,
+                crate::api::resolve::ResolveOutcome::Refused => 6,
+                crate::api::resolve::ResolveOutcome::NoAnswer => 7,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::resolve::ResolveResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.mostro_pubkey, serializer);
+        <String>::sse_encode(self.dispute_id, serializer);
+        <crate::api::resolve::Resolution>::sse_encode(self.resolution, serializer);
+        <crate::api::resolve::ResolveOutcome>::sse_encode(self.outcome, serializer);
+        <Option<String>>::sse_encode(self.reason, serializer);
+    }
+}
+
+impl SseEncode for crate::api::resolve::ResolvedAs {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::resolve::ResolvedAs::PaidBuyer => 0,
+                crate::api::resolve::ResolvedAs::RefundedSeller => 1,
+                crate::api::resolve::ResolvedAs::CooperativelyCanceled => 2,
                 _ => {
                     unimplemented!("");
                 }
@@ -5647,6 +6055,7 @@ impl SseEncode for crate::api::take::TakenDisputeSummary {
         <Option<i64>>::sse_encode(self.amount, serializer);
         <Option<i64>>::sse_encode(self.fiat_amount, serializer);
         <Option<String>>::sse_encode(self.fiat_code, serializer);
+        <Option<crate::api::resolve::ResolvedAs>>::sse_encode(self.resolved_as, serializer);
     }
 }
 

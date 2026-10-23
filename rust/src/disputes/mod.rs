@@ -13,6 +13,7 @@ pub mod feed;
 use anyhow::Result;
 
 use crate::api::disputes::{DisputeInitiator, DisputeStatus, DisputeSummary};
+use crate::api::resolve::ResolvedAs;
 use crate::db::Storage;
 use event::ParsedDispute;
 
@@ -58,6 +59,10 @@ pub struct TakenDispute {
     pub initiator_pubkey: Option<String>,
     pub buyer_pubkey: Option<String>,
     pub seller_pubkey: Option<String>,
+    /// How this key resolved it (phase 6), from the node's answer; `None`
+    /// while open, and for a dispute that closed some other way.
+    #[serde(default)]
+    pub resolved_as: Option<ResolvedAs>,
 }
 
 impl DisputeStatus {
@@ -138,6 +143,34 @@ impl DisputeRecord {
             initiator: self.initiator,
             opened_at: self.opened_at,
             is_pending: self.is_pending(now),
+        }
+    }
+}
+
+impl ResolvedAs {
+    pub fn as_wire(self) -> &'static str {
+        match self {
+            ResolvedAs::PaidBuyer => "paid-buyer",
+            ResolvedAs::RefundedSeller => "refunded-seller",
+            ResolvedAs::CooperativelyCanceled => "cooperatively-canceled",
+        }
+    }
+
+    pub fn from_wire(value: &str) -> Option<Self> {
+        Some(match value {
+            "paid-buyer" => ResolvedAs::PaidBuyer,
+            "refunded-seller" => ResolvedAs::RefundedSeller,
+            "cooperatively-canceled" => ResolvedAs::CooperativelyCanceled,
+            _ => return None,
+        })
+    }
+
+    /// The public status the node gives a dispute that closed this way.
+    pub fn status(self) -> DisputeStatus {
+        match self {
+            ResolvedAs::PaidBuyer => DisputeStatus::Settled,
+            ResolvedAs::RefundedSeller => DisputeStatus::SellerRefunded,
+            ResolvedAs::CooperativelyCanceled => DisputeStatus::CooperativelyCanceled,
         }
     }
 }
@@ -273,6 +306,7 @@ pub(crate) mod tests {
             initiator_pubkey: Some("aa".into()),
             buyer_pubkey: Some("bb".into()),
             seller_pubkey: Some("cc".into()),
+            resolved_as: None,
         }
     }
 

@@ -65,6 +65,19 @@ pub(crate) async fn set_status(node: &str, solver: &str, status: SolverStatus) {
     write(node, solver, learned).await;
 }
 
+/// Record what `solver` may do on `node` (phase 6: learned from settle and
+/// cancel). Its solver status is kept, but a permission means a solver.
+pub(crate) async fn set_permission(node: &str, solver: &str, permission: SolverPermission) {
+    let mut learned = read(node, solver).await;
+    let status = SolverStatus::Yes;
+    if learned.permission == permission && learned.status == status {
+        return;
+    }
+    learned.permission = permission;
+    learned.status = status;
+    write(node, solver, learned).await;
+}
+
 async fn write(node: &str, solver: &str, learned: Learned) {
     let key = settings_keys::solver_standing(node, solver);
     lock(memory()).insert(key.clone(), learned);
@@ -133,5 +146,27 @@ mod tests {
                 permission: SolverPermission::Unknown,
             }
         );
+    }
+
+    /// A permission is learned per node and key too, and only answers to a
+    /// solver (the node checked it held the dispute first).
+    #[tokio::test]
+    async fn a_permission_is_kept_per_node_and_key_and_means_a_solver() {
+        let (node_a, node_b) = ("e5".repeat(32), "f6".repeat(32));
+        let me = "a7".repeat(32);
+        set_permission(&node_a, &me, SolverPermission::Read).await;
+        assert_eq!(
+            read(&node_a, &me).await,
+            Learned {
+                status: SolverStatus::Yes,
+                permission: SolverPermission::Read,
+            }
+        );
+        assert_eq!(read(&node_b, &me).await, Learned::default());
+        set_permission(&node_a, &me, SolverPermission::ReadWrite).await;
+        assert_eq!(read(&node_a, &me).await.permission, SolverPermission::ReadWrite);
+        // A later take's status does not forget it.
+        set_status(&node_a, &me, SolverStatus::Yes).await;
+        assert_eq!(read(&node_a, &me).await.permission, SolverPermission::ReadWrite);
     }
 }

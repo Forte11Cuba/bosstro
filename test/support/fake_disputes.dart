@@ -107,11 +107,18 @@ class FakeDisputesCore implements DisputesCore {
     );
   }
 
+  /// The closed disputes this key held, as `in_progress_disputes` answers.
+  List<TakenDisputeSummary> closed = [];
+
   @override
   Future<InProgressDisputes?> inProgress() async {
     final node = this.node;
     if (node == null) return null;
-    return InProgressDisputes(mostroPubkey: node, disputes: List.of(held));
+    return InProgressDisputes(
+      mostroPubkey: node,
+      disputes: List.of(held),
+      closed: List.of(closed),
+    );
   }
 
   @override
@@ -135,6 +142,67 @@ class FakeDisputesCore implements DisputesCore {
   @override
   Future<DisputeDetail?> detail(String disputeId) async =>
       node == null ? null : details[disputeId];
+
+  /// How each resolution ends: a [ResolveResult] outcome, or a
+  /// [ResolveError] thrown. [resolveAnswer] completes it later when set (a
+  /// request still waiting for the node).
+  ResolveOutcome resolveOutcome = ResolveOutcome.paidBuyer;
+  String? resolveReason;
+  ResolveError? resolveError;
+  Completer<void>? resolveAnswer;
+
+  /// The resolutions asked for, in order.
+  final List<(String, Resolution)> resolutions = [];
+
+  @override
+  Future<ResolveResult> resolve(String disputeId, Resolution resolution) async {
+    resolutions.add((disputeId, resolution));
+    if (resolveAnswer case final wait?) await wait.future;
+    if (resolveError case final error?) throw error;
+    final resolvedAs = switch (resolveOutcome) {
+      ResolveOutcome.paidBuyer => ResolvedAs.paidBuyer,
+      ResolveOutcome.refundedSeller => ResolvedAs.refundedSeller,
+      ResolveOutcome.cooperativelyCanceled => ResolvedAs.cooperativelyCanceled,
+      _ => null,
+    };
+    if (resolvedAs != null) {
+      final status = switch (resolvedAs) {
+        ResolvedAs.paidBuyer => DisputeStatus.settled,
+        ResolvedAs.refundedSeller => DisputeStatus.sellerRefunded,
+        ResolvedAs.cooperativelyCanceled => DisputeStatus.cooperativelyCanceled,
+      };
+      if (held.any((d) => d.disputeId == disputeId)) {
+        closed.insert(
+          0,
+          sampleTaken(id: disputeId, status: status, resolvedAs: resolvedAs),
+        );
+      }
+      held.removeWhere((d) => d.disputeId == disputeId);
+      if (details[disputeId] case final detail?) {
+        details[disputeId] = sampleDetail(
+          id: detail.disputeId,
+          status: status,
+          resolvedAs: resolvedAs,
+        );
+      }
+      permission = SolverPermission.readWrite;
+      push();
+    } else if (resolveOutcome == ResolveOutcome.readOnlySolver) {
+      permission = SolverPermission.read;
+      push();
+    } else if (resolveOutcome == ResolveOutcome.takenOver) {
+      held.removeWhere((d) => d.disputeId == disputeId);
+      details.remove(disputeId);
+      push();
+    }
+    return ResolveResult(
+      mostroPubkey: node ?? '',
+      disputeId: disputeId,
+      resolution: resolution,
+      outcome: resolveOutcome,
+      reason: resolveReason,
+    );
+  }
 
   /// Announce a change of [dispute] (or of the list, without one) for
   /// [forNode], as the feed does.
@@ -165,9 +233,12 @@ DisputeSummary sampleDispute({
   isPending: status == DisputeStatus.initiated,
 );
 
-/// A dispute this key holds, as the core summarises it.
+/// A dispute this key holds (or held, with a closed [status]), as the core
+/// summarises it.
 TakenDisputeSummary sampleTaken({
   String id = '8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c',
+  DisputeStatus status = DisputeStatus.inProgress,
+  ResolvedAs? resolvedAs,
   DisputeInitiator initiator = DisputeInitiator.seller,
   int? openedAt = 1700000000,
   int takenAt = 1700003600,
@@ -178,19 +249,23 @@ TakenDisputeSummary sampleTaken({
 }) => TakenDisputeSummary(
   mostroPubkey: node,
   disputeId: id,
-  status: DisputeStatus.inProgress,
+  status: status,
   initiator: initiator,
   openedAt: openedAt,
   takenAt: takenAt,
   amount: amount,
   fiatAmount: fiatAmount,
   fiatCode: fiatCode,
+  resolvedAs: resolvedAs,
 );
 
 /// A dispute's detail, as the core answers it.
 DisputeDetail sampleDetail({
   String id = '8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c',
   DisputeStatus status = DisputeStatus.inProgress,
+  ResolvedAs? resolvedAs,
+  Resolution? unanswered,
+  String? orderId = '5b9e1f7e-6f0e-4b8a-9c3d-2e1f0a9b8c7d',
   DisputeInitiator initiator = DisputeInitiator.seller,
   int? openedAt = 1700000000,
   int takenAt = 1700003600,
@@ -206,7 +281,7 @@ DisputeDetail sampleDetail({
   initiator: initiator,
   openedAt: openedAt,
   takenAt: takenAt,
-  orderId: '5b9e1f7e-6f0e-4b8a-9c3d-2e1f0a9b8c7d',
+  orderId: orderId,
   orderKind: 'sell',
   amount: 75000,
   fiatAmount: 50,
@@ -216,8 +291,14 @@ DisputeDetail sampleDetail({
   fee: 750,
   buyerPubkey: buyerPubkey,
   sellerPubkey: sellerPubkey,
-  isClosed: switch (status) {
-    DisputeStatus.initiated || DisputeStatus.inProgress => false,
-    _ => true,
-  },
+  isClosed:
+      resolvedAs != null ||
+      switch (status) {
+        DisputeStatus.initiated || DisputeStatus.inProgress => false,
+        _ => true,
+      },
+  resolvedAs: resolvedAs,
+  buyerPayout: 75000 - 750,
+  sellerRefund: 75000 + 750,
+  unansweredResolution: unanswered,
 );

@@ -1283,6 +1283,7 @@ pub(crate) mod tests {
             initiator_pubkey: None,
             buyer_pubkey: buyer.map(|k| k.public_key().to_hex()),
             seller_pubkey: seller.map(|k| k.public_key().to_hex()),
+            resolved_as: None,
         }
     }
 

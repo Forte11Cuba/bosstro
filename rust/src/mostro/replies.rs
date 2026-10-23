@@ -8,10 +8,10 @@
 //! process sent to that same node with that same key. Anything else is
 //! dropped. The content is never logged.
 //!
-//! **Requests** wait in [`Router::register`] until their answer arrives or
-//! they age out ([`LATE_WINDOW`]); a caller that stopped waiting
-//! (`take::ANSWER_WAIT`) leaves its request there, so a late answer is still
-//! stored. A retarget to another node or key drops the requests of the old
+//! **Requests** (a take, a resolution) wait in [`Router::register`] until
+//! their answer arrives or they age out ([`LATE_WINDOW_SECS`]); a caller that
+//! stopped waiting (`take::ANSWER_WAIT`) leaves its request there, so a late
+//! answer is still applied. A retarget to another node or key drops the requests of the old
 //! one: their answers are not taken.
 //!
 //! **Since.** The subscription starts a minute before it is opened, so a
@@ -28,7 +28,8 @@ use nostr_sdk::prelude::{
 use tokio::sync::{mpsc, oneshot};
 
 use crate::api::disputes::DisputeStatus;
-use crate::api::take::{TakeError, TakeResult};
+use crate::api::resolve::{Resolution, ResolveResult};
+use crate::api::take::TakeResult;
 use crate::disputes::feed::Feed;
 use crate::nostr::live_subs::LiveSubs;
 
@@ -42,7 +43,7 @@ const SINCE_SKEW_SECS: u64 = 60;
 /// How many handled event ids are remembered (each relay sends a copy).
 const SEEN_CAPACITY: usize = 256;
 
-/// One take sent and not answered yet.
+/// One request sent and not answered yet.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct Request {
     /// The node it went to (hex).
@@ -50,15 +51,38 @@ pub(crate) struct Request {
     /// The key that signed it (hex).
     pub solver: String,
     pub dispute_id: String,
-    /// The dispute's stored status when it was sent.
-    pub status_at_send: DisputeStatus,
+    pub purpose: Purpose,
 }
+
+/// What a request asked for, which decides how its answer is read.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum Purpose {
+    /// `AdminTakeDispute`, sent while the dispute was stored with
+    /// `status_at_send`.
+    Take { status_at_send: DisputeStatus },
+    /// `AdminSettle` or `AdminCancel` of the dispute's order.
+    Resolve {
+        resolution: Resolution,
+        order_id: String,
+    },
+}
+
+/// What the caller of a request gets back.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum Reply {
+    Take(TakeResult),
+    Resolve(ResolveResult),
+}
+
+/// A request of the same dispute on the same node is still waited for.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct Busy;
 
 struct Waiting {
     request: Request,
     registered_at: i64,
     /// The caller, while it waits.
-    reply: Option<oneshot::Sender<TakeResult>>,
+    reply: Option<oneshot::Sender<Reply>>,
 }
 
 /// Who the subscription is for.
@@ -233,13 +257,14 @@ impl Router {
         }
     }
 
-    /// Wait for the answer to `request_id`. Refused while a take of the same
-    /// dispute on the same node is still waited for.
+    /// Wait for the answer to `request_id`. Refused while a request (a take
+    /// or a resolution) of the same dispute on the same node is still waited
+    /// for; one whose caller stopped waiting does not count.
     pub(crate) fn register(
         &self,
         request_id: u64,
         request: Request,
-    ) -> Result<oneshot::Receiver<TakeResult>, TakeError> {
+    ) -> Result<oneshot::Receiver<Reply>, Busy> {
         let now = crate::rt::unix_now();
         let (tx, rx) = oneshot::channel();
         let mut waiting = lock(&self.waiting);
@@ -250,7 +275,7 @@ impl Router {
                 && w.reply.as_ref().is_some_and(|r| !r.is_closed())
         });
         if busy {
-            return Err(TakeError::AlreadyTaking);
+            return Err(Busy);
         }
         waiting.insert(
             request_id,
@@ -266,6 +291,32 @@ impl Router {
     /// Drop a request that never left.
     pub(crate) fn forget(&self, request_id: u64) {
         lock(&self.waiting).remove(&request_id);
+    }
+
+    /// The resolution of `dispute_id` on `node` sent by `solver` that is still
+    /// waiting for its answer although its caller stopped waiting: the node
+    /// may have acted on it. The newest, if several.
+    pub(crate) fn unanswered_resolution(
+        &self,
+        node: &str,
+        solver: &str,
+        dispute_id: &str,
+    ) -> Option<Resolution> {
+        let now = crate::rt::unix_now();
+        lock(&self.waiting)
+            .values()
+            .filter(|w| {
+                w.request.node == node
+                    && w.request.solver == solver
+                    && w.request.dispute_id == dispute_id
+                    && now - w.registered_at < LATE_WINDOW_SECS
+                    && w.reply.as_ref().is_none_or(|r| r.is_closed())
+            })
+            .max_by_key(|w| w.registered_at)
+            .and_then(|w| match &w.request.purpose {
+                Purpose::Resolve { resolution, .. } => Some(*resolution),
+                Purpose::Take { .. } => None,
+            })
     }
 
     /// One kind 14 of the current subscription.
@@ -309,7 +360,30 @@ impl Router {
         let Some(waiting) = waiting else {
             return;
         };
-        let result = super::take::settle(&self.feed, &waiting.request, &opened.message).await;
+        let result = match &waiting.request.purpose {
+            Purpose::Take { status_at_send } => Reply::Take(
+                super::take::settle(
+                    &self.feed,
+                    &waiting.request,
+                    *status_at_send,
+                    &opened.message,
+                )
+                .await,
+            ),
+            Purpose::Resolve {
+                resolution,
+                order_id,
+            } => Reply::Resolve(
+                super::resolve::apply(
+                    &self.feed,
+                    &waiting.request,
+                    *resolution,
+                    order_id,
+                    &opened.message,
+                )
+                .await,
+            ),
+        };
         if let Some(reply) = waiting.reply {
             let _ = reply.send(result);
         }
@@ -356,9 +430,9 @@ async fn follow_with(router: &Router) {
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
-mod tests {
+pub(crate) mod tests {
     use super::*;
-    use crate::api::take::{SolverStatus, TakeOutcome};
+    use crate::api::take::{SolverStatus, TakeError, TakeOutcome};
     use crate::disputes::event::tests::mostrod_event;
     use crate::disputes::feed::Store;
     use crate::mostro::take::tests::{cant_do, took, DISPUTE};
@@ -369,10 +443,11 @@ mod tests {
     use nostr_sdk::local_relay::MockRelay;
     use std::time::Duration;
 
-    /// What the simulated daemon answers to a take: the answer, or nothing.
-    type Script = Arc<dyn Fn(u64) -> Vec<Message> + Send + Sync>;
+    /// What the simulated daemon answers to a request, from its request id
+    /// and the message it carried: the answers, or nothing.
+    pub(crate) type Script = Arc<dyn Fn(u64, &Message) -> Vec<Message> + Send + Sync>;
 
-    async fn connected(url: &nostr_sdk::prelude::RelayUrl) -> Arc<Client> {
+    pub(crate) async fn connected(url: &nostr_sdk::prelude::RelayUrl) -> Arc<Client> {
         let client = Arc::new(Client::new());
         client.add_relay(url).await.unwrap();
         client
@@ -385,7 +460,7 @@ mod tests {
     /// The node's side as mostrod writes it (`util.rs`, `send_dm`): every
     /// kind 14 to the node is opened, and each message the script returns
     /// goes back to its author, unsigned inside, signed outside by the node.
-    async fn daemon(relay: &MockRelay, node: Keys, script: Script) -> Arc<Client> {
+    pub(crate) async fn daemon(relay: &MockRelay, node: Keys, script: Script) -> Arc<Client> {
         let client = connected(&relay.url().await).await;
         client
             .subscribe(
@@ -408,7 +483,7 @@ mod tests {
                     continue;
                 };
                 let request_id = opened.message.get_inner_message_kind().request_id.unwrap();
-                for answer in script(request_id) {
+                for answer in script(request_id, &opened.message) {
                     let reply = wrap_message_with(
                         Transport::Nip44Direct,
                         &answer,
@@ -429,18 +504,18 @@ mod tests {
         client
     }
 
-    struct Rig {
-        node: Keys,
-        solver: Keys,
-        client: Arc<Client>,
-        feed: Arc<Feed>,
-        router: Arc<Router>,
-        _relay: MockRelay,
-        _daemon: Arc<Client>,
+    pub(crate) struct Rig {
+        pub node: Keys,
+        pub solver: Keys,
+        pub client: Arc<Client>,
+        pub feed: Arc<Feed>,
+        pub router: Arc<Router>,
+        pub _relay: MockRelay,
+        pub _daemon: Arc<Client>,
     }
 
     impl Rig {
-        async fn new(status: &str, script: Script) -> Self {
+        pub(crate) async fn new(status: &str, script: Script) -> Self {
             let relay = MockRelay::run().await.unwrap();
             let node = Keys::generate();
             let solver = Keys::generate();
@@ -469,11 +544,11 @@ mod tests {
             }
         }
 
-        fn node_hex(&self) -> String {
+        pub(crate) fn node_hex(&self) -> String {
             self.node.public_key().to_hex()
         }
 
-        fn solver_hex(&self) -> String {
+        pub(crate) fn solver_hex(&self) -> String {
             self.solver.public_key().to_hex()
         }
 
@@ -491,7 +566,7 @@ mod tests {
             .await
         }
 
-        async fn row(&self) -> crate::disputes::DisputeRecord {
+        pub(crate) async fn row(&self) -> crate::disputes::DisputeRecord {
             self.feed
                 .row(&self.node_hex(), DISPUTE)
                 .await
@@ -499,22 +574,22 @@ mod tests {
                 .unwrap()
         }
 
-        async fn standing(&self) -> SolverStatus {
+        pub(crate) async fn standing(&self) -> SolverStatus {
             crate::mostro::standing::read(&self.node_hex(), &self.solver_hex())
                 .await
                 .status
         }
     }
 
-    fn answer_with(f: fn(u64) -> Message) -> Script {
-        Arc::new(move |rid| vec![f(rid)])
+    pub(crate) fn answer_with(f: fn(u64) -> Message) -> Script {
+        Arc::new(move |rid, _| vec![f(rid)])
     }
 
-    fn silent() -> Script {
-        Arc::new(|_| Vec::new())
+    pub(crate) fn silent() -> Script {
+        Arc::new(|_, _| Vec::new())
     }
 
-    const WAIT: Duration = Duration::from_secs(5);
+    pub(crate) const WAIT: Duration = Duration::from_secs(5);
 
     // ── Each row of the marker tables, end to end ────────────────────────
 
@@ -608,7 +683,7 @@ mod tests {
     async fn only_the_answer_with_the_request_id_counts() {
         let rig = Rig::new(
             "initiated",
-            Arc::new(|rid| {
+            Arc::new(|rid, _| {
                 vec![
                     took(rid.wrapping_add(1), DISPUTE),
                     cant_do(rid, Some(CantDoReason::InvalidPubkey)),
@@ -631,7 +706,9 @@ mod tests {
             node: rig.node_hex(),
             solver: rig.solver_hex(),
             dispute_id: DISPUTE.into(),
-            status_at_send: DisputeStatus::Initiated,
+            purpose: Purpose::Take {
+                status_at_send: DisputeStatus::Initiated,
+            },
         };
         let mut answer = rig.router.register(42, request).unwrap();
         let impostor = Keys::generate();
@@ -736,7 +813,7 @@ mod tests {
     // ── The node's PoW ───────────────────────────────────────────────────
 
     /// The node's kind 38385, as mostrod publishes it, with its PoW.
-    fn instance_info(node: &Keys, pow: u32, first_contact: u32) -> Event {
+    pub(crate) fn instance_info(node: &Keys, pow: u32, first_contact: u32) -> Event {
         use nostr_sdk::prelude::*;
         EventBuilder::new(Kind::Custom(38385), "")
             .tags([
@@ -786,7 +863,7 @@ mod tests {
         let counter = asked.clone();
         let rig = Rig::new(
             "initiated",
-            Arc::new(move |rid| {
+            Arc::new(move |rid, _| {
                 counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
                 vec![took(rid, DISPUTE)]
             }),
@@ -820,12 +897,14 @@ mod tests {
             node: rig.node_hex(),
             solver: rig.solver_hex(),
             dispute_id: DISPUTE.into(),
-            status_at_send: DisputeStatus::Initiated,
+            purpose: Purpose::Take {
+                status_at_send: DisputeStatus::Initiated,
+            },
         };
         let first = rig.router.register(1, request.clone()).unwrap();
         assert_eq!(
             rig.router.register(2, request.clone()).unwrap_err(),
-            TakeError::AlreadyTaking
+            Busy
         );
         // Once the first stopped waiting (timed out), another may go.
         drop(first);
