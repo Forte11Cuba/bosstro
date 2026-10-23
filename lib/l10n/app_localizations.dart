@@ -1957,6 +1957,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open the dispute'**
   String get openDisputeHint;
+
+  /// Tooltip and screen-reader label of the attach button in the chat
+  ///
+  /// In en, this message translates to:
+  /// **'Attach a file'**
+  String get chatAttach;
+
+  /// Title of the sheet that asks where a file comes from
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get attachSheetTitle;
+
+  /// Attach sheet row: pick an image
+  ///
+  /// In en, this message translates to:
+  /// **'Photo from the gallery'**
+  String get attachSourcePhoto;
+
+  /// Attach sheet row: open the camera
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get attachSourceCamera;
+
+  /// Attach sheet row: pick a PDF
+  ///
+  /// In en, this message translates to:
+  /// **'PDF document'**
+  String get attachSourcePdf;
+
+  /// Note at the foot of the attach sheet
+  ///
+  /// In en, this message translates to:
+  /// **'The file is encrypted on this device. Only you and this party can open it. JPEG, PNG or PDF, up to 25 MB.'**
+  String get attachSheetNote;
+
+  /// Title of the confirmation before a file is sent
+  ///
+  /// In en, this message translates to:
+  /// **'Send this file?'**
+  String get attachConfirmTitle;
+
+  /// Body of the confirmation before a file is sent to the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({size}) goes to the buyer, encrypted. A photo is sent without its location or camera details.'**
+  String attachConfirmBuyer(String name, String size);
+
+  /// Body of the confirmation before a file is sent to the seller
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({size}) goes to the seller, encrypted. A photo is sent without its location or camera details.'**
+  String attachConfirmSeller(String name, String size);
+
+  /// A picked or received file is over the limit
+  ///
+  /// In en, this message translates to:
+  /// **'The file is over 25 MB.'**
+  String get attachmentTooLarge;
+
+  /// The picked file is not a JPEG, PNG or PDF
+  ///
+  /// In en, this message translates to:
+  /// **'Only JPEG and PNG images and PDF documents can be sent.'**
+  String get attachmentUnsupported;
+
+  /// The image does not decode
+  ///
+  /// In en, this message translates to:
+  /// **'The image could not be read.'**
+  String get attachmentInvalidImage;
+
+  /// The picked file could not be read, or the camera was refused
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be read.'**
+  String get attachmentReadFailed;
+
+  /// No file server took the upload
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be uploaded. Check your connection and try again.'**
+  String get attachmentUploadFailed;
+
+  /// Any other refusal of a file being sent
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be sent.'**
+  String get attachmentSendFailed;
+
+  /// Status of a file being sent
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypting and sending…'**
+  String get attachmentUploading;
+
+  /// Action on a file that was not sent: forget it
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get attachmentDiscard;
+
+  /// Screen-reader label of the skeleton shown while a file downloads and decrypts
+  ///
+  /// In en, this message translates to:
+  /// **'Decrypting the file'**
+  String get attachmentLoading;
+
+  /// The downloaded file is not the one the message names, or does not open with the conversation's key
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be verified.'**
+  String get attachmentNotVerified;
+
+  /// The download of a file failed
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be downloaded.'**
+  String get attachmentDownloadFailed;
+
+  /// A received file is not a JPEG, PNG or PDF
+  ///
+  /// In en, this message translates to:
+  /// **'This type of file cannot be opened here.'**
+  String get attachmentUnsupportedReceived;
+
+  /// Any other failure to open a file
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be opened.'**
+  String get attachmentOpenFailed;
+
+  /// Screen-reader label of an image in the chat
+  ///
+  /// In en, this message translates to:
+  /// **'Image {name}'**
+  String attachmentImageLabel(String name);
+
+  /// Screen-reader hint of an image in the chat
+  ///
+  /// In en, this message translates to:
+  /// **'Open the image'**
+  String get attachmentOpenImage;
+
+  /// Action: save the file where the solver chooses
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get attachmentSave;
+
+  /// Screen-reader hint of a file in the chat
+  ///
+  /// In en, this message translates to:
+  /// **'Save the file'**
+  String get attachmentSaveHint;
+
+  /// Confirmation that a file was saved
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get attachmentSaved;
+
+  /// Saving a file failed
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be saved.'**
+  String get attachmentSaveFailed;
+
+  /// Screen-reader label of a file in the chat
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, {details}'**
+  String attachmentFileLabel(String name, String details);
+
+  /// Screen-reader hint of the full-screen image
+  ///
+  /// In en, this message translates to:
+  /// **'Pinch to zoom'**
+  String get attachmentViewerZoomHint;
 }
 
 class _AppLocalizationsDelegate

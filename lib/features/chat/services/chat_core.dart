@@ -1,11 +1,21 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:bosstro/src/rust/api/chat.dart' as chat_api;
 import 'package:bosstro/src/rust/api/chat.dart'
-    show ChatMessageView, ChatParty, ChatThread, ChatUpdate;
+    show
+        AttachmentProgress,
+        ChatMessageView,
+        ChatParty,
+        ChatThread,
+        ChatUpdate,
+        OpenedAttachment;
 
 export 'package:bosstro/src/rust/api/chat.dart'
     show
+        AttachmentProgress,
+        ChatAttachment,
+        ChatAttachmentKind,
         ChatChannelState,
         ChatDelivery,
         ChatError,
@@ -13,7 +23,8 @@ export 'package:bosstro/src/rust/api/chat.dart'
         ChatParty,
         ChatSender,
         ChatThread,
-        ChatUpdate;
+        ChatUpdate,
+        OpenedAttachment;
 
 /// The Rust core's dispute chat (`rust/src/api/chat.rs`). An interface so
 /// widget tests, which run without the native library, drive a fake.
@@ -36,6 +47,29 @@ abstract interface class ChatCore {
 
   /// Every conversation change, for whichever node is active.
   Stream<ChatUpdate> updates();
+
+  /// Check, clean, encrypt, upload and send the file [bytes] to [party]
+  /// (`send_chat_attachment`). Returns the message as stored, sending; throws
+  /// a [ChatError] when nothing was sent ([uploadId] names the upload on
+  /// [attachmentProgress]).
+  Future<ChatMessageView> sendAttachment(
+    String disputeId,
+    ChatParty party,
+    Uint8List bytes,
+    String fileName,
+    String uploadId,
+  );
+
+  /// The attachment of [messageId], downloaded if needed, verified and
+  /// decrypted in memory (`open_chat_attachment`). Throws a [ChatError].
+  Future<OpenedAttachment> openAttachment(
+    String disputeId,
+    ChatParty party,
+    String messageId,
+  );
+
+  /// Every transfer's progress, uploads and downloads.
+  Stream<AttachmentProgress> attachmentProgress();
 }
 
 class RustChatCore implements ChatCore {
@@ -66,6 +100,42 @@ class RustChatCore implements ChatCore {
   @override
   Stream<ChatUpdate> updates() async* {
     final stream = await chat_api.onChatUpdates();
+    while (true) {
+      final next = await stream.next();
+      if (next == null) return;
+      yield next;
+    }
+  }
+
+  @override
+  Future<ChatMessageView> sendAttachment(
+    String disputeId,
+    ChatParty party,
+    Uint8List bytes,
+    String fileName,
+    String uploadId,
+  ) => chat_api.sendChatAttachment(
+    disputeId: disputeId,
+    party: party,
+    bytes: bytes,
+    fileName: fileName,
+    uploadId: uploadId,
+  );
+
+  @override
+  Future<OpenedAttachment> openAttachment(
+    String disputeId,
+    ChatParty party,
+    String messageId,
+  ) => chat_api.openChatAttachment(
+    disputeId: disputeId,
+    party: party,
+    messageId: messageId,
+  );
+
+  @override
+  Stream<AttachmentProgress> attachmentProgress() async* {
+    final stream = await chat_api.onAttachmentProgress();
     while (true) {
       final next = await stream.next();
       if (next == null) return;

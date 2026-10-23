@@ -44,6 +44,13 @@ dependencies:
   # Loading skeletons (DS-CMP-13), as ../app.
   shimmer: ^3.0.0
 
+  # Chat attachments, as ../app: PDFs and the save dialog (file_picker; SAF on
+  # Android), gallery and camera (image_picker), and the browser download of a
+  # saved file on the web (web).
+  file_picker: ^8.3.7
+  image_picker: ^1.2.3
+  web: ^1.1.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
