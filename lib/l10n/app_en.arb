@@ -1067,6 +1067,10 @@
   "@takeProtocolBody": {
     "description": "Body under takeFailedTitle when the node does not speak protocol 2"
   },
+  "takeNodeInfoBody": "Bosstro could not read this node's settings, so it does not know the proof of work the node asks for. Check the relays and try again.",
+  "@takeNodeInfoBody": {
+    "description": "Body under takeFailedTitle when the node's kind 38385 (its settings, with the proof of work a request needs) was never read"
+  },
   "disputeTakenJustNow": "Taken just now",
   "@disputeTakenJustNow": {
     "description": "How long ago the solver took a dispute, under a minute"

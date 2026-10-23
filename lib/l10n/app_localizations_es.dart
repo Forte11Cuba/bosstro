@@ -873,6 +873,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este nodo anuncia otra versión del protocolo. Bosstro solo habla con nodos del protocolo 2.';
 
   @override
+  String get takeNodeInfoBody =>
+      'Bosstro no pudo leer la configuración del nodo, así que no sabe la prueba de trabajo que pide. Revisa los relays y vuelve a intentarlo.';
+
+  @override
   String get disputeTakenJustNow => 'Tomada hace un momento';
 
   @override

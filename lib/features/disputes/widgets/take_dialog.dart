@@ -221,6 +221,7 @@ String notSentBody(AppLocalizations l10n, TakeError error) => switch (error) {
   TakeError.notTakeable => l10n.takeClosedBody,
   TakeError.unknownDispute => l10n.takeUnknownBody,
   TakeError.protocolUnsupported => l10n.takeProtocolBody,
+  TakeError.nodeInfoUnavailable => l10n.takeNodeInfoBody,
   TakeError.noKey ||
   TakeError.noNode ||
   TakeError.noRelays ||

@@ -871,6 +871,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This node announces another protocol version. Bosstro talks to nodes on protocol 2 only.';
 
   @override
+  String get takeNodeInfoBody =>
+      'Bosstro could not read this node\'s settings, so it does not know the proof of work the node asks for. Check the relays and try again.';
+
+  @override
   String get disputeTakenJustNow => 'Taken just now';
 
   @override

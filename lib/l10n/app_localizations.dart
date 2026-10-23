@@ -1562,6 +1562,12 @@ abstract class AppLocalizations {
   /// **'This node announces another protocol version. Bosstro talks to nodes on protocol 2 only.'**
   String get takeProtocolBody;
 
+  /// Body under takeFailedTitle when the node's kind 38385 (its settings, with the proof of work a request needs) was never read
+  ///
+  /// In en, this message translates to:
+  /// **'Bosstro could not read this node\'s settings, so it does not know the proof of work the node asks for. Check the relays and try again.'**
+  String get takeNodeInfoBody;
+
   /// How long ago the solver took a dispute, under a minute
   ///
   /// In en, this message translates to:

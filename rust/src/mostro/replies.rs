@@ -361,8 +361,8 @@ mod tests {
     use crate::api::take::{SolverStatus, TakeOutcome};
     use crate::disputes::event::tests::mostrod_event;
     use crate::disputes::feed::Store;
-    use crate::mostro::take::send_take;
     use crate::mostro::take::tests::{cant_do, took, DISPUTE};
+    use crate::mostro::take::{send_take, take_on, take_pow_on};
     use mostro_core::error::CantDoReason;
     use mostro_core::message::Message;
     use mostro_core::transport::{wrap_message_with, Transport, WrapOptions};
@@ -733,6 +733,84 @@ mod tests {
         assert_eq!(rig.standing().await, SolverStatus::Unknown);
     }
 
+    // ── The node's PoW ───────────────────────────────────────────────────
+
+    /// The node's kind 38385, as mostrod publishes it, with its PoW.
+    fn instance_info(node: &Keys, pow: u32, first_contact: u32) -> Event {
+        use nostr_sdk::prelude::*;
+        EventBuilder::new(Kind::Custom(38385), "")
+            .tags([
+                Tag::identifier(node.public_key().to_hex()),
+                Tag::parse(["pow", &pow.to_string()]).unwrap(),
+                Tag::parse(["pow_first_contact", &first_contact.to_string()]).unwrap(),
+                Tag::parse(["protocol_version", "2"]).unwrap(),
+            ])
+            .finalize(node)
+            .unwrap()
+    }
+
+    /// Nothing cached (the node was chosen while the relays were down): the
+    /// take reads the 38385 first and mines the larger of the two.
+    #[tokio::test]
+    async fn without_cached_node_info_the_take_reads_it_and_mines_enough() {
+        let rig = Rig::new("initiated", answer_with(|rid| took(rid, DISPUTE))).await;
+        let info = instance_info(&rig.node, 2, 6);
+        assert!(!rig
+            ._daemon
+            .send_event(&info)
+            .await
+            .unwrap()
+            .success
+            .is_empty());
+
+        assert_eq!(take_pow_on(&rig.client, &rig.node_hex()).await, Ok(6));
+        let result = take_on(
+            &rig.router,
+            &rig.feed,
+            &rig.client,
+            &rig.solver,
+            &rig.node_hex(),
+            DISPUTE,
+            WAIT,
+        )
+        .await
+        .unwrap();
+        assert_eq!(result.outcome, TakeOutcome::Taken);
+    }
+
+    /// No info cached and none to read: the PoW the node wants is unknown,
+    /// so nothing goes out (a take below it would be dropped unanswered).
+    #[tokio::test]
+    async fn without_any_node_info_nothing_is_sent() {
+        let asked = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let counter = asked.clone();
+        let rig = Rig::new(
+            "initiated",
+            Arc::new(move |rid| {
+                counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                vec![took(rid, DISPUTE)]
+            }),
+        )
+        .await;
+
+        let result = take_on(
+            &rig.router,
+            &rig.feed,
+            &rig.client,
+            &rig.solver,
+            &rig.node_hex(),
+            DISPUTE,
+            WAIT,
+        )
+        .await;
+
+        assert_eq!(result.unwrap_err(), TakeError::NodeInfoUnavailable);
+        tokio::time::sleep(Duration::from_millis(300)).await;
+        assert_eq!(asked.load(std::sync::atomic::Ordering::SeqCst), 0);
+        assert_eq!(rig.router.waiting_len(), 0);
+        assert_eq!(rig.row().await.taken, None);
+    }
+
     // ── Guards ───────────────────────────────────────────────────────────
 
     #[tokio::test]
@@ -821,14 +899,13 @@ mod tests {
             .retarget(Some(node.clone()), Some(solver.clone()))
             .await;
         let started = std::time::Instant::now();
-        let result = send_take(
+        let result = take_on(
             &router,
             &feed,
             &client,
             &solver,
             &node,
             &dispute,
-            0,
             crate::mostro::take::ANSWER_WAIT,
         )
         .await

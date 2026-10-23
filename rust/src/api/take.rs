@@ -107,6 +107,10 @@ pub enum TakeError {
     AlreadyTaking,
     /// The node says it speaks another protocol than v2 (its kind 38385).
     ProtocolUnsupported,
+    /// The node's kind 38385 was never read and could not be read now, so
+    /// the proof of work it asks for is not known. Sent without it, the take
+    /// could be dropped unanswered; it is not sent.
+    NodeInfoUnavailable,
 }
 
 /// One dispute this key took, as In progress lists it.

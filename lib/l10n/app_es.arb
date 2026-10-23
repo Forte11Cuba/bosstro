@@ -244,6 +244,7 @@
   "takeClosedBody": "Esta disputa está cerrada: no hay nada que tomar.",
   "takeUnknownBody": "Esta disputa no está entre las disputas de este nodo en este teléfono.",
   "takeProtocolBody": "Este nodo anuncia otra versión del protocolo. Bosstro solo habla con nodos del protocolo 2.",
+  "takeNodeInfoBody": "Bosstro no pudo leer la configuración del nodo, así que no sabe la prueba de trabajo que pide. Revisa los relays y vuelve a intentarlo.",
   "disputeTakenJustNow": "Tomada hace un momento",
   "disputeTakenMinutesAgo": "{count, plural, =1{Tomada hace 1 minuto} other{Tomada hace {count} minutos}}",
   "disputeTakenHoursAgo": "{count, plural, =1{Tomada hace 1 hora} other{Tomada hace {count} horas}}",

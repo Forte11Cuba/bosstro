@@ -217,33 +217,60 @@ pub(crate) async fn take(dispute_id: &str) -> Result<TakeResult, TakeError> {
     let pool = crate::api::relays::pool().map_err(|_| TakeError::NoRelays)?;
     let feed = crate::disputes::feed::feed().ok_or(TakeError::NoRelays)?;
     let router = replies::router().ok_or(TakeError::NoRelays)?;
-    let info = crate::api::node_info::cached_node_info(node.clone())
-        .await
-        .ok()
-        .flatten();
-    if info.as_ref().map(|i| i.protocol_support) == Some(ProtocolSupport::Unsupported) {
-        return Err(TakeError::ProtocolUnsupported);
-    }
-    let pow = take_pow(
-        info.as_ref().and_then(|i| i.pow),
-        info.as_ref().and_then(|i| i.pow_first_contact),
-    );
     // The answer must have a subscription to land on before the request
     // leaves (a no-op when the router already follows this node and key).
     router
         .retarget(Some(node.clone()), Some(keys.clone()))
         .await;
-    send_take(
+    take_on(
         &router,
         &feed,
         &pool.client(),
         &keys,
         &node,
         dispute_id,
-        pow,
         ANSWER_WAIT,
     )
     .await
+}
+
+/// The take on explicit parts: the node's PoW first, then the request.
+pub(crate) async fn take_on(
+    router: &replies::Router,
+    feed: &Feed,
+    client: &Client,
+    keys: &Keys,
+    node: &str,
+    dispute_id: &str,
+    wait: std::time::Duration,
+) -> Result<TakeResult, TakeError> {
+    let pow = take_pow_on(client, node).await?;
+    send_take(router, feed, client, keys, node, dispute_id, pow, wait).await
+}
+
+/// The PoW a take needs on `node`, from its cached kind 38385, or read from
+/// the relays now when none is cached (a node chosen while they were down).
+/// Without the info the PoW is unknown: a take sent with none would be
+/// dropped unanswered by a node that asks for some, so it is not sent.
+pub(crate) async fn take_pow_on(client: &Client, node: &str) -> Result<u8, TakeError> {
+    let cached = crate::api::node_info::cached_node_info(node.to_string())
+        .await
+        .ok()
+        .flatten();
+    let info = match cached {
+        Some(info) => info,
+        None => crate::api::node_info::fetch_node_info_on(client, node)
+            .await
+            .map_err(|e| {
+                log::warn!("[take] node info not read: {e}");
+                TakeError::NodeInfoUnavailable
+            })?
+            .ok_or(TakeError::NodeInfoUnavailable)?,
+    };
+    if info.protocol_support == ProtocolSupport::Unsupported {
+        return Err(TakeError::ProtocolUnsupported);
+    }
+    Ok(take_pow(info.pow, info.pow_first_contact))
 }
 
 /// The take itself, on explicit parts so tests drive it against a relay.
@@ -286,7 +313,7 @@ pub(crate) async fn send_take(
         None,
     );
     let sent = async {
-        let event = crate::nostr::transport::wrap_mostro_message(keys, &node_key, &message, pow)
+        let event = wrap_mined(keys, &node_key, &message, pow)
             .await
             .map_err(|e| {
                 log::warn!("[take] request not built: {e}");
@@ -319,6 +346,29 @@ pub(crate) async fn send_take(
             reason: None,
         }),
     }
+}
+
+/// Wrap the request, mining its PoW. mostro-core mines on the calling thread
+/// (`SingleThreadPow`): natively that runs on the blocking pool, off the
+/// runtime's workers; the web has no other thread and the page waits
+/// (AGENTS.md → "Accepted limits").
+async fn wrap_mined(
+    keys: &Keys,
+    node: &PublicKey,
+    message: &Message,
+    pow: u8,
+) -> anyhow::Result<Event> {
+    #[cfg(not(target_arch = "wasm32"))]
+    if pow > 0 {
+        let (keys, node, message) = (keys.clone(), *node, message.clone());
+        return tokio::task::spawn_blocking(move || {
+            tokio::runtime::Handle::current().block_on(
+                crate::nostr::transport::wrap_mostro_message(&keys, &node, &message, pow),
+            )
+        })
+        .await?;
+    }
+    crate::nostr::transport::wrap_mostro_message(keys, node, message, pow).await
 }
 
 /// Look for the order's fiat code in its kind 38383 (the take's answer has

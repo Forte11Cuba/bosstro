@@ -300,6 +300,17 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('The request was not sent'), findsOne);
       expect(find.textContaining('No relay took it'), findsOne);
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      // The node's settings (its PoW) were never read: nothing was sent.
+      core.takeError = TakeError.nodeInfoUnavailable;
+      await tester.tap(find.byType(PendingDisputeRow));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take dispute'));
+      await tester.pumpAndSettle();
+      expect(find.text('The request was not sent'), findsOne);
+      expect(find.textContaining('could not read this node'), findsOne);
     });
   });
 

@@ -2253,6 +2253,7 @@ impl SseDecode for crate::api::take::TakeError {
             5 => crate::api::take::TakeError::NotTakeable,
             6 => crate::api::take::TakeError::AlreadyTaking,
             7 => crate::api::take::TakeError::ProtocolUnsupported,
+            8 => crate::api::take::TakeError::NodeInfoUnavailable,
             _ => unreachable!("Invalid variant for TakeError: {}", inner),
         };
     }
@@ -3016,6 +3017,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::take::TakeError {
             Self::NotTakeable => 5.into_dart(),
             Self::AlreadyTaking => 6.into_dart(),
             Self::ProtocolUnsupported => 7.into_dart(),
+            Self::NodeInfoUnavailable => 8.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -3726,6 +3728,7 @@ impl SseEncode for crate::api::take::TakeError {
                 crate::api::take::TakeError::NotTakeable => 5,
                 crate::api::take::TakeError::AlreadyTaking => 6,
                 crate::api::take::TakeError::ProtocolUnsupported => 7,
+                crate::api::take::TakeError::NodeInfoUnavailable => 8,
                 _ => {
                     unimplemented!("");
                 }
