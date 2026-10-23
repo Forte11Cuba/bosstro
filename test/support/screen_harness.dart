@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bosstro/core/app.dart';
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/services/solver_key_service.dart';
+import 'package:bosstro/features/disputes/providers/pending_providers.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/features/nodes/providers/relay_providers.dart';
@@ -15,10 +16,12 @@ import 'package:bosstro/shared/providers/core_providers.dart';
 import 'package:bosstro/shared/providers/device_security_providers.dart';
 
 import 'fake_device_security.dart';
+import 'fake_disputes.dart';
 import 'fake_nodes.dart';
 import 'fake_solver_key.dart';
 
 export 'fake_device_security.dart';
+export 'fake_disputes.dart';
 export 'fake_nodes.dart';
 export 'fake_solver_key.dart';
 
@@ -51,7 +54,8 @@ class FakeKeyBackend {
 /// Overrides for everything that would call into the native library, which
 /// widget tests run without. Signed in with [sampleKey] unless [signedIn]
 /// is false; on the Mostro node unless [nodes] says otherwise (pass a
-/// `FakeNodesCore()` for a solver who has not chosen one).
+/// `FakeNodesCore()` for a solver who has not chosen one). The dispute feed
+/// has answered with no pending dispute unless [disputes] says otherwise.
 List<Override> fakeCoreOverrides({
   bool signedIn = true,
   FakeKeyBackend? backend,
@@ -59,6 +63,7 @@ List<Override> fakeCoreOverrides({
   FakeDeviceSecurity? device,
   FakeNodesCore? nodes,
   FakeRelaysCore? relays,
+  FakeDisputesCore? disputes,
 }) {
   final nodeCore = nodes ?? FakeNodesCore(active: mostroNodePubkey);
   final keys =
@@ -78,6 +83,10 @@ List<Override> fakeCoreOverrides({
     nodesCoreProvider.overrideWithValue(nodeCore),
     activeNodeProvider.overrideWith(() => ActiveNodeNotifier(nodeCore.active)),
     relaysCoreProvider.overrideWithValue(relays ?? FakeRelaysCore()),
+    disputesCoreProvider.overrideWithValue(
+      disputes ??
+          FakeDisputesCore(node: null, followNode: () => nodeCore.active),
+    ),
   ];
 }
 

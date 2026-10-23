@@ -1,18 +1,27 @@
+import 'dart:async';
+
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/app_theme.dart';
+import 'package:bosstro/features/disputes/providers/pending_providers.dart';
+import 'package:bosstro/features/disputes/services/disputes_core.dart';
+import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/list_empty_state.dart';
+import 'package:bosstro/shared/widgets/list_skeleton.dart';
 import 'package:bosstro/shared/widgets/primary_button.dart';
+import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 import 'package:bosstro/shared/widgets/tab_app_bar.dart';
 
-/// Pending tab: the node's disputes waiting for a solver (kind 38386). The
-/// list arrives in phase 3; until then it is the empty state. Before a node
-/// is chosen it says so, with the way to choose one (D5).
+/// Pending tab: the active node's disputes waiting for a solver (kind 38386
+/// `initiated`, as Mostrix's Disputes Pending), the one that has waited
+/// longest first. Before a node is chosen it says so, with the way to choose
+/// one (D5). Taking a dispute arrives in phase 4.
 class PendingScreen extends ConsumerWidget {
   const PendingScreen({super.key});
 
@@ -29,11 +38,7 @@ class PendingScreen extends ConsumerWidget {
           Expanded(
             child:
                 hasNode
-                    ? ListEmptyState(
-                      sticker: 'dispute',
-                      title: l10n.pendingEmptyTitle,
-                      body: l10n.pendingEmptyBody,
-                    )
+                    ? const _PendingBody()
                     : ListEmptyState(
                       sticker: 'thinking',
                       title: l10n.pendingNoNodeTitle,
@@ -46,6 +51,90 @@ class PendingScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PendingBody extends ConsumerWidget {
+  const _PendingBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final pending = ref.watch(pendingDisputesProvider);
+    // Clipped rather than overflowing when the rows outgrow a short screen.
+    final skeleton = SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: ListSkeleton(label: l10n.loadingDisputes, rowHeight: 132),
+    );
+    return switch (pending) {
+      AsyncError() => ListEmptyState(
+        sticker: 'thinking',
+        title: l10n.pendingLoadErrorTitle,
+        body: l10n.pendingLoadErrorBody,
+      ),
+      AsyncData(:final value?) when value.disputes.isNotEmpty => _PendingList(
+        disputes: value.disputes,
+      ),
+      // Nothing stored and the relays not heard from yet: not known, not none.
+      AsyncData(:final value?) when value.synced => ListEmptyState(
+        sticker: 'dispute',
+        title: l10n.pendingEmptyTitle,
+        body: l10n.pendingEmptyBody,
+      ),
+      _ => skeleton,
+    };
+  }
+}
+
+/// The list, with the ages counted to a clock that moves every minute. The
+/// same tick reads the list again, so a dispute that expired (NIP-40) leaves
+/// without waiting for the next update.
+class _PendingList extends ConsumerStatefulWidget {
+  const _PendingList({required this.disputes});
+
+  final List<DisputeSummary> disputes;
+
+  @override
+  ConsumerState<_PendingList> createState() => _PendingListState();
+}
+
+class _PendingListState extends ConsumerState<_PendingList> {
+  late DateTime _now = clock.now();
+  late final Timer _tick = Timer.periodic(const Duration(minutes: 1), (_) {
+    setState(() => _now = clock.now());
+    unawaited(ref.read(pendingDisputesProvider.notifier).refresh());
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    _tick;
+  }
+
+  @override
+  void dispose() {
+    _tick.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(
+        redesignSidePadding,
+        4,
+        redesignSidePadding,
+        24,
+      ),
+      itemCount: widget.disputes.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder:
+          (context, i) => PendingDisputeRow(
+            key: ValueKey(widget.disputes[i].disputeId),
+            dispute: widget.disputes[i],
+            now: _now,
+          ),
     );
   }
 }

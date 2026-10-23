@@ -63,8 +63,8 @@ void main() {
       locale: const Locale('en'),
       textScale: 1,
     );
-    expect(find.text('No disputes to solve'), findsOneWidget);
-    expect(find.textContaining('opens a dispute'), findsOneWidget);
+    expect(find.text('No disputes waiting'), findsOneWidget);
+    expect(find.textContaining('waiting for a solver'), findsOneWidget);
   });
 
   testWidgets('the app bar says no node is selected, in words', (tester) async {

@@ -2,6 +2,7 @@
 //! (`rust_input` in `flutter_rust_bridge.yaml`). Any change here, even to a
 //! private item, needs `./scripts/frb-generate.sh`.
 
+pub mod disputes;
 pub mod node_info;
 pub mod nodes;
 pub mod relays;

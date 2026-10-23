@@ -1,6 +1,6 @@
 //! Persistent storage (A4), from ../app's `rust/src/db/`, trimmed to what
-//! phase 2 uses: the settings key-value store, the relays and the node
-//! pictures. Phase 3 adds the dispute tables.
+//! Bosstro uses: the settings key-value store, the relays, the node pictures
+//! (phase 2) and the disputes (phase 3).
 //!
 //! One [`Storage`] trait, two backends picked at compile time
 //! (`app_db.rs`): SQLite through `sqlx` on native (Android, Linux),
@@ -20,6 +20,8 @@ use anyhow::Result;
 
 use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
+use crate::api::disputes::DisputeStatus;
+use crate::disputes::DisputeRecord;
 
 /// Keys used in the generic key-value settings store.
 ///
@@ -99,4 +101,30 @@ pub trait Storage: Send + Sync {
     async fn list_node_picture_urls(&self) -> Result<std::collections::HashMap<String, String>>;
     /// Remove `pubkey`'s picture. No-op when absent.
     async fn delete_node_picture(&self, pubkey: &str) -> Result<()>;
+
+    // ── Disputes (`crate::disputes`), one row per node and dispute (D6) ─────
+
+    /// Insert or replace the row of (`mostro_pubkey`, `dispute_id`), every
+    /// field included. Whether a revision should replace the row is decided
+    /// before, by `crate::disputes::merge`.
+    async fn save_dispute(&self, dispute: &DisputeRecord) -> Result<()>;
+    /// One dispute of one node, if stored.
+    async fn get_dispute(
+        &self,
+        mostro_pubkey: &str,
+        dispute_id: &str,
+    ) -> Result<Option<DisputeRecord>>;
+    /// Every stored dispute of `mostro_pubkey`, whatever its status, in no
+    /// particular order. Another node's rows never appear. Unused in the app
+    /// since Pending reads by status; kept for phase 4, which reconciles this
+    /// solver's disputes whatever their status.
+    #[cfg_attr(not(test), allow(dead_code))]
+    async fn list_disputes(&self, mostro_pubkey: &str) -> Result<Vec<DisputeRecord>>;
+    /// The stored disputes of `mostro_pubkey` whose status is `status` (Pending
+    /// reads `initiated`), in no particular order.
+    async fn list_disputes_with_status(
+        &self,
+        mostro_pubkey: &str,
+        status: DisputeStatus,
+    ) -> Result<Vec<DisputeRecord>>;
 }

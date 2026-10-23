@@ -25,6 +25,9 @@ nostr-sdk = { version = "0.45", default-features = false }
 # nostr-sdk's copy too).
 nostr = { version = "0.45", default-features = false, features = ["std", "nip44"] }
 mostro-core = "0.17.3"
+# Dispute ids (the kind 38386 `d` tag) are UUIDs. Already in the tree through
+# mostro-core; same declaration as ../app.
+uuid = { version = "1", features = ["v4"] }
 
 # Serialization: the rows Storage keeps as JSON documents (relays, the node
 # registry's settings blobs), as in ../app.
@@ -65,7 +68,7 @@ wasmtimer = "0.4"
 # The web executor (rt::spawn) and the IndexedDB store (db/indexeddb.rs).
 wasm-bindgen-futures = "0.4"
 indexed_db_futures = "0.4"
-web-sys = { version = "0.3", features = ["console"] }
+web-sys = { version = "0.3", features = ["console", "IdbKeyRange"] }
 # Node pictures through the browser's fetch (node_pictures.rs).
 reqwest = { version = "0.12", default-features = false, features = ["stream"] }
 # The getrandom versions under nostr, k256 and friends have no default backend on

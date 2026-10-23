@@ -137,13 +137,13 @@ abstract class AppLocalizations {
   /// Empty state title of the Pending tab
   ///
   /// In en, this message translates to:
-  /// **'No disputes to solve'**
+  /// **'No disputes waiting'**
   String get pendingEmptyTitle;
 
   /// Empty state explanation of the Pending tab
   ///
   /// In en, this message translates to:
-  /// **'When a trade on this node opens a dispute, it shows up here for you to take.'**
+  /// **'No dispute on this node is waiting for a solver. When a trade opens one, it shows up here for you to take.'**
   String get pendingEmptyBody;
 
   /// Header of the In progress tab: disputes this solver took
@@ -1261,6 +1261,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading relays'**
   String get loadingRelays;
+
+  /// Screen-reader label of the Pending list skeleton
+  ///
+  /// In en, this message translates to:
+  /// **'Loading disputes'**
+  String get loadingDisputes;
+
+  /// Pending tab state when the stored disputes cannot be read
+  ///
+  /// In en, this message translates to:
+  /// **'Disputes could not be read'**
+  String get pendingLoadErrorTitle;
+
+  /// Explanation under pendingLoadErrorTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong reading this node\'s disputes on this phone. Close and reopen Bosstro to try again.'**
+  String get pendingLoadErrorBody;
+
+  /// Status chip of a dispute nobody has taken yet (initiated). Shown upper-case
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a solver'**
+  String get disputeStatusInitiated;
+
+  /// Status chip of a dispute a solver took (in-progress). Shown upper-case
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get disputeStatusInProgress;
+
+  /// Status chip of a dispute a solver closed by paying the buyer (settled). Shown upper-case
+  ///
+  /// In en, this message translates to:
+  /// **'Buyer paid'**
+  String get disputeStatusSettled;
+
+  /// Status chip of a dispute a solver closed by refunding the seller (seller-refunded). Shown upper-case
+  ///
+  /// In en, this message translates to:
+  /// **'Seller refunded'**
+  String get disputeStatusSellerRefunded;
+
+  /// Status chip of a dispute the seller ended by releasing the funds (released). Shown upper-case
+  ///
+  /// In en, this message translates to:
+  /// **'Released by the seller'**
+  String get disputeStatusReleased;
+
+  /// Status chip of a dispute the buyer and seller ended by canceling together (cooperatively-canceled). Shown upper-case
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled by both parties'**
+  String get disputeStatusCooperativelyCanceled;
+
+  /// Who opened a dispute: the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'Opened by the buyer'**
+  String get disputeOpenedByBuyer;
+
+  /// Who opened a dispute: the seller
+  ///
+  /// In en, this message translates to:
+  /// **'Opened by the seller'**
+  String get disputeOpenedBySeller;
+
+  /// Who opened a dispute: the node did not say
+  ///
+  /// In en, this message translates to:
+  /// **'Opener not known'**
+  String get disputeOpenedByUnknown;
+
+  /// Age of a dispute opened less than a minute ago
+  ///
+  /// In en, this message translates to:
+  /// **'Opened just now'**
+  String get disputeOpenedJustNow;
+
+  /// Age of a dispute, in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Opened 1 minute ago} other{Opened {count} minutes ago}}'**
+  String disputeOpenedMinutesAgo(int count);
+
+  /// Age of a dispute, in hours
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Opened 1 hour ago} other{Opened {count} hours ago}}'**
+  String disputeOpenedHoursAgo(int count);
+
+  /// Age of a dispute, in days
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Opened 1 day ago} other{Opened {count} days ago}}'**
+  String disputeOpenedDaysAgo(int count);
+
+  /// Age of a dispute whose event carries no open time
+  ///
+  /// In en, this message translates to:
+  /// **'Open time not known'**
+  String get disputeOpenedUnknown;
+
+  /// Screen-reader label of a dispute row; id is the short dispute id
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute {id}'**
+  String disputeRowLabel(String id);
 }
 
 class _AppLocalizationsDelegate
