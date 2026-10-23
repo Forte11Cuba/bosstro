@@ -161,7 +161,7 @@ abstract class AppLocalizations {
   /// Empty state explanation of the In progress tab
   ///
   /// In en, this message translates to:
-  /// **'Disputes you take show up here, with a chat for the buyer and one for the seller.'**
+  /// **'Disputes you take show up here. If a take got no answer, recover it.'**
   String get inProgressEmptyBody;
 
   /// Header of the Settings tab
@@ -1369,6 +1369,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dispute {id}'**
   String disputeRowLabel(String id);
+
+  /// Answer of a dialog that only informs
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// Screen-reader hint of a Pending row: tapping it opens the take confirmation (glossary: take a dispute)
+  ///
+  /// In en, this message translates to:
+  /// **'Take dispute'**
+  String get takeDisputeHint;
+
+  /// Title of the confirmation before taking a dispute
+  ///
+  /// In en, this message translates to:
+  /// **'Take this dispute?'**
+  String get takeDisputeTitle;
+
+  /// Body of the take confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'You become its solver: the node tells the buyer and the seller, and the dispute moves to Your disputes. Take only a dispute you can see through.'**
+  String get takeDisputeBody;
+
+  /// Answer of the take confirmation; repeats the opener's verb (DS-CMP-26, glossary: take a dispute)
+  ///
+  /// In en, this message translates to:
+  /// **'Take dispute'**
+  String get takeDisputeAnswer;
+
+  /// Snackbar once the node gave the solver the dispute
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute taken. It is in Your disputes.'**
+  String get takeTakenSnack;
+
+  /// Label of the action in the Your disputes header that opens Recover a dispute
+  ///
+  /// In en, this message translates to:
+  /// **'Recover'**
+  String get recoverAction;
+
+  /// Title of the Recover a dispute screen, and the link to it
+  ///
+  /// In en, this message translates to:
+  /// **'Recover a dispute'**
+  String get recoverTitle;
+
+  /// Note at the top of Recover a dispute
+  ///
+  /// In en, this message translates to:
+  /// **'The node does not publish who holds a dispute. So this list shows every dispute in progress on this node that is not among Your disputes on this phone: yours whose answer was lost, and other solvers\'. Recover them one at a time.'**
+  String get recoverNote;
+
+  /// Recover a dispute with no candidate
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to recover'**
+  String get recoverEmptyTitle;
+
+  /// Explanation under recoverEmptyTitle
+  ///
+  /// In en, this message translates to:
+  /// **'No dispute in progress on this node is missing from Your disputes.'**
+  String get recoverEmptyBody;
+
+  /// Screen-reader hint of a Recover row: tapping it opens the recover confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Recover dispute'**
+  String get recoverDisputeHint;
+
+  /// Title of the confirmation before recovering a dispute
+  ///
+  /// In en, this message translates to:
+  /// **'Recover this dispute?'**
+  String get recoverDisputeTitle;
+
+  /// Body of the recover confirmation; warns about the take-over
+  ///
+  /// In en, this message translates to:
+  /// **'Bosstro asks the node for this dispute again. If it is yours, the node sends its data back. If another solver holds it, the node says no, unless that solver is read-only, like Serbero, and your key can pay the buyer and refund the seller: then the dispute becomes yours (a take-over).'**
+  String get recoverDisputeBody;
+
+  /// Answer of the recover confirmation; repeats the opener's verb (DS-CMP-26)
+  ///
+  /// In en, this message translates to:
+  /// **'Recover dispute'**
+  String get recoverDisputeAnswer;
+
+  /// Snackbar once the node gave the dispute back
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute recovered. It is in Your disputes.'**
+  String get recoverTakenSnack;
+
+  /// Banner on Pending and take outcome when the node refused a dispute waiting for a solver
+  ///
+  /// In en, this message translates to:
+  /// **'You are not a solver on this node'**
+  String get notSolverTitle;
+
+  /// Body under notSolverTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to your node to resolve disputes. If this is your node, send your npub to its operator.'**
+  String get notSolverBody;
+
+  /// Action that opens the node selector from the not-a-solver banner or outcome
+  ///
+  /// In en, this message translates to:
+  /// **'Switch node'**
+  String get switchNodeAction;
+
+  /// Take outcome when the node refused a dispute a solver already holds
+  ///
+  /// In en, this message translates to:
+  /// **'Another solver holds this dispute'**
+  String get cannotTakeOverTitle;
+
+  /// Body under cannotTakeOverTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Only a dispute held by a read-only solver, like Serbero, can be taken over, and only by a solver who can pay the buyer and refund the seller.'**
+  String get cannotTakeOverBody;
+
+  /// Take outcome for any other refusal
+  ///
+  /// In en, this message translates to:
+  /// **'The node did not give you this dispute'**
+  String get takeRefusedTitle;
+
+  /// Body under takeRefusedTitle
+  ///
+  /// In en, this message translates to:
+  /// **'It refused the request. Try again later, or ask the node\'s operator.'**
+  String get takeRefusedBody;
+
+  /// Body under takeRefusedTitle when the node did not find the order
+  ///
+  /// In en, this message translates to:
+  /// **'The node no longer has this dispute\'s order.'**
+  String get takeRefusedNotFoundBody;
+
+  /// Take outcome when no answer arrived in time
+  ///
+  /// In en, this message translates to:
+  /// **'The node did not answer'**
+  String get noAnswerTitle;
+
+  /// Body under noAnswerTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Your request may have reached it all the same, so Bosstro did not send it again. In a moment, look in Your disputes, or ask again from Recover a dispute.'**
+  String get noAnswerBody;
+
+  /// Take outcome when the request could not leave
+  ///
+  /// In en, this message translates to:
+  /// **'The request was not sent'**
+  String get takeFailedTitle;
+
+  /// Body under takeFailedTitle
+  ///
+  /// In en, this message translates to:
+  /// **'No relay took it. Check your connection and the relays, then try again.'**
+  String get takeFailedBody;
+
+  /// Body under takeFailedTitle when a take of this dispute is pending
+  ///
+  /// In en, this message translates to:
+  /// **'A request for this dispute is already waiting for the node\'s answer.'**
+  String get takeAlreadyTakingBody;
+
+  /// Body under takeFailedTitle when the dispute closed meanwhile
+  ///
+  /// In en, this message translates to:
+  /// **'This dispute is closed: there is nothing to take.'**
+  String get takeClosedBody;
+
+  /// Body under takeFailedTitle when the dispute is not stored
+  ///
+  /// In en, this message translates to:
+  /// **'This dispute is not among this node\'s disputes on this phone.'**
+  String get takeUnknownBody;
+
+  /// Body under takeFailedTitle when the node does not speak protocol 2
+  ///
+  /// In en, this message translates to:
+  /// **'This node announces another protocol version. Bosstro talks to nodes on protocol 2 only.'**
+  String get takeProtocolBody;
+
+  /// How long ago the solver took a dispute, under a minute
+  ///
+  /// In en, this message translates to:
+  /// **'Taken just now'**
+  String get disputeTakenJustNow;
+
+  /// How long ago the solver took a dispute, in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Taken 1 minute ago} other{Taken {count} minutes ago}}'**
+  String disputeTakenMinutesAgo(int count);
+
+  /// How long ago the solver took a dispute, in hours
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Taken 1 hour ago} other{Taken {count} hours ago}}'**
+  String disputeTakenHoursAgo(int count);
+
+  /// How long ago the solver took a dispute, in days
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Taken 1 day ago} other{Taken {count} days ago}}'**
+  String disputeTakenDaysAgo(int count);
+
+  /// A dispute's trade amount in sats; amount is already formatted
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} sats'**
+  String disputeAmountSats(String amount);
+
+  /// A dispute's fiat amount; amount is already formatted, code is the currency (EUR)
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} {code}'**
+  String disputeAmountFiat(String amount, String code);
+
+  /// A taken dispute whose amount the node did not send
+  ///
+  /// In en, this message translates to:
+  /// **'Amount not known'**
+  String get disputeAmountUnknown;
+
+  /// Settings row: whether the node let this key take a dispute
+  ///
+  /// In en, this message translates to:
+  /// **'Solver on this node'**
+  String get settingsSolverStatus;
+
+  /// Value of settingsSolverStatus
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get settingsSolverYes;
+
+  /// Value of settingsSolverStatus
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get settingsSolverNo;
+
+  /// Settings row: what the solver key may do on this node
+  ///
+  /// In en, this message translates to:
+  /// **'Permission'**
+  String get settingsPermission;
+
+  /// Permission value: read-only solver (takes and chats, never pays or refunds)
+  ///
+  /// In en, this message translates to:
+  /// **'Mediate only'**
+  String get permissionRead;
+
+  /// Permission value: read-write solver
+  ///
+  /// In en, this message translates to:
+  /// **'Mediate, pay and refund'**
+  String get permissionReadWrite;
 }
 
 class _AppLocalizationsDelegate

@@ -40,7 +40,7 @@
   "@inProgressEmptyTitle": {
     "description": "Empty state title of the In progress tab"
   },
-  "inProgressEmptyBody": "Disputes you take show up here, with a chat for the buyer and one for the seller.",
+  "inProgressEmptyBody": "Disputes you take show up here. If a take got no answer, recover it.",
   "@inProgressEmptyBody": {
     "description": "Empty state explanation of the In progress tab"
   },
@@ -938,5 +938,213 @@
         "type": "String"
       }
     }
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Answer of a dialog that only informs"
+  },
+  "takeDisputeHint": "Take dispute",
+  "@takeDisputeHint": {
+    "description": "Screen-reader hint of a Pending row: tapping it opens the take confirmation (glossary: take a dispute)"
+  },
+  "takeDisputeTitle": "Take this dispute?",
+  "@takeDisputeTitle": {
+    "description": "Title of the confirmation before taking a dispute"
+  },
+  "takeDisputeBody": "You become its solver: the node tells the buyer and the seller, and the dispute moves to Your disputes. Take only a dispute you can see through.",
+  "@takeDisputeBody": {
+    "description": "Body of the take confirmation"
+  },
+  "takeDisputeAnswer": "Take dispute",
+  "@takeDisputeAnswer": {
+    "description": "Answer of the take confirmation; repeats the opener's verb (DS-CMP-26, glossary: take a dispute)"
+  },
+  "takeTakenSnack": "Dispute taken. It is in Your disputes.",
+  "@takeTakenSnack": {
+    "description": "Snackbar once the node gave the solver the dispute"
+  },
+  "recoverAction": "Recover",
+  "@recoverAction": {
+    "description": "Label of the action in the Your disputes header that opens Recover a dispute"
+  },
+  "recoverTitle": "Recover a dispute",
+  "@recoverTitle": {
+    "description": "Title of the Recover a dispute screen, and the link to it"
+  },
+  "recoverNote": "The node does not publish who holds a dispute. So this list shows every dispute in progress on this node that is not among Your disputes on this phone: yours whose answer was lost, and other solvers'. Recover them one at a time.",
+  "@recoverNote": {
+    "description": "Note at the top of Recover a dispute"
+  },
+  "recoverEmptyTitle": "Nothing to recover",
+  "@recoverEmptyTitle": {
+    "description": "Recover a dispute with no candidate"
+  },
+  "recoverEmptyBody": "No dispute in progress on this node is missing from Your disputes.",
+  "@recoverEmptyBody": {
+    "description": "Explanation under recoverEmptyTitle"
+  },
+  "recoverDisputeHint": "Recover dispute",
+  "@recoverDisputeHint": {
+    "description": "Screen-reader hint of a Recover row: tapping it opens the recover confirmation"
+  },
+  "recoverDisputeTitle": "Recover this dispute?",
+  "@recoverDisputeTitle": {
+    "description": "Title of the confirmation before recovering a dispute"
+  },
+  "recoverDisputeBody": "Bosstro asks the node for this dispute again. If it is yours, the node sends its data back. If another solver holds it, the node says no, unless that solver is read-only, like Serbero, and your key can pay the buyer and refund the seller: then the dispute becomes yours (a take-over).",
+  "@recoverDisputeBody": {
+    "description": "Body of the recover confirmation; warns about the take-over"
+  },
+  "recoverDisputeAnswer": "Recover dispute",
+  "@recoverDisputeAnswer": {
+    "description": "Answer of the recover confirmation; repeats the opener's verb (DS-CMP-26)"
+  },
+  "recoverTakenSnack": "Dispute recovered. It is in Your disputes.",
+  "@recoverTakenSnack": {
+    "description": "Snackbar once the node gave the dispute back"
+  },
+  "notSolverTitle": "You are not a solver on this node",
+  "@notSolverTitle": {
+    "description": "Banner on Pending and take outcome when the node refused a dispute waiting for a solver"
+  },
+  "notSolverBody": "Switch to your node to resolve disputes. If this is your node, send your npub to its operator.",
+  "@notSolverBody": {
+    "description": "Body under notSolverTitle"
+  },
+  "switchNodeAction": "Switch node",
+  "@switchNodeAction": {
+    "description": "Action that opens the node selector from the not-a-solver banner or outcome"
+  },
+  "cannotTakeOverTitle": "Another solver holds this dispute",
+  "@cannotTakeOverTitle": {
+    "description": "Take outcome when the node refused a dispute a solver already holds"
+  },
+  "cannotTakeOverBody": "Only a dispute held by a read-only solver, like Serbero, can be taken over, and only by a solver who can pay the buyer and refund the seller.",
+  "@cannotTakeOverBody": {
+    "description": "Body under cannotTakeOverTitle"
+  },
+  "takeRefusedTitle": "The node did not give you this dispute",
+  "@takeRefusedTitle": {
+    "description": "Take outcome for any other refusal"
+  },
+  "takeRefusedBody": "It refused the request. Try again later, or ask the node's operator.",
+  "@takeRefusedBody": {
+    "description": "Body under takeRefusedTitle"
+  },
+  "takeRefusedNotFoundBody": "The node no longer has this dispute's order.",
+  "@takeRefusedNotFoundBody": {
+    "description": "Body under takeRefusedTitle when the node did not find the order"
+  },
+  "noAnswerTitle": "The node did not answer",
+  "@noAnswerTitle": {
+    "description": "Take outcome when no answer arrived in time"
+  },
+  "noAnswerBody": "Your request may have reached it all the same, so Bosstro did not send it again. In a moment, look in Your disputes, or ask again from Recover a dispute.",
+  "@noAnswerBody": {
+    "description": "Body under noAnswerTitle"
+  },
+  "takeFailedTitle": "The request was not sent",
+  "@takeFailedTitle": {
+    "description": "Take outcome when the request could not leave"
+  },
+  "takeFailedBody": "No relay took it. Check your connection and the relays, then try again.",
+  "@takeFailedBody": {
+    "description": "Body under takeFailedTitle"
+  },
+  "takeAlreadyTakingBody": "A request for this dispute is already waiting for the node's answer.",
+  "@takeAlreadyTakingBody": {
+    "description": "Body under takeFailedTitle when a take of this dispute is pending"
+  },
+  "takeClosedBody": "This dispute is closed: there is nothing to take.",
+  "@takeClosedBody": {
+    "description": "Body under takeFailedTitle when the dispute closed meanwhile"
+  },
+  "takeUnknownBody": "This dispute is not among this node's disputes on this phone.",
+  "@takeUnknownBody": {
+    "description": "Body under takeFailedTitle when the dispute is not stored"
+  },
+  "takeProtocolBody": "This node announces another protocol version. Bosstro talks to nodes on protocol 2 only.",
+  "@takeProtocolBody": {
+    "description": "Body under takeFailedTitle when the node does not speak protocol 2"
+  },
+  "disputeTakenJustNow": "Taken just now",
+  "@disputeTakenJustNow": {
+    "description": "How long ago the solver took a dispute, under a minute"
+  },
+  "disputeTakenMinutesAgo": "{count, plural, =1{Taken 1 minute ago} other{Taken {count} minutes ago}}",
+  "@disputeTakenMinutesAgo": {
+    "description": "How long ago the solver took a dispute, in minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputeTakenHoursAgo": "{count, plural, =1{Taken 1 hour ago} other{Taken {count} hours ago}}",
+  "@disputeTakenHoursAgo": {
+    "description": "How long ago the solver took a dispute, in hours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputeTakenDaysAgo": "{count, plural, =1{Taken 1 day ago} other{Taken {count} days ago}}",
+  "@disputeTakenDaysAgo": {
+    "description": "How long ago the solver took a dispute, in days",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputeAmountSats": "{amount} sats",
+  "@disputeAmountSats": {
+    "description": "A dispute's trade amount in sats; amount is already formatted",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "disputeAmountFiat": "{amount} {code}",
+  "@disputeAmountFiat": {
+    "description": "A dispute's fiat amount; amount is already formatted, code is the currency (EUR)",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "disputeAmountUnknown": "Amount not known",
+  "@disputeAmountUnknown": {
+    "description": "A taken dispute whose amount the node did not send"
+  },
+  "settingsSolverStatus": "Solver on this node",
+  "@settingsSolverStatus": {
+    "description": "Settings row: whether the node let this key take a dispute"
+  },
+  "settingsSolverYes": "Yes",
+  "@settingsSolverYes": {
+    "description": "Value of settingsSolverStatus"
+  },
+  "settingsSolverNo": "No",
+  "@settingsSolverNo": {
+    "description": "Value of settingsSolverStatus"
+  },
+  "settingsPermission": "Permission",
+  "@settingsPermission": {
+    "description": "Settings row: what the solver key may do on this node"
+  },
+  "permissionRead": "Mediate only",
+  "@permissionRead": {
+    "description": "Permission value: read-only solver (takes and chats, never pays or refunds)"
+  },
+  "permissionReadWrite": "Mediate, pay and refund",
+  "@permissionReadWrite": {
+    "description": "Permission value: read-write solver"
   }
 }

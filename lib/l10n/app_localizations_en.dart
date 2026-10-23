@@ -41,7 +41,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inProgressEmptyBody =>
-      'Disputes you take show up here, with a chat for the buyer and one for the seller.';
+      'Disputes you take show up here. If a take got no answer, recover it.';
 
   @override
   String get settingsTitle => 'Settings';
@@ -759,4 +759,181 @@ class AppLocalizationsEn extends AppLocalizations {
   String disputeRowLabel(String id) {
     return 'Dispute $id';
   }
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get takeDisputeHint => 'Take dispute';
+
+  @override
+  String get takeDisputeTitle => 'Take this dispute?';
+
+  @override
+  String get takeDisputeBody =>
+      'You become its solver: the node tells the buyer and the seller, and the dispute moves to Your disputes. Take only a dispute you can see through.';
+
+  @override
+  String get takeDisputeAnswer => 'Take dispute';
+
+  @override
+  String get takeTakenSnack => 'Dispute taken. It is in Your disputes.';
+
+  @override
+  String get recoverAction => 'Recover';
+
+  @override
+  String get recoverTitle => 'Recover a dispute';
+
+  @override
+  String get recoverNote =>
+      'The node does not publish who holds a dispute. So this list shows every dispute in progress on this node that is not among Your disputes on this phone: yours whose answer was lost, and other solvers\'. Recover them one at a time.';
+
+  @override
+  String get recoverEmptyTitle => 'Nothing to recover';
+
+  @override
+  String get recoverEmptyBody =>
+      'No dispute in progress on this node is missing from Your disputes.';
+
+  @override
+  String get recoverDisputeHint => 'Recover dispute';
+
+  @override
+  String get recoverDisputeTitle => 'Recover this dispute?';
+
+  @override
+  String get recoverDisputeBody =>
+      'Bosstro asks the node for this dispute again. If it is yours, the node sends its data back. If another solver holds it, the node says no, unless that solver is read-only, like Serbero, and your key can pay the buyer and refund the seller: then the dispute becomes yours (a take-over).';
+
+  @override
+  String get recoverDisputeAnswer => 'Recover dispute';
+
+  @override
+  String get recoverTakenSnack => 'Dispute recovered. It is in Your disputes.';
+
+  @override
+  String get notSolverTitle => 'You are not a solver on this node';
+
+  @override
+  String get notSolverBody =>
+      'Switch to your node to resolve disputes. If this is your node, send your npub to its operator.';
+
+  @override
+  String get switchNodeAction => 'Switch node';
+
+  @override
+  String get cannotTakeOverTitle => 'Another solver holds this dispute';
+
+  @override
+  String get cannotTakeOverBody =>
+      'Only a dispute held by a read-only solver, like Serbero, can be taken over, and only by a solver who can pay the buyer and refund the seller.';
+
+  @override
+  String get takeRefusedTitle => 'The node did not give you this dispute';
+
+  @override
+  String get takeRefusedBody =>
+      'It refused the request. Try again later, or ask the node\'s operator.';
+
+  @override
+  String get takeRefusedNotFoundBody =>
+      'The node no longer has this dispute\'s order.';
+
+  @override
+  String get noAnswerTitle => 'The node did not answer';
+
+  @override
+  String get noAnswerBody =>
+      'Your request may have reached it all the same, so Bosstro did not send it again. In a moment, look in Your disputes, or ask again from Recover a dispute.';
+
+  @override
+  String get takeFailedTitle => 'The request was not sent';
+
+  @override
+  String get takeFailedBody =>
+      'No relay took it. Check your connection and the relays, then try again.';
+
+  @override
+  String get takeAlreadyTakingBody =>
+      'A request for this dispute is already waiting for the node\'s answer.';
+
+  @override
+  String get takeClosedBody =>
+      'This dispute is closed: there is nothing to take.';
+
+  @override
+  String get takeUnknownBody =>
+      'This dispute is not among this node\'s disputes on this phone.';
+
+  @override
+  String get takeProtocolBody =>
+      'This node announces another protocol version. Bosstro talks to nodes on protocol 2 only.';
+
+  @override
+  String get disputeTakenJustNow => 'Taken just now';
+
+  @override
+  String disputeTakenMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Taken $count minutes ago',
+      one: 'Taken 1 minute ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeTakenHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Taken $count hours ago',
+      one: 'Taken 1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeTakenDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Taken $count days ago',
+      one: 'Taken 1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeAmountSats(String amount) {
+    return '$amount sats';
+  }
+
+  @override
+  String disputeAmountFiat(String amount, String code) {
+    return '$amount $code';
+  }
+
+  @override
+  String get disputeAmountUnknown => 'Amount not known';
+
+  @override
+  String get settingsSolverStatus => 'Solver on this node';
+
+  @override
+  String get settingsSolverYes => 'Yes';
+
+  @override
+  String get settingsSolverNo => 'No';
+
+  @override
+  String get settingsPermission => 'Permission';
+
+  @override
+  String get permissionRead => 'Mediate only';
+
+  @override
+  String get permissionReadWrite => 'Mediate, pay and refund';
 }

@@ -9,7 +9,9 @@ import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/features/disputes/providers/pending_providers.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
+import 'package:bosstro/features/disputes/widgets/not_solver_banner.dart';
 import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
+import 'package:bosstro/features/disputes/widgets/take_dialog.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/list_empty_state.dart';
@@ -21,7 +23,9 @@ import 'package:bosstro/shared/widgets/tab_app_bar.dart';
 /// Pending tab: the active node's disputes waiting for a solver (kind 38386
 /// `initiated`, as Mostrix's Disputes Pending), the one that has waited
 /// longest first. Before a node is chosen it says so, with the way to choose
-/// one (D5). Taking a dispute arrives in phase 4.
+/// one (D5). A tap on a row takes the dispute, after a confirmation; once
+/// the node refused this key a waiting dispute, a banner says it is no
+/// solver here.
 class PendingScreen extends ConsumerWidget {
   const PendingScreen({super.key});
 
@@ -62,22 +66,45 @@ class _PendingBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final pending = ref.watch(pendingDisputesProvider);
+    // Once the node refused this key a waiting dispute: above whatever
+    // the list shows, in its scroll (it is tall at a large text scale).
+    final banner =
+        ref.watch(solverStandingProvider).valueOrNull?.status == SolverStatus.no
+            ? const NotSolverBanner()
+            : null;
     // Clipped rather than overflowing when the rows outgrow a short screen.
     final skeleton = SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
-      child: ListSkeleton(label: l10n.loadingDisputes, rowHeight: 132),
+      child: Column(
+        children: [
+          if (banner case final top?)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                redesignSidePadding,
+                0,
+                redesignSidePadding,
+                12,
+              ),
+              child: top,
+            ),
+          ListSkeleton(label: l10n.loadingDisputes, rowHeight: 132),
+        ],
+      ),
     );
     return switch (pending) {
       AsyncError() => ListEmptyState(
+        header: banner,
         sticker: 'thinking',
         title: l10n.pendingLoadErrorTitle,
         body: l10n.pendingLoadErrorBody,
       ),
       AsyncData(:final value?) when value.disputes.isNotEmpty => _PendingList(
         disputes: value.disputes,
+        header: banner,
       ),
       // Nothing stored and the relays not heard from yet: not known, not none.
       AsyncData(:final value?) when value.synced => ListEmptyState(
+        header: banner,
         sticker: 'dispute',
         title: l10n.pendingEmptyTitle,
         body: l10n.pendingEmptyBody,
@@ -91,9 +118,12 @@ class _PendingBody extends ConsumerWidget {
 /// same tick reads the list again, so a dispute that expired (NIP-40) leaves
 /// without waiting for the next update.
 class _PendingList extends ConsumerStatefulWidget {
-  const _PendingList({required this.disputes});
+  const _PendingList({required this.disputes, this.header});
 
   final List<DisputeSummary> disputes;
+
+  /// Shown above the rows, in the same scroll.
+  final Widget? header;
 
   @override
   ConsumerState<_PendingList> createState() => _PendingListState();
@@ -120,6 +150,8 @@ class _PendingListState extends ConsumerState<_PendingList> {
 
   @override
   Widget build(BuildContext context) {
+    final rows = widget.disputes;
+    final offset = widget.header == null ? 0 : 1;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(
         redesignSidePadding,
@@ -127,14 +159,24 @@ class _PendingListState extends ConsumerState<_PendingList> {
         redesignSidePadding,
         24,
       ),
-      itemCount: widget.disputes.length,
+      itemCount: rows.length + offset,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder:
-          (context, i) => PendingDisputeRow(
-            key: ValueKey(widget.disputes[i].disputeId),
-            dispute: widget.disputes[i],
-            now: _now,
-          ),
+      itemBuilder: (context, i) {
+        if (i < offset) return widget.header!;
+        final dispute = rows[i - offset];
+        return PendingDisputeRow(
+          key: ValueKey(dispute.disputeId),
+          dispute: dispute,
+          now: _now,
+          hint: AppLocalizations.of(context).takeDisputeHint,
+          onTap:
+              () => openTakeDialog(
+                context,
+                disputeId: dispute.disputeId,
+                kind: TakeKind.take,
+              ),
+        );
+      },
     );
   }
 }

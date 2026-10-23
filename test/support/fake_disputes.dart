@@ -58,6 +58,77 @@ class FakeDisputesCore implements DisputesCore {
   @override
   Stream<DisputeUpdate> updates() => changes.stream;
 
+  /// The disputes this key holds, as `in_progress_disputes` answers.
+  List<TakenDisputeSummary> held = [];
+
+  /// What `recover_candidates` answers.
+  List<DisputeSummary> candidates = [];
+
+  /// What `solver_standing` answers (on [node]).
+  SolverStatus status = SolverStatus.unknown;
+  SolverPermission permission = SolverPermission.unknown;
+
+  /// How each take ends: a [TakeResult] outcome, or a [TakeError] thrown.
+  /// [takeAnswer] completes it later when set (a take still waiting).
+  TakeOutcome takeOutcome = TakeOutcome.taken;
+  String? takeReason;
+  TakeError? takeError;
+  Completer<void>? takeAnswer;
+
+  /// The dispute ids asked for, in order.
+  final List<String> takes = [];
+
+  @override
+  Future<TakeResult> take(String disputeId) async {
+    takes.add(disputeId);
+    if (takeAnswer case final wait?) await wait.future;
+    if (takeError case final error?) throw error;
+    if (takeOutcome == TakeOutcome.taken) {
+      final taken = disputes.where((d) => d.disputeId == disputeId).toList();
+      disputes.removeWhere((d) => d.disputeId == disputeId);
+      candidates.removeWhere((d) => d.disputeId == disputeId);
+      held.add(
+        sampleTaken(
+          id: disputeId,
+          initiator:
+              taken.isEmpty ? DisputeInitiator.seller : taken.first.initiator,
+        ),
+      );
+      status = SolverStatus.yes;
+      push();
+    } else if (takeOutcome == TakeOutcome.notSolver) {
+      status = SolverStatus.no;
+    }
+    return TakeResult(
+      mostroPubkey: node ?? '',
+      disputeId: disputeId,
+      outcome: takeOutcome,
+      reason: takeReason,
+    );
+  }
+
+  @override
+  Future<InProgressDisputes?> inProgress() async {
+    final node = this.node;
+    if (node == null) return null;
+    return InProgressDisputes(mostroPubkey: node, disputes: List.of(held));
+  }
+
+  @override
+  Future<List<DisputeSummary>?> recoverCandidates() async =>
+      node == null ? null : List.of(candidates);
+
+  @override
+  Future<SolverStanding?> standing() async {
+    final node = this.node;
+    if (node == null) return null;
+    return SolverStanding(
+      mostroPubkey: node,
+      status: status,
+      permission: permission,
+    );
+  }
+
   /// Announce a change of [dispute] (or of the list, without one) for
   /// [forNode], as the feed does.
   void push({DisputeSummary? dispute, String? forNode}) {
@@ -85,4 +156,26 @@ DisputeSummary sampleDispute({
   initiator: initiator,
   openedAt: openedAt,
   isPending: status == DisputeStatus.initiated,
+);
+
+/// A dispute this key holds, as the core summarises it.
+TakenDisputeSummary sampleTaken({
+  String id = '8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c',
+  DisputeInitiator initiator = DisputeInitiator.seller,
+  int? openedAt = 1700000000,
+  int takenAt = 1700003600,
+  int? amount = 75000,
+  int? fiatAmount = 50,
+  String? fiatCode = 'EUR',
+  String node = mostroNodePubkey,
+}) => TakenDisputeSummary(
+  mostroPubkey: node,
+  disputeId: id,
+  status: DisputeStatus.inProgress,
+  initiator: initiator,
+  openedAt: openedAt,
+  takenAt: takenAt,
+  amount: amount,
+  fiatAmount: fiatAmount,
+  fiatCode: fiatCode,
 );
