@@ -1,6 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/features/nodes/models/node_display.dart';
+import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/features/nodes/providers/relay_providers.dart';
 import 'package:bosstro/features/nodes/services/nodes_core.dart';
 import 'package:bosstro/l10n/app_localizations_en.dart';
@@ -8,6 +10,39 @@ import 'package:bosstro/l10n/app_localizations_en.dart';
 import '../../support/fake_nodes.dart';
 
 void main() {
+  test('the active node is what the core saved, not what was typed', () async {
+    final core = FakeNodesCore();
+    final container = ProviderContainer(
+      overrides: [nodesCoreProvider.overrideWithValue(core)],
+    );
+    addTearDown(container.dispose);
+
+    await container
+        .read(activeNodeProvider.notifier)
+        .select('  ${cubaPubkey.toUpperCase()} ');
+    expect(container.read(activeNodeProvider), cubaPubkey);
+    expect(container.read(activeNodeProvider), core.activeNode());
+  });
+
+  test('a refused selection leaves the active node as it was', () async {
+    final core = FakeNodesCore(active: mostroNodePubkey)..failSelect = true;
+    final container = ProviderContainer(
+      overrides: [
+        nodesCoreProvider.overrideWithValue(core),
+        activeNodeProvider.overrideWith(
+          () => ActiveNodeNotifier(mostroNodePubkey),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await expectLater(
+      container.read(activeNodeProvider.notifier).select(cubaPubkey),
+      throwsException,
+    );
+    expect(container.read(activeNodeProvider), mostroNodePubkey);
+  });
+
   test('the link is online with one connected relay in use', () {
     final link = relayLinkOf([
       relay('wss://a', status: RelayStatus.disconnected),

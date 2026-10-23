@@ -30,8 +30,11 @@ abstract interface class NodesCore {
   Future<MostroNodeEntry> addNode({required String input, String? name});
   Future<void> removeNode(String pubkey);
 
-  /// Persist [pubkey] as the active node.
+  /// Persist [pubkey] (hex or npub) as the active node.
   Future<void> selectNode(String pubkey);
+
+  /// The active node as the core holds it (lowercase hex), or null.
+  String? activeNode();
 
   Future<NodeInfo?> cachedInfo(String pubkey);
   Future<NodeInfo?> fetchInfo(String pubkey);
@@ -69,6 +72,9 @@ class RustNodesCore implements NodesCore {
   @override
   Future<void> selectNode(String pubkey) =>
       nodes_api.selectActiveNode(pubkey: pubkey);
+
+  @override
+  String? activeNode() => nodes_api.activeNode();
 
   @override
   Future<NodeInfo?> cachedInfo(String pubkey) =>

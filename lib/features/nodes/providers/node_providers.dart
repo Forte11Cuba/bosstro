@@ -28,10 +28,12 @@ class ActiveNodeNotifier extends Notifier<String?> {
   String? build() => _initial;
 
   /// Make [pubkey] the active node. Rethrows the core's marker when it is
-  /// refused; the active node is then unchanged.
+  /// refused; the active node is then unchanged. The new state is what the
+  /// core saved (its normalised hex), never Dart's guess at it.
   Future<void> select(String pubkey) async {
-    await ref.read(nodesCoreProvider).selectNode(pubkey);
-    state = pubkey.toLowerCase();
+    final core = ref.read(nodesCoreProvider);
+    await core.selectNode(pubkey);
+    state = core.activeNode();
   }
 }
 

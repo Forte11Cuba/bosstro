@@ -96,12 +96,16 @@ class FakeNodesCore implements NodesCore {
     log.add('remove:$pubkey');
   }
 
+  /// Normalises as the core does (`parse_node_pubkey` → lowercase hex).
   @override
   Future<void> selectNode(String pubkey) async {
     if (failSelect) throw Exception('storage refused');
-    active = pubkey;
+    active = pubkey.trim().toLowerCase();
     log.add('select:$pubkey');
   }
+
+  @override
+  String? activeNode() => active;
 
   @override
   Future<NodeInfo?> cachedInfo(String pubkey) async => null;
