@@ -6,6 +6,7 @@ import 'package:bosstro/features/chat/attachments/attachment_flow.dart';
 import 'package:bosstro/features/chat/attachments/attachment_picker.dart';
 import 'package:bosstro/features/chat/services/chat_core.dart';
 import 'package:bosstro/features/chat/widgets/chat_bubble.dart';
+import 'package:bosstro/features/chat/widgets/message_copy.dart';
 import 'package:bosstro/features/observer/services/observer_core.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
@@ -19,6 +20,8 @@ import 'package:bosstro/l10n/app_localizations.dart';
 /// the files of this chat with a key the chat key does not give. The bubble
 /// says so and how to get it (ask that party for it in their chat with the
 /// solver, where files open).
+///
+/// A long press copies the message, or a file's name ([messageCopier]).
 class ObservedBubble extends StatelessWidget {
   const ObservedBubble({super.key, required this.message, required this.now});
 
@@ -82,6 +85,11 @@ class ObservedBubble extends StatelessWidget {
       ),
     );
 
+    final copy = messageCopier(
+      context,
+      attachment == null ? message.content : attachment.fileName,
+    );
+
     return LayoutBuilder(
       builder:
           (context, constraints) => Align(
@@ -93,7 +101,11 @@ class ObservedBubble extends StatelessWidget {
               child: MergeSemantics(
                 child: Semantics(
                   label: l10n.chatMessageLabel(sender, time, spoken),
-                  child: ExcludeSemantics(child: bubble),
+                  onLongPress: copy,
+                  onLongPressHint: copy == null ? null : l10n.chatCopyHint,
+                  child: ExcludeSemantics(
+                    child: GestureDetector(onLongPress: copy, child: bubble),
+                  ),
                 ),
               ),
             ),

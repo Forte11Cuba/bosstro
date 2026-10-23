@@ -188,6 +188,18 @@ abstract class AppLocalizations {
   /// **'Copied'**
   String get copied;
 
+  /// Snackbar after copying a chat message that carries a party's chat key (a secret): copied as sensitive and cleared after a minute
+  ///
+  /// In en, this message translates to:
+  /// **'Chat key copied. It is cleared from the clipboard in 60 seconds.'**
+  String get chatKeyCopied;
+
+  /// Screen reader hint of the long press on a chat message, which copies it
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the message'**
+  String get chatCopyHint;
+
   /// Data row label of an id (a dispute's or an order's)
   ///
   /// In en, this message translates to:

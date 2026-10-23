@@ -456,6 +456,9 @@ Applied in place above; listed here so a reviewer coming from `app` sees what di
 8. **The chat between the parties** (amends DS-COL-9, maintainer 2026-10-23): in the observed chat
    the buyer's bubbles take a lime tint and the seller's the sell tint, as `app` colors the two
    sides of an order (`DisputesPalette.observed*`). There they name a side, not the solver's turn
-   or a danger; the side is always written too (DS-COL-10).
+   or a danger; the side is always written too (DS-COL-10). The same two tints mark the resolve actions
+   ("Pay the buyer" lime, "Refund the seller" pink, maintainer 2026-10-23): both soft tints of one
+   weight, never a solid fill (a solid lime would read as the primary CTA, DS-CMP-3); the red
+   answer stays the confirmation's (DS-CMP-2).
 9. **Glossary additions** (§9): chat key / clave del chat, chat between the parties.
 

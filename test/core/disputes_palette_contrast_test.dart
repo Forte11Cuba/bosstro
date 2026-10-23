@@ -81,6 +81,19 @@ void main() {
         expectAA('note', shell.textSecondary, flatten(shell.inset, shell.bg));
       });
 
+      test('the resolve actions: each party tint on the card', () {
+        for (final (name, fill, label) in [
+          ('pay the buyer', pal.observedBuyerFill, pal.observedBuyerLabel),
+          (
+            'refund the seller',
+            pal.observedSellerFill,
+            pal.observedSellerLabel,
+          ),
+        ]) {
+          expectAA(name, label, flatten(fill, shell.surface));
+        }
+      });
+
       test('the message field', () {
         final fill = flatten(pal.composerFill, shell.bg);
         expectAA('text', pal.bubbleInk, fill);

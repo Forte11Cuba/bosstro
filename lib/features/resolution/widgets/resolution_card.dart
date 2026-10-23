@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bosstro/core/app_theme.dart';
+import 'package:bosstro/core/disputes_palette.dart';
 import 'package:bosstro/features/disputes/providers/pending_providers.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/resolution/screens/resolution_screen.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
-import 'package:bosstro/shared/widgets/primary_button.dart';
 import 'package:bosstro/shared/widgets/warning_note.dart';
 
 /// The Info segment's way to end an open dispute this key holds: "Pay the
 /// buyer" and "Refund the seller" (Mostrix's finalization popup), each
 /// opening its full-screen confirmation. Neither is the screen's primary
 /// action, and both weigh the same (DS-CMP-3, DS-CMP-4): the red answer is
-/// the confirmation's.
+/// the confirmation's. Each takes its party's tint from the chat (buyer
+/// lime, seller pink, amendment 8), so the action reads as that side's at a
+/// glance; both are the same soft tint, never a solid fill, and the label
+/// names the party (DS-COL-10).
 ///
 /// When the node said this key is read-only here, the actions stay and a note
 /// says why they will be refused — the operator may have changed it since,
@@ -29,6 +32,7 @@ class ResolutionCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final pal = ShellPalette.of(context);
+    final parties = DisputesPalette.of(context);
     final permission =
         ref.watch(solverStandingProvider).valueOrNull?.permission;
 
@@ -85,17 +89,65 @@ class ResolutionCard extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: 14),
-          SecondaryButton(
+          _PartyAction(
             label: l10n.payBuyerAction,
+            fill: parties.observedBuyerFill,
+            border: parties.observedBuyerBorder,
+            ink: parties.observedBuyerLabel,
             onPressed: () => open(Resolution.payBuyer),
           ),
           const SizedBox(height: 10),
-          SecondaryButton(
+          _PartyAction(
             label: l10n.refundSellerAction,
+            fill: parties.observedSellerFill,
+            border: parties.observedSellerBorder,
+            ink: parties.observedSellerLabel,
             onPressed: () => open(Resolution.refundSeller),
           ),
         ],
       ),
+    );
+  }
+}
+
+/// One resolution action on its party's tint: `SecondaryButton`'s shape,
+/// size and type, filled with the party's chat tint, its border and its
+/// label colour. The two are built the same, so neither weighs more.
+class _PartyAction extends StatelessWidget {
+  const _PartyAction({
+    required this.label,
+    required this.fill,
+    required this.border,
+    required this.ink,
+    required this.onPressed,
+  });
+
+  final String label;
+  final Color fill;
+  final Color border;
+  final Color ink;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        backgroundColor: fill,
+        foregroundColor: ink,
+        side: BorderSide(color: border),
+        minimumSize: const Size.fromHeight(48),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.pageCta),
+        ),
+        textStyle: const TextStyle(
+          fontFamily: AppFonts.ui,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      child: FittedBox(fit: BoxFit.scaleDown, child: Text(label, maxLines: 1)),
     );
   }
 }

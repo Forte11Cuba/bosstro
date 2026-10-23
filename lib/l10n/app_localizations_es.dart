@@ -56,6 +56,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get copied => 'Copiado';
 
   @override
+  String get chatKeyCopied =>
+      'Clave del chat copiada. Se borra del portapapeles en 60 segundos.';
+
+  @override
+  String get chatCopyHint => 'Copiar el mensaje';
+
+  @override
   String get idLabel => 'ID';
 
   @override
