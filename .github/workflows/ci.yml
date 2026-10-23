@@ -15,9 +15,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # Same versions as ../app. FRB_VERSION is checked against pubspec.yaml and
-  # rust/Cargo.toml by scripts/frb-generate.sh.
-  FLUTTER_VERSION: "3.41.9"
+  # FRB_VERSION is the same as ../app and is checked against pubspec.yaml and
+  # rust/Cargo.toml by scripts/frb-generate.sh. Flutter is ahead of ../app
+  # (3.41.9) on purpose; keep it equal to the local Flutter (CLAUDE.md).
+  FLUTTER_VERSION: "3.47.7"
   FRB_VERSION: "2.11.1"
   CARGO_EXPAND_VERSION: "1.0.123"
   # Same as ../app's web build.
@@ -26,12 +27,12 @@ env:
 jobs:
   rust:
     name: Rust (build / test / clippy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: rust
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -58,9 +59,9 @@ jobs:
 
   flutter:
     name: Flutter (generated code / analyze / test)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -89,7 +90,7 @@ jobs:
       # alongside the codegen binary.
       - name: Cache codegen tools
         id: tools-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/bin/flutter_rust_bridge_codegen
@@ -149,9 +150,9 @@ jobs:
   design:
     name: Design guide
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
           # The diff is taken from the merge base with the target branch.
@@ -174,15 +175,15 @@ jobs:
   # graph and the Rust core for every Android ABI through cargokit.
   android:
     name: Android (debug APK)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Install Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
@@ -217,10 +218,10 @@ jobs:
   # graph and the Rust core through cargokit.
   linux:
     name: Linux (debug build)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -257,10 +258,10 @@ jobs:
   # which selects nightly itself for -Z build-std), then the Flutter bundle.
   web:
     name: Web (build)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -282,7 +283,7 @@ jobs:
 
       - name: Cache wasm-pack
         id: wasm-pack-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cargo/bin/wasm-pack
           key: wasm-pack-${{ runner.os }}-${{ env.WASM_PACK_VERSION }}
