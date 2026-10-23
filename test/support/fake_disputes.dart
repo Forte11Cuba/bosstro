@@ -154,9 +154,17 @@ class FakeDisputesCore implements DisputesCore {
   /// The resolutions asked for, in order.
   final List<(String, Resolution)> resolutions = [];
 
+  /// The bond choice of each resolution, in the same order.
+  final List<BondSlash> bonds = [];
+
   @override
-  Future<ResolveResult> resolve(String disputeId, Resolution resolution) async {
+  Future<ResolveResult> resolve(
+    String disputeId,
+    Resolution resolution,
+    BondSlash bond,
+  ) async {
     resolutions.add((disputeId, resolution));
+    bonds.add(bond);
     if (resolveAnswer case final wait?) await wait.future;
     if (resolveError case final error?) throw error;
     final resolvedAs = switch (resolveOutcome) {
@@ -183,6 +191,10 @@ class FakeDisputesCore implements DisputesCore {
           id: detail.disputeId,
           status: status,
           resolvedAs: resolvedAs,
+          bondSlash: resolvedAs == ResolvedAs.cooperativelyCanceled
+              ? BondSlash.noSlash
+              : bond,
+          bondsEnabled: detail.bondsEnabled,
         );
       }
       permission = SolverPermission.readWrite;
@@ -199,6 +211,7 @@ class FakeDisputesCore implements DisputesCore {
       mostroPubkey: node ?? '',
       disputeId: disputeId,
       resolution: resolution,
+      bond: bond,
       outcome: resolveOutcome,
       reason: resolveReason,
     );
@@ -264,6 +277,8 @@ DisputeDetail sampleDetail({
   String id = '8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c',
   DisputeStatus status = DisputeStatus.inProgress,
   ResolvedAs? resolvedAs,
+  BondSlash? bondSlash,
+  bool bondsEnabled = false,
   Resolution? unanswered,
   String? orderId = '5b9e1f7e-6f0e-4b8a-9c3d-2e1f0a9b8c7d',
   DisputeInitiator initiator = DisputeInitiator.seller,
@@ -298,6 +313,8 @@ DisputeDetail sampleDetail({
         _ => true,
       },
   resolvedAs: resolvedAs,
+  bondSlash: bondSlash,
+  bondsEnabled: bondsEnabled,
   buyerPayout: 75000 - 750,
   sellerRefund: 75000 + 750,
   unansweredResolution: unanswered,

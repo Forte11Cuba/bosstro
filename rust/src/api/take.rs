@@ -13,7 +13,7 @@
 use anyhow::Result;
 
 use crate::api::disputes::{DisputeInitiator, DisputeStatus, DisputeSummary};
-use crate::api::resolve::{Resolution, ResolvedAs};
+use crate::api::resolve::{BondSlash, Resolution, ResolvedAs};
 
 /// Whether this key is a solver on a node, as its answers have shown.
 /// Cached per node and solver key (D6, D12).
@@ -210,6 +210,12 @@ pub struct DisputeDetail {
     pub is_closed: bool,
     /// How this key resolved it, when its own request closed it.
     pub resolved_as: Option<ResolvedAs>,
+    /// The bonds that resolution slashed, when it was kept.
+    pub bond_slash: Option<BondSlash>,
+    /// Whether the node uses anti-abuse bonds (`bond_enabled` in its cached
+    /// kind 38385): only then the solver chooses which to slash. `false`
+    /// when the info was never read, so nothing is offered blind.
+    pub bonds_enabled: bool,
     /// What paying the buyer sends them, sats: the order amount less the
     /// node's fee (mostrod's `do_payment` pays `amount - fee`).
     pub buyer_payout: Option<i64>,

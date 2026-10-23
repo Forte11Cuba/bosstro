@@ -82,6 +82,14 @@ class DisputeDetail {
   /// How this key resolved it, when its own request closed it.
   final ResolvedAs? resolvedAs;
 
+  /// The bonds that resolution slashed, when it was kept.
+  final BondSlash? bondSlash;
+
+  /// Whether the node uses anti-abuse bonds (`bond_enabled` in its cached
+  /// kind 38385): only then the solver chooses which to slash. `false`
+  /// when the info was never read, so nothing is offered blind.
+  final bool bondsEnabled;
+
   /// What paying the buyer sends them, sats: the order amount less the
   /// node's fee (mostrod's `do_payment` pays `amount - fee`).
   final PlatformInt64? buyerPayout;
@@ -114,6 +122,8 @@ class DisputeDetail {
     this.sellerPubkey,
     required this.isClosed,
     this.resolvedAs,
+    this.bondSlash,
+    required this.bondsEnabled,
     this.buyerPayout,
     this.sellerRefund,
     this.unansweredResolution,
@@ -139,6 +149,8 @@ class DisputeDetail {
       sellerPubkey.hashCode ^
       isClosed.hashCode ^
       resolvedAs.hashCode ^
+      bondSlash.hashCode ^
+      bondsEnabled.hashCode ^
       buyerPayout.hashCode ^
       sellerRefund.hashCode ^
       unansweredResolution.hashCode;
@@ -166,6 +178,8 @@ class DisputeDetail {
           sellerPubkey == other.sellerPubkey &&
           isClosed == other.isClosed &&
           resolvedAs == other.resolvedAs &&
+          bondSlash == other.bondSlash &&
+          bondsEnabled == other.bondsEnabled &&
           buyerPayout == other.buyerPayout &&
           sellerRefund == other.sellerRefund &&
           unansweredResolution == other.unansweredResolution;

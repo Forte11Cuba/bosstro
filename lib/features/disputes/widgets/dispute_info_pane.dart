@@ -5,7 +5,7 @@ import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
 import 'package:bosstro/features/observer/widgets/observer_card.dart';
 import 'package:bosstro/features/resolution/screens/resolution_screen.dart'
-    show closedResultLabel;
+    show bondChoiceLabel, closedResultLabel;
 import 'package:bosstro/features/resolution/widgets/resolution_card.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
@@ -97,6 +97,12 @@ class DisputeInfoPane extends StatelessWidget {
                 Icons.task_alt_rounded,
                 l10n.detailResult,
                 closedResultLabel(l10n, detail.resolvedAs, detail.status),
+              ),
+            if (detail.isClosed && detail.bondSlash != null)
+              textRow(
+                Icons.shield_outlined,
+                l10n.detailBonds,
+                bondChoiceLabel(l10n, detail.bondSlash!),
               ),
           ],
         ),

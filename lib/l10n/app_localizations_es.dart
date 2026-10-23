@@ -1501,4 +1501,59 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get detailResult => 'Resultado';
+
+  @override
+  String get bondsTitle => 'Fianzas';
+
+  @override
+  String get bondsPickerHint =>
+      'Este nodo usa fianzas antiabuso. Elige a quién se le penaliza, si a alguien. Va en la misma petición.';
+
+  @override
+  String get bondNoSlash => 'No penalizar';
+
+  @override
+  String get bondNoSlashDetail => 'Las fianzas vuelven a las dos partes.';
+
+  @override
+  String get bondSlashBuyer => 'Penalizar al comprador';
+
+  @override
+  String get bondSlashBuyerDetail =>
+      'El comprador pierde su fianza; el vendedor puede reclamar su parte.';
+
+  @override
+  String get bondSlashSeller => 'Penalizar al vendedor';
+
+  @override
+  String get bondSlashSellerDetail =>
+      'El vendedor pierde su fianza; el comprador puede reclamar su parte.';
+
+  @override
+  String get bondSlashBoth => 'Penalizar a los dos';
+
+  @override
+  String get bondSlashBothDetail => 'Los dos pierden su fianza.';
+
+  @override
+  String get bondNotPostedTitle => 'Esa parte no depositó fianza';
+
+  @override
+  String get bondNotPostedBody =>
+      'El nodo no tiene fianza de la parte que elegiste penalizar, así que no se pagó ni se devolvió nada. Elige otra opción de fianzas.';
+
+  @override
+  String get bondChooseAgain => 'Elegir otra opción';
+
+  @override
+  String get resolvedSlashedBuyer => 'Se penalizó la fianza del comprador.';
+
+  @override
+  String get resolvedSlashedSeller => 'Se penalizó la fianza del vendedor.';
+
+  @override
+  String get resolvedSlashedBoth => 'Se penalizaron las fianzas de los dos.';
+
+  @override
+  String get detailBonds => 'Fianzas';
 }

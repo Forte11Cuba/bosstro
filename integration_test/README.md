@@ -205,3 +205,20 @@ cd rust && BOSSTRO_E2E_RELAY=ws://localhost:<port> BOSSTRO_E2E_NODE=<node hex> \
 - dispute 3 after `cancel -o <order>` from both parties (mostro-cli) →
   `cooperatively-canceled`; the seller's hold invoice is `CANCELED` by the
   parties' cancel, and the node's 38386 reads `cooperatively-canceled`.
+
+## Bond slash, with real regtest sats
+
+Same setup as the resolution run, on a mostrod whose copied `settings.toml` has
+`[anti_abuse_bond] enabled = true` (here `apply_to = "take"`: the taker posts the
+bond) and a node key of its own. Its kind 38385 then says `bond_enabled = "true"`,
+which is what makes Bosstro offer the choice.
+
+- The buyer's `takesell` answers with the taker's **bond invoice**
+  (`PayBondInvoice`): pay it from `carol` in the background (`payinvoice -f`); the
+  bond row turns `locked`. Then the seller's hold invoice arrives as usual.
+- Take the dispute with the solver key (`mostro-cli admtakedispute -d <dispute>` with
+  `ADMIN_NSEC`), then resolve through the Rust core with
+  `BOSSTRO_E2E_BOND=no-slash|buyer|seller|both` (`resolve_against_a_local_mostrod`).
+- Slashing a party with no bond answers `bond-not-posted` and moves nothing. A valid
+  slash settles that party's bond HTLC (`pending-payout`, `lost-dispute`) and the other
+  party gets `AddBondInvoice` for its share (`getdm`).

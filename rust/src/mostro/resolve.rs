@@ -19,6 +19,7 @@
 //! | `CantDo(NotAuthorized)` | `ReadOnlySolver` | permission read |
 //! | `CantDo(IsNotYourDispute)`, `CantDo(DisputeTakenByAdmin)` | `TakenOver` | this key's take dropped |
 //! | `CantDo(InvalidOrderStatus)`, `CantDo(NotAllowedByStatus)` | `NotInDispute` | none: the 38386 reconciles |
+//! | `CantDo(InvalidPayload)`, to a request that slashed a bond | `BondNotPosted` | none: a party it names posted no bond |
 //! | another `CantDo`, anything else | `Refused` | none |
 //! | nothing in time | `NoAnswer` | none; a late answer is still applied |
 //!
@@ -39,12 +40,14 @@
 //! `pow_first_contact`.
 
 use mostro_core::error::CantDoReason;
-use mostro_core::message::{Action, Message, Payload};
+use mostro_core::message::{Action, BondResolution, Message, Payload};
 use nostr_sdk::prelude::*;
 
 use super::replies::{self, Purpose, Reply, Request};
 use super::take::{new_request_id, reason_marker, take_pow_on, wrap_mined, ANSWER_WAIT};
-use crate::api::resolve::{Resolution, ResolveError, ResolveOutcome, ResolveResult, ResolvedAs};
+use crate::api::resolve::{
+    BondSlash, Resolution, ResolveError, ResolveOutcome, ResolveResult, ResolvedAs,
+};
 use crate::api::take::{SolverPermission, TakeError};
 use crate::disputes::feed::Feed;
 
@@ -74,14 +77,26 @@ pub(crate) fn request_message(
     resolution: Resolution,
     order_id: uuid::Uuid,
     request_id: u64,
+    bond: BondSlash,
 ) -> Message {
     Message::new_order(
         Some(order_id),
         Some(request_id),
         None,
         actions_of(resolution).0,
-        None,
+        bond_payload(bond),
     )
+}
+
+/// The payload that carries `bond`: none when nothing is slashed (mostrod
+/// reads none as "release every bond", as Mostrix's `to_optional_payload`),
+/// mostro-core's `BondResolution` otherwise.
+pub(crate) fn bond_payload(bond: BondSlash) -> Option<Payload> {
+    let (slash_seller, slash_buyer) = bond.slashes();
+    (slash_seller || slash_buyer).then_some(Payload::BondResolution(BondResolution {
+        slash_seller,
+        slash_buyer,
+    }))
 }
 
 /// Read `message` as the answer to `resolution` of `order_id`. A
@@ -102,7 +117,11 @@ pub(crate) fn read_answer(resolution: Resolution, order_id: &str, message: &Mess
 
 /// The outcome of `answer` to `resolution`, and the refusal's reason when it
 /// is worth carrying.
-pub(crate) fn classify(answer: &Answer, resolution: Resolution) -> (ResolveOutcome, Option<String>) {
+pub(crate) fn classify(
+    answer: &Answer,
+    resolution: Resolution,
+    bond: BondSlash,
+) -> (ResolveOutcome, Option<String>) {
     match answer {
         Answer::Done => (
             match resolution {
@@ -121,8 +140,23 @@ pub(crate) fn classify(answer: &Answer, resolution: Resolution) -> (ResolveOutco
             | CantDoReason::NotAllowedByStatus
             | CantDoReason::InvalidDisputeStatus),
         )) => (ResolveOutcome::NotInDispute, Some(reason_marker(reason))),
+        // Only a slash can make a well-formed request's payload invalid.
+        Answer::CantDo(Some(CantDoReason::InvalidPayload)) if bond != BondSlash::NoSlash => {
+            (ResolveOutcome::BondNotPosted, None)
+        }
         Answer::CantDo(reason) => (ResolveOutcome::Refused, reason.as_ref().map(reason_marker)),
         Answer::Other => (ResolveOutcome::Refused, None),
+    }
+}
+
+/// The bonds a resolution that closed as `closed` slashed: what it asked for,
+/// unless the parties had cancelled already (mostrod answers
+/// `CooperativeCancelAccepted` before it reads the payload, so nothing is
+/// slashed then).
+pub(crate) fn slashed(closed: ResolvedAs, bond: BondSlash) -> BondSlash {
+    match closed {
+        ResolvedAs::CooperativelyCanceled => BondSlash::NoSlash,
+        _ => bond,
     }
 }
 
@@ -145,14 +179,15 @@ pub(crate) async fn apply(
     request: &Request,
     resolution: Resolution,
     order_id: &str,
+    bond: BondSlash,
     message: &Message,
 ) -> ResolveResult {
     let answer = read_answer(resolution, order_id, message);
-    let (outcome, reason) = classify(&answer, resolution);
+    let (outcome, reason) = classify(&answer, resolution, bond);
     let (node, solver, dispute) = (&request.node, &request.solver, &request.dispute_id);
     if let Some(closed) = resolved_as(outcome) {
         if let Err(e) = feed
-            .record_resolution(node, dispute, solver, order_id, closed)
+            .record_resolution(node, dispute, solver, order_id, closed, slashed(closed, bond))
             .await
         {
             log::warn!("[resolve] resolution not stored: {e}");
@@ -174,13 +209,14 @@ pub(crate) async fn apply(
     // read again (the "no answer yet" warning goes, the permission shows).
     feed.announce_stored(node, dispute).await;
     log::info!(
-        "[resolve] dispute {}…: {resolution:?} → {outcome:?}",
+        "[resolve] dispute {}…: {resolution:?}, bonds {bond:?} → {outcome:?}",
         &dispute[..8.min(dispute.len())]
     );
     ResolveResult {
         mostro_pubkey: node.clone(),
         dispute_id: dispute.clone(),
         resolution,
+        bond,
         outcome,
         reason,
     }
@@ -191,6 +227,7 @@ pub(crate) async fn apply(
 pub(crate) async fn resolve(
     dispute_id: &str,
     resolution: Resolution,
+    bond: BondSlash,
 ) -> Result<ResolveResult, ResolveError> {
     let keys = crate::solver_slot::SOLVER_SLOT
         .keys()
@@ -211,6 +248,7 @@ pub(crate) async fn resolve(
         &node,
         dispute_id,
         resolution,
+        bond,
         ANSWER_WAIT,
     )
     .await
@@ -253,6 +291,7 @@ pub(crate) async fn resolve_on(
     node: &str,
     dispute_id: &str,
     resolution: Resolution,
+    bond: BondSlash,
     wait: std::time::Duration,
 ) -> Result<ResolveResult, ResolveError> {
     order_to_resolve(feed, node, &keys.public_key().to_hex(), dispute_id).await?;
@@ -260,7 +299,7 @@ pub(crate) async fn resolve_on(
         TakeError::ProtocolUnsupported => ResolveError::ProtocolUnsupported,
         _ => ResolveError::NodeInfoUnavailable,
     })?;
-    send_resolution(router, feed, client, keys, node, dispute_id, resolution, pow, wait).await
+    send_resolution(router, feed, client, keys, node, dispute_id, resolution, bond, pow, wait).await
 }
 
 /// The request itself, on explicit parts so tests drive it against a relay.
@@ -273,6 +312,7 @@ pub(crate) async fn send_resolution(
     node: &str,
     dispute_id: &str,
     resolution: Resolution,
+    bond: BondSlash,
     pow: u8,
     wait: std::time::Duration,
 ) -> Result<ResolveResult, ResolveError> {
@@ -288,12 +328,13 @@ pub(crate) async fn send_resolution(
         purpose: Purpose::Resolve {
             resolution,
             order_id: order_id.to_string(),
+            bond,
         },
     };
     let answer = router
         .register(request_id, request)
         .map_err(|_| ResolveError::AlreadyResolving)?;
-    let message = request_message(resolution, order_id, request_id);
+    let message = request_message(resolution, order_id, request_id, bond);
     let sent = async {
         let event = wrap_mined(keys, &node_key, &message, pow)
             .await
@@ -325,6 +366,7 @@ pub(crate) async fn send_resolution(
             mostro_pubkey: node.to_string(),
             dispute_id: dispute_id.to_string(),
             resolution,
+            bond,
             outcome: ResolveOutcome::NoAnswer,
             reason: None,
         }),
@@ -373,7 +415,7 @@ pub(crate) mod tests {
     #[test]
     fn the_request_carries_the_order_id_not_the_dispute_id() {
         for (resolution, action) in [(PayBuyer, Action::AdminSettle), (RefundSeller, Action::AdminCancel)] {
-            let message = request_message(resolution, order(), 7);
+            let message = request_message(resolution, order(), 7, BondSlash::NoSlash);
             let kind = message.get_inner_message_kind();
             assert_eq!(kind.action, action);
             assert_eq!(kind.id.unwrap().to_string(), ORDER);
@@ -391,9 +433,9 @@ pub(crate) mod tests {
     #[test]
     fn a_confirmation_resolves_as_asked() {
         let answer = read_answer(PayBuyer, ORDER, &confirmed(1, PayBuyer));
-        assert_eq!(classify(&answer, PayBuyer), (ResolveOutcome::PaidBuyer, None));
+        assert_eq!(classify(&answer, PayBuyer, BondSlash::NoSlash), (ResolveOutcome::PaidBuyer, None));
         let answer = read_answer(RefundSeller, ORDER, &confirmed(1, RefundSeller));
-        assert_eq!(classify(&answer, RefundSeller), (ResolveOutcome::RefundedSeller, None));
+        assert_eq!(classify(&answer, RefundSeller, BondSlash::NoSlash), (ResolveOutcome::RefundedSeller, None));
     }
 
     /// The other action's confirmation, or one about another order, is not
@@ -405,7 +447,7 @@ pub(crate) mod tests {
         let other = "1f2e3d4c-5b6a-4978-8695-a4b3c2d1e0f9";
         assert_eq!(read_answer(PayBuyer, other, &confirmed(1, PayBuyer)), Answer::Other);
         assert_eq!(
-            classify(&Answer::Other, PayBuyer),
+            classify(&Answer::Other, PayBuyer, BondSlash::NoSlash),
             (ResolveOutcome::Refused, None)
         );
     }
@@ -415,7 +457,7 @@ pub(crate) mod tests {
         for resolution in [PayBuyer, RefundSeller] {
             let answer = read_answer(resolution, ORDER, &coop_accepted(1));
             assert_eq!(
-                classify(&answer, resolution),
+                classify(&answer, resolution, BondSlash::NoSlash),
                 (ResolveOutcome::CooperativelyCanceled, None)
             );
         }
@@ -424,14 +466,14 @@ pub(crate) mod tests {
     #[test]
     fn not_authorized_is_a_read_only_solver() {
         let answer = read_answer(PayBuyer, ORDER, &refused(1, CantDoReason::NotAuthorized));
-        assert_eq!(classify(&answer, PayBuyer), (ResolveOutcome::ReadOnlySolver, None));
+        assert_eq!(classify(&answer, PayBuyer, BondSlash::NoSlash), (ResolveOutcome::ReadOnlySolver, None));
     }
 
     #[test]
     fn not_your_dispute_and_taken_by_admin_are_a_take_over() {
         for reason in [CantDoReason::IsNotYourDispute, CantDoReason::DisputeTakenByAdmin] {
             let answer = read_answer(RefundSeller, ORDER, &refused(1, reason));
-            assert_eq!(classify(&answer, RefundSeller), (ResolveOutcome::TakenOver, None));
+            assert_eq!(classify(&answer, RefundSeller, BondSlash::NoSlash), (ResolveOutcome::TakenOver, None));
         }
     }
 
@@ -443,7 +485,7 @@ pub(crate) mod tests {
         ] {
             let answer = read_answer(PayBuyer, ORDER, &refused(1, reason));
             assert_eq!(
-                classify(&answer, PayBuyer),
+                classify(&answer, PayBuyer, BondSlash::NoSlash),
                 (ResolveOutcome::NotInDispute, Some(marker.into()))
             );
         }
@@ -453,12 +495,12 @@ pub(crate) mod tests {
     fn another_refusal_keeps_its_reason() {
         let answer = read_answer(PayBuyer, ORDER, &refused(1, CantDoReason::NotFound));
         assert_eq!(
-            classify(&answer, PayBuyer),
+            classify(&answer, PayBuyer, BondSlash::NoSlash),
             (ResolveOutcome::Refused, Some("not_found".into()))
         );
         let bare = Message::cant_do(Some(order()), Some(1), None);
         assert_eq!(
-            classify(&read_answer(PayBuyer, ORDER, &bare), PayBuyer),
+            classify(&read_answer(PayBuyer, ORDER, &bare), PayBuyer, BondSlash::NoSlash),
             (ResolveOutcome::Refused, None)
         );
     }
@@ -496,7 +538,7 @@ mod rig_tests {
     use std::sync::{Arc, Mutex};
     use std::time::Duration;
 
-    use super::tests::{confirmed, coop_accepted, refused};
+    use super::tests::{confirmed, coop_accepted, order, refused};
     use super::*;
     use crate::api::disputes::DisputeStatus;
     use crate::api::take::{SolverPermission, SolverStatus};
@@ -518,6 +560,15 @@ mod rig_tests {
     }
 
     async fn resolve(rig: &Rig, resolution: Resolution, wait: Duration) -> Result<ResolveResult, ResolveError> {
+        resolve_with(rig, resolution, BondSlash::NoSlash, wait).await
+    }
+
+    async fn resolve_with(
+        rig: &Rig,
+        resolution: Resolution,
+        bond: BondSlash,
+        wait: Duration,
+    ) -> Result<ResolveResult, ResolveError> {
         send_resolution(
             &rig.router,
             &rig.feed,
@@ -526,6 +577,7 @@ mod rig_tests {
             &rig.node_hex(),
             DISPUTE,
             resolution,
+            bond,
             0,
             wait,
         )
@@ -603,6 +655,104 @@ mod rig_tests {
             ResolveError::Closed
         );
         assert_eq!(received.count.load(Ordering::SeqCst), 1);
+    }
+
+    // ── Bonds ────────────────────────────────────────────────────────────
+
+    /// Each choice as mostro-core's payload (Mostrix `to_optional_payload`):
+    /// none when nothing is slashed, `BondResolution` otherwise, and a
+    /// request mostrod's own check accepts for both actions.
+    #[test]
+    fn each_bond_choice_is_its_payload() {
+        for (bond, expected) in [
+            (BondSlash::NoSlash, None),
+            (BondSlash::Buyer, Some((false, true))),
+            (BondSlash::Seller, Some((true, false))),
+            (BondSlash::Both, Some((true, true))),
+        ] {
+            for resolution in [PayBuyer, RefundSeller] {
+                let message = request_message(resolution, order(), 3, bond);
+                let payload = message.get_inner_message_kind().payload.clone();
+                match (payload, expected) {
+                    (None, None) => {}
+                    (Some(Payload::BondResolution(b)), Some((seller, buyer))) => {
+                        assert_eq!((b.slash_seller, b.slash_buyer), (seller, buyer), "{bond:?}");
+                    }
+                    (other, _) => panic!("{bond:?}: unexpected payload {other:?}"),
+                }
+                assert!(message.verify(), "{bond:?} {resolution:?}");
+            }
+        }
+    }
+
+    /// A slash of a party that posted no bond is refused as such; the same
+    /// refusal to a request without a slash is an ordinary refusal.
+    #[test]
+    fn invalid_payload_is_a_missing_bond_only_when_one_was_slashed() {
+        let answer = read_answer(PayBuyer, ORDER, &refused(1, CantDoReason::InvalidPayload));
+        for bond in [BondSlash::Buyer, BondSlash::Seller, BondSlash::Both] {
+            assert_eq!(classify(&answer, PayBuyer, bond), (ResolveOutcome::BondNotPosted, None));
+        }
+        assert_eq!(
+            classify(&answer, PayBuyer, BondSlash::NoSlash).0,
+            ResolveOutcome::Refused
+        );
+    }
+
+    /// mostrod answers a cooperative cancel before it reads the payload:
+    /// nothing was slashed then.
+    #[test]
+    fn a_cooperative_cancel_slashes_nothing() {
+        assert_eq!(slashed(ResolvedAs::CooperativelyCanceled, BondSlash::Both), BondSlash::NoSlash);
+        assert_eq!(slashed(ResolvedAs::PaidBuyer, BondSlash::Seller), BondSlash::Seller);
+        assert_eq!(slashed(ResolvedAs::RefundedSeller, BondSlash::Buyer), BondSlash::Buyer);
+    }
+
+    #[tokio::test]
+    async fn a_slash_goes_out_with_the_request_and_is_kept_with_the_dispute() {
+        let received = Arc::new(Received::default());
+        let rig = taken_rig(recording(received.clone(), |rid| {
+            vec![confirmed(rid, RefundSeller)]
+        }))
+        .await;
+
+        let result = resolve_with(&rig, RefundSeller, BondSlash::Buyer, WAIT)
+            .await
+            .unwrap();
+
+        assert_eq!(result.outcome, ResolveOutcome::RefundedSeller);
+        assert_eq!(result.bond, BondSlash::Buyer);
+        let kind = received.messages.lock().unwrap()[0].get_inner_message_kind().clone();
+        assert_eq!(kind.action, Action::AdminCancel);
+        assert_eq!(kind.id.unwrap().to_string(), ORDER);
+        match kind.payload {
+            Some(Payload::BondResolution(b)) => {
+                assert!(b.slash_buyer && !b.slash_seller);
+            }
+            other => panic!("expected BondResolution, got {other:?}"),
+        }
+        let row = rig.row().await;
+        let taken = row.taken.clone().unwrap();
+        assert_eq!(taken.resolved_as, Some(ResolvedAs::RefundedSeller));
+        assert_eq!(taken.bond_slash, Some(BondSlash::Buyer));
+        let detail = crate::mostro::take::detail_of(&row, &rig.solver_hex()).unwrap();
+        assert_eq!(detail.bond_slash, Some(BondSlash::Buyer));
+    }
+
+    #[tokio::test]
+    async fn a_slash_of_a_party_with_no_bond_resolves_nothing() {
+        let rig = taken_rig(answer_with(|rid| refused(rid, CantDoReason::InvalidPayload))).await;
+
+        let result = resolve_with(&rig, PayBuyer, BondSlash::Seller, WAIT).await.unwrap();
+
+        assert_eq!(result.outcome, ResolveOutcome::BondNotPosted);
+        let row = rig.row().await;
+        assert_eq!(row.status, DisputeStatus::InProgress, "still open");
+        let taken = row.taken.unwrap();
+        assert_eq!(taken.resolved_as, None);
+        assert_eq!(taken.bond_slash, None);
+        // Another choice can be sent: nothing is in flight.
+        assert!(rig.router.unanswered_resolution(&rig.node_hex(), &rig.solver_hex(), DISPUTE).is_none());
     }
 
     #[tokio::test]
@@ -874,7 +1024,8 @@ mod rig_tests {
     /// BOSSTRO_E2E_RELAY=ws://localhost:7010 BOSSTRO_E2E_NODE=<hex> \
     /// BOSSTRO_E2E_SOLVER=<nsec or hex> BOSSTRO_E2E_DISPUTE=<uuid> \
     /// BOSSTRO_E2E_ORDER=<uuid> BOSSTRO_E2E_RESOLUTION=pay|refund \
-    /// BOSSTRO_E2E_EXPECT=paid-buyer|refunded-seller|cooperatively-canceled|read-only|taken-over|not-in-dispute \
+    /// [BOSSTRO_E2E_BOND=no-slash|buyer|seller|both] \
+    /// BOSSTRO_E2E_EXPECT=paid-buyer|refunded-seller|cooperatively-canceled|read-only|bond-not-posted|taken-over|not-in-dispute \
     ///   cargo test --lib resolve_against_a_local_mostrod -- --ignored --nocapture
     /// ```
     #[tokio::test]
@@ -896,11 +1047,17 @@ mod rig_tests {
             "refund" => RefundSeller,
             other => panic!("unknown RESOLUTION {other}"),
         };
+        // Optional: which bonds to slash (BOSSTRO_E2E_BOND=no-slash|buyer|seller|both).
+        let bond = std::env::var("BOSSTRO_E2E_BOND")
+            .ok()
+            .map(|b| BondSlash::from_wire(&b).unwrap_or_else(|| panic!("unknown BOND {b}")))
+            .unwrap_or_default();
         let expect = match env("BOSSTRO_E2E_EXPECT").as_str() {
             "paid-buyer" => ResolveOutcome::PaidBuyer,
             "refunded-seller" => ResolveOutcome::RefundedSeller,
             "cooperatively-canceled" => ResolveOutcome::CooperativelyCanceled,
             "read-only" => ResolveOutcome::ReadOnlySolver,
+            "bond-not-posted" => ResolveOutcome::BondNotPosted,
             "taken-over" => ResolveOutcome::TakenOver,
             "not-in-dispute" => ResolveOutcome::NotInDispute,
             other => panic!("unknown EXPECT {other}"),
@@ -930,6 +1087,7 @@ mod rig_tests {
             &node,
             &dispute,
             resolution,
+            bond,
             ANSWER_WAIT,
         )
         .await

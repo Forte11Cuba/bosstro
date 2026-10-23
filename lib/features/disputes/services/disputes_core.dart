@@ -5,7 +5,7 @@ import 'package:bosstro/src/rust/api/disputes.dart'
     show DisputeSummary, DisputeUpdate, PendingDisputes;
 import 'package:bosstro/src/rust/api/resolve.dart' as resolve_api;
 import 'package:bosstro/src/rust/api/resolve.dart'
-    show Resolution, ResolveResult;
+    show BondSlash, Resolution, ResolveResult;
 import 'package:bosstro/src/rust/api/take.dart' as take_api;
 import 'package:bosstro/src/rust/api/take.dart'
     show DisputeDetail, InProgressDisputes, SolverStanding, TakeResult;
@@ -19,6 +19,7 @@ export 'package:bosstro/src/rust/api/disputes.dart'
         PendingDisputes;
 export 'package:bosstro/src/rust/api/resolve.dart'
     show
+        BondSlash,
         Resolution,
         ResolveError,
         ResolveOutcome,
@@ -69,8 +70,12 @@ abstract interface class DisputesCore {
 
   /// Pay the buyer or refund the seller of [disputeId] and wait for the
   /// node's answer. Throws a [ResolveError] when the request was not sent.
-  /// Never retried.
-  Future<ResolveResult> resolve(String disputeId, Resolution resolution);
+  /// Never retried. [bond] says which anti-abuse bonds it slashes.
+  Future<ResolveResult> resolve(
+    String disputeId,
+    Resolution resolution,
+    BondSlash bond,
+  );
 }
 
 class RustDisputesCore implements DisputesCore {
@@ -108,6 +113,13 @@ class RustDisputesCore implements DisputesCore {
       take_api.disputeDetail(disputeId: disputeId);
 
   @override
-  Future<ResolveResult> resolve(String disputeId, Resolution resolution) =>
-      resolve_api.resolveDispute(disputeId: disputeId, resolution: resolution);
+  Future<ResolveResult> resolve(
+    String disputeId,
+    Resolution resolution,
+    BondSlash bond,
+  ) => resolve_api.resolveDispute(
+    disputeId: disputeId,
+    resolution: resolution,
+    bond: bond,
+  );
 }

@@ -6,21 +6,47 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `hash`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `hash`, `hash`
 
 /// Send `AdminSettle` ([`Resolution::PayBuyer`]) or `AdminCancel`
 /// ([`Resolution::RefundSeller`]) for `dispute_id`, a dispute this key holds
 /// on the active node, and wait for the answer (15 s). What the answer says
 /// is stored before it returns: the closed dispute and how it closed, this
 /// key's permission, a take-over. An answer that arrives after the wait is
-/// still applied. Never retried.
+/// still applied. Never retried. [`BondSlash::NoSlash`] sends no payload;
+/// any other choice sends mostro-core's `BondResolution`.
 Future<ResolveResult> resolveDispute({
   required String disputeId,
   required Resolution resolution,
+  required BondSlash bond,
 }) => RustLib.instance.api.crateApiResolveResolveDispute(
   disputeId: disputeId,
   resolution: resolution,
+  bond: bond,
 );
+
+/// Which anti-abuse bonds a resolution slashes, decided apart from paying or
+/// refunding (mostrod `docs/ANTI_ABUSE_BOND.md` §7, Mostrix
+/// `BondSlashChoice`). Only on a node whose kind 38385 says `bond_enabled`.
+/// A slashed party loses its bond; the other may claim its share
+/// (`AddBondInvoice`, on the traders' side).
+enum BondSlash {
+  /// Release every bond, slash none: the default, and what the request
+  /// means without a payload.
+  noSlash,
+
+  /// Slash the buyer's bond.
+  buyer,
+
+  /// Slash the seller's bond.
+  seller,
+
+  /// Slash both bonds.
+  both;
+
+  static Future<BondSlash> default_() =>
+      RustLib.instance.api.crateApiResolveBondSlashDefault();
+}
 
 /// What the solver decides.
 enum Resolution {
@@ -101,6 +127,11 @@ enum ResolveOutcome {
   /// lost. Nothing changes here; the node's 38386 says how it ended.
   notInDispute,
 
+  /// `CantDo(InvalidPayload)` to a request that slashed a bond: a party it
+  /// names posted none (mostrod `validate_bond_resolution`). Nothing was
+  /// paid or refunded; the solver sends it again with another choice.
+  bondNotPosted,
+
   /// Another `CantDo`; its reason is in [`ResolveResult::reason`].
   refused,
 
@@ -115,6 +146,9 @@ class ResolveResult {
   final String mostroPubkey;
   final String disputeId;
   final Resolution resolution;
+
+  /// The bonds the request slashed.
+  final BondSlash bond;
   final ResolveOutcome outcome;
 
   /// With [`ResolveOutcome::Refused`] and [`ResolveOutcome::NotInDispute`]:
@@ -126,6 +160,7 @@ class ResolveResult {
     required this.mostroPubkey,
     required this.disputeId,
     required this.resolution,
+    required this.bond,
     required this.outcome,
     this.reason,
   });
@@ -135,6 +170,7 @@ class ResolveResult {
       mostroPubkey.hashCode ^
       disputeId.hashCode ^
       resolution.hashCode ^
+      bond.hashCode ^
       outcome.hashCode ^
       reason.hashCode;
 
@@ -146,6 +182,7 @@ class ResolveResult {
           mostroPubkey == other.mostroPubkey &&
           disputeId == other.disputeId &&
           resolution == other.resolution &&
+          bond == other.bond &&
           outcome == other.outcome &&
           reason == other.reason;
 }

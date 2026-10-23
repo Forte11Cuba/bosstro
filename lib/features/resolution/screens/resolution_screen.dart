@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/app_theme.dart';
+import 'package:bosstro/core/disputes_palette.dart';
 import 'package:bosstro/core/resolution_palette.dart';
 import 'package:bosstro/features/disputes/providers/detail_providers.dart';
 import 'package:bosstro/features/disputes/providers/pending_providers.dart';
@@ -72,6 +73,12 @@ class _NotSent extends _Outcome {
 /// side, and that it cannot be undone. Its one answer is red and repeats
 /// the action (DS-CMP-2, DS-CMP-26, amendment 3).
 ///
+/// On a node that uses anti-abuse bonds (`bond_enabled` in its kind 38385,
+/// [DisputeDetail.bondsEnabled]) the solver also chooses whose bond is
+/// slashed, if anyone's (Mostrix's bond submenu): "Don't slash" by default.
+/// The choice goes in the same request; elsewhere nothing is offered and
+/// the request carries none.
+///
 /// While the node answers, the answer shows its own spinner (DS-CMP-13) and
 /// there is no way back: leaving would lose what the node says. Then the
 /// same screen turns into the outcome, with one way out.
@@ -93,6 +100,9 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
   bool _busy = false;
   _Outcome? _outcome;
 
+  /// Which bonds the request slashes (only offered when the node uses them).
+  BondSlash _bond = BondSlash.noSlash;
+
   /// What the confirmation showed when the request left: the node's own
   /// revision may close the dispute before its answer arrives, and the
   /// screen must not change under a request that is waiting.
@@ -108,7 +118,7 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
       outcome = _Answered(
         await ref
             .read(disputesCoreProvider)
-            .resolve(widget.disputeId, widget.resolution),
+            .resolve(widget.disputeId, widget.resolution, _bond),
       );
     } on ResolveError catch (error) {
       outcome = _NotSent(error);
@@ -149,6 +159,8 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
                   : _OutcomeView(
                     outcome: outcome,
                     resolution: widget.resolution,
+                    // Back to the confirmation, to choose other bonds.
+                    onChooseAgain: () => setState(() => _outcome = null),
                   ),
         ),
       ),
@@ -173,6 +185,8 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
               detail: value,
               pay: _pay,
               busy: _busy,
+              bond: _bond,
+              onBond: (bond) => setState(() => _bond = bond),
             ),
           ),
           ActionBar(
@@ -234,11 +248,15 @@ class _ConfirmationBody extends StatelessWidget {
     required this.detail,
     required this.pay,
     required this.busy,
+    required this.bond,
+    required this.onBond,
   });
 
   final DisputeDetail detail;
   final bool pay;
   final bool busy;
+  final BondSlash bond;
+  final ValueChanged<BondSlash> onBond;
 
   @override
   Widget build(BuildContext context) {
@@ -323,7 +341,11 @@ class _ConfirmationBody extends StatelessWidget {
           style: TextStyle(fontSize: 14, height: 1.45, color: pal.textBody),
         ),
         const SizedBox(height: 10),
-        Text(l10n.resolveBondsNote, style: secondary),
+        if (detail.bondsEnabled) ...[
+          const SizedBox(height: 6),
+          _BondPicker(value: bond, onChanged: busy ? null : onBond),
+        ] else
+          Text(l10n.resolveBondsNote, style: secondary),
         const SizedBox(height: 16),
         _IrreversibleBanner(text: l10n.resolveIrreversible),
         if (busy) ...[
@@ -389,10 +411,17 @@ class _IrreversibleBanner extends StatelessWidget {
 /// How the request ended: an icon in the outcome's color, a title, what it
 /// means, and one way on.
 class _OutcomeView extends StatelessWidget {
-  const _OutcomeView({required this.outcome, required this.resolution});
+  const _OutcomeView({
+    required this.outcome,
+    required this.resolution,
+    required this.onChooseAgain,
+  });
 
   final _Outcome outcome;
   final Resolution resolution;
+
+  /// After [ResolveOutcome.bondNotPosted]: back to the confirmation.
+  final VoidCallback onChooseAgain;
 
   @override
   Widget build(BuildContext context) {
@@ -442,6 +471,12 @@ class _OutcomeView extends StatelessWidget {
           l10n.noAnswerTitle,
           l10n.resolveNoAnswerBody,
         ),
+        ResolveOutcome.bondNotPosted => (
+          Icons.error_outline_rounded,
+          pal.dangerText,
+          l10n.bondNotPostedTitle,
+          l10n.bondNotPostedBody,
+        ),
         ResolveOutcome.refused => (
           Icons.error_outline_rounded,
           pal.dangerText,
@@ -461,6 +496,19 @@ class _OutcomeView extends StatelessWidget {
     final takenOver = switch (outcome) {
       _Answered(:final result) => result.outcome == ResolveOutcome.takenOver,
       _NotSent() => false,
+    };
+    final chooseAgain = switch (outcome) {
+      _Answered(:final result) =>
+        result.outcome == ResolveOutcome.bondNotPosted,
+      _NotSent() => false,
+    };
+    // What a resolution that went through slashed, when it slashed anything.
+    final slashed = switch (outcome) {
+      _Answered(:final result)
+          when result.outcome == ResolveOutcome.paidBuyer ||
+              result.outcome == ResolveOutcome.refundedSeller =>
+        slashedLabel(l10n, result.bond),
+      _ => null,
     };
 
     return Column(
@@ -499,6 +547,18 @@ class _OutcomeView extends StatelessWidget {
                         color: pal.textBody,
                       ),
                     ),
+                    if (slashed != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        slashed,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.45,
+                          fontWeight: FontWeight.w600,
+                          color: pal.textBody,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -508,9 +568,15 @@ class _OutcomeView extends StatelessWidget {
         ActionBar(
           child: PrimaryButton(
             label:
-                takenOver ? l10n.resolveGoToDisputes : l10n.resolveBackToDispute,
+                chooseAgain
+                    ? l10n.bondChooseAgain
+                    : takenOver
+                    ? l10n.resolveGoToDisputes
+                    : l10n.resolveBackToDispute,
             onPressed: () {
-              if (takenOver) {
+              if (chooseAgain) {
+                onChooseAgain();
+              } else if (takenOver) {
                 final router = GoRouter.of(context);
                 Navigator.of(context).pop();
                 router.go(AppRoute.inProgress);
@@ -540,3 +606,203 @@ String resolveNotSentBody(AppLocalizations l10n, ResolveError error) =>
       ResolveError.noRelays ||
       ResolveError.sendFailed => l10n.takeFailedBody,
     };
+
+/// What a resolution slashed, in words, or null when it slashed nothing.
+String? slashedLabel(AppLocalizations l10n, BondSlash? bond) => switch (bond) {
+  BondSlash.buyer => l10n.resolvedSlashedBuyer,
+  BondSlash.seller => l10n.resolvedSlashedSeller,
+  BondSlash.both => l10n.resolvedSlashedBoth,
+  BondSlash.noSlash || null => null,
+};
+
+/// The bond choice as its label (the Info row of a closed dispute).
+String bondChoiceLabel(AppLocalizations l10n, BondSlash bond) => switch (bond) {
+  BondSlash.noSlash => l10n.bondNoSlash,
+  BondSlash.buyer => l10n.bondSlashBuyer,
+  BondSlash.seller => l10n.bondSlashSeller,
+  BondSlash.both => l10n.bondSlashBoth,
+};
+
+/// Whose bond a resolution slashes, if anyone's: four rows of one group,
+/// "Don't slash" first and chosen by default. Each row names the party it
+/// slashes and marks it with that party's colour (buyer lime, seller pink,
+/// both for both, none for "Don't slash", amendment 8): a dot beside the
+/// words, never a filled row, so no choice reads as the suggested one. Red
+/// stays the confirmation's answer. The choice is read from the radio and
+/// the words, never from colour alone (DS-COL-10).
+class _BondPicker extends StatelessWidget {
+  const _BondPicker({required this.value, required this.onChanged});
+
+  final BondSlash value;
+
+  /// Null while the request waits: the choice can no longer change.
+  final ValueChanged<BondSlash>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final pal = ShellPalette.of(context);
+    final parties = DisputesPalette.of(context);
+    final buyer = parties.observedBuyerLabel;
+    final seller = parties.observedSellerLabel;
+    final options = [
+      (BondSlash.noSlash, l10n.bondNoSlash, l10n.bondNoSlashDetail, <Color>[]),
+      (
+        BondSlash.buyer,
+        l10n.bondSlashBuyer,
+        l10n.bondSlashBuyerDetail,
+        [buyer],
+      ),
+      (
+        BondSlash.seller,
+        l10n.bondSlashSeller,
+        l10n.bondSlashSellerDetail,
+        [seller],
+      ),
+      (
+        BondSlash.both,
+        l10n.bondSlashBoth,
+        l10n.bondSlashBothDetail,
+        [buyer, seller],
+      ),
+    ];
+    return SurfaceCard(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              l10n.bondsTitle,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: pal.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.bondsPickerHint,
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.4,
+              color: pal.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final (choice, label, detail, dots) in options)
+            _BondOption(
+              label: label,
+              detail: detail,
+              dots: dots,
+              selected: choice == value,
+              onTap: onChanged == null ? null : () => onChanged!(choice),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BondOption extends StatelessWidget {
+  const _BondOption({
+    required this.label,
+    required this.detail,
+    required this.dots,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final String detail;
+  final List<Color> dots;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = ShellPalette.of(context);
+    return Semantics(
+      inMutuallyExclusiveGroup: true,
+      checked: selected,
+      button: true,
+      enabled: onTap != null,
+      label: '$label. $detail',
+      // Its own tap: the excluded subtree takes the InkWell's with it.
+      onTap: onTap,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.tile),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  size: 20,
+                  color: selected ? pal.limeIcon : pal.textTertiary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight:
+                              selected ? FontWeight.w600 : FontWeight.w500,
+                          color: pal.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        detail,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.4,
+                          color: pal.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (dots.isNotEmpty) ...[
+                  const SizedBox(width: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final (i, color) in dots.indexed) ...[
+                          if (i > 0) const SizedBox(width: 4),
+                          Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -22,6 +22,26 @@ pub enum Resolution {
     RefundSeller,
 }
 
+/// Which anti-abuse bonds a resolution slashes, decided apart from paying or
+/// refunding (mostrod `docs/ANTI_ABUSE_BOND.md` §7, Mostrix
+/// `BondSlashChoice`). Only on a node whose kind 38385 says `bond_enabled`.
+/// A slashed party loses its bond; the other may claim its share
+/// (`AddBondInvoice`, on the traders' side).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum BondSlash {
+    /// Release every bond, slash none: the default, and what the request
+    /// means without a payload.
+    #[default]
+    NoSlash,
+    /// Slash the buyer's bond.
+    Buyer,
+    /// Slash the seller's bond.
+    Seller,
+    /// Slash both bonds.
+    Both,
+}
+
 /// How a dispute this key held ended, as the node's answer to its own
 /// resolution said. Kept with the take: a 38386 status says what happened
 /// to the dispute, not that this key did it.
@@ -61,6 +81,10 @@ pub enum ResolveOutcome {
     /// refunded or released already, perhaps by a request whose answer was
     /// lost. Nothing changes here; the node's 38386 says how it ended.
     NotInDispute,
+    /// `CantDo(InvalidPayload)` to a request that slashed a bond: a party it
+    /// names posted none (mostrod `validate_bond_resolution`). Nothing was
+    /// paid or refunded; the solver sends it again with another choice.
+    BondNotPosted,
     /// Another `CantDo`; its reason is in [`ResolveResult::reason`].
     Refused,
     /// The node did not answer in time. **It may have acted all the same**,
@@ -75,6 +99,8 @@ pub struct ResolveResult {
     pub mostro_pubkey: String,
     pub dispute_id: String,
     pub resolution: Resolution,
+    /// The bonds the request slashed.
+    pub bond: BondSlash,
     pub outcome: ResolveOutcome,
     /// With [`ResolveOutcome::Refused`] and [`ResolveOutcome::NotInDispute`]:
     /// mostro-core's `CantDoReason` as the wire writes it, or `None` when the
@@ -117,10 +143,12 @@ pub enum ResolveError {
 /// on the active node, and wait for the answer (15 s). What the answer says
 /// is stored before it returns: the closed dispute and how it closed, this
 /// key's permission, a take-over. An answer that arrives after the wait is
-/// still applied. Never retried.
+/// still applied. Never retried. [`BondSlash::NoSlash`] sends no payload;
+/// any other choice sends mostro-core's `BondResolution`.
 pub async fn resolve_dispute(
     dispute_id: String,
     resolution: Resolution,
+    bond: BondSlash,
 ) -> Result<ResolveResult, ResolveError> {
-    crate::mostro::resolve::resolve(&dispute_id, resolution).await
+    crate::mostro::resolve::resolve(&dispute_id, resolution, bond).await
 }

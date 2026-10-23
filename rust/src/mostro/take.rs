@@ -199,6 +199,7 @@ pub(crate) fn taken_from(
         buyer_pubkey: info.buyer_pubkey.clone(),
         seller_pubkey: info.seller_pubkey.clone(),
         resolved_as: None,
+        bond_slash: None,
     }
 }
 
@@ -571,6 +572,12 @@ pub(crate) async fn detail(dispute_id: &str) -> anyhow::Result<Option<DisputeDet
     if let Some(router) = replies::router() {
         detail.unanswered_resolution = router.unanswered_resolution(&node, &solver, dispute_id);
     }
+    detail.bonds_enabled = crate::api::node_info::cached_node_info(node.clone())
+        .await
+        .ok()
+        .flatten()
+        .and_then(|info| info.bond_enabled)
+        .unwrap_or(false);
     Ok(Some(detail))
 }
 
@@ -596,6 +603,8 @@ pub(crate) fn detail_of(row: &DisputeRecord, solver: &str) -> Option<DisputeDeta
         seller_pubkey: taken.seller_pubkey.clone(),
         is_closed: row.status.is_terminal() || taken.resolved_as.is_some(),
         resolved_as: taken.resolved_as,
+        bond_slash: taken.bond_slash,
+        bonds_enabled: false,
         buyer_payout: taken
             .amount
             .map(|amount| amount.saturating_sub(taken.fee.unwrap_or(0)).max(0)),
