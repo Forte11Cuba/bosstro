@@ -29,7 +29,9 @@ use std::hash::Hash;
 use mostro_core::chat::derive_chat_keys;
 use nostr_sdk::prelude::{EventId, Keys, PublicKey};
 
-use crate::api::chat::{ChatDelivery, ChatMessageView, ChatParty, ChatSender};
+use crate::api::chat::{
+    ChatAttachment, ChatAttachmentKind, ChatDelivery, ChatMessageView, ChatParty, ChatSender,
+};
 
 /// The longest message this app sends, in UTF-8 bytes. The spec bounds the
 /// encrypted payload at 64 KiB; a 16 KiB text stays well under it once
@@ -165,8 +167,27 @@ impl ChatRecord {
             content: self.content.clone(),
             created_at: self.created_at,
             delivery,
+            attachment: attachment_of(&self.content),
         }
     }
+}
+
+/// The attachment a message's text declares, if it is a well-formed one.
+pub fn attachment_of(content: &str) -> Option<ChatAttachment> {
+    let a = crate::attachments::payload::parse(content)?;
+    Some(ChatAttachment {
+        kind: if a.is_image {
+            ChatAttachmentKind::Image
+        } else {
+            ChatAttachmentKind::File
+        },
+        file_name: a.file_name,
+        mime_type: a.mime_type,
+        // At most 25 MiB: `parse` refuses more.
+        size: u32::try_from(a.original_size).unwrap_or(u32::MAX),
+        width: a.width,
+        height: a.height,
+    })
 }
 
 /// The spec's cursor rule: `min(accepted, local_now)` (Mostrix

@@ -6,7 +6,7 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `hash`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `hash`
 
 /// The conversation with `party` of `dispute_id`, a dispute this key holds
 /// (or held until it closed) on the active node; `None` otherwise.
@@ -43,15 +43,144 @@ Future<ChatMessageView> retryChatMessage({
   messageId: messageId,
 );
 
+/// Send the file `bytes` (picked by the solver, named `file_name`) to
+/// `party`: checked and cleaned by its bytes (JPEG, PNG or PDF, at most
+/// 25 MiB; images re-encoded without metadata), encrypted with the key shared
+/// with the party, uploaded to Blossom, and sent as ../app's JSON message.
+/// Returns the message as stored, `Sending`, as [`send_chat_message`]; a
+/// message that then fails is retried with [`retry_chat_message`] (the file
+/// is not uploaded again). `upload_id`, chosen by Dart, names the upload on
+/// [`on_attachment_progress`]. A refusal before the message exists
+/// (`UploadFailed`, …) leaves nothing stored: Dart keeps the bytes for a
+/// retry.
+Future<ChatMessageView> sendChatAttachment({
+  required String disputeId,
+  required ChatParty party,
+  required List<int> bytes,
+  required String fileName,
+  required String uploadId,
+}) => RustLib.instance.api.crateApiChatSendChatAttachment(
+  disputeId: disputeId,
+  party: party,
+  bytes: bytes,
+  fileName: fileName,
+  uploadId: uploadId,
+);
+
+/// Open the attachment of `message_id` in the conversation with `party`:
+/// the encrypted blob from the cache, or downloaded (`https://` only, at most
+/// 25 MiB) and checked against the hash its URL names, then decrypted with
+/// the key shared with the party and checked to be a JPEG, PNG or PDF.
+/// Works on a closed dispute too. A download reports on
+/// [`on_attachment_progress`] under `message_id`.
+Future<OpenedAttachment> openChatAttachment({
+  required String disputeId,
+  required ChatParty party,
+  required String messageId,
+}) => RustLib.instance.api.crateApiChatOpenChatAttachment(
+  disputeId: disputeId,
+  party: party,
+  messageId: messageId,
+);
+
+/// Stream of every transfer's progress (uploads and downloads).
+Future<AttachmentProgressStream> onAttachmentProgress() =>
+    RustLib.instance.api.crateApiChatOnAttachmentProgress();
+
 /// Stream of conversation changes for whichever node is active.
 Future<ChatUpdateStream> onChatUpdates() =>
     RustLib.instance.api.crateApiChatOnChatUpdates();
+
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<AttachmentProgressStream>>
+abstract class AttachmentProgressStream implements RustOpaqueInterface {
+  /// The next report, or `None` once the sender is gone. A reader that
+  /// fell behind skips what it missed: progress is only ever a hint.
+  Future<AttachmentProgress?> next();
+}
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ChatUpdateStream>>
 abstract class ChatUpdateStream implements RustOpaqueInterface {
   /// The next update, or `None` once the router is gone. A reader that
   /// fell behind gets one update naming no conversation: read again.
   Future<ChatUpdate?> next();
+}
+
+/// How far a transfer is: `id` is the upload id Dart chose, or the message
+/// id of a download; `fraction` goes from 0 to 1.
+class AttachmentProgress {
+  final String id;
+  final double fraction;
+
+  const AttachmentProgress({required this.id, required this.fraction});
+
+  @override
+  int get hashCode => id.hashCode ^ fraction.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AttachmentProgress &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          fraction == other.fraction;
+}
+
+/// An attachment as its message declares it: labels, until it is opened.
+class ChatAttachment {
+  final ChatAttachmentKind kind;
+
+  /// Sanitized: the last path component only, no control or invisible
+  /// characters, at most 120 characters.
+  final String fileName;
+
+  /// As the sender declared it: a label only.
+  final String mimeType;
+
+  /// The file's size before encryption, as declared (at most 25 MiB).
+  final int size;
+
+  /// Pixel size, for an image: lets the bubble keep its shape.
+  final int? width;
+  final int? height;
+
+  const ChatAttachment({
+    required this.kind,
+    required this.fileName,
+    required this.mimeType,
+    required this.size,
+    this.width,
+    this.height,
+  });
+
+  @override
+  int get hashCode =>
+      kind.hashCode ^
+      fileName.hashCode ^
+      mimeType.hashCode ^
+      size.hashCode ^
+      width.hashCode ^
+      height.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChatAttachment &&
+          runtimeType == other.runtimeType &&
+          kind == other.kind &&
+          fileName == other.fileName &&
+          mimeType == other.mimeType &&
+          size == other.size &&
+          width == other.width &&
+          height == other.height;
+}
+
+/// How an attachment is shown before it is opened.
+enum ChatAttachmentKind {
+  /// Sent as an image (`image_encrypted`): previewed in the bubble.
+  image,
+
+  /// Sent as a file (`file_encrypted`; from ../app, a PDF): name and size.
+  file,
 }
 
 /// Whether the conversation can be written to.
@@ -106,8 +235,29 @@ enum ChatError {
   /// Longer than [`crate::chat::MAX_MESSAGE_BYTES`].
   tooLong,
 
-  /// The message to retry is not one of this key's unsent messages.
+  /// The message to retry is not one of this key's unsent messages, or
+  /// the message to open carries no attachment.
   unknownMessage,
+
+  /// The file is over 25 MiB (before encryption).
+  fileTooLarge,
+
+  /// The file is not a JPEG, PNG or PDF, by its bytes.
+  unsupportedFile,
+
+  /// An image that does not decode, or is beyond the decoding limits.
+  invalidImage,
+
+  /// No Blossom server took the file. Nothing was sent; try again.
+  uploadFailed,
+
+  /// The file could not be downloaded. Try again.
+  downloadFailed,
+
+  /// The file downloaded is not the one the message names (its hash), or
+  /// it does not open with this conversation's key (its tag), or it is not
+  /// what it was sent as. Trying again gives the same answer.
+  notVerified,
 }
 
 /// One message as the chat shows it. The content is the party's own text:
@@ -116,11 +266,18 @@ class ChatMessageView {
   /// The inner event id (hex): the message's identity.
   final String id;
   final ChatSender sender;
+
+  /// The text; for an attachment, its JSON (not shown).
   final String content;
 
   /// The inner event's `created_at` (Unix seconds), as the writer set it.
   final PlatformInt64 createdAt;
   final ChatDelivery delivery;
+
+  /// Set when the text is a well-formed attachment (an `https://` blob URL
+  /// that names its hash, sizes within the limits). Not opened yet: what
+  /// the file really is is known only from [`open_chat_attachment`].
+  final ChatAttachment? attachment;
 
   const ChatMessageView({
     required this.id,
@@ -128,6 +285,7 @@ class ChatMessageView {
     required this.content,
     required this.createdAt,
     required this.delivery,
+    this.attachment,
   });
 
   @override
@@ -136,7 +294,8 @@ class ChatMessageView {
       sender.hashCode ^
       content.hashCode ^
       createdAt.hashCode ^
-      delivery.hashCode;
+      delivery.hashCode ^
+      attachment.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -147,7 +306,8 @@ class ChatMessageView {
           sender == other.sender &&
           content == other.content &&
           createdAt == other.createdAt &&
-          delivery == other.delivery;
+          delivery == other.delivery &&
+          attachment == other.attachment;
 }
 
 /// Which party a conversation is with.
@@ -215,4 +375,41 @@ class ChatUpdate {
           mostroPubkey == other.mostroPubkey &&
           disputeId == other.disputeId &&
           party == other.party;
+}
+
+/// An attachment opened: decrypted in memory, its type read from its bytes.
+/// The plaintext is never written to disk by Rust; Dart writes it only when
+/// the solver saves it.
+class OpenedAttachment {
+  final Uint8List bytes;
+
+  /// Sanitized, as [`ChatAttachment::file_name`].
+  final String fileName;
+
+  /// `image/jpeg`, `image/png` or `application/pdf`, from the bytes.
+  final String mimeType;
+
+  /// A JPEG or a PNG, within the decoding limits: Dart may preview it.
+  final bool isImage;
+
+  const OpenedAttachment({
+    required this.bytes,
+    required this.fileName,
+    required this.mimeType,
+    required this.isImage,
+  });
+
+  @override
+  int get hashCode =>
+      bytes.hashCode ^ fileName.hashCode ^ mimeType.hashCode ^ isImage.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is OpenedAttachment &&
+          runtimeType == other.runtimeType &&
+          bytes == other.bytes &&
+          fileName == other.fileName &&
+          mimeType == other.mimeType &&
+          isImage == other.isImage;
 }

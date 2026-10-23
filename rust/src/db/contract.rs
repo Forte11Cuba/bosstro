@@ -400,3 +400,28 @@ pub(crate) async fn the_chat_cursor_never_passes_the_clock_of_acceptance(storage
     storage.insert_chat_message(&future).await.unwrap();
     assert_eq!(storage.chat_cursor(&seller).await.unwrap(), Some(2_000));
 }
+
+/// The attachment cache: kept by hash, read back whole, bounded oldest first.
+pub(crate) async fn attachment_blobs_are_cached_and_bounded(storage: &impl Storage) {
+    assert_eq!(storage.get_attachment_blob("a").await.unwrap(), None);
+    storage.save_attachment_blob("a", &[1u8; 10]).await.unwrap();
+    storage.save_attachment_blob("b", &[2u8; 10]).await.unwrap();
+    storage.save_attachment_blob("c", &[3u8; 10]).await.unwrap();
+    assert_eq!(
+        storage.get_attachment_blob("b").await.unwrap(),
+        Some(vec![2u8; 10])
+    );
+    // Saved within one second: the last saved is the newest.
+    storage.trim_attachment_blobs(25).await.unwrap();
+    assert_eq!(storage.get_attachment_blob("a").await.unwrap(), None);
+    assert!(storage.get_attachment_blob("b").await.unwrap().is_some());
+    assert!(storage.get_attachment_blob("c").await.unwrap().is_some());
+    // Saving again replaces, never duplicates.
+    storage.save_attachment_blob("c", &[4u8; 10]).await.unwrap();
+    assert_eq!(
+        storage.get_attachment_blob("c").await.unwrap(),
+        Some(vec![4u8; 10])
+    );
+    storage.trim_attachment_blobs(20).await.unwrap();
+    assert!(storage.get_attachment_blob("c").await.unwrap().is_some());
+}

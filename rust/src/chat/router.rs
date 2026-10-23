@@ -85,12 +85,20 @@ fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
 /// The app's storage, or memory when it never opened.
 pub(crate) enum ChatStore {
     Db(&'static crate::db::app_db::AppStorage),
-    Memory(Mutex<HashMap<ChannelRef, Vec<ChatRecord>>>),
+    Memory(MemoryChat),
+}
+
+/// [`ChatStore::Memory`]: the messages, and the attachment cache (encrypted
+/// blobs by hash).
+#[derive(Default)]
+pub(crate) struct MemoryChat {
+    messages: Mutex<HashMap<ChannelRef, Vec<ChatRecord>>>,
+    blobs: Mutex<HashMap<String, Vec<u8>>>,
 }
 
 impl ChatStore {
     pub(crate) fn memory() -> Self {
-        ChatStore::Memory(Mutex::new(HashMap::new()))
+        ChatStore::Memory(MemoryChat::default())
     }
 
     fn app() -> Self {
@@ -104,7 +112,7 @@ impl ChatStore {
         match self {
             ChatStore::Db(db) => db.insert_chat_message(record).await,
             ChatStore::Memory(m) => {
-                let mut map = lock(m);
+                let mut map = lock(&m.messages);
                 let rows = map.entry(record.channel.clone()).or_default();
                 if rows.iter().any(|r| r.message_id == record.message_id) {
                     return Ok(false);
@@ -115,10 +123,10 @@ impl ChatStore {
         }
     }
 
-    async fn get(&self, channel: &ChannelRef, id: &str) -> anyhow::Result<Option<ChatRecord>> {
+    pub(crate) async fn get(&self, channel: &ChannelRef, id: &str) -> anyhow::Result<Option<ChatRecord>> {
         match self {
             ChatStore::Db(db) => db.get_chat_message(channel, id).await,
-            ChatStore::Memory(m) => Ok(lock(m)
+            ChatStore::Memory(m) => Ok(lock(&m.messages)
                 .get(channel)
                 .and_then(|rows| rows.iter().find(|r| r.message_id == id).cloned())),
         }
@@ -127,7 +135,10 @@ impl ChatStore {
     pub(crate) async fn list(&self, channel: &ChannelRef) -> anyhow::Result<Vec<ChatRecord>> {
         match self {
             ChatStore::Db(db) => db.list_chat_messages(channel).await,
-            ChatStore::Memory(m) => Ok(lock(m).get(channel).cloned().unwrap_or_default()),
+            ChatStore::Memory(m) => Ok(lock(&m.messages)
+                .get(channel)
+                .cloned()
+                .unwrap_or_default()),
         }
     }
 
@@ -140,7 +151,7 @@ impl ChatStore {
         match self {
             ChatStore::Db(db) => db.set_chat_delivery(channel, id, delivery).await,
             ChatStore::Memory(m) => {
-                if let Some(row) = lock(m)
+                if let Some(row) = lock(&m.messages)
                     .get_mut(channel)
                     .and_then(|rows| rows.iter_mut().find(|r| r.message_id == id))
                 {
@@ -155,7 +166,7 @@ impl ChatStore {
         match self {
             ChatStore::Db(db) => db.delete_chat_message(channel, id).await,
             ChatStore::Memory(m) => {
-                if let Some(rows) = lock(m).get_mut(channel) {
+                if let Some(rows) = lock(&m.messages).get_mut(channel) {
                     rows.retain(|r| r.message_id != id);
                 }
                 Ok(())
@@ -172,6 +183,25 @@ impl ChatStore {
                 .iter()
                 .map(ChatRecord::cursor)
                 .max()),
+        }
+    }
+
+    /// Keep an encrypted attachment blob under its hash (bounded cache).
+    pub(crate) async fn save_blob(&self, sha256: &str, blob: &[u8]) -> anyhow::Result<()> {
+        match self {
+            ChatStore::Db(db) => db.save_attachment_blob(sha256, blob).await,
+            ChatStore::Memory(m) => {
+                lock(&m.blobs).insert(sha256.to_string(), blob.to_vec());
+                Ok(())
+            }
+        }
+    }
+
+    /// The cached encrypted blob of `sha256`, if any.
+    pub(crate) async fn get_blob(&self, sha256: &str) -> anyhow::Result<Option<Vec<u8>>> {
+        match self {
+            ChatStore::Db(db) => db.get_attachment_blob(sha256).await,
+            ChatStore::Memory(m) => Ok(lock(&m.blobs).get(sha256).cloned()),
         }
     }
 }
@@ -259,6 +289,15 @@ enum Inbound {
         relay: String,
         sub: SubscriptionId,
     },
+}
+
+/// A conversation of a dispute this key holds: the key, the channel, the
+/// party's trade key when the take named it, and the dispute's row.
+pub(crate) struct Conversation {
+    pub(crate) keys: Keys,
+    pub(crate) channel: ChannelRef,
+    pub(crate) party_key: Option<PublicKey>,
+    pub(crate) row: DisputeRecord,
 }
 
 /// Who the router works for: the active node (hex) and the loaded key.
@@ -698,7 +737,7 @@ impl Router {
         true
     }
 
-    fn announce(&self, channel: &ChannelRef) {
+    pub(crate) fn announce(&self, channel: &ChannelRef) {
         let _ = self.updates.send(ChatUpdate {
             mostro_pubkey: channel.mostro_pubkey.clone(),
             dispute_id: Some(channel.dispute_id.clone()),
@@ -710,13 +749,13 @@ impl Router {
         lock(&self.target).clone()
     }
 
-    /// The conversation `party` of `dispute_id`, when this key may write to
-    /// it now; the reason otherwise.
-    async fn writable(
+    /// The conversation `party` of `dispute_id`, a dispute this key holds (or
+    /// held until it closed) on the active node, whatever its status.
+    pub(crate) async fn conversation(
         &self,
         dispute_id: &str,
         party: ChatParty,
-    ) -> Result<(Target, ChannelRef, PublicKey), ChatError> {
+    ) -> Result<Conversation, ChatError> {
         let target = self.target().ok_or(ChatError::NoKey)?;
         let solver = target.keys.public_key().to_hex();
         let row = self
@@ -729,20 +768,36 @@ impl Router {
         if row.taken.as_ref().is_none_or(|t| t.solver_pubkey != solver) {
             return Err(ChatError::UnknownDispute);
         }
-        if row.status.is_terminal() {
-            return Err(ChatError::Closed);
-        }
-        if row.status != DisputeStatus::InProgress {
-            return Err(ChatError::UnknownDispute);
-        }
-        let key = party_key(&row, party).ok_or(ChatError::NoPartyKey)?;
         let channel = ChannelRef {
             mostro_pubkey: target.node.clone(),
             dispute_id: dispute_id.to_string(),
             party,
             solver_pubkey: solver,
         };
-        Ok((target, channel, key))
+        Ok(Conversation {
+            party_key: party_key(&row, party),
+            keys: target.keys,
+            channel,
+            row,
+        })
+    }
+
+    /// The conversation `party` of `dispute_id`, when this key may write to
+    /// it now; the reason otherwise.
+    pub(crate) async fn writable(
+        &self,
+        dispute_id: &str,
+        party: ChatParty,
+    ) -> Result<(Keys, ChannelRef, PublicKey), ChatError> {
+        let conversation = self.conversation(dispute_id, party).await?;
+        if conversation.row.status.is_terminal() {
+            return Err(ChatError::Closed);
+        }
+        if conversation.row.status != DisputeStatus::InProgress {
+            return Err(ChatError::UnknownDispute);
+        }
+        let key = conversation.party_key.ok_or(ChatError::NoPartyKey)?;
+        Ok((conversation.keys, conversation.channel, key))
     }
 
     /// Wrap `text` for `party` of `dispute_id`, store it `Sending` and
@@ -760,19 +815,19 @@ impl Router {
         if text.len() > MAX_MESSAGE_BYTES {
             return Err(ChatError::TooLong);
         }
-        let (target, channel, party_key) = self.writable(dispute_id, party).await?;
-        let (conv, sign) = channel_keys(&target.keys, &party_key).map_err(|e| {
+        let (keys, channel, party_key) = self.writable(dispute_id, party).await?;
+        let (conv, sign) = channel_keys(&keys, &party_key).map_err(|e| {
             log::warn!("[chat] message not built: {e}");
             ChatError::NoPartyKey
         })?;
-        let event = wrap_chat_message(&target.keys, &conv, &sign, text)
+        let event = wrap_chat_message(&keys, &conv, &sign, text)
             .await
             .map_err(|e| {
                 log::warn!("[chat] message not built: {e}");
                 ChatError::NoPartyKey
             })?;
         // The inner id, read back the way the party will read it.
-        let solver = target.keys.public_key();
+        let solver = keys.public_key();
         let opened = unwrap_chat_message(
             &conv,
             &sign.public_key(),
@@ -914,6 +969,11 @@ fn sorted_views(records: &[ChatRecord], in_flight: impl Fn(&str) -> bool) -> Vec
 
 static ROUTER: OnceLock<Arc<Router>> = OnceLock::new();
 
+/// The process-wide router, once the relay pool started it.
+pub(crate) fn router() -> Option<&'static Arc<Router>> {
+    ROUTER.get()
+}
+
 fn updates() -> &'static broadcast::Sender<ChatUpdate> {
     static UPDATES: OnceLock<broadcast::Sender<ChatUpdate>> = OnceLock::new();
     UPDATES.get_or_init(|| broadcast::channel(UPDATE_CAPACITY).0)
@@ -976,7 +1036,7 @@ async fn follow_with(router: &Router) {
 }
 
 /// The active node and the loaded key, or why not.
-async fn node_and_keys() -> Result<(String, Keys), ChatError> {
+pub(crate) async fn node_and_keys() -> Result<(String, Keys), ChatError> {
     let keys = crate::solver_slot::SOLVER_SLOT
         .keys()
         .await
@@ -1063,7 +1123,7 @@ pub(crate) fn thread_state(row: &DisputeRecord, party: ChatParty) -> ChatChannel
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     use crate::disputes::event::tests::mostrod_event;
     use crate::disputes::feed::Store;
@@ -1074,10 +1134,10 @@ mod tests {
     use nostr_sdk::prelude::*;
     use std::time::Duration;
 
-    const DISPUTE_A: &str = "8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c";
+    pub(crate) const DISPUTE_A: &str = "8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c";
     const DISPUTE_B: &str = "1f2e3d4c-5b6a-4978-8695-a4b3c2d1e0f9";
 
-    async fn connected(relay: &MockRelay) -> Arc<Client> {
+    pub(crate) async fn connected(relay: &MockRelay) -> Arc<Client> {
         let url = relay.url().await;
         let client = Arc::new(Client::new());
         client.add_relay(&url).await.unwrap();
@@ -1089,7 +1149,7 @@ mod tests {
     }
 
     /// Wait until `check` holds, or fail after a few seconds.
-    async fn eventually<F, Fut>(what: &str, mut check: F)
+    pub(crate) async fn eventually<F, Fut>(what: &str, mut check: F)
     where
         F: FnMut() -> Fut,
         Fut: std::future::Future<Output = bool>,
@@ -1104,14 +1164,14 @@ mod tests {
     }
 
     /// One side of a dispute: its trade key.
-    struct Party {
-        keys: Keys,
-        client: Arc<Client>,
+    pub(crate) struct Party {
+        pub(crate) keys: Keys,
+        pub(crate) client: Arc<Client>,
     }
 
     impl Party {
         /// Write `text` to the solver, as a party's client does.
-        async fn say(&self, solver: &PublicKey, text: &str) -> Event {
+        pub(crate) async fn say(&self, solver: &PublicKey, text: &str) -> Event {
             let (conv, sign) = channel_keys(&self.keys, solver).unwrap();
             let event = wrap_chat_message(&self.keys, &conv, &sign, text)
                 .await
@@ -1120,13 +1180,13 @@ mod tests {
             event
         }
 
-        async fn publish(&self, event: &Event) {
+        pub(crate) async fn publish(&self, event: &Event) {
             let output = self.client.send_event(event).await.unwrap();
             assert!(!output.success.is_empty(), "the relay refused it");
         }
 
         /// What the party reads from the solver's channel, as (sender, text).
-        async fn read(&self, solver: &PublicKey) -> Vec<(PublicKey, String)> {
+        pub(crate) async fn read(&self, solver: &PublicKey) -> Vec<(PublicKey, String)> {
             let (conv, sign) = channel_keys(&self.keys, solver).unwrap();
             let events = self
                 .client
@@ -1146,15 +1206,15 @@ mod tests {
         }
     }
 
-    struct Bench {
-        relay: MockRelay,
-        node: Keys,
-        solver: Keys,
-        buyer: Party,
-        seller: Party,
-        feed: Arc<Feed>,
-        router: Arc<Router>,
-        updates: broadcast::Receiver<ChatUpdate>,
+    pub(crate) struct Bench {
+        pub(crate) relay: MockRelay,
+        pub(crate) node: Keys,
+        pub(crate) solver: Keys,
+        pub(crate) buyer: Party,
+        pub(crate) seller: Party,
+        pub(crate) feed: Arc<Feed>,
+        pub(crate) router: Arc<Router>,
+        pub(crate) updates: broadcast::Receiver<ChatUpdate>,
     }
 
     fn taken(solver: &Keys, buyer: Option<&Keys>, seller: Option<&Keys>) -> TakenDispute {
@@ -1175,7 +1235,7 @@ mod tests {
         }
     }
 
-    async fn bench_with(feed_store: Store, chat_store: ChatStore) -> Bench {
+    pub(crate) async fn bench_with(feed_store: Store, chat_store: ChatStore) -> Bench {
         let relay = MockRelay::run().await.unwrap();
         let client = connected(&relay).await;
         let node = Keys::generate();
@@ -1219,12 +1279,12 @@ mod tests {
         }
     }
 
-    async fn bench() -> Bench {
+    pub(crate) async fn bench() -> Bench {
         bench_with(Store::memory(), ChatStore::memory()).await
     }
 
     impl Bench {
-        fn channel(&self, dispute: &str, party: ChatParty) -> ChannelRef {
+        pub(crate) fn channel(&self, dispute: &str, party: ChatParty) -> ChannelRef {
             ChannelRef {
                 mostro_pubkey: self.node.public_key().to_hex(),
                 dispute_id: dispute.into(),
@@ -1233,14 +1293,14 @@ mod tests {
             }
         }
 
-        async fn messages(&self, dispute: &str, party: ChatParty) -> Vec<ChatMessageView> {
+        pub(crate) async fn messages(&self, dispute: &str, party: ChatParty) -> Vec<ChatMessageView> {
             self.router
                 .messages(&self.channel(dispute, party))
                 .await
                 .unwrap()
         }
 
-        async fn wait_for(&self, dispute: &str, party: ChatParty, count: usize) {
+        pub(crate) async fn wait_for(&self, dispute: &str, party: ChatParty, count: usize) {
             let what = format!("{count} message(s) with the {party:?} of {dispute}");
             eventually(&what, || async {
                 self.messages(dispute, party).await.len() >= count

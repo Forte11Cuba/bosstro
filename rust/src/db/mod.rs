@@ -1,14 +1,17 @@
 //! Persistent storage (A4), from ../app's `rust/src/db/`, trimmed to what
 //! Bosstro uses: the settings key-value store, the relays, the node pictures
-//! (phase 2) and the disputes (phase 3).
+//! (phase 2), the disputes (phase 3), the dispute chat and its attachment
+//! cache (phase 5).
 //!
 //! One [`Storage`] trait, two backends picked at compile time
 //! (`app_db.rs`): SQLite through `sqlx` on native (Android, Linux),
 //! IndexedDB on the web. Neither is encrypted (SQLCipher is post-MVP).
-//! No key is ever written here: the chat's channel keys live in memory
-//! (`crate::chat`).
+//! No key is ever written here: the chat's channel keys and the attachment
+//! keys live in memory (`crate::chat`, `crate::crypto::file_enc`), and the
+//! attachment cache holds encrypted blobs only.
 
 pub mod app_db;
+pub(crate) mod blob_cache;
 #[cfg(target_arch = "wasm32")]
 pub mod indexeddb;
 pub mod seeds;
@@ -178,5 +181,15 @@ pub trait Storage: Send + Sync {
             .map(ChatRecord::cursor)
             .max())
     }
+
+    // ── Attachment cache (`crate::attachments`), encrypted blobs only ───────
+
+    /// Keep `blob` (encrypted, as on Blossom) under its hex SHA-256, then trim
+    /// the cache to the platform's cap, oldest first.
+    async fn save_attachment_blob(&self, sha256: &str, blob: &[u8]) -> Result<()>;
+    /// The cached blob of `sha256`, if it was kept and not evicted.
+    async fn get_attachment_blob(&self, sha256: &str) -> Result<Option<Vec<u8>>>;
+    /// Drop the oldest blobs until the rest fit in `cap` bytes.
+    async fn trim_attachment_blobs(&self, cap: u64) -> Result<()>;
 }
 
