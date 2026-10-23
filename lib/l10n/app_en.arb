@@ -24,11 +24,11 @@
   "@pendingTitle": {
     "description": "Header of the Pending tab"
   },
-  "pendingEmptyTitle": "No disputes to solve",
+  "pendingEmptyTitle": "No disputes waiting",
   "@pendingEmptyTitle": {
     "description": "Empty state title of the Pending tab"
   },
-  "pendingEmptyBody": "When a trade on this node opens a dispute, it shows up here for you to take.",
+  "pendingEmptyBody": "No dispute on this node is waiting for a solver. When a trade opens one, it shows up here for you to take.",
   "@pendingEmptyBody": {
     "description": "Empty state explanation of the Pending tab"
   },
@@ -846,5 +846,97 @@
   "loadingRelays": "Loading relays",
   "@loadingRelays": {
     "description": "Screen-reader label of the relay list skeleton"
+  },
+  "loadingDisputes": "Loading disputes",
+  "@loadingDisputes": {
+    "description": "Screen-reader label of the Pending list skeleton"
+  },
+  "pendingLoadErrorTitle": "Disputes could not be read",
+  "@pendingLoadErrorTitle": {
+    "description": "Pending tab state when the stored disputes cannot be read"
+  },
+  "pendingLoadErrorBody": "Something went wrong reading this node's disputes on this phone. Close and reopen Bosstro to try again.",
+  "@pendingLoadErrorBody": {
+    "description": "Explanation under pendingLoadErrorTitle"
+  },
+  "disputeStatusInitiated": "Waiting for a solver",
+  "@disputeStatusInitiated": {
+    "description": "Status chip of a dispute nobody has taken yet (initiated). Shown upper-case"
+  },
+  "disputeStatusInProgress": "In progress",
+  "@disputeStatusInProgress": {
+    "description": "Status chip of a dispute a solver took (in-progress). Shown upper-case"
+  },
+  "disputeStatusSettled": "Buyer paid",
+  "@disputeStatusSettled": {
+    "description": "Status chip of a dispute a solver closed by paying the buyer (settled). Shown upper-case"
+  },
+  "disputeStatusSellerRefunded": "Seller refunded",
+  "@disputeStatusSellerRefunded": {
+    "description": "Status chip of a dispute a solver closed by refunding the seller (seller-refunded). Shown upper-case"
+  },
+  "disputeStatusReleased": "Released by the seller",
+  "@disputeStatusReleased": {
+    "description": "Status chip of a dispute the seller ended by releasing the funds (released). Shown upper-case"
+  },
+  "disputeStatusCooperativelyCanceled": "Canceled by both parties",
+  "@disputeStatusCooperativelyCanceled": {
+    "description": "Status chip of a dispute the buyer and seller ended by canceling together (cooperatively-canceled). Shown upper-case"
+  },
+  "disputeOpenedByBuyer": "Opened by the buyer",
+  "@disputeOpenedByBuyer": {
+    "description": "Who opened a dispute: the buyer"
+  },
+  "disputeOpenedBySeller": "Opened by the seller",
+  "@disputeOpenedBySeller": {
+    "description": "Who opened a dispute: the seller"
+  },
+  "disputeOpenedByUnknown": "Opener not known",
+  "@disputeOpenedByUnknown": {
+    "description": "Who opened a dispute: the node did not say"
+  },
+  "disputeOpenedJustNow": "Opened just now",
+  "@disputeOpenedJustNow": {
+    "description": "Age of a dispute opened less than a minute ago"
+  },
+  "disputeOpenedMinutesAgo": "{count, plural, =1{Opened 1 minute ago} other{Opened {count} minutes ago}}",
+  "@disputeOpenedMinutesAgo": {
+    "description": "Age of a dispute, in minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputeOpenedHoursAgo": "{count, plural, =1{Opened 1 hour ago} other{Opened {count} hours ago}}",
+  "@disputeOpenedHoursAgo": {
+    "description": "Age of a dispute, in hours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputeOpenedDaysAgo": "{count, plural, =1{Opened 1 day ago} other{Opened {count} days ago}}",
+  "@disputeOpenedDaysAgo": {
+    "description": "Age of a dispute, in days",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputeOpenedUnknown": "Open time not known",
+  "@disputeOpenedUnknown": {
+    "description": "Age of a dispute whose event carries no open time"
+  },
+  "disputeRowLabel": "Dispute {id}",
+  "@disputeRowLabel": {
+    "description": "Screen-reader label of a dispute row; id is the short dispute id",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   }
 }

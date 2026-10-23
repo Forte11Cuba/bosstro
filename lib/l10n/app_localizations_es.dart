@@ -27,11 +27,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pendingTitle => 'Disputas pendientes';
 
   @override
-  String get pendingEmptyTitle => 'No hay disputas por resolver';
+  String get pendingEmptyTitle => 'No hay disputas esperando';
 
   @override
   String get pendingEmptyBody =>
-      'Cuando una operación de este nodo abra una disputa, aparecerá aquí para que la tomes.';
+      'Ninguna disputa de este nodo está esperando solver. Cuando una operación abra una, aparecerá aquí para que la tomes.';
 
   @override
   String get inProgressTitle => 'Tus disputas';
@@ -680,4 +680,85 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loadingRelays => 'Cargando relays';
+
+  @override
+  String get loadingDisputes => 'Cargando disputas';
+
+  @override
+  String get pendingLoadErrorTitle => 'No se pudieron leer las disputas';
+
+  @override
+  String get pendingLoadErrorBody =>
+      'Algo falló al leer en este teléfono las disputas de este nodo. Cierra y vuelve a abrir Bosstro para intentarlo de nuevo.';
+
+  @override
+  String get disputeStatusInitiated => 'Esperando solver';
+
+  @override
+  String get disputeStatusInProgress => 'En curso';
+
+  @override
+  String get disputeStatusSettled => 'Pagado al comprador';
+
+  @override
+  String get disputeStatusSellerRefunded => 'Devuelto al vendedor';
+
+  @override
+  String get disputeStatusReleased => 'Liberado por el vendedor';
+
+  @override
+  String get disputeStatusCooperativelyCanceled => 'Cancelada por ambas partes';
+
+  @override
+  String get disputeOpenedByBuyer => 'Abierta por el comprador';
+
+  @override
+  String get disputeOpenedBySeller => 'Abierta por el vendedor';
+
+  @override
+  String get disputeOpenedByUnknown => 'No se sabe quién la abrió';
+
+  @override
+  String get disputeOpenedJustNow => 'Abierta hace un momento';
+
+  @override
+  String disputeOpenedMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Abierta hace $count minutos',
+      one: 'Abierta hace 1 minuto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeOpenedHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Abierta hace $count horas',
+      one: 'Abierta hace 1 hora',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeOpenedDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Abierta hace $count días',
+      one: 'Abierta hace 1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get disputeOpenedUnknown => 'Hora de apertura desconocida';
+
+  @override
+  String disputeRowLabel(String id) {
+    return 'Disputa $id';
+  }
 }
