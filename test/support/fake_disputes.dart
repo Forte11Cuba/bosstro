@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
+
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 
@@ -27,6 +29,10 @@ class FakeDisputesCore implements DisputesCore {
   set node(String? value) => _node = value;
 
   List<DisputeSummary> disputes;
+
+  /// NIP-40 expirations by dispute id: past one (by `clock`), the dispute is
+  /// no longer pending, as the core computes `is_pending` when it answers.
+  final Map<String, DateTime> expiresAt = {};
   bool synced;
   int reads = 0;
   final StreamController<DisputeUpdate> changes = StreamController.broadcast();
@@ -38,7 +44,13 @@ class FakeDisputesCore implements DisputesCore {
     if (node == null) return null;
     return PendingDisputes(
       mostroPubkey: node,
-      disputes: disputes.where((d) => d.isPending).toList(),
+      disputes:
+          disputes
+              .where((d) => d.isPending)
+              .where(
+                (d) => expiresAt[d.disputeId]?.isAfter(clock.now()) ?? true,
+              )
+              .toList(),
       synced: synced,
     );
   }

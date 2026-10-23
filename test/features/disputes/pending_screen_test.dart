@@ -213,6 +213,36 @@ void main() {
     expect(find.text('1f2e3d4c…e0f9'), findsOneWidget);
   });
 
+  testWidgets('a dispute that expires leaves on the next minute tick, with '
+      'no update', (tester) async {
+    setSurface(tester, width: 400, height: 800);
+    var now = _now;
+    final core = FakeDisputesCore(
+      disputes: [sampleDispute(id: _a), sampleDispute(id: _b)],
+    )..expiresAt[_a] = _now.add(const Duration(seconds: 30));
+    await withClock(
+      Clock(() => now),
+      () => pumpApp(
+        tester,
+        location: AppRoute.pending,
+        locale: const Locale('en'),
+        textScale: 1,
+        overrides: fakeCoreOverrides(disputes: core),
+      ),
+    );
+    expect(find.byType(PendingDisputeRow), findsNWidgets(2));
+    expect(find.text('Opened 2 hours ago'), findsNWidgets(2));
+
+    now = now.add(const Duration(minutes: 1));
+    await tester.pump(const Duration(minutes: 1));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PendingDisputeRow), findsOneWidget);
+    expect(find.text('1f2e3d4c…e0f9'), findsOneWidget);
+    // The age moved with the same tick.
+    expect(find.text('Opened 2 hours ago'), findsOneWidget);
+  });
+
   testWidgets('a burst of updates is read once, and another node\'s are '
       'ignored', (tester) async {
     setSurface(tester, width: 400, height: 800);

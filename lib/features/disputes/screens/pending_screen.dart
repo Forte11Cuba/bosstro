@@ -87,22 +87,24 @@ class _PendingBody extends ConsumerWidget {
   }
 }
 
-/// The list, with the ages counted to a clock that moves every minute.
-class _PendingList extends StatefulWidget {
+/// The list, with the ages counted to a clock that moves every minute. The
+/// same tick reads the list again, so a dispute that expired (NIP-40) leaves
+/// without waiting for the next update.
+class _PendingList extends ConsumerStatefulWidget {
   const _PendingList({required this.disputes});
 
   final List<DisputeSummary> disputes;
 
   @override
-  State<_PendingList> createState() => _PendingListState();
+  ConsumerState<_PendingList> createState() => _PendingListState();
 }
 
-class _PendingListState extends State<_PendingList> {
+class _PendingListState extends ConsumerState<_PendingList> {
   late DateTime _now = clock.now();
-  late final Timer _tick = Timer.periodic(
-    const Duration(minutes: 1),
-    (_) => setState(() => _now = clock.now()),
-  );
+  late final Timer _tick = Timer.periodic(const Duration(minutes: 1), (_) {
+    setState(() => _now = clock.now());
+    unawaited(ref.read(pendingDisputesProvider.notifier).refresh());
+  });
 
   @override
   void initState() {

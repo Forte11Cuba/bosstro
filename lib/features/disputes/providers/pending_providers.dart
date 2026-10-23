@@ -52,6 +52,11 @@ class PendingDisputesNotifier extends AsyncNotifier<PendingDisputes?> {
     return _core.pending();
   }
 
+  /// Read the list again now: what counts as pending also changes with
+  /// time (a dispute past its NIP-40 expiration leaves), and only the core
+  /// knows the expiration.
+  Future<void> refresh() => _reload();
+
   void _schedule() {
     if (_pending?.isActive ?? false) return;
     _pending = Timer(coalesce, () => unawaited(_reload()));
