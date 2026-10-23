@@ -205,3 +205,36 @@ pub(crate) async fn disputes_never_mix_nodes(storage: &impl Storage) {
     );
     assert!(storage.list_disputes("cc").await.unwrap().is_empty());
 }
+
+/// Pending's query: one node's rows with one status, and nothing else.
+pub(crate) async fn disputes_by_status(storage: &impl Storage) {
+    let waiting = dispute("aa", DISPUTE_A);
+    let mut taken = dispute("aa", DISPUTE_B);
+    taken.status = DisputeStatus::InProgress;
+    // Another node's `initiated` row, keyed so it sorts right after `aa`'s.
+    let elsewhere = dispute("aab", DISPUTE_A);
+    for row in [&waiting, &taken, &elsewhere] {
+        storage.save_dispute(row).await.unwrap();
+    }
+
+    let initiated = storage
+        .list_disputes_with_status("aa", DisputeStatus::Initiated)
+        .await
+        .unwrap();
+    assert_eq!(initiated, vec![waiting]);
+    let in_progress = storage
+        .list_disputes_with_status("aa", DisputeStatus::InProgress)
+        .await
+        .unwrap();
+    assert_eq!(in_progress, vec![taken]);
+    assert!(storage
+        .list_disputes_with_status("aa", DisputeStatus::Settled)
+        .await
+        .unwrap()
+        .is_empty());
+    assert!(storage
+        .list_disputes_with_status("a", DisputeStatus::Initiated)
+        .await
+        .unwrap()
+        .is_empty());
+}

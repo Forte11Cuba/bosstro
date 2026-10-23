@@ -26,6 +26,7 @@ use web_sys::wasm_bindgen::{JsCast, JsValue};
 use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
 use crate::db::Storage;
+use crate::api::disputes::DisputeStatus;
 use crate::disputes::DisputeRecord;
 
 /// Bumped when a store is added; `open_db` creates whatever is missing.
@@ -306,6 +307,41 @@ impl Storage for IndexedDbStorage {
             .filter(|row| row.mostro_pubkey == mostro_pubkey)
             .collect())
     }
+
+    async fn list_disputes_with_status(
+        &self,
+        mostro_pubkey: &str,
+        status: DisputeStatus,
+    ) -> Result<Vec<DisputeRecord>> {
+        // Only this node's records are read: its keys are the range
+        // `node:` ..< `node;` (`;` follows `:`). The status is checked here:
+        // an IndexedDB index needs object values with a key path, and these
+        // records are JSON strings (a schema change not worth a few hundred
+        // rows).
+        let range = web_sys::IdbKeyRange::bound(
+            &JsValue::from_str(&format!("{mostro_pubkey}:")),
+            &JsValue::from_str(&format!("{mostro_pubkey};")),
+        )
+        .map_err(|e| js_err("key range", e))?;
+        let db = self.open_db().await?;
+        let tx = db
+            .transaction_on_one_with_mode(DISPUTES_STORE, IdbTransactionMode::Readonly)
+            .map_err(|e| js_err("tx open", e))?;
+        let store = tx
+            .object_store(DISPUTES_STORE)
+            .map_err(|e| js_err("store open", e))?;
+        let array = store
+            .get_all_with_key(&range)
+            .map_err(|e| js_err("get_all", e))?
+            .await
+            .map_err(|e| js_err("get_all await", e))?;
+        Ok(array
+            .iter()
+            .filter_map(|v| v.as_string())
+            .filter_map(|json| serde_json::from_str::<DisputeRecord>(&json).ok())
+            .filter(|row| row.mostro_pubkey == mostro_pubkey && row.status == status)
+            .collect())
+    }
 }
 
 /// The same checks as the SQLite backend's, in a browser
@@ -351,5 +387,10 @@ mod tests {
     #[wasm_bindgen_test]
     async fn disputes_never_mix_nodes() {
         contract::disputes_never_mix_nodes(&store("disputes_nodes").await).await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn disputes_by_status() {
+        contract::disputes_by_status(&store("disputes_status").await).await;
     }
 }

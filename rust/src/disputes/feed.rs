@@ -22,19 +22,27 @@
 //! relay that stopped delivering. Events are read from the raw relay frames,
 //! before nostr-sdk's first-seen dedup, so a revision first seen while
 //! another node was active is not lost when its node comes back.
+//!
+//! **Back-pressure.** The client's notifications are a bounded broadcast
+//! (4096 messages in nostr-sdk 0.45) whose stream drops what a slow reader
+//! missed without a word, and a first sync sends every event once per relay
+//! and per subscription. So the reader only sorts messages into an unbounded
+//! channel, in order, and a second task does the work; and an event id
+//! already handled for the followed node is skipped before its signature is
+//! checked or storage is read ([`SeenEvents`]).
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use nostr_sdk::prelude::{
-    Client, ClientNotification, Event, Filter, Kind, PublicKey, RelayMessage, SingleLetterTag,
-    StreamExt, SubscriptionId,
+    Client, ClientNotification, Event, EventId, Filter, Kind, PublicKey, RelayMessage,
+    SingleLetterTag, StreamExt, SubscriptionId,
 };
-use tokio::sync::broadcast;
+use tokio::sync::{broadcast, mpsc};
 
 use super::event::{parse_dispute_event, KIND_DISPUTE};
 use super::{merge, DisputeRecord};
-use crate::api::disputes::DisputeUpdate;
+use crate::api::disputes::{DisputeStatus, DisputeUpdate};
 use crate::db::Storage;
 use crate::nostr::live_subs::LiveSubs;
 
@@ -47,6 +55,12 @@ pub const RECENT_LIMIT: usize = 500;
 /// anyway, so a silent relay set does not leave Pending loading forever.
 /// The same bound as the node's other first reads (`api::nodes`).
 const SYNC_WAIT: std::time::Duration = std::time::Duration::from_secs(10);
+
+/// How many handled event ids [`SeenEvents`] remembers. A first sync is at
+/// most every `initiated` dispute plus [`RECENT_LIMIT`] others, one id each
+/// (relays keep one revision per dispute); past the cap the oldest ids are
+/// forgotten, which only costs a check again.
+const SEEN_CAPACITY: usize = 4096;
 
 /// Capacity of the update channel. A node's whole history arrives at once on
 /// a first sync; a reader that falls behind is told to re-read instead.
@@ -82,26 +96,39 @@ pub fn subscription_ids(node: &str) -> (SubscriptionId, SubscriptionId) {
 /// app then runs from memory, as everywhere else).
 pub(crate) enum Store {
     Db(&'static crate::db::app_db::AppStorage),
-    Memory(Mutex<HashMap<(String, String), DisputeRecord>>),
+    Memory(MemoryRows),
+}
+
+/// The rows of [`Store::Memory`].
+#[derive(Default)]
+pub(crate) struct MemoryRows {
+    rows: Mutex<HashMap<(String, String), DisputeRecord>>,
+    /// Tests only: how long a save takes, standing in for a slow disk.
+    #[cfg(test)]
+    save_delay: std::time::Duration,
 }
 
 impl Store {
     fn memory() -> Self {
-        Store::Memory(Mutex::new(HashMap::new()))
+        Store::Memory(MemoryRows::default())
     }
 
     async fn get(&self, node: &str, id: &str) -> anyhow::Result<Option<DisputeRecord>> {
         match self {
             Store::Db(db) => db.get_dispute(node, id).await,
-            Store::Memory(rows) => Ok(lock(rows).get(&(node.into(), id.into())).cloned()),
+            Store::Memory(m) => Ok(lock(&m.rows).get(&(node.into(), id.into())).cloned()),
         }
     }
 
     async fn save(&self, row: &DisputeRecord) -> anyhow::Result<()> {
         match self {
             Store::Db(db) => db.save_dispute(row).await,
-            Store::Memory(rows) => {
-                lock(rows).insert(
+            Store::Memory(m) => {
+                #[cfg(test)]
+                if !m.save_delay.is_zero() {
+                    tokio::time::sleep(m.save_delay).await;
+                }
+                lock(&m.rows).insert(
                     (row.mostro_pubkey.clone(), row.dispute_id.clone()),
                     row.clone(),
                 );
@@ -110,16 +137,62 @@ impl Store {
         }
     }
 
-    pub(crate) async fn list(&self, node: &str) -> anyhow::Result<Vec<DisputeRecord>> {
+    /// `node`'s rows whose status is `status`.
+    pub(crate) async fn list_with_status(
+        &self,
+        node: &str,
+        status: DisputeStatus,
+    ) -> anyhow::Result<Vec<DisputeRecord>> {
         match self {
-            Store::Db(db) => db.list_disputes(node).await,
-            Store::Memory(rows) => Ok(lock(rows)
+            Store::Db(db) => db.list_disputes_with_status(node, status).await,
+            Store::Memory(m) => Ok(lock(&m.rows)
                 .values()
-                .filter(|row| row.mostro_pubkey == node)
+                .filter(|row| row.mostro_pubkey == node && row.status == status)
                 .cloned()
                 .collect()),
         }
     }
+}
+
+/// Event ids already handled for the followed node: the copy every other
+/// relay sends, and the same event under both subscriptions, then cost a set
+/// lookup instead of a signature check and a storage read. Bounded by
+/// [`SEEN_CAPACITY`], oldest first out; emptied on every retarget, so a node
+/// followed again is read afresh.
+#[derive(Default)]
+struct SeenEvents {
+    ids: HashSet<EventId>,
+    order: VecDeque<EventId>,
+}
+
+impl SeenEvents {
+    fn contains(&self, id: &EventId) -> bool {
+        self.ids.contains(id)
+    }
+
+    fn insert(&mut self, id: EventId) {
+        if !self.ids.insert(id) {
+            return;
+        }
+        self.order.push_back(id);
+        if self.order.len() > SEEN_CAPACITY {
+            if let Some(oldest) = self.order.pop_front() {
+                self.ids.remove(&oldest);
+            }
+        }
+    }
+
+    fn clear(&mut self) {
+        self.ids.clear();
+        self.order.clear();
+    }
+}
+
+/// What the reader hands the worker, in the order the relays sent it.
+enum Inbound {
+    Event(Box<Event>),
+    EndOfStored(SubscriptionId),
+    Closed { relay: String, id: SubscriptionId },
 }
 
 fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
@@ -145,6 +218,7 @@ pub(crate) struct Feed {
     subs: &'static LiveSubs,
     updates: broadcast::Sender<DisputeUpdate>,
     state: Mutex<FeedState>,
+    seen: Mutex<SeenEvents>,
     /// Serialises retargets: each closes the previous node's subscriptions
     /// and opens its own.
     retarget_lock: tokio::sync::Mutex<()>,
@@ -166,6 +240,7 @@ impl Feed {
             subs,
             updates,
             state: Mutex::new(FeedState::default()),
+            seen: Mutex::new(SeenEvents::default()),
             retarget_lock: tokio::sync::Mutex::new(()),
             ingest_lock: tokio::sync::Mutex::new(()),
         })
@@ -173,29 +248,51 @@ impl Feed {
 
     /// Read the client's notifications for as long as it lives. Taken before
     /// the first subscription, so nothing a relay sends first is missed.
+    ///
+    /// Two tasks: the reader only keeps what concerns the feed and passes it
+    /// on through an unbounded channel, so it never falls behind the
+    /// client's bounded broadcast; the worker handles it in arrival order, so
+    /// an EOSE is handled after the events the relay sent before it.
     pub(crate) fn spawn_reader(self: &Arc<Self>) {
-        let feed = self.clone();
+        let (tx, mut rx) = mpsc::unbounded_channel::<Inbound>();
         let mut notifications = self.client.notifications();
         crate::rt::spawn(async move {
             while let Some(notification) = notifications.next().await {
                 let ClientNotification::Message { relay_url, message } = notification else {
                     continue;
                 };
-                match *message {
+                let inbound = match *message {
                     RelayMessage::Event { event, .. } if is_dispute_kind(&event) => {
-                        feed.ingest(&event).await;
+                        Inbound::Event(Box::new(event.into_owned()))
                     }
-                    RelayMessage::EndOfStoredEvents(id) => feed.on_end_of_stored(&id),
+                    RelayMessage::EndOfStoredEvents(id) => Inbound::EndOfStored(id.into_owned()),
                     RelayMessage::Closed {
                         subscription_id, ..
-                    } => {
-                        // The SDK forgot it on that relay; get it back
-                        // (MostroP2P/app#523). A no-op for ids nobody records.
-                        feed.subs
-                            .on_closed(&feed.client, relay_url.as_str(), &subscription_id)
-                            .await;
+                    } => Inbound::Closed {
+                        relay: relay_url.to_string(),
+                        id: subscription_id.into_owned(),
+                    },
+                    _ => continue,
+                };
+                if tx.send(inbound).is_err() {
+                    break;
+                }
+            }
+        });
+
+        let feed = self.clone();
+        crate::rt::spawn(async move {
+            while let Some(inbound) = rx.recv().await {
+                match inbound {
+                    Inbound::Event(event) => {
+                        feed.ingest(&event).await;
                     }
-                    _ => {}
+                    Inbound::EndOfStored(id) => feed.on_end_of_stored(&id),
+                    // The SDK forgot it on that relay; get it back
+                    // (MostroP2P/app#523). A no-op for ids nobody records.
+                    Inbound::Closed { relay, id } => {
+                        feed.subs.on_closed(&feed.client, &relay, &id).await;
+                    }
                 }
             }
         });
@@ -214,6 +311,7 @@ impl Feed {
             let previous = std::mem::replace(&mut state.node, node.clone());
             state.synced = false;
             state.generation += 1;
+            lock(&self.seen).clear();
             (previous, state.generation)
         };
         if let Some(previous) = previous {
@@ -265,15 +363,20 @@ impl Feed {
 
     /// Merge one 38386 revision into storage and announce the change. Refused
     /// silently (logged at debug) when it is not a valid revision of the
-    /// followed node's, or not newer than the stored one.
+    /// followed node's, or not newer than the stored one; skipped before any
+    /// check when this event was already handled for the followed node.
     pub(crate) async fn ingest(&self, event: &Event) -> Option<DisputeRecord> {
         let node = self.node()?;
+        if lock(&self.seen).contains(&event.id) {
+            return None;
+        }
         let author = PublicKey::from_hex(&node).ok()?;
         let now = crate::rt::unix_now();
         let parsed = match parse_dispute_event(event, &author, now) {
             Ok(parsed) => parsed,
             Err(why) => {
                 log::debug!("[disputes] event {} refused: {why:?}", event.id.to_hex());
+                self.mark_seen(&node, event.id);
                 return None;
             }
         };
@@ -291,11 +394,16 @@ impl Feed {
                     return None;
                 }
             };
-            let row = merge(existing.as_ref(), &parsed)?;
+            let Some(row) = merge(existing.as_ref(), &parsed) else {
+                self.mark_seen(&node, event.id);
+                return None;
+            };
             if let Err(e) = self.store.save(&row).await {
+                // Not marked: the next copy of the event tries again.
                 log::warn!("[disputes] dispute not stored: {e}");
                 return None;
             }
+            self.mark_seen(&node, event.id);
             row
         };
         self.send(DisputeUpdate {
@@ -304,6 +412,16 @@ impl Feed {
             synced: self.is_synced(&row.mostro_pubkey),
         });
         Some(row)
+    }
+
+    /// Remember `id` as handled, if the feed still follows `node`: an event
+    /// handled for a node the feed has just left must not be skipped for
+    /// the next.
+    fn mark_seen(&self, node: &str, id: EventId) {
+        let state = lock(&self.state);
+        if state.node.as_deref() == Some(node) {
+            lock(&self.seen).insert(id);
+        }
     }
 
     fn on_end_of_stored(&self, id: &SubscriptionId) {
@@ -397,10 +515,14 @@ pub(crate) fn is_synced(node: &str) -> bool {
     FEED.get().is_none_or(|feed| feed.is_synced(node))
 }
 
-/// `node`'s rows from the feed's memory store, when storage never opened.
-pub(crate) async fn memory_rows(node: &str) -> Vec<DisputeRecord> {
+/// `node`'s rows with `status` from the feed's memory store, when storage
+/// never opened.
+pub(crate) async fn memory_rows(node: &str, status: DisputeStatus) -> Vec<DisputeRecord> {
     match FEED.get().map(|feed| &feed.store) {
-        Some(store @ Store::Memory(_)) => store.list(node).await.unwrap_or_default(),
+        Some(store @ Store::Memory(_)) => store
+            .list_with_status(node, status)
+            .await
+            .unwrap_or_default(),
         _ => Vec::new(),
     }
 }
@@ -408,9 +530,8 @@ pub(crate) async fn memory_rows(node: &str) -> Vec<DisputeRecord> {
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use super::*;
-    use crate::api::disputes::DisputeStatus;
     use crate::disputes::event::tests::{mostrod_event, DISPUTE_ID};
-    use nostr_sdk::local_relay::MockRelay;
+    use nostr_sdk::local_relay::{LocalRelayBuilder, MockRelay, RateLimit};
     use nostr_sdk::prelude::Keys;
     use std::time::Duration;
 
@@ -668,6 +789,166 @@ mod tests {
             .filter(|u| u.dispute.is_some())
             .count();
         assert_eq!(changes, 1);
+    }
+
+    /// A first sync of a busy node: 1200 disputes, two revisions each, on six
+    /// relays that keep only the newest revision (as real relays do) and
+    /// answer at most 500 events per filter. Both subscriptions bring about
+    /// 900 events per relay — over 5000 messages, more than the client's
+    /// 4096-slot broadcast holds — into a store that takes a while per save.
+    /// Every dispute either subscription can reach must end on its newest
+    /// revision, and the node must be synced by its EOSE, with every waiting
+    /// dispute already stored, not by the 10 s fallback. Without the worker
+    /// channel and the seen-set this lost disputes.
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn a_first_sync_of_a_busy_node_loses_nothing() {
+        const DISPUTES: usize = 1_200;
+        const RELAYS: usize = 6;
+        // MockRelay takes 60 events a minute; these relays take them all.
+        let roomy = || {
+            LocalRelayBuilder::default()
+                .rate_limit(RateLimit {
+                    max_reqs: 500,
+                    notes_per_minute: 1_000_000,
+                })
+                .build()
+        };
+        let relays: Vec<_> = (0..RELAYS).map(|_| roomy()).collect();
+        let client = Arc::new(Client::new());
+        for relay in &relays {
+            relay.run().await.unwrap();
+            let url = relay.url().await;
+            client.add_relay(&url).await.unwrap();
+            client
+                .try_connect_relay(&url, Duration::from_secs(3))
+                .await
+                .unwrap();
+        }
+        let node = Keys::generate();
+        let hex = node.public_key().to_hex();
+        let finals = ["initiated", "settled", "seller-refunded"];
+        // dispute id → (newest event id, its status, reachable by a filter)
+        let mut newest = HashMap::new();
+        for i in 0..DISPUTES {
+            let id = uuid::Uuid::new_v4().to_string();
+            // An old `initiated`, then the final revision; finals are newer
+            // than every first revision, ordered by `i`.
+            let first = mostrod_event(&node, &id, "initiated", (1_700_000_000 + i) as u64);
+            let status = finals[i % finals.len()];
+            let last = mostrod_event(&node, &id, status, (1_700_100_000 + i) as u64);
+            for event in [&first, &last] {
+                let sent = client.send_event(event).await.unwrap();
+                assert_eq!(sent.success.len(), RELAYS, "{:?}", sent.failed);
+            }
+            // The recent filter reaches the newest 500; the other filter
+            // every `initiated` one (400 here, under the relays' 500 cap).
+            let reachable = i >= DISPUTES - RECENT_LIMIT || status == "initiated";
+            newest.insert(id, (last.id.to_hex(), status, reachable));
+        }
+        let store = Store::Memory(MemoryRows {
+            save_delay: Duration::from_millis(3),
+            ..MemoryRows::default()
+        });
+        let (feed, _rx) = feed_on(client.clone(), store);
+        let started = tokio::time::Instant::now();
+
+        feed.retarget(Some(hex.clone())).await;
+
+        for _ in 0..400 {
+            if feed.is_synced(&hex) {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(25)).await;
+        }
+        assert!(feed.is_synced(&hex));
+        assert!(
+            started.elapsed() < SYNC_WAIT,
+            "synced by the timeout, not by EOSE ({:?})",
+            started.elapsed()
+        );
+        let waiting = feed
+            .store
+            .list_with_status(&hex, DisputeStatus::Initiated)
+            .await
+            .unwrap()
+            .len();
+        let expected = newest
+            .values()
+            .filter(|(_, s, _)| *s == "initiated")
+            .count();
+        assert_eq!(
+            waiting, expected,
+            "the EOSE is handled after the events before it"
+        );
+
+        eventually("every reachable dispute on its newest revision", || {
+            let feed = feed.clone();
+            let newest = newest.clone();
+            let hex = hex.clone();
+            async move {
+                for (id, (event_id, _, reachable)) in &newest {
+                    if !reachable {
+                        continue;
+                    }
+                    match feed.store.get(&hex, id).await.unwrap() {
+                        Some(row) if &row.event_id == event_id => {}
+                        _ => return false,
+                    }
+                }
+                true
+            }
+        })
+        .await;
+        for (id, (_, status, reachable)) in &newest {
+            if *reachable {
+                let row = feed.store.get(&hex, id).await.unwrap().unwrap();
+                assert_eq!(row.status.as_wire(), *status);
+            }
+        }
+    }
+
+    #[test]
+    fn seen_events_are_bounded_oldest_first() {
+        let mut seen = SeenEvents::default();
+        let id = |n: u32| {
+            let mut bytes = [0u8; 32];
+            bytes[..4].copy_from_slice(&n.to_be_bytes());
+            EventId::from_byte_array(bytes)
+        };
+        for n in 0..(SEEN_CAPACITY as u32 + 10) {
+            seen.insert(id(n));
+        }
+        seen.insert(id(20)); // already there: no double entry
+        assert_eq!(seen.ids.len(), SEEN_CAPACITY);
+        assert_eq!(seen.order.len(), SEEN_CAPACITY);
+        assert!(!seen.contains(&id(0)) && !seen.contains(&id(9)));
+        assert!(seen.contains(&id(10)) && seen.contains(&(id(SEEN_CAPACITY as u32 + 9))));
+        seen.clear();
+        assert!(!seen.contains(&id(10)));
+    }
+
+    /// A copy of a handled event is skipped before anything is read; a
+    /// retarget forgets what was handled.
+    #[tokio::test]
+    async fn a_handled_event_is_skipped_until_the_next_retarget() {
+        let (feed, _rx) = feed_on(Arc::new(Client::new()), Store::memory());
+        let node = Keys::generate();
+        let hex = node.public_key().to_hex();
+        feed.retarget(Some(hex.clone())).await;
+        let event = mostrod_event(&node, DISPUTE_ID, "initiated", 1_700_000_100);
+
+        assert!(feed.ingest(&event).await.is_some());
+        assert!(lock(&feed.seen).contains(&event.id));
+        // Lose the row behind the feed's back: a skipped copy cannot bring it.
+        if let Store::Memory(m) = &feed.store {
+            lock(&m.rows).clear();
+        }
+        assert!(feed.ingest(&event).await.is_none());
+        assert_eq!(status_of(&feed, &node, DISPUTE_ID).await, None);
+
+        feed.retarget(None).await;
+        feed.retarget(Some(hex)).await;
+        assert!(feed.ingest(&event).await.is_some());
     }
 
     #[tokio::test]

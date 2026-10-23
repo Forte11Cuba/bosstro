@@ -198,8 +198,11 @@ pub fn sort_pending(list: &mut [DisputeSummary]) {
 /// The pending disputes of `node` as stored now, sorted for the list.
 pub async fn pending_for(node: &str) -> Result<Vec<DisputeSummary>> {
     let rows = match crate::db::app_db::db() {
-        Some(db) => db.list_disputes(node).await?,
-        None => feed::memory_rows(node).await,
+        Some(db) => {
+            db.list_disputes_with_status(node, DisputeStatus::Initiated)
+                .await?
+        }
+        None => feed::memory_rows(node, DisputeStatus::Initiated).await,
     };
     Ok(pending_of(&rows, crate::rt::unix_now()))
 }

@@ -20,6 +20,7 @@ use anyhow::Result;
 
 use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
+use crate::api::disputes::DisputeStatus;
 use crate::disputes::DisputeRecord;
 
 /// Keys used in the generic key-value settings store.
@@ -114,6 +115,16 @@ pub trait Storage: Send + Sync {
         dispute_id: &str,
     ) -> Result<Option<DisputeRecord>>;
     /// Every stored dispute of `mostro_pubkey`, whatever its status, in no
-    /// particular order. Another node's rows never appear.
+    /// particular order. Another node's rows never appear. Unused in the app
+    /// since Pending reads by status; kept for phase 4, which reconciles this
+    /// solver's disputes whatever their status.
+    #[cfg_attr(not(test), allow(dead_code))]
     async fn list_disputes(&self, mostro_pubkey: &str) -> Result<Vec<DisputeRecord>>;
+    /// The stored disputes of `mostro_pubkey` whose status is `status` (Pending
+    /// reads `initiated`), in no particular order.
+    async fn list_disputes_with_status(
+        &self,
+        mostro_pubkey: &str,
+        status: DisputeStatus,
+    ) -> Result<Vec<DisputeRecord>>;
 }

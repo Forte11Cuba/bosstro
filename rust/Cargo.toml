@@ -68,7 +68,7 @@ wasmtimer = "0.4"
 # The web executor (rt::spawn) and the IndexedDB store (db/indexeddb.rs).
 wasm-bindgen-futures = "0.4"
 indexed_db_futures = "0.4"
-web-sys = { version = "0.3", features = ["console"] }
+web-sys = { version = "0.3", features = ["console", "IdbKeyRange"] }
 # Node pictures through the browser's fetch (node_pictures.rs).
 reqwest = { version = "0.12", default-features = false, features = ["stream"] }
 # The getrandom versions under nostr, k256 and friends have no default backend on

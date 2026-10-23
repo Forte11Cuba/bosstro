@@ -194,6 +194,22 @@ impl Storage for SqliteStorage {
         .await?;
         Ok(rows.iter().filter_map(readable_dispute).collect())
     }
+
+    async fn list_disputes_with_status(
+        &self,
+        mostro_pubkey: &str,
+        status: DisputeStatus,
+    ) -> Result<Vec<DisputeRecord>> {
+        // Served by `disputes_by_node_status`.
+        let rows = sqlx::query(&format!(
+            "SELECT {DISPUTE_COLUMNS} FROM disputes WHERE mostro_pubkey = ? AND status = ?"
+        ))
+        .bind(mostro_pubkey)
+        .bind(status.as_wire())
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows.iter().filter_map(readable_dispute).collect())
+    }
 }
 
 /// A row as a record, or `None` (logged) when it no longer reads — a status a
@@ -290,6 +306,26 @@ pub(crate) mod tests {
     #[tokio::test]
     async fn disputes_never_mix_nodes() {
         contract::disputes_never_mix_nodes(&store().await).await;
+    }
+
+    #[tokio::test]
+    async fn disputes_by_status() {
+        contract::disputes_by_status(&store().await).await;
+    }
+
+    /// The Pending query uses the index, not a scan of the table.
+    #[tokio::test]
+    async fn the_pending_query_uses_the_status_index() {
+        let storage = store().await;
+        let plan: Vec<(i64, i64, i64, String)> = sqlx::query_as(
+            "EXPLAIN QUERY PLAN SELECT dispute_id FROM disputes
+             WHERE mostro_pubkey = 'aa' AND status = 'initiated'",
+        )
+        .fetch_all(&storage.pool)
+        .await
+        .unwrap();
+        let detail = plan.iter().map(|r| r.3.as_str()).collect::<Vec<_>>().join(" | ");
+        assert!(detail.contains("disputes_by_node_status"), "{detail}");
     }
 
     /// A dispute row with a status this version does not know (written by a
