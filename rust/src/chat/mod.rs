@@ -41,9 +41,11 @@ pub const MAX_MESSAGE_BYTES: usize = 16 * 1024;
 /// copies cost an id lookup.
 pub const CURSOR_OVERLAP_SECS: i64 = 60;
 
-/// The most stored events one subscription replays: the bounded backlog the
-/// spec asks for. The cursor keeps it to what is new.
-pub const BACKLOG_LIMIT: usize = 500;
+/// The most `pub(K_sign)` authors one REQ carries; past it the channels are
+/// split into a few REQs. No relay we use documents a cap on a filter's
+/// authors, but some refuse very large filters: 100 authors are 50 disputes
+/// held at once, far past what one solver works on.
+pub const MAX_AUTHORS_PER_REQ: usize = 100;
 
 /// Sustained chat events per conversation and minute, and the burst: the
 /// spec's token bucket (Mostrix `chat_security`).

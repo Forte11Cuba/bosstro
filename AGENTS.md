@@ -97,11 +97,13 @@ tool/                # design_check.dart, launcher_icon/build_sources.py
   over a dispute this key holds, the node republishes it `in-progress` and the 38386 does not
   say who holds it, so it stays in Your disputes. Settle and cancel (phase 6) learn it from
   `IsNotYourDispute` / `DisputeTakenByAdmin`.
-- **The dispute chat is stored in clear:** messages sit in the same unencrypted database
-  (SQLCipher is post-MVP); the keys that open them are never stored.
-- **Many disputes, many subscriptions:** the chat opens one relay subscription per party of
-  each dispute this key holds (two per dispute). A relay with a low subscription cap may CLOSE
-  some; `live_subs` retries them on a budget.
+- **Chat messages are stored in plain text** in the unencrypted database (A4): on Android
+  the app sandbox is their only protection until SQLCipher (post-MVP); on Linux and the web
+  they have not even that (a file in the user's home, browser storage). The keys that open the
+  conversations are never stored.
+- **Retry sends a new message:** a message marked "Not sent" may still have reached a relay
+  (a slow `OK`, the app stopped mid-send). Retrying it sends it again as a new event, so the
+  party then sees it twice.
 - The key-handling limits are listed under "Key handling" (2 and 8).
 
 ### Generated code
@@ -187,8 +189,12 @@ python3 tool/launcher_icon/build_sources.py && dart run flutter_launcher_icons  
   (`mostro_core::chat`). The keys are derived in memory from the loaded key and never stored
   (Mostrix persists the ECDH secret; Bosstro's database is not encrypted). Inner signers: the
   party's trade key and this key, nothing else; an unknown signer is dropped, never guessed.
-  One live subscription per channel (`authors = [pub(K_sign)]`); its `since` is the newest
-  `min(created_at, received_at)` of the stored messages, never past the local clock. The inner
+  One long-lived REQ for every channel of the node and key (`authors` = every channel's
+  `pub(K_sign)`; each event goes to its conversation by its outer author), rebuilt
+  make-before-break only when the set of authors changes, and split past 100 authors (relays
+  cap concurrent REQs per connection). Its `since` is the earliest channel start: each channel's
+  newest `min(created_at, received_at)` of its stored messages, never past the local clock; no
+  `limit`, so one long conversation cannot crowd out another. The inner
   event id is the message's identity (copies, own echoes and replays are one row). A message is
   sent only when a relay took it; a failed one is retried by hand, as a new message. A
   message's content is never logged.

@@ -5,26 +5,38 @@
 //! node (`in-progress`, taken by it, not expired) whose trade key the take
 //! named. They are worked out again whenever the node, the key or a dispute
 //! changes (a take, a recovery, a close, a reopen: every one comes through
-//! the 38386 feed's updates), and each is one long-lived subscription,
-//! `authors = [pub(K_sign)]`, through `nostr::live_subs`, so a reconnect
-//! re-issues it. A closed dispute's channels close; its messages stay, read
-//! only.
+//! the 38386 feed's updates). A closed dispute's channels close; its messages
+//! stay, read only.
 //!
-//! **Since.** Each subscription starts at its cursor, the newest
-//! `min(created_at, received_at)` of the channel's stored messages, minus an
-//! overlap; the first time, a little before the dispute was opened (or
-//! taken). The cursor never passes the local clock: a message dated in the
-//! future cannot silence the conversation. At most [`BACKLOG_LIMIT`] stored
-//! events are replayed.
+//! **One subscription for them all.** Relays cap concurrent REQs per
+//! connection (strfry: 20; nos.lol refused ../app's one-per-order REQs), so
+//! the channels share one long-lived kind 14 REQ, `authors` = every channel's
+//! `pub(K_sign)` (Mostrix `live_chat_filters`), through `nostr::live_subs`.
+//! Each event goes to its conversation by its outer author. The REQ is
+//! rebuilt only when the set of authors changes, make-before-break (Mostrix
+//! `resubscribe`): the new one, under a new id, is issued before the old one
+//! closes, so nothing published meanwhile falls between them. Past
+//! [`MAX_AUTHORS_PER_REQ`] authors the set is split into a few REQs.
+//!
+//! **Since.** The REQ starts at the earliest of its channels' starts: each
+//! channel's cursor (the newest `min(created_at, received_at)` of its stored
+//! messages) minus an overlap, or, the first time, a little before the
+//! dispute was opened (or taken). It never passes the local clock, so a
+//! message dated in the future cannot silence a conversation. The copies the
+//! earliest start brings to the other channels are dropped by id. **No
+//! `limit`:** shared by every channel, a limit would let one long
+//! conversation push another's messages out of the replay; `since` is what
+//! bounds it. A relay's own cap on a filter's results still applies.
 //!
 //! **Checks, cheapest first** (the spec's order): the outer author, then the
 //! outer id already handled ([`SeenOuter`]), then the conversation's rate
 //! budget, then `mostro_core::chat::unwrap_chat_message` (the `p` tag, the
 //! future bound, the size, both signatures, the allowed inner signers, the
 //! inner kind, the inner/outer time skew), then the durable inner id (the
-//! row's key). The budget counts only what a relay sends live, after its
-//! stored events: a first sync of a long conversation is bounded by
-//! [`BACKLOG_LIMIT`] instead, and nothing of it is dropped.
+//! row's key). The budget is per conversation (per outer author) and counts
+//! only what a relay sends live, after its stored events: a first sync of a
+//! long conversation is bounded by `since` instead, and nothing of it is
+//! dropped.
 //!
 //! **Back-pressure.** As the 38386 feed: the reader only passes this
 //! router's events and EOSEs, in order, through an unbounded channel, so it
@@ -47,7 +59,7 @@ use tokio::sync::{broadcast, mpsc};
 
 use super::{
     allowed_signers, channel_keys, sender_of, subscription_since, ChannelRef, ChatRecord,
-    RateLimits, SeenOuter, BACKLOG_LIMIT, MAX_MESSAGE_BYTES,
+    RateLimits, SeenOuter, MAX_AUTHORS_PER_REQ, MAX_MESSAGE_BYTES,
 };
 use crate::api::chat::{
     ChatChannelState, ChatDelivery, ChatError, ChatMessageView, ChatParty, ChatSender, ChatThread,
@@ -169,29 +181,48 @@ impl ChatStore {
 /// One followed conversation, with its keys (in memory only).
 pub(crate) struct Channel {
     pub(crate) channel: ChannelRef,
-    pub(crate) sub: SubscriptionId,
     party_key: PublicKey,
     conv: Keys,
     sign: Keys,
+    /// Where its first subscription reaches back to, when nothing is stored.
+    opened_at: Option<i64>,
+    taken_at: i64,
 }
 
-/// The subscription id of a channel: `chat-<16 hex of pub(K_sign)>-<8 of the
-/// dispute id>`, within NIP-01's 64 characters. `pub(K_sign)` is already in
-/// the filter, so the id tells a relay nothing new.
-pub(crate) fn subscription_id(sign: &PublicKey, dispute_id: &str) -> SubscriptionId {
-    let sign: String = sign.to_hex().chars().take(16).collect();
-    let dispute: String = dispute_id.chars().take(8).collect();
-    SubscriptionId::new(format!("chat-{sign}-{dispute}"))
+/// The id of one of the shared REQs of `node` and `solver` (hex):
+/// `chat-<16 node>-<16 solver>-<generation>-<chunk>`, within NIP-01's 64
+/// characters. A rebuild takes the next generation, so the new REQ can be
+/// issued before the old one closes.
+pub(crate) fn subscription_id(
+    node: &str,
+    solver: &str,
+    generation: u64,
+    chunk: usize,
+) -> SubscriptionId {
+    let short = |s: &str| s.chars().take(16).collect::<String>();
+    SubscriptionId::new(format!(
+        "chat-{}-{}-{generation}-{chunk}",
+        short(node),
+        short(solver)
+    ))
 }
 
-/// Every chat event of a channel, from `since` on, at most [`BACKLOG_LIMIT`]
-/// stored ones.
-pub(crate) fn channel_filter(sign: &PublicKey, since: i64) -> Filter {
+/// Every chat event of `authors` (the channels' `pub(K_sign)`) from `since`
+/// on. No `limit`: see the module's "Since".
+pub(crate) fn channels_filter(authors: &[PublicKey], since: i64) -> Filter {
     Filter::new()
         .kind(Kind::PrivateDirectMessage)
-        .author(*sign)
+        .authors(authors.iter().copied())
         .since(Timestamp::from_secs(since.max(0) as u64))
-        .limit(BACKLOG_LIMIT)
+}
+
+/// The shared REQs in place now: for whom, which authors, under which ids.
+#[derive(Default)]
+struct Shared {
+    /// (node, solver) hex.
+    owner: Option<(String, String)>,
+    authors: std::collections::BTreeSet<PublicKey>,
+    ids: Vec<SubscriptionId>,
 }
 
 /// The party's trade key the take named, if it parses.
@@ -245,10 +276,16 @@ pub(crate) struct Router {
     updates: broadcast::Sender<ChatUpdate>,
     target: Mutex<Option<Target>>,
     channels: Mutex<HashMap<ChannelRef, Arc<Channel>>>,
-    /// The ids of [`Self::channels`]' subscriptions, for the reader.
+    /// The shared REQs ([`Self::rebuild`]).
+    shared: Mutex<Shared>,
+    /// Bumped by every rebuild: the next REQs' id.
+    generation: std::sync::atomic::AtomicU64,
+    /// Every REQ id whose events are taken: the shared ones, and during a
+    /// rebuild the previous ones too, for the reader.
     sub_ids: Mutex<HashSet<SubscriptionId>>,
     seen: Mutex<SeenOuter>,
-    limits: Mutex<RateLimits<SubscriptionId>>,
+    /// Per conversation, keyed by its outer author (`pub(K_sign)`).
+    limits: Mutex<RateLimits<PublicKey>>,
     /// (relay, subscription) pairs past their EOSE: what those relays send
     /// now is live and counts against the rate budget.
     live: Mutex<HashSet<(String, SubscriptionId)>>,
@@ -278,6 +315,8 @@ impl Router {
             updates,
             target: Mutex::new(None),
             channels: Mutex::new(HashMap::new()),
+            shared: Mutex::new(Shared::default()),
+            generation: std::sync::atomic::AtomicU64::new(0),
             sub_ids: Mutex::new(HashSet::new()),
             seen: Mutex::new(SeenOuter::default()),
             limits: Mutex::new(RateLimits::default()),
@@ -357,11 +396,20 @@ impl Router {
         lock(&self.sub_ids).contains(sub)
     }
 
-    fn channel_of_sub(&self, sub: &SubscriptionId) -> Option<Arc<Channel>> {
+    /// The channels whose `pub(K_sign)` is `author`: one, unless two
+    /// disputes share a party trade key.
+    fn channels_of(&self, author: &PublicKey) -> Vec<Arc<Channel>> {
         lock(&self.channels)
             .values()
-            .find(|c| &c.sub == sub)
+            .filter(|c| c.sign.public_key() == *author)
             .cloned()
+            .collect()
+    }
+
+    /// The shared REQ ids in place now (tests).
+    #[cfg(all(test, not(target_arch = "wasm32")))]
+    pub(crate) fn shared_ids(&self) -> Vec<SubscriptionId> {
+        lock(&self.shared).ids.clone()
     }
 
     /// The channels followed now (tests).
@@ -422,79 +470,133 @@ impl Router {
             }
         }
 
-        // Close what is no longer wanted (or wanted with another party key).
-        let closing: Vec<Arc<Channel>> = {
+        // Forget what is no longer wanted (or wanted with another party key).
+        {
             let mut channels = lock(&self.channels);
             let gone: Vec<ChannelRef> = channels
                 .iter()
                 .filter(|(r, c)| wanted.get(*r).is_none_or(|w| w.party_key != c.party_key))
                 .map(|(r, _)| r.clone())
                 .collect();
-            gone.iter().filter_map(|r| channels.remove(r)).collect()
-        };
-        for channel in closing {
-            lock(&self.sub_ids).remove(&channel.sub);
-            lock(&self.limits).remove(&channel.sub);
-            lock(&self.live).retain(|(_, sub)| sub != &channel.sub);
-            self.subs.close(&self.client, &channel.sub).await;
+            for r in gone {
+                if let Some(c) = channels.remove(&r) {
+                    lock(&self.limits).remove(&c.sign.public_key());
+                }
+            }
         }
 
-        // Open the new ones.
-        let Some(target) = target else {
-            return;
-        };
-        let opening: Vec<(ChannelRef, Wanted)> = {
-            let channels = lock(&self.channels);
-            wanted
-                .into_iter()
-                .filter(|(r, _)| !channels.contains_key(r))
-                .collect()
-        };
-        for (channel, wanted) in opening {
-            let Wanted {
-                party_key,
-                opened_at,
-                taken_at,
-            } = wanted;
-            let (conv, sign) = match channel_keys(&target.keys, &party_key) {
-                Ok(keys) => keys,
-                Err(e) => {
-                    log::warn!("[chat] channel not opened: {e}");
-                    continue;
-                }
+        // Derive the new ones' keys.
+        if let Some(target) = &target {
+            let opening: Vec<(ChannelRef, Wanted)> = {
+                let channels = lock(&self.channels);
+                wanted
+                    .into_iter()
+                    .filter(|(r, _)| !channels.contains_key(r))
+                    .collect()
             };
-            let cursor = match self.store.cursor(&channel).await {
-                Ok(cursor) => cursor,
-                Err(e) => {
-                    log::warn!("[chat] cursor not read: {e}");
-                    None
-                }
-            };
-            let since = subscription_since(cursor, opened_at, taken_at, crate::rt::unix_now());
-            let sub = subscription_id(&sign.public_key(), &channel.dispute_id);
-            let filter = channel_filter(&sign.public_key(), since);
-            let followed = Arc::new(Channel {
-                channel: channel.clone(),
-                sub: sub.clone(),
-                party_key,
-                conv,
-                sign,
-            });
-            // Known before the REQ, so its first events are not passed over.
-            lock(&self.channels).insert(channel, followed);
-            lock(&self.sub_ids).insert(sub.clone());
-            if let Err(e) = self.subs.replace(&self.client, sub.clone(), filter).await {
-                log::warn!("[chat] subscribe {sub} failed: {e}");
+            for (channel, wanted) in opening {
+                let (conv, sign) = match channel_keys(&target.keys, &wanted.party_key) {
+                    Ok(keys) => keys,
+                    Err(e) => {
+                        log::warn!("[chat] channel not opened: {e}");
+                        continue;
+                    }
+                };
+                let followed = Arc::new(Channel {
+                    channel: channel.clone(),
+                    party_key: wanted.party_key,
+                    conv,
+                    sign,
+                    opened_at: wanted.opened_at,
+                    taken_at: wanted.taken_at,
+                });
+                lock(&self.channels).insert(channel, followed);
             }
+        }
+
+        self.rebuild(target.as_ref()).await;
+    }
+
+    /// Point the shared REQs at the channels followed now, when their set of
+    /// authors (or the node and key they are for) changed; otherwise leave
+    /// them. Make-before-break: the new REQs are issued under the next
+    /// generation's ids before the previous ones close. Run under
+    /// `sync_lock`.
+    async fn rebuild(&self, target: Option<&Target>) {
+        let owner = target.map(|t| (t.node.clone(), t.keys.public_key().to_hex()));
+        let channels: Vec<Arc<Channel>> = lock(&self.channels).values().cloned().collect();
+        let authors: std::collections::BTreeSet<PublicKey> =
+            channels.iter().map(|c| c.sign.public_key()).collect();
+        let previous = {
+            let shared = lock(&self.shared);
+            if shared.owner == owner && shared.authors == authors {
+                return;
+            }
+            shared.ids.clone()
+        };
+
+        let mut ids = Vec::new();
+        if let (Some((node, solver)), false) = (&owner, authors.is_empty()) {
+            let now = crate::rt::unix_now();
+            let mut since = now;
+            for channel in &channels {
+                let cursor = match self.store.cursor(&channel.channel).await {
+                    Ok(cursor) => cursor,
+                    Err(e) => {
+                        log::warn!("[chat] cursor not read: {e}");
+                        None
+                    }
+                };
+                since = since.min(subscription_since(
+                    cursor,
+                    channel.opened_at,
+                    channel.taken_at,
+                    now,
+                ));
+            }
+            let generation = self
+                .generation
+                .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+                + 1;
+            let authors: Vec<PublicKey> = authors.iter().copied().collect();
+            for (chunk, part) in authors.chunks(MAX_AUTHORS_PER_REQ).enumerate() {
+                let id = subscription_id(node, solver, generation, chunk);
+                // Taken from its first event on.
+                lock(&self.sub_ids).insert(id.clone());
+                if let Err(e) = self
+                    .subs
+                    .replace(&self.client, id.clone(), channels_filter(part, since))
+                    .await
+                {
+                    log::warn!("[chat] subscribe {id} failed: {e}");
+                }
+                ids.push(id);
+            }
+            log::info!(
+                "[chat] following {} conversation(s) in {} REQ(s)",
+                authors.len(),
+                ids.len()
+            );
+        }
+        {
+            let mut shared = lock(&self.shared);
+            shared.owner = owner;
+            shared.authors = authors;
+            shared.ids = ids;
+        }
+        // Break: the previous REQs go once the new ones are in place.
+        for id in previous {
+            self.subs.close(&self.client, &id).await;
+            lock(&self.sub_ids).remove(&id);
+            lock(&self.live).retain(|(_, sub)| sub != &id);
         }
     }
 
-    /// One kind 14 of a channel's subscription, checked cheapest first.
+    /// One kind 14 of the shared REQs, checked cheapest first and taken to
+    /// the conversation its outer author names.
     pub(crate) async fn handle(&self, relay: &str, sub: &SubscriptionId, event: &Event) {
-        let Some(channel) = self.channel_of_sub(sub) else {
-            return;
-        };
-        if event.pubkey != channel.sign.public_key() {
+        let channels = self.channels_of(&event.pubkey);
+        if channels.is_empty() {
             return;
         }
         if lock(&self.seen).contains(&event.id) {
@@ -503,15 +605,27 @@ impl Router {
         let is_live = lock(&self.live).contains(&(relay.to_string(), sub.clone()));
         if is_live {
             let now = self.started.elapsed().as_secs_f64();
-            if !lock(&self.limits).allow(sub, now) {
+            if !lock(&self.limits).allow(&event.pubkey, now) {
                 // Not marked: a copy from another relay may still pass.
-                log::debug!("[chat] {sub}: over the rate budget, event dropped");
+                log::debug!("[chat] a conversation is over its rate budget, event dropped");
                 return;
             }
         }
-        let solver = PublicKey::parse(&channel.channel.solver_pubkey).ok();
-        let Some(solver) = solver else {
-            return;
+        let mut handled = true;
+        for channel in channels {
+            handled &= self.ingest(&channel, event).await;
+        }
+        if handled {
+            lock(&self.seen).insert(event.id);
+        }
+    }
+
+    /// Open `event` on `channel` and store it. Returns whether it is done
+    /// with (stored, a copy, or refused for good); `false` when storage
+    /// failed and the next copy should try again.
+    async fn ingest(&self, channel: &Channel, event: &Event) -> bool {
+        let Ok(solver) = PublicKey::parse(&channel.channel.solver_pubkey) else {
+            return true;
         };
         let allowed = allowed_signers(&solver, &channel.party_key);
         let message = match unwrap_chat_message(
@@ -525,8 +639,7 @@ impl Router {
             Err(e) => {
                 // The reason, never the content.
                 log::debug!("[chat] event {} dropped: {e}", event.id.to_hex());
-                lock(&self.seen).insert(event.id);
-                return;
+                return true;
             }
         };
         let Some(sender) = sender_of(
@@ -535,8 +648,7 @@ impl Router {
             channel.channel.party,
             &channel.party_key,
         ) else {
-            lock(&self.seen).insert(event.id);
-            return;
+            return true;
         };
         let record = ChatRecord {
             channel: channel.channel.clone(),
@@ -566,7 +678,7 @@ impl Router {
                                 .await
                             {
                                 log::warn!("[chat] delivery not stored: {e}");
-                                return;
+                                return false;
                             }
                             true
                         }
@@ -575,16 +687,15 @@ impl Router {
                 }
                 Ok(false) => false,
                 Err(e) => {
-                    // Not marked: the next copy tries again.
                     log::warn!("[chat] message not stored: {e}");
-                    return;
+                    return false;
                 }
             }
         };
-        lock(&self.seen).insert(event.id);
         if changed {
             self.announce(&record.channel);
         }
+        true
     }
 
     fn announce(&self, channel: &ChannelRef) {
@@ -1230,11 +1341,7 @@ mod tests {
         let event = b.buyer.say(&solver, "once").await;
         b.wait_for(DISPUTE_A, ChatParty::Buyer, 1).await;
         b.router
-            .handle(
-                "wss://another.relay",
-                &b.router.channel_refs_sub(DISPUTE_A, ChatParty::Buyer),
-                &event,
-            )
+            .handle("wss://another.relay", &b.router.the_sub(), &event)
             .await;
         // Re-wrap the same inner event in a fresh envelope.
         let (conv, sign) = channel_keys(&b.buyer.keys, &solver).unwrap();
@@ -1554,13 +1661,11 @@ mod tests {
     }
 
     impl Router {
-        /// The subscription id of one followed channel (tests).
-        fn channel_refs_sub(&self, dispute: &str, party: ChatParty) -> SubscriptionId {
-            lock(&self.channels)
-                .iter()
-                .find(|(r, _)| r.dispute_id == dispute && r.party == party)
-                .map(|(_, c)| c.sub.clone())
-                .unwrap()
+        /// The shared REQ's id (tests: one REQ is in place).
+        fn the_sub(&self) -> SubscriptionId {
+            let ids = self.shared_ids();
+            assert_eq!(ids.len(), 1, "{ids:?}");
+            ids[0].clone()
         }
     }
 
@@ -1569,7 +1674,7 @@ mod tests {
     #[tokio::test]
     async fn the_rate_budget_counts_live_events_only() {
         let b = bench().await;
-        let sub = b.router.channel_refs_sub(DISPUTE_A, ChatParty::Buyer);
+        let sub = b.router.the_sub();
         let solver = b.solver.public_key();
         let (conv, sign) = channel_keys(&b.buyer.keys, &solver).unwrap();
         let mut events = Vec::new();
@@ -1601,5 +1706,170 @@ mod tests {
         }
         let taken = b.messages(DISPUTE_A, ChatParty::Buyer).await.len() - 70;
         assert_eq!(taken, crate::chat::RATE_BURST as usize);
+    }
+
+    /// The chat REQs the router's client holds on the relay.
+    async fn chat_reqs(b: &Bench) -> Vec<SubscriptionId> {
+        let url = b.relay.url().await;
+        let relay = b.router.client.relay(&url).await.unwrap().unwrap();
+        let mut ids: Vec<SubscriptionId> = relay
+            .subscriptions()
+            .await
+            .into_keys()
+            .filter(|id| id.to_string().starts_with("chat-"))
+            .collect();
+        ids.sort_by_key(|id| id.to_string());
+        ids
+    }
+
+    fn dispute_id(n: usize) -> String {
+        format!("00000000-0000-4000-8000-{n:012}")
+    }
+
+    /// Takes `count` more disputes, each with its own parties; returns them.
+    async fn take_more(b: &Bench, count: usize) -> Vec<(String, Keys, Keys)> {
+        let mut taken_now = Vec::new();
+        for n in 0..count {
+            let (buyer, seller) = (Keys::generate(), Keys::generate());
+            let id = dispute_id(n);
+            b.feed
+                .record_take(
+                    &b.node.public_key().to_hex(),
+                    &id,
+                    taken(&b.solver, Some(&buyer), Some(&seller)),
+                )
+                .await
+                .unwrap();
+            taken_now.push((id, buyer, seller));
+        }
+        b.router
+            .sync(Some(b.node.public_key().to_hex()), Some(b.solver.clone()))
+            .await;
+        taken_now
+    }
+
+    /// A party of another dispute, writing through the buyer's connection.
+    async fn say_as(b: &Bench, party: &Keys, text: &str) {
+        let (conv, sign) = channel_keys(party, &b.solver.public_key()).unwrap();
+        let event = wrap_chat_message(party, &conv, &sign, text).await.unwrap();
+        b.buyer.publish(&event).await;
+    }
+
+    /// Twelve disputes held: one REQ on the relay, not twenty-four, and each
+    /// message reaches its own conversation.
+    #[tokio::test]
+    async fn twelve_disputes_share_one_req_and_every_message_finds_its_conversation() {
+        let b = bench().await;
+        let others = take_more(&b, 11).await;
+        assert_eq!(b.router.channel_refs().len(), 24);
+        assert_eq!(chat_reqs(&b).await.len(), 1, "one REQ for every channel");
+
+        b.buyer.say(&b.solver.public_key(), "A buyer").await;
+        b.seller.say(&b.solver.public_key(), "A seller").await;
+        for (id, buyer, seller) in &others {
+            say_as(&b, buyer, &format!("{id} buyer")).await;
+            say_as(&b, seller, &format!("{id} seller")).await;
+        }
+        for (id, _, _) in &others {
+            b.wait_for(id, ChatParty::Buyer, 1).await;
+            b.wait_for(id, ChatParty::Seller, 1).await;
+        }
+        b.wait_for(DISPUTE_A, ChatParty::Buyer, 1).await;
+        b.wait_for(DISPUTE_A, ChatParty::Seller, 1).await;
+        tokio::time::sleep(Duration::from_millis(300)).await;
+        for (id, _, _) in &others {
+            for (party, word) in [(ChatParty::Buyer, "buyer"), (ChatParty::Seller, "seller")] {
+                let got = b.messages(id, party).await;
+                assert_eq!(got.len(), 1, "{id} {word}");
+                assert_eq!(got[0].content, format!("{id} {word}"));
+                assert_eq!(got[0].sender, party.sender());
+            }
+        }
+        assert_eq!(
+            b.messages(DISPUTE_A, ChatParty::Buyer).await[0].content,
+            "A buyer"
+        );
+        assert_eq!(
+            b.messages(DISPUTE_A, ChatParty::Seller).await[0].content,
+            "A seller"
+        );
+    }
+
+    /// A take and a close each rebuild the REQ (one REQ still, under a new
+    /// id) and lose nothing, not even a message published while it is
+    /// rebuilt; a sync that changes no channel leaves the REQ as it is.
+    #[tokio::test]
+    async fn a_take_or_a_close_rebuilds_the_req_without_losing_messages() {
+        let b = bench().await;
+        let node = b.node.public_key().to_hex();
+        let first = chat_reqs(&b).await;
+        assert_eq!(first.len(), 1);
+
+        // Nothing changed: the same REQ.
+        b.router
+            .sync(Some(node.clone()), Some(b.solver.clone()))
+            .await;
+        assert_eq!(chat_reqs(&b).await, first);
+
+        // A message on A goes out as dispute B is taken.
+        b.buyer.say(&b.solver.public_key(), "during the take").await;
+        let others = take_more(&b, 1).await;
+        let after_take = chat_reqs(&b).await;
+        assert_eq!(after_take.len(), 1);
+        assert_ne!(after_take, first, "a new REQ for the new authors");
+        let (b_id, b_buyer, _) = &others[0];
+        say_as(&b, b_buyer, "B buyer").await;
+        b.wait_for(DISPUTE_A, ChatParty::Buyer, 1).await;
+        b.wait_for(b_id, ChatParty::Buyer, 1).await;
+
+        // B closes; A's next message still arrives, on the rebuilt REQ.
+        b.feed.retarget(Some(node.clone())).await;
+        b.feed
+            .ingest(&mostrod_event(
+                &b.node,
+                b_id,
+                "settled",
+                crate::rt::unix_now() as u64,
+            ))
+            .await
+            .unwrap();
+        b.seller
+            .say(&b.solver.public_key(), "during the close")
+            .await;
+        b.router
+            .sync(Some(node.clone()), Some(b.solver.clone()))
+            .await;
+        let after_close = chat_reqs(&b).await;
+        assert_eq!(after_close.len(), 1);
+        assert_ne!(after_close, after_take);
+        b.buyer.say(&b.solver.public_key(), "after the close").await;
+        b.wait_for(DISPUTE_A, ChatParty::Buyer, 2).await;
+        b.wait_for(DISPUTE_A, ChatParty::Seller, 1).await;
+        assert_eq!(b.router.channel_refs().len(), 2);
+        assert_eq!(
+            b.messages(b_id, ChatParty::Buyer).await.len(),
+            1,
+            "kept, read only"
+        );
+
+        // No channel left: no REQ.
+        b.router.sync(Some(node), None).await;
+        assert!(chat_reqs(&b).await.is_empty());
+    }
+
+    /// Past the author cap, a few REQs, never one per channel.
+    #[tokio::test]
+    async fn past_the_author_cap_the_channels_split_into_a_few_reqs() {
+        let b = bench().await;
+        let more = crate::chat::MAX_AUTHORS_PER_REQ / 2;
+        take_more(&b, more).await;
+        let channels = 2 * (more + 1);
+        assert_eq!(b.router.channel_refs().len(), channels);
+        let reqs = chat_reqs(&b).await;
+        assert_eq!(
+            reqs.len(),
+            channels.div_ceil(crate::chat::MAX_AUTHORS_PER_REQ)
+        );
+        assert_eq!(reqs.len(), 2);
     }
 }
