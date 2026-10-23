@@ -2,6 +2,9 @@
 //! (`rust_input` in `flutter_rust_bridge.yaml`). Any change here, even to a
 //! private item, needs `./scripts/frb-generate.sh`.
 
+pub mod node_info;
+pub mod nodes;
+pub mod relays;
 pub mod solver;
 
 /// The crate version, which is also the app version (`pubspec.yaml` without
@@ -10,6 +13,17 @@ pub mod solver;
 #[flutter_rust_bridge::frb(sync)]
 pub fn app_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
+}
+
+/// Open the persistent store (A4). Call once at startup, before anything
+/// that reads or writes it: on native platforms `path` is the SQLite file
+/// (in the app data directory), on the web the IndexedDB database name.
+/// Later calls are no-ops.
+///
+/// Without it the app still runs, from memory: nothing node-related is kept
+/// across a restart.
+pub async fn init_db(path: String) -> anyhow::Result<()> {
+    crate::db::app_db::init_db(&path).await
 }
 
 /// Runs once when Dart calls `RustLib.init()`. An `frb(init)` function
