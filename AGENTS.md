@@ -87,6 +87,15 @@ tool/                # design_check.dart, launcher_icon/build_sources.py
   `web_lock` (Web Locks API) is the fix if it ever matters. The dispute feed does the
   same with one dispute row (read, merge, save under `Feed::ingest_lock`); two tabs merge
   the same relay events, so at worst a revision is written twice.
+- **Proof of work on the web:** mostro-core mines a request's PoW on the calling thread
+  (`SingleThreadPow`). Natively the take mines on the blocking pool (`mostro::take`,
+  `wrap_mined`); the web has no other thread, so the page stops while a take is mined.
+  mostrod's default `pow` is 0, so today it is not felt; a node asking for a high
+  `pow_first_contact` would freeze a web tab for a while.
+- **A take-over of your dispute goes unseen until phase 6:** when a Read-Write solver takes
+  over a dispute this key holds, the node republishes it `in-progress` and the 38386 does not
+  say who holds it, so it stays in Your disputes. Settle and cancel (phase 6) learn it from
+  `IsNotYourDispute` / `DisputeTakenByAdmin`.
 - The key-handling limits are listed under "Key handling" (2 and 8).
 
 ### Generated code
