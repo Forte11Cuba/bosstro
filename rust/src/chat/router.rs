@@ -50,8 +50,8 @@ use super::{
     RateLimits, SeenOuter, BACKLOG_LIMIT, MAX_MESSAGE_BYTES,
 };
 use crate::api::chat::{
-    ChatChannelState, ChatDelivery, ChatError, ChatMessageView, ChatParty, ChatSender,
-    ChatThread, ChatUpdate,
+    ChatChannelState, ChatDelivery, ChatError, ChatMessageView, ChatParty, ChatSender, ChatThread,
+    ChatUpdate,
 };
 use crate::api::disputes::DisputeStatus;
 use crate::db::Storage;
@@ -154,7 +154,12 @@ impl ChatStore {
     async fn cursor(&self, channel: &ChannelRef) -> anyhow::Result<Option<i64>> {
         match self {
             ChatStore::Db(db) => db.chat_cursor(channel).await,
-            ChatStore::Memory(_) => Ok(self.list(channel).await?.iter().map(ChatRecord::cursor).max()),
+            ChatStore::Memory(_) => Ok(self
+                .list(channel)
+                .await?
+                .iter()
+                .map(ChatRecord::cursor)
+                .max()),
         }
     }
 }
@@ -553,7 +558,11 @@ impl Router {
                         Ok(Some(row)) if row.delivery != ChatDelivery::Sent => {
                             if let Err(e) = self
                                 .store
-                                .set_delivery(&record.channel, &record.message_id, ChatDelivery::Sent)
+                                .set_delivery(
+                                    &record.channel,
+                                    &record.message_id,
+                                    ChatDelivery::Sent,
+                                )
                                 .await
                             {
                                 log::warn!("[chat] delivery not stored: {e}");
@@ -765,12 +774,14 @@ impl Router {
     }
 
     /// The conversation as the chat shows it: oldest first, ties by id.
-    pub(crate) async fn messages(&self, channel: &ChannelRef) -> anyhow::Result<Vec<ChatMessageView>> {
+    pub(crate) async fn messages(
+        &self,
+        channel: &ChannelRef,
+    ) -> anyhow::Result<Vec<ChatMessageView>> {
         let in_flight = lock(&self.in_flight).clone();
-        Ok(sorted_views(
-            &self.store.list(channel).await?,
-            |id| in_flight.contains(id),
-        ))
+        Ok(sorted_views(&self.store.list(channel).await?, |id| {
+            in_flight.contains(id)
+        }))
     }
 }
 
@@ -780,7 +791,11 @@ fn sorted_views(records: &[ChatRecord], in_flight: impl Fn(&str) -> bool) -> Vec
         .iter()
         .map(|r| r.view(in_flight(&r.message_id)))
         .collect();
-    views.sort_by(|a, b| a.created_at.cmp(&b.created_at).then_with(|| a.id.cmp(&b.id)));
+    views.sort_by(|a, b| {
+        a.created_at
+            .cmp(&b.created_at)
+            .then_with(|| a.id.cmp(&b.id))
+    });
     views
 }
 
@@ -882,7 +897,10 @@ pub(crate) async fn retry(
 /// The conversation with `party` of `dispute_id`, a dispute this key took on
 /// the active node; `None` otherwise. Read from storage, so it works before
 /// the relays are up and after the dispute closed.
-pub(crate) async fn thread(dispute_id: &str, party: ChatParty) -> anyhow::Result<Option<ChatThread>> {
+pub(crate) async fn thread(
+    dispute_id: &str,
+    party: ChatParty,
+) -> anyhow::Result<Option<ChatThread>> {
     let Ok((node, keys)) = node_and_keys().await else {
         return Ok(None);
     };
@@ -1132,7 +1150,11 @@ mod tests {
 
         let sent = b
             .router
-            .send(DISPUTE_A, ChatParty::Buyer, "  Send me the receipt, please.\n")
+            .send(
+                DISPUTE_A,
+                ChatParty::Buyer,
+                "  Send me the receipt, please.\n",
+            )
             .await
             .unwrap();
         assert_eq!(sent.sender, ChatSender::You);
@@ -1208,15 +1230,23 @@ mod tests {
         let event = b.buyer.say(&solver, "once").await;
         b.wait_for(DISPUTE_A, ChatParty::Buyer, 1).await;
         b.router
-            .handle("wss://another.relay", &b.router.channel_refs_sub(DISPUTE_A, ChatParty::Buyer), &event)
+            .handle(
+                "wss://another.relay",
+                &b.router.channel_refs_sub(DISPUTE_A, ChatParty::Buyer),
+                &event,
+            )
             .await;
         // Re-wrap the same inner event in a fresh envelope.
         let (conv, sign) = channel_keys(&b.buyer.keys, &solver).unwrap();
-        let inner_json = nip44::decrypt(conv.secret_key(), &conv.public_key(), &event.content)
-            .unwrap();
-        let content =
-            nip44::encrypt(conv.secret_key(), &conv.public_key(), inner_json, nip44::Version::V2)
-                .unwrap();
+        let inner_json =
+            nip44::decrypt(conv.secret_key(), &conv.public_key(), &event.content).unwrap();
+        let content = nip44::encrypt(
+            conv.secret_key(),
+            &conv.public_key(),
+            inner_json,
+            nip44::Version::V2,
+        )
+        .unwrap();
         let replay = EventBuilder::new(Kind::PrivateDirectMessage, content)
             .tag(nostr_sdk::prelude::Tag::public_key(conv.public_key()))
             .custom_created_at(event.created_at)
@@ -1241,9 +1271,13 @@ mod tests {
             .custom_created_at(ahead)
             .finalize(&b.seller.keys)
             .unwrap();
-        let content =
-            nip44::encrypt(conv.secret_key(), &conv.public_key(), inner.as_json(), nip44::Version::V2)
-                .unwrap();
+        let content = nip44::encrypt(
+            conv.secret_key(),
+            &conv.public_key(),
+            inner.as_json(),
+            nip44::Version::V2,
+        )
+        .unwrap();
         let outer = EventBuilder::new(Kind::PrivateDirectMessage, content)
             .tag(nostr_sdk::prelude::Tag::public_key(conv.public_key()))
             .custom_created_at(ahead)
@@ -1310,7 +1344,9 @@ mod tests {
             .ingest(&mostrod_event(&b.node, DISPUTE_A, "settled", now))
             .await
             .unwrap();
-        b.router.sync(Some(node.clone()), Some(b.solver.clone())).await;
+        b.router
+            .sync(Some(node.clone()), Some(b.solver.clone()))
+            .await;
         assert!(b.router.channel_refs().is_empty());
         assert_eq!(
             b.router
@@ -1321,7 +1357,10 @@ mod tests {
         );
         assert_eq!(b.messages(DISPUTE_A, ChatParty::Buyer).await.len(), 1);
         let row = b.feed.row(&node, DISPUTE_A).await.unwrap().unwrap();
-        assert_eq!(thread_state(&row, ChatParty::Buyer), ChatChannelState::Closed);
+        assert_eq!(
+            thread_state(&row, ChatParty::Buyer),
+            ChatChannelState::Closed
+        );
 
         // A key unload closes everything.
         let c = bench().await;
@@ -1346,7 +1385,10 @@ mod tests {
             let router = b.router.clone();
             async move { router.send(dispute, ChatParty::Seller, text).await }
         };
-        assert_eq!(send(" \n\t ", DISPUTE_A).await.unwrap_err(), ChatError::Empty);
+        assert_eq!(
+            send(" \n\t ", DISPUTE_A).await.unwrap_err(),
+            ChatError::Empty
+        );
         let long: &'static str = Box::leak("x".repeat(MAX_MESSAGE_BYTES + 1).into_boxed_str());
         assert_eq!(send(long, DISPUTE_A).await.unwrap_err(), ChatError::TooLong);
         assert_eq!(
@@ -1372,7 +1414,11 @@ mod tests {
             .record_take(
                 &b.node.public_key().to_hex(),
                 DISPUTE_B,
-                taken(&Keys::generate(), Some(&Keys::generate()), Some(&Keys::generate())),
+                taken(
+                    &Keys::generate(),
+                    Some(&Keys::generate()),
+                    Some(&Keys::generate()),
+                ),
             )
             .await
             .unwrap();

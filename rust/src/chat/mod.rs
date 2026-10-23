@@ -274,10 +274,7 @@ impl<K> Default for RateLimits<K> {
 impl<K: Eq + Hash + Clone> RateLimits<K> {
     /// Whether one more event of `key` may be decrypted at `now`.
     pub fn allow(&mut self, key: &K, now: f64) -> bool {
-        let (tokens, last) = self
-            .buckets
-            .entry(key.clone())
-            .or_insert((RATE_BURST, now));
+        let (tokens, last) = self.buckets.entry(key.clone()).or_insert((RATE_BURST, now));
         let elapsed = (now - *last).max(0.0);
         *last = now;
         *tokens = (*tokens + elapsed * RATE_PER_MINUTE / 60.0).min(RATE_BURST);
@@ -306,9 +303,8 @@ mod tests {
         let solver =
             Keys::parse("548f68890c49fa42f104c60352395e60ff030b0b407e955f1eed1400d6c0347a")
                 .unwrap();
-        let party =
-            Keys::parse("f258e73f07386d37133718b6127f873dd7c391b8f43b331ff8254034a13d2943")
-                .unwrap();
+        let party = Keys::parse("f258e73f07386d37133718b6127f873dd7c391b8f43b331ff8254034a13d2943")
+            .unwrap();
         let (conv, sign) = channel_keys(&solver, &party.public_key()).unwrap();
         assert_eq!(
             conv.public_key().to_hex(),
@@ -350,7 +346,10 @@ mod tests {
         // The seller on the buyer's channel is a stranger there.
         assert_eq!(sender_of(&seller, &solver, ChatParty::Buyer, &buyer), None);
         let stranger = Keys::generate().public_key();
-        assert_eq!(sender_of(&stranger, &solver, ChatParty::Seller, &seller), None);
+        assert_eq!(
+            sender_of(&stranger, &solver, ChatParty::Seller, &seller),
+            None
+        );
     }
 
     /// A message dated in the future never moves the cursor past the clock.
