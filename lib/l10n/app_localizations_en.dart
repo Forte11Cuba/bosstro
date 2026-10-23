@@ -56,6 +56,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copied => 'Copied';
 
   @override
+  String get chatKeyCopied =>
+      'Chat key copied. It is cleared from the clipboard in 60 seconds.';
+
+  @override
+  String get chatCopyHint => 'Copy the message';
+
+  @override
   String get idLabel => 'ID';
 
   @override

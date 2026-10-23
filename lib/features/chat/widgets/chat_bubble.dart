@@ -7,6 +7,7 @@ import 'package:bosstro/features/chat/attachments/attachment_flow.dart';
 import 'package:bosstro/features/chat/providers/chat_providers.dart';
 import 'package:bosstro/features/chat/services/chat_core.dart';
 import 'package:bosstro/features/chat/widgets/attachment_content.dart';
+import 'package:bosstro/features/chat/widgets/message_copy.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
 /// One chat message. This solver's own sit on the right on a lime tint, the
@@ -23,6 +24,8 @@ import 'package:bosstro/l10n/app_localizations.dart';
 ///
 /// A message of this key that was not sent says so under the bubble, on the
 /// page, with a retry ([onRetry]).
+///
+/// A long press copies the message, or a file's name ([messageCopier]).
 class ChatBubble extends StatelessWidget {
   const ChatBubble({
     super.key,
@@ -125,6 +128,12 @@ class ChatBubble extends StatelessWidget {
       ),
     );
 
+    final copy = messageCopier(
+      context,
+      attachment == null ? message.content : attachment.fileName,
+    );
+    final pressable = GestureDetector(onLongPress: copy, child: bubble);
+
     final failed = message.delivery == ChatDelivery.failed;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -145,7 +154,10 @@ class ChatBubble extends StatelessWidget {
                             delivery == null ? time : '$time, $delivery',
                             spoken,
                           ),
-                          child: ExcludeSemantics(child: bubble),
+                          onLongPress: copy,
+                          onLongPressHint:
+                              copy == null ? null : l10n.chatCopyHint,
+                          child: ExcludeSemantics(child: pressable),
                         ),
                       )
                       // The file's own controls (open, save, retry) stay
@@ -157,7 +169,10 @@ class ChatBubble extends StatelessWidget {
                           delivery == null ? time : '$time, $delivery',
                           spoken,
                         ),
-                        child: bubble,
+                        onLongPress: copy,
+                        onLongPressHint:
+                            copy == null ? null : l10n.chatCopyHint,
+                        child: pressable,
                       ),
             ),
             if (failed)

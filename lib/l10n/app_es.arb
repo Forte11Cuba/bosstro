@@ -15,6 +15,8 @@
   "settingsGroupAbout": "Acerca de",
   "settingsVersion": "Versión",
   "copied": "Copiado",
+  "chatKeyCopied": "Clave del chat copiada. Se borra del portapapeles en 60 segundos.",
+  "chatCopyHint": "Copiar el mensaje",
   "idLabel": "ID",
   "copyIdHint": "Copiar ID",
   "easterEggWhitepaper": "31 de octubre de 2008: nueve páginas, sin pedirle permiso a nadie. Feliz Halloween.",
