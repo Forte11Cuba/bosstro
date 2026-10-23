@@ -1645,6 +1645,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mediate, pay and refund'**
   String get permissionReadWrite;
+
+  /// App bar title of the dispute detail
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute'**
+  String get disputeDetailTitle;
+
+  /// Segment of the dispute detail with the dispute's data
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get detailSegmentInfo;
+
+  /// Segment of the dispute detail with the chat with the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'Buyer'**
+  String get detailSegmentBuyer;
+
+  /// Segment of the dispute detail with the chat with the seller
+  ///
+  /// In en, this message translates to:
+  /// **'Seller'**
+  String get detailSegmentSeller;
+
+  /// Screen-reader label of the Info / Buyer / Seller control
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute sections'**
+  String get detailSegmentsLabel;
+
+  /// Data row: the dispute id, copyable
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute ID'**
+  String get detailDisputeId;
+
+  /// Data row: the order id, copyable
+  ///
+  /// In en, this message translates to:
+  /// **'Order ID'**
+  String get detailOrderId;
+
+  /// Data row: the dispute's status
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get detailStatus;
+
+  /// Data row: who opened the dispute
+  ///
+  /// In en, this message translates to:
+  /// **'Opened by'**
+  String get detailOpenedBy;
+
+  /// Data row: when the dispute was opened
+  ///
+  /// In en, this message translates to:
+  /// **'Opened'**
+  String get detailOpenedAt;
+
+  /// Data row: when this solver took the dispute
+  ///
+  /// In en, this message translates to:
+  /// **'Taken'**
+  String get detailTakenAt;
+
+  /// Data row: the order's amount in sats
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get detailAmount;
+
+  /// Data row: the order's fiat amount
+  ///
+  /// In en, this message translates to:
+  /// **'Fiat amount'**
+  String get detailFiatAmount;
+
+  /// Data row: the order's payment method
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get detailPaymentMethod;
+
+  /// Data row: the order's premium over the market price
+  ///
+  /// In en, this message translates to:
+  /// **'Premium'**
+  String get detailPremium;
+
+  /// Data row: the node's fee for the order, in sats
+  ///
+  /// In en, this message translates to:
+  /// **'Node fee'**
+  String get detailFee;
+
+  /// Data row: whether the order was a buy or a sell order
+  ///
+  /// In en, this message translates to:
+  /// **'Order type'**
+  String get detailOrderKind;
+
+  /// Data row: the buyer's trade public key, copyable
+  ///
+  /// In en, this message translates to:
+  /// **'Buyer\'s trade key'**
+  String get detailBuyerKey;
+
+  /// Data row: the seller's trade public key, copyable
+  ///
+  /// In en, this message translates to:
+  /// **'Seller\'s trade key'**
+  String get detailSellerKey;
+
+  /// Value of the Opened by row: the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'Buyer'**
+  String get detailPartyBuyer;
+
+  /// Value of the Opened by row: the seller
+  ///
+  /// In en, this message translates to:
+  /// **'Seller'**
+  String get detailPartySeller;
+
+  /// Value of a data row the node did not send
+  ///
+  /// In en, this message translates to:
+  /// **'Not known'**
+  String get detailPartyUnknown;
+
+  /// Value of the Order type row: a buy order
+  ///
+  /// In en, this message translates to:
+  /// **'Buy order'**
+  String get detailOrderKindBuy;
+
+  /// Value of the Order type row: a sell order
+  ///
+  /// In en, this message translates to:
+  /// **'Sell order'**
+  String get detailOrderKindSell;
+
+  /// Value of the Premium row
+  ///
+  /// In en, this message translates to:
+  /// **'{value} %'**
+  String detailPremiumValue(String value);
+
+  /// Shown in the detail when the dispute is no longer held by this solver key
+  ///
+  /// In en, this message translates to:
+  /// **'This dispute is not yours now'**
+  String get detailNotYoursTitle;
+
+  /// Explanation under detailNotYoursTitle
+  ///
+  /// In en, this message translates to:
+  /// **'The node reopened it, or it belongs to another key. It is no longer in Your disputes.'**
+  String get detailNotYoursBody;
+
+  /// Tablet split view: shown on the right before a dispute is chosen
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a dispute'**
+  String get detailSelectTitle;
+
+  /// Explanation under detailSelectTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Its data and the chats with the buyer and the seller show here.'**
+  String get detailSelectBody;
+
+  /// Sender label of the solver's own chat message
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get chatSenderYou;
+
+  /// Sender label of a chat message from the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'Buyer'**
+  String get chatSenderBuyer;
+
+  /// Sender label of a chat message from the seller
+  ///
+  /// In en, this message translates to:
+  /// **'Seller'**
+  String get chatSenderSeller;
+
+  /// Empty state title of the chat with the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'No messages with the buyer'**
+  String get chatEmptyBuyerTitle;
+
+  /// Empty state title of the chat with the seller
+  ///
+  /// In en, this message translates to:
+  /// **'No messages with the seller'**
+  String get chatEmptySellerTitle;
+
+  /// Empty state explanation of a dispute chat
+  ///
+  /// In en, this message translates to:
+  /// **'Only you and this party can read this conversation. The other party does not see it.'**
+  String get chatEmptyBody;
+
+  /// Shown instead of a chat when the node did not name the party's trade key
+  ///
+  /// In en, this message translates to:
+  /// **'No chat with this party'**
+  String get chatNoPartyKeyTitle;
+
+  /// Explanation under chatNoPartyKeyTitle
+  ///
+  /// In en, this message translates to:
+  /// **'The node\'s answer to the take did not include this party\'s key, so Bosstro cannot reach them.'**
+  String get chatNoPartyKeyBody;
+
+  /// Shown in place of the message field when the dispute is over
+  ///
+  /// In en, this message translates to:
+  /// **'This dispute is closed. The chat is read only.'**
+  String get chatClosedNote;
+
+  /// Placeholder of the message field in the chat with the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'Write to the buyer'**
+  String get chatComposerBuyerHint;
+
+  /// Placeholder of the message field in the chat with the seller
+  ///
+  /// In en, this message translates to:
+  /// **'Write to the seller'**
+  String get chatComposerSellerHint;
+
+  /// Tooltip and screen-reader label of the send button
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get chatSend;
+
+  /// Status of a solver's message being sent
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get chatSending;
+
+  /// Status of a solver's message no relay took
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent'**
+  String get chatNotSent;
+
+  /// Action on a message that was not sent: send it again
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get chatRetry;
+
+  /// Shown under the message field when the message is over the limit
+  ///
+  /// In en, this message translates to:
+  /// **'The message is too long. Split it in two.'**
+  String get chatErrorTooLong;
+
+  /// Shown under the message field when the dispute closed meanwhile
+  ///
+  /// In en, this message translates to:
+  /// **'This dispute is closed. The chat is read only.'**
+  String get chatErrorClosed;
+
+  /// Shown under the message field when the relays are not running
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected to any relay. Check your connection.'**
+  String get chatErrorNoRelays;
+
+  /// Shown under the message field when the dispute is no longer held by this key
+  ///
+  /// In en, this message translates to:
+  /// **'This dispute is no longer yours.'**
+  String get chatErrorNotYours;
+
+  /// Shown under the message field for any other refusal
+  ///
+  /// In en, this message translates to:
+  /// **'The message could not be sent.'**
+  String get chatErrorGeneric;
+
+  /// Screen-reader label of the chat's loading skeleton
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the messages'**
+  String get chatLoading;
+
+  /// Screen-reader label of one chat message
+  ///
+  /// In en, this message translates to:
+  /// **'{sender}, {time}: {text}'**
+  String chatMessageLabel(String sender, String time, String text);
+
+  /// Screen-reader hint of a row in Your disputes
+  ///
+  /// In en, this message translates to:
+  /// **'Open the dispute'**
+  String get openDisputeHint;
 }
 
 class _AppLocalizationsDelegate

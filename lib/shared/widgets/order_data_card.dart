@@ -20,11 +20,16 @@ class SurfaceCard extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(14),
     this.onTap,
+    this.borderColor,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
+
+  /// The hairline's color when it says something (the row open beside a
+  /// list); the palette's `border` otherwise.
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +37,7 @@ class SurfaceCard extends StatelessWidget {
     if (onTap case final tap?) {
       final shape = RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.block),
-        side: BorderSide(color: pal.border),
+        side: BorderSide(color: borderColor ?? pal.border),
       );
       return Material(
         color: pal.surface,
@@ -55,7 +60,7 @@ class SurfaceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: pal.surface,
         borderRadius: BorderRadius.circular(AppRadius.block),
-        border: Border.all(color: pal.border),
+        border: Border.all(color: borderColor ?? pal.border),
       ),
       child: child,
     );

@@ -940,4 +940,170 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get permissionReadWrite => 'Mediate, pay and refund';
+
+  @override
+  String get disputeDetailTitle => 'Dispute';
+
+  @override
+  String get detailSegmentInfo => 'Info';
+
+  @override
+  String get detailSegmentBuyer => 'Buyer';
+
+  @override
+  String get detailSegmentSeller => 'Seller';
+
+  @override
+  String get detailSegmentsLabel => 'Dispute sections';
+
+  @override
+  String get detailDisputeId => 'Dispute ID';
+
+  @override
+  String get detailOrderId => 'Order ID';
+
+  @override
+  String get detailStatus => 'Status';
+
+  @override
+  String get detailOpenedBy => 'Opened by';
+
+  @override
+  String get detailOpenedAt => 'Opened';
+
+  @override
+  String get detailTakenAt => 'Taken';
+
+  @override
+  String get detailAmount => 'Amount';
+
+  @override
+  String get detailFiatAmount => 'Fiat amount';
+
+  @override
+  String get detailPaymentMethod => 'Payment method';
+
+  @override
+  String get detailPremium => 'Premium';
+
+  @override
+  String get detailFee => 'Node fee';
+
+  @override
+  String get detailOrderKind => 'Order type';
+
+  @override
+  String get detailBuyerKey => 'Buyer\'s trade key';
+
+  @override
+  String get detailSellerKey => 'Seller\'s trade key';
+
+  @override
+  String get detailPartyBuyer => 'Buyer';
+
+  @override
+  String get detailPartySeller => 'Seller';
+
+  @override
+  String get detailPartyUnknown => 'Not known';
+
+  @override
+  String get detailOrderKindBuy => 'Buy order';
+
+  @override
+  String get detailOrderKindSell => 'Sell order';
+
+  @override
+  String detailPremiumValue(String value) {
+    return '$value %';
+  }
+
+  @override
+  String get detailNotYoursTitle => 'This dispute is not yours now';
+
+  @override
+  String get detailNotYoursBody =>
+      'The node reopened it, or it belongs to another key. It is no longer in Your disputes.';
+
+  @override
+  String get detailSelectTitle => 'Choose a dispute';
+
+  @override
+  String get detailSelectBody =>
+      'Its data and the chats with the buyer and the seller show here.';
+
+  @override
+  String get chatSenderYou => 'You';
+
+  @override
+  String get chatSenderBuyer => 'Buyer';
+
+  @override
+  String get chatSenderSeller => 'Seller';
+
+  @override
+  String get chatEmptyBuyerTitle => 'No messages with the buyer';
+
+  @override
+  String get chatEmptySellerTitle => 'No messages with the seller';
+
+  @override
+  String get chatEmptyBody =>
+      'Only you and this party can read this conversation. The other party does not see it.';
+
+  @override
+  String get chatNoPartyKeyTitle => 'No chat with this party';
+
+  @override
+  String get chatNoPartyKeyBody =>
+      'The node\'s answer to the take did not include this party\'s key, so Bosstro cannot reach them.';
+
+  @override
+  String get chatClosedNote => 'This dispute is closed. The chat is read only.';
+
+  @override
+  String get chatComposerBuyerHint => 'Write to the buyer';
+
+  @override
+  String get chatComposerSellerHint => 'Write to the seller';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatSending => 'Sending…';
+
+  @override
+  String get chatNotSent => 'Not sent';
+
+  @override
+  String get chatRetry => 'Retry';
+
+  @override
+  String get chatErrorTooLong => 'The message is too long. Split it in two.';
+
+  @override
+  String get chatErrorClosed =>
+      'This dispute is closed. The chat is read only.';
+
+  @override
+  String get chatErrorNoRelays =>
+      'Not connected to any relay. Check your connection.';
+
+  @override
+  String get chatErrorNotYours => 'This dispute is no longer yours.';
+
+  @override
+  String get chatErrorGeneric => 'The message could not be sent.';
+
+  @override
+  String get chatLoading => 'Loading the messages';
+
+  @override
+  String chatMessageLabel(String sender, String time, String text) {
+    return '$sender, $time: $text';
+  }
+
+  @override
+  String get openDisputeHint => 'Open the dispute';
 }
