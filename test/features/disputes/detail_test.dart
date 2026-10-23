@@ -303,6 +303,7 @@ void main() {
         location: AppRoute.disputeDetail(_a),
         textScale: 1,
       );
+      await _scrollInfoTo(tester, find.text('ID de la orden'));
       await tester.tap(find.text('ID de la orden'));
       await tester.pump();
       expect(copied, '5b9e1f7e-6f0e-4b8a-9c3d-2e1f0a9b8c7d');

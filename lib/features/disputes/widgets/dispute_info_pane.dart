@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
 import 'package:bosstro/features/observer/widgets/observer_card.dart';
+import 'package:bosstro/features/resolution/screens/resolution_screen.dart'
+    show closedResultLabel;
+import 'package:bosstro/features/resolution/widgets/resolution_card.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
@@ -11,8 +14,9 @@ import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 /// The Info segment of the dispute detail: what the take told this solver,
 /// as label → value rows (DS-CMP-24). Ids and keys read short and copy whole
 /// (DS-CMP-22); a value the node did not send reads "Not known". Under the
-/// dispute's own facts, the way into the chat between the parties (phase
-/// 5c).
+/// dispute's own facts: while it is open, the way to resolve it (phase 6);
+/// once closed, how it ended; then the way into the chat between the parties
+/// (phase 5c).
 class DisputeInfoPane extends StatelessWidget {
   const DisputeInfoPane({super.key, required this.detail});
 
@@ -88,8 +92,18 @@ class DisputeInfoPane extends StatelessWidget {
               l10n.detailTakenAt,
               _dateTime(detail.takenAt.toInt(), locale),
             ),
+            if (detail.isClosed)
+              textRow(
+                Icons.task_alt_rounded,
+                l10n.detailResult,
+                closedResultLabel(l10n, detail.resolvedAs, detail.status),
+              ),
           ],
         ),
+        if (!detail.isClosed) ...[
+          const SizedBox(height: 12),
+          ResolutionCard(detail: detail),
+        ],
         const SizedBox(height: 12),
         ObserverCard(disputeId: detail.disputeId),
         const SizedBox(height: 12),

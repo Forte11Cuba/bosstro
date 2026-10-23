@@ -2335,6 +2335,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'File'**
   String get observerFileOther;
+
+  /// Dispute detail, Info: title of the card with the two resolution actions
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve the dispute'**
+  String get resolveCardTitle;
+
+  /// Under resolveCardTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Once you have heard both parties, decide where the sats go. It cannot be undone.'**
+  String get resolveCardBody;
+
+  /// Opens the settle confirmation (glossary: pay the buyer = settle)
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the buyer'**
+  String get payBuyerAction;
+
+  /// Opens the cancel confirmation (glossary: refund the seller = cancel)
+  ///
+  /// In en, this message translates to:
+  /// **'Refund the seller'**
+  String get refundSellerAction;
+
+  /// The destructive answer of the settle confirmation; same wording as payBuyerAction (DS-CMP-26)
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the buyer'**
+  String get payBuyerAnswer;
+
+  /// The destructive answer of the cancel confirmation; same wording as refundSellerAction (DS-CMP-26)
+  ///
+  /// In en, this message translates to:
+  /// **'Refund the seller'**
+  String get refundSellerAnswer;
+
+  /// Shown above the resolution actions when the node said this key is a read-only solver
+  ///
+  /// In en, this message translates to:
+  /// **'Your solver key can mediate on this node but not pay or refund. Ask the operator for read-write permission.'**
+  String get resolveReadOnlyNote;
+
+  /// Shown above the resolution actions while a settle request got no answer in time
+  ///
+  /// In en, this message translates to:
+  /// **'Your request to pay the buyer got no answer. The node may have paid all the same: check the dispute\'s status before you try again.'**
+  String get resolveUnansweredPayNote;
+
+  /// Shown above the resolution actions while a cancel request got no answer in time
+  ///
+  /// In en, this message translates to:
+  /// **'Your request to refund the seller got no answer. The node may have refunded all the same: check the dispute\'s status before you try again.'**
+  String get resolveUnansweredRefundNote;
+
+  /// Title of the full-screen settle confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the buyer?'**
+  String get payBuyerTitle;
+
+  /// Title of the full-screen cancel confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Refund the seller?'**
+  String get refundSellerTitle;
+
+  /// Settle confirmation: label above the amount
+  ///
+  /// In en, this message translates to:
+  /// **'The buyer receives'**
+  String get payBuyerRecipient;
+
+  /// Cancel confirmation: label above the amount
+  ///
+  /// In en, this message translates to:
+  /// **'The seller gets back'**
+  String get refundSellerRecipient;
+
+  /// Settle confirmation: how the amount is made up; both are formatted sat amounts
+  ///
+  /// In en, this message translates to:
+  /// **'The order\'s {amount} less the node\'s fee of {fee}.'**
+  String payBuyerBreakdown(String amount, String fee);
+
+  /// Cancel confirmation: how the amount is made up; both are formatted sat amounts
+  ///
+  /// In en, this message translates to:
+  /// **'The order\'s {amount} plus the node\'s fee of {fee}, as the seller locked them.'**
+  String refundSellerBreakdown(String amount, String fee);
+
+  /// Confirmation: the fiat side of the trade, e.g. "50 EUR"
+  ///
+  /// In en, this message translates to:
+  /// **'Trade: {fiat}'**
+  String resolveTradeFiat(String fiat);
+
+  /// Settle confirmation: what happens to the other party
+  ///
+  /// In en, this message translates to:
+  /// **'The seller\'s hold invoice is settled: the seller does not get these sats back.'**
+  String get payBuyerOtherSide;
+
+  /// Cancel confirmation: what happens to the other party
+  ///
+  /// In en, this message translates to:
+  /// **'The seller\'s hold invoice is canceled: the buyer receives nothing from this trade.'**
+  String get refundSellerOtherSide;
+
+  /// Confirmation: what happens to the anti-abuse bonds (no slash in this version)
+  ///
+  /// In en, this message translates to:
+  /// **'Bonds, if any, go back to both parties; none is slashed.'**
+  String get resolveBondsNote;
+
+  /// Confirmation: the irreversibility warning, in red
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone. Once sent, Bosstro never sends it again by itself.'**
+  String get resolveIrreversible;
+
+  /// Confirmation: shown while the request waits for the node
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the node\'s answer. Keep Bosstro open.'**
+  String get resolveWaiting;
+
+  /// Result: the node confirmed the settle
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved: you paid the buyer'**
+  String get resolvedPaidTitle;
+
+  /// Under resolvedPaidTitle
+  ///
+  /// In en, this message translates to:
+  /// **'The node settled the seller\'s hold invoice and pays the buyer. The dispute is closed.'**
+  String get resolvedPaidBody;
+
+  /// Result: the node confirmed the cancel
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved: you refunded the seller'**
+  String get resolvedRefundedTitle;
+
+  /// Under resolvedRefundedTitle
+  ///
+  /// In en, this message translates to:
+  /// **'The node canceled the seller\'s hold invoice: the sats go back to the seller. The dispute is closed.'**
+  String get resolvedRefundedBody;
+
+  /// Result: CooperativeCancelAccepted
+  ///
+  /// In en, this message translates to:
+  /// **'The parties had already canceled'**
+  String get resolvedCoopTitle;
+
+  /// Under resolvedCoopTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Buyer and seller canceled the trade between them before your request, so nothing was paid or refunded by you. The dispute is closed.'**
+  String get resolvedCoopBody;
+
+  /// Result: NotAuthorized (read-only solver)
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot pay or refund on this node'**
+  String get readOnlySolverTitle;
+
+  /// Result: the node said the dispute is not this key's (taken over)
+  ///
+  /// In en, this message translates to:
+  /// **'Another solver holds this dispute now'**
+  String get takenOverTitle;
+
+  /// Under takenOverTitle
+  ///
+  /// In en, this message translates to:
+  /// **'The node gave it to another solver, so nothing was paid or refunded. It has left Your disputes.'**
+  String get takenOverBody;
+
+  /// Result: refused by the order's status
+  ///
+  /// In en, this message translates to:
+  /// **'This order is no longer in dispute'**
+  String get notInDisputeTitle;
+
+  /// Under notInDisputeTitle
+  ///
+  /// In en, this message translates to:
+  /// **'It was paid, refunded or released already, perhaps by an earlier request whose answer was lost. The dispute\'s status will say how it ended.'**
+  String get notInDisputeBody;
+
+  /// Result: another refusal
+  ///
+  /// In en, this message translates to:
+  /// **'The node refused the request'**
+  String get resolveRefusedTitle;
+
+  /// Under resolveRefusedTitle
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was paid or refunded. Try again later, or ask the node\'s operator.'**
+  String get resolveRefusedBody;
+
+  /// Result: no answer in time (title is noAnswerTitle)
+  ///
+  /// In en, this message translates to:
+  /// **'It may have acted all the same: the sats may have moved. Bosstro did not send the request again. Check the dispute\'s status before you try again; it changes as soon as the node publishes it.'**
+  String get resolveNoAnswerBody;
+
+  /// Not sent: the dispute is closed already
+  ///
+  /// In en, this message translates to:
+  /// **'This dispute is closed: there is nothing to resolve.'**
+  String get resolveClosedBody;
+
+  /// Not sent: the take named no order id
+  ///
+  /// In en, this message translates to:
+  /// **'Bosstro does not know this dispute\'s order, and the request needs it. Recover the dispute to read it again.'**
+  String get resolveNoOrderBody;
+
+  /// Result: the one action, back to the dispute detail
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the dispute'**
+  String get resolveBackToDispute;
+
+  /// Result after a take-over: back to the In progress list
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Your disputes'**
+  String get resolveGoToDisputes;
+
+  /// In progress: heading of the disputes this key held that are closed
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get inProgressClosedHeading;
+
+  /// In progress: shown above the closed disputes when none is open
+  ///
+  /// In en, this message translates to:
+  /// **'You hold no dispute now.'**
+  String get inProgressNoneOpen;
+
+  /// A closed dispute this key resolved by paying the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'You paid the buyer'**
+  String get closedPaidBuyer;
+
+  /// A closed dispute this key resolved by refunding the seller
+  ///
+  /// In en, this message translates to:
+  /// **'You refunded the seller'**
+  String get closedRefundedSeller;
+
+  /// A closed dispute: CooperativeCancelAccepted answered this key's request
+  ///
+  /// In en, this message translates to:
+  /// **'The parties canceled it before your decision'**
+  String get closedCooperatively;
+
+  /// Dispute detail, Info: row with how a closed dispute ended
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get detailResult;
 }
 
 class _AppLocalizationsDelegate

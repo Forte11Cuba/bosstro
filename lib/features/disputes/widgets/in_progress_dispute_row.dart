@@ -5,6 +5,8 @@ import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/disputes_palette.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
+import 'package:bosstro/features/resolution/screens/resolution_screen.dart'
+    show closedResultLabel;
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/status_chip.dart';
@@ -12,7 +14,7 @@ import 'package:bosstro/shared/widgets/status_chip.dart';
 /// One dispute this solver holds: its status (lime, the solver's move,
 /// amendment 3), the amount in sats and fiat from the take's answer, who
 /// opened it, how long ago it was taken, and its short id, which copies the
-/// full one (DS-CMP-22). A tap opens its detail and chats ([onTap]); in the
+/// full one (DS-CMP-22). A closed one reads neutral, with how it ended. A tap opens its detail and chats ([onTap]); in the
 /// tablet split view the row open beside the list is [selected].
 class InProgressDisputeRow extends StatelessWidget {
   const InProgressDisputeRow({
@@ -64,6 +66,17 @@ class InProgressDisputeRow extends StatelessWidget {
                 color: pal.textPrimary,
               ),
             ),
+            if (dispute.resolvedAs case final resolved?) ...[
+              const SizedBox(height: 6),
+              Text(
+                closedResultLabel(l10n, resolved, dispute.status),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: pal.textBody,
+                ),
+              ),
+            ],
             const SizedBox(height: 6),
             Text(
               disputeInitiatorLabel(l10n, dispute.initiator),

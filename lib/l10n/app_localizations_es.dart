@@ -1334,4 +1334,164 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get observerFileOther => 'Archivo';
+
+  @override
+  String get resolveCardTitle => 'Resolver la disputa';
+
+  @override
+  String get resolveCardBody =>
+      'Cuando hayas escuchado a las dos partes, decide adónde van los sats. No se puede deshacer.';
+
+  @override
+  String get payBuyerAction => 'Pagar al comprador';
+
+  @override
+  String get refundSellerAction => 'Devolver al vendedor';
+
+  @override
+  String get payBuyerAnswer => 'Pagar al comprador';
+
+  @override
+  String get refundSellerAnswer => 'Devolver al vendedor';
+
+  @override
+  String get resolveReadOnlyNote =>
+      'Tu clave de solver puede mediar en este nodo pero no pagar ni devolver. Pide al operador permiso de lectura y escritura.';
+
+  @override
+  String get resolveUnansweredPayNote =>
+      'Tu petición de pagar al comprador no tuvo respuesta. Puede que el nodo pagara igualmente: consulta el estado de la disputa antes de volver a intentarlo.';
+
+  @override
+  String get resolveUnansweredRefundNote =>
+      'Tu petición de devolver al vendedor no tuvo respuesta. Puede que el nodo devolviera igualmente: consulta el estado de la disputa antes de volver a intentarlo.';
+
+  @override
+  String get payBuyerTitle => '¿Pagar al comprador?';
+
+  @override
+  String get refundSellerTitle => '¿Devolver al vendedor?';
+
+  @override
+  String get payBuyerRecipient => 'El comprador recibe';
+
+  @override
+  String get refundSellerRecipient => 'El vendedor recupera';
+
+  @override
+  String payBuyerBreakdown(String amount, String fee) {
+    return 'Los $amount de la orden menos la comisión del nodo, $fee.';
+  }
+
+  @override
+  String refundSellerBreakdown(String amount, String fee) {
+    return 'Los $amount de la orden más la comisión del nodo, $fee, tal como los bloqueó el vendedor.';
+  }
+
+  @override
+  String resolveTradeFiat(String fiat) {
+    return 'Intercambio: $fiat';
+  }
+
+  @override
+  String get payBuyerOtherSide =>
+      'Se liquida la factura retenida del vendedor: el vendedor no recupera estos sats.';
+
+  @override
+  String get refundSellerOtherSide =>
+      'Se cancela la factura retenida del vendedor: el comprador no recibe nada de este intercambio.';
+
+  @override
+  String get resolveBondsNote =>
+      'Las fianzas, si las hay, vuelven a las dos partes; no se penaliza ninguna.';
+
+  @override
+  String get resolveIrreversible =>
+      'No se puede deshacer. Una vez enviada, Bosstro nunca la vuelve a enviar por su cuenta.';
+
+  @override
+  String get resolveWaiting =>
+      'Esperando la respuesta del nodo. Mantén Bosstro abierto.';
+
+  @override
+  String get resolvedPaidTitle => 'Resuelta: pagaste al comprador';
+
+  @override
+  String get resolvedPaidBody =>
+      'El nodo liquidó la factura retenida del vendedor y paga al comprador. La disputa está cerrada.';
+
+  @override
+  String get resolvedRefundedTitle => 'Resuelta: devolviste al vendedor';
+
+  @override
+  String get resolvedRefundedBody =>
+      'El nodo canceló la factura retenida del vendedor: los sats vuelven al vendedor. La disputa está cerrada.';
+
+  @override
+  String get resolvedCoopTitle => 'Las partes ya la habían cancelado';
+
+  @override
+  String get resolvedCoopBody =>
+      'El comprador y el vendedor cancelaron el intercambio entre ellos antes de tu petición, así que no pagaste ni devolviste nada. La disputa está cerrada.';
+
+  @override
+  String get readOnlySolverTitle => 'No puedes pagar ni devolver en este nodo';
+
+  @override
+  String get takenOverTitle => 'Ahora otro solver tiene esta disputa';
+
+  @override
+  String get takenOverBody =>
+      'El nodo se la dio a otro solver, así que no se pagó ni se devolvió nada. Ha salido de Tus disputas.';
+
+  @override
+  String get notInDisputeTitle => 'Esta orden ya no está en disputa';
+
+  @override
+  String get notInDisputeBody =>
+      'Ya se pagó, se devolvió o se liberó, quizá por una petición anterior cuya respuesta se perdió. El estado de la disputa dirá cómo terminó.';
+
+  @override
+  String get resolveRefusedTitle => 'El nodo rechazó la petición';
+
+  @override
+  String get resolveRefusedBody =>
+      'No se pagó ni se devolvió nada. Inténtalo más tarde o pregunta al operador del nodo.';
+
+  @override
+  String get resolveNoAnswerBody =>
+      'Puede que actuara igualmente: los sats pueden haberse movido. Bosstro no volvió a enviar la petición. Consulta el estado de la disputa antes de volver a intentarlo; cambia en cuanto el nodo lo publique.';
+
+  @override
+  String get resolveClosedBody =>
+      'Esta disputa está cerrada: no hay nada que resolver.';
+
+  @override
+  String get resolveNoOrderBody =>
+      'Bosstro no conoce la orden de esta disputa, y la petición la necesita. Recupera la disputa para volver a leerla.';
+
+  @override
+  String get resolveBackToDispute => 'Volver a la disputa';
+
+  @override
+  String get resolveGoToDisputes => 'Ir a Tus disputas';
+
+  @override
+  String get inProgressClosedHeading => 'Cerradas';
+
+  @override
+  String get inProgressNoneOpen => 'Ahora no tienes ninguna disputa.';
+
+  @override
+  String get closedPaidBuyer => 'Pagaste al comprador';
+
+  @override
+  String get closedRefundedSeller => 'Devolviste al vendedor';
+
+  @override
+  String get closedCooperatively =>
+      'Las partes la cancelaron antes de tu decisión';
+
+  @override
+  String get detailResult => 'Resultado';
 }
