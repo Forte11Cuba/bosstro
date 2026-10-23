@@ -79,4 +79,14 @@ flutter test integration_test/attachments_against_local_mostrod_test.dart -d lin
   --dart-define=E2E_FILES=<directory>
 ```
 
-The helpers both chat runs share are in `e2e_support.dart`.
+`new_dispute.sh` adds such a dispute (an order cloned with fresh trade keys,
+its 38386 published with the node key) to a copy of a mostrod home, and with
+`SOLVER_PK` registers that key as a read-write solver; it refuses
+`~/.mostro`. Its output is the `E2E_DISPUTE` / `E2E_BUYER` / `E2E_SELLER`
+values:
+
+```bash
+eval "$(SOLVER_PK=<solver pubkey hex> integration_test/new_dispute.sh <home copy>)"
+```
+
+The helpers the runs share are in `e2e_support.dart`.
