@@ -61,7 +61,7 @@ rust/src/attachments/ # chat files: what may be sent or opened (by the bytes), .
 rust/src/chat/       # the dispute chat: channel keys (in memory), the router, send / retry; observer.rs reads the parties' own chat
 rust/src/db/         # Storage: SQLite (native) and IndexedDB (web), one trait
 rust/src/disputes/   # kind 38386: parsing, merge (NIP-01 order), the active node's feed
-rust/src/mostro/     # the daemon's answers to the solver key, AdminTakeDispute, solver standing
+rust/src/mostro/     # the daemon's answers to the solver key, AdminTakeDispute, AdminSettle / AdminCancel, solver standing
 rust/src/nostr/      # the relay pool, live subscriptions, liveness probe, event readers, transport v2
 rust/migrations/     # sqlx migrations; never edit one that shipped, add a new file
 rust_builder/        # cargokit glue, copied from app
@@ -94,10 +94,16 @@ tool/                # design_check.dart, launcher_icon/build_sources.py
   `wrap_mined`); the web has no other thread, so the page stops while a take is mined.
   mostrod's default `pow` is 0, so today it is not felt; a node asking for a high
   `pow_first_contact` would freeze a web tab for a while.
-- **A take-over of your dispute goes unseen until phase 6:** when a Read-Write solver takes
-  over a dispute this key holds, the node republishes it `in-progress` and the 38386 does not
-  say who holds it, so it stays in Your disputes. Settle and cancel (phase 6) learn it from
-  `IsNotYourDispute` / `DisputeTakenByAdmin`.
+- **A take-over of your dispute goes unseen until you try to resolve it:** when a Read-Write
+  solver takes over a dispute this key holds, the node republishes it `in-progress` and the
+  38386 does not say who holds it, so it stays in Your disputes. Settle and cancel learn it
+  from `IsNotYourDispute` / `DisputeTakenByAdmin` and drop the take then.
+- **A resolution with no answer is remembered in memory only:** the detail warns that the node
+  may have acted on it while the request is still waited for (ten minutes, this process). After
+  a restart nothing says so; the dispute's 38386 tells, and a request sent again after the node
+  did act is refused by the order's status, so nothing is paid twice.
+- **A cached "read" permission may be stale:** the operator can change it and Bosstro cannot ask.
+  The resolution actions stay usable with a note; the next answer learns the permission again.
 - **Chat messages are stored in plain text** in the unencrypted database (A4): on Android
   the app sandbox is their only protection until SQLCipher (post-MVP); on Linux and the web
   they have not even that (a file in the user's home, browser storage). The keys that open the
@@ -252,6 +258,18 @@ python3 tool/launcher_icon/build_sources.py && dart run flutter_launcher_icons  
   node and loaded key (author = node, `#p` = solver). An answer is taken only when the node
   signed it, it opens with the key, and its `request_id` is one this process sent to that node
   with that key; a node or key change drops the old requests. A DM's content is never logged.
+- **Resolution** (`rust/src/mostro/resolve.rs`, phase 6): "Pay the buyer" is `AdminSettle`,
+  "Refund the seller" `AdminCancel`, carrying the dispute's **order** id (from the take's
+  `SolverDisputeInfo`, never the dispute id) and no payload (release every bond, slash none);
+  without an order id nothing is sent. Same router, PoW and wait as a take. Answers:
+  `AdminSettled` / `AdminCanceled` (only to the matching request, about that order) and
+  `CooperativeCancelAccepted` close the dispute at once, keep how (`resolved_as`) and mean
+  Read-Write; `NotAuthorized` means Read; `IsNotYourDispute` / `DisputeTakenByAdmin` drop this
+  key's take; a refusal by the order's status (`InvalidOrderStatus`, `NotAllowedByStatus`)
+  changes nothing and lets the 38386 reconcile. **Nothing is ever retried:** a settle cannot be
+  undone and mostrod may have paid although its answer was lost (it answers an internal
+  failure, an LND error included, with nothing). A request of a dispute still waiting for its
+  answer is refused. The buyer receives `amount - fee`; the seller gets back `amount + fee`.
 - **"Am I a solver on this node?"** mostrod has no read-only query. The signal is the answer to
   `AdminTakeDispute`: `CantDo(InvalidPubkey)` on an `initiated` dispute means `NotSolver` (the
   status is read again when the answer arrives); on an `in-progress` one, `CannotTakeOver`
@@ -265,7 +283,8 @@ python3 tool/launcher_icon/build_sources.py && dart run flutter_launcher_icons  
   mostrod 0.20 drops, unanswered, a kind 14 below `pow_first_contact` from a key outside its
   spam gate, and a solver key is inside only while it holds an active dispute.
 - **Auto-close:** a cooperative cancel or a seller release closes the dispute with no DM to the
-  solver (38386 `seller-refunded` / `settled`); taken disputes are reconciled from 38386.
+  solver (38386 `cooperatively-canceled` / `released` in mostrod 0.20); taken disputes are
+  reconciled from 38386, and a late request answered `CooperativeCancelAccepted` reads closed.
 - **Serbero:** kind 14 `send-dm` messages to the solver key, read only from trusted senders, never
   treated as protocol actions.
 
@@ -291,6 +310,7 @@ One PR per phase; long phases split into phased PRs. Conventional commits, branc
 `flutter analyze && flutter test` and `dart tool/design_check.dart` green.
 
 Phases: 0 scaffold · 1 solver key · 2 nodes and relays · 3 pending disputes · 4 take dispute ·
-5 dispute detail and chat · 5b Serbero · 6 resolution · 7 notifications · 8 release.
+5 dispute detail and chat · 5c observer · 6 resolution · 7 manual verification on a device ·
+8 release. Serbero and notifications are post-MVP.
 
 Mostrix is read at tag **v0.3.8** or later.
