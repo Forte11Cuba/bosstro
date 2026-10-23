@@ -13,6 +13,7 @@ import 'api/node_info.dart';
 import 'api/nodes.dart';
 import 'api/observer.dart';
 import 'api/relays.dart';
+import 'api/resolve.dart';
 import 'api/solver.dart';
 import 'api/take.dart';
 import 'dart:async';
@@ -205,6 +206,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RelayInfo dco_decode_box_autoadd_relay_info(dynamic raw);
 
   @protected
+  Resolution dco_decode_box_autoadd_resolution(dynamic raw);
+
+  @protected
+  ResolvedAs dco_decode_box_autoadd_resolved_as(dynamic raw);
+
+  @protected
   SolverKeyInfo dco_decode_box_autoadd_solver_key_info(dynamic raw);
 
   @protected
@@ -394,6 +401,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RelayInfo? dco_decode_opt_box_autoadd_relay_info(dynamic raw);
 
   @protected
+  Resolution? dco_decode_opt_box_autoadd_resolution(dynamic raw);
+
+  @protected
+  ResolvedAs? dco_decode_opt_box_autoadd_resolved_as(dynamic raw);
+
+  @protected
   SolverKeyInfo? dco_decode_opt_box_autoadd_solver_key_info(dynamic raw);
 
   @protected
@@ -419,6 +432,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RelayStatus dco_decode_relay_status(dynamic raw);
+
+  @protected
+  Resolution dco_decode_resolution(dynamic raw);
+
+  @protected
+  ResolveError dco_decode_resolve_error(dynamic raw);
+
+  @protected
+  ResolveOutcome dco_decode_resolve_outcome(dynamic raw);
+
+  @protected
+  ResolveResult dco_decode_resolve_result(dynamic raw);
+
+  @protected
+  ResolvedAs dco_decode_resolved_as(dynamic raw);
 
   @protected
   SolverKeyError dco_decode_solver_key_error(dynamic raw);
@@ -636,6 +664,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RelayInfo sse_decode_box_autoadd_relay_info(SseDeserializer deserializer);
+
+  @protected
+  Resolution sse_decode_box_autoadd_resolution(SseDeserializer deserializer);
+
+  @protected
+  ResolvedAs sse_decode_box_autoadd_resolved_as(SseDeserializer deserializer);
 
   @protected
   SolverKeyInfo sse_decode_box_autoadd_solver_key_info(
@@ -871,6 +905,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  Resolution? sse_decode_opt_box_autoadd_resolution(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ResolvedAs? sse_decode_opt_box_autoadd_resolved_as(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   SolverKeyInfo? sse_decode_opt_box_autoadd_solver_key_info(
     SseDeserializer deserializer,
   );
@@ -902,6 +946,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RelayStatus sse_decode_relay_status(SseDeserializer deserializer);
+
+  @protected
+  Resolution sse_decode_resolution(SseDeserializer deserializer);
+
+  @protected
+  ResolveError sse_decode_resolve_error(SseDeserializer deserializer);
+
+  @protected
+  ResolveOutcome sse_decode_resolve_outcome(SseDeserializer deserializer);
+
+  @protected
+  ResolveResult sse_decode_resolve_result(SseDeserializer deserializer);
+
+  @protected
+  ResolvedAs sse_decode_resolved_as(SseDeserializer deserializer);
 
   @protected
   SolverKeyError sse_decode_solver_key_error(SseDeserializer deserializer);
@@ -1166,6 +1225,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_relay_info(
     RelayInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_resolution(
+    Resolution self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_resolved_as(
+    ResolvedAs self,
     SseSerializer serializer,
   );
 
@@ -1470,6 +1541,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_resolution(
+    Resolution? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_resolved_as(
+    ResolvedAs? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_solver_key_info(
     SolverKeyInfo? self,
     SseSerializer serializer,
@@ -1510,6 +1593,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_relay_status(RelayStatus self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_resolution(Resolution self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_resolve_error(ResolveError self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_resolve_outcome(
+    ResolveOutcome self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_resolve_result(ResolveResult self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_resolved_as(ResolvedAs self, SseSerializer serializer);
 
   @protected
   void sse_encode_solver_key_error(

@@ -1675,5 +1675,206 @@
   "observerFileOther": "File",
   "@observerFileOther": {
     "description": "Type of a file that cannot be opened, when it declares none"
+  },
+  "resolveCardTitle": "Resolve the dispute",
+  "@resolveCardTitle": {
+    "description": "Dispute detail, Info: title of the card with the two resolution actions"
+  },
+  "resolveCardBody": "Once you have heard both parties, decide where the sats go. It cannot be undone.",
+  "@resolveCardBody": {
+    "description": "Under resolveCardTitle"
+  },
+  "payBuyerAction": "Pay the buyer",
+  "@payBuyerAction": {
+    "description": "Opens the settle confirmation (glossary: pay the buyer = settle)"
+  },
+  "refundSellerAction": "Refund the seller",
+  "@refundSellerAction": {
+    "description": "Opens the cancel confirmation (glossary: refund the seller = cancel)"
+  },
+  "payBuyerAnswer": "Pay the buyer",
+  "@payBuyerAnswer": {
+    "description": "The destructive answer of the settle confirmation; same wording as payBuyerAction (DS-CMP-26)"
+  },
+  "refundSellerAnswer": "Refund the seller",
+  "@refundSellerAnswer": {
+    "description": "The destructive answer of the cancel confirmation; same wording as refundSellerAction (DS-CMP-26)"
+  },
+  "resolveReadOnlyNote": "Your solver key can mediate on this node but not pay or refund. Ask the operator for read-write permission.",
+  "@resolveReadOnlyNote": {
+    "description": "Shown above the resolution actions when the node said this key is a read-only solver"
+  },
+  "resolveUnansweredPayNote": "Your request to pay the buyer got no answer. The node may have paid all the same: check the dispute's status before you try again.",
+  "@resolveUnansweredPayNote": {
+    "description": "Shown above the resolution actions while a settle request got no answer in time"
+  },
+  "resolveUnansweredRefundNote": "Your request to refund the seller got no answer. The node may have refunded all the same: check the dispute's status before you try again.",
+  "@resolveUnansweredRefundNote": {
+    "description": "Shown above the resolution actions while a cancel request got no answer in time"
+  },
+  "payBuyerTitle": "Pay the buyer?",
+  "@payBuyerTitle": {
+    "description": "Title of the full-screen settle confirmation"
+  },
+  "refundSellerTitle": "Refund the seller?",
+  "@refundSellerTitle": {
+    "description": "Title of the full-screen cancel confirmation"
+  },
+  "payBuyerRecipient": "The buyer receives",
+  "@payBuyerRecipient": {
+    "description": "Settle confirmation: label above the amount"
+  },
+  "refundSellerRecipient": "The seller gets back",
+  "@refundSellerRecipient": {
+    "description": "Cancel confirmation: label above the amount"
+  },
+  "payBuyerBreakdown": "The order's {amount} less the node's fee of {fee}.",
+  "@payBuyerBreakdown": {
+    "description": "Settle confirmation: how the amount is made up; both are formatted sat amounts",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "refundSellerBreakdown": "The order's {amount} plus the node's fee of {fee}, as the seller locked them.",
+  "@refundSellerBreakdown": {
+    "description": "Cancel confirmation: how the amount is made up; both are formatted sat amounts",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "resolveTradeFiat": "Trade: {fiat}",
+  "@resolveTradeFiat": {
+    "description": "Confirmation: the fiat side of the trade, e.g. \"50 EUR\"",
+    "placeholders": {
+      "fiat": {
+        "type": "String"
+      }
+    }
+  },
+  "payBuyerOtherSide": "The seller's hold invoice is settled: the seller does not get these sats back.",
+  "@payBuyerOtherSide": {
+    "description": "Settle confirmation: what happens to the other party"
+  },
+  "refundSellerOtherSide": "The seller's hold invoice is canceled: the buyer receives nothing from this trade.",
+  "@refundSellerOtherSide": {
+    "description": "Cancel confirmation: what happens to the other party"
+  },
+  "resolveBondsNote": "Bonds, if any, go back to both parties; none is slashed.",
+  "@resolveBondsNote": {
+    "description": "Confirmation: what happens to the anti-abuse bonds (no slash in this version)"
+  },
+  "resolveIrreversible": "This cannot be undone. Once sent, Bosstro never sends it again by itself.",
+  "@resolveIrreversible": {
+    "description": "Confirmation: the irreversibility warning, in red"
+  },
+  "resolveWaiting": "Waiting for the node's answer. Keep Bosstro open.",
+  "@resolveWaiting": {
+    "description": "Confirmation: shown while the request waits for the node"
+  },
+  "resolvedPaidTitle": "Resolved: you paid the buyer",
+  "@resolvedPaidTitle": {
+    "description": "Result: the node confirmed the settle"
+  },
+  "resolvedPaidBody": "The node settled the seller's hold invoice and pays the buyer. The dispute is closed.",
+  "@resolvedPaidBody": {
+    "description": "Under resolvedPaidTitle"
+  },
+  "resolvedRefundedTitle": "Resolved: you refunded the seller",
+  "@resolvedRefundedTitle": {
+    "description": "Result: the node confirmed the cancel"
+  },
+  "resolvedRefundedBody": "The node canceled the seller's hold invoice: the sats go back to the seller. The dispute is closed.",
+  "@resolvedRefundedBody": {
+    "description": "Under resolvedRefundedTitle"
+  },
+  "resolvedCoopTitle": "The parties had already canceled",
+  "@resolvedCoopTitle": {
+    "description": "Result: CooperativeCancelAccepted"
+  },
+  "resolvedCoopBody": "Buyer and seller canceled the trade between them before your request, so nothing was paid or refunded by you. The dispute is closed.",
+  "@resolvedCoopBody": {
+    "description": "Under resolvedCoopTitle"
+  },
+  "readOnlySolverTitle": "You cannot pay or refund on this node",
+  "@readOnlySolverTitle": {
+    "description": "Result: NotAuthorized (read-only solver)"
+  },
+  "takenOverTitle": "Another solver holds this dispute now",
+  "@takenOverTitle": {
+    "description": "Result: the node said the dispute is not this key's (taken over)"
+  },
+  "takenOverBody": "The node gave it to another solver, so nothing was paid or refunded. It has left Your disputes.",
+  "@takenOverBody": {
+    "description": "Under takenOverTitle"
+  },
+  "notInDisputeTitle": "This order is no longer in dispute",
+  "@notInDisputeTitle": {
+    "description": "Result: refused by the order's status"
+  },
+  "notInDisputeBody": "It was paid, refunded or released already, perhaps by an earlier request whose answer was lost. The dispute's status will say how it ended.",
+  "@notInDisputeBody": {
+    "description": "Under notInDisputeTitle"
+  },
+  "resolveRefusedTitle": "The node refused the request",
+  "@resolveRefusedTitle": {
+    "description": "Result: another refusal"
+  },
+  "resolveRefusedBody": "Nothing was paid or refunded. Try again later, or ask the node's operator.",
+  "@resolveRefusedBody": {
+    "description": "Under resolveRefusedTitle"
+  },
+  "resolveNoAnswerBody": "It may have acted all the same: the sats may have moved. Bosstro did not send the request again. Check the dispute's status before you try again; it changes as soon as the node publishes it.",
+  "@resolveNoAnswerBody": {
+    "description": "Result: no answer in time (title is noAnswerTitle)"
+  },
+  "resolveClosedBody": "This dispute is closed: there is nothing to resolve.",
+  "@resolveClosedBody": {
+    "description": "Not sent: the dispute is closed already"
+  },
+  "resolveNoOrderBody": "Bosstro does not know this dispute's order, and the request needs it. Recover the dispute to read it again.",
+  "@resolveNoOrderBody": {
+    "description": "Not sent: the take named no order id"
+  },
+  "resolveBackToDispute": "Back to the dispute",
+  "@resolveBackToDispute": {
+    "description": "Result: the one action, back to the dispute detail"
+  },
+  "resolveGoToDisputes": "Go to Your disputes",
+  "@resolveGoToDisputes": {
+    "description": "Result after a take-over: back to the In progress list"
+  },
+  "inProgressClosedHeading": "Closed",
+  "@inProgressClosedHeading": {
+    "description": "In progress: heading of the disputes this key held that are closed"
+  },
+  "inProgressNoneOpen": "You hold no dispute now.",
+  "@inProgressNoneOpen": {
+    "description": "In progress: shown above the closed disputes when none is open"
+  },
+  "closedPaidBuyer": "You paid the buyer",
+  "@closedPaidBuyer": {
+    "description": "A closed dispute this key resolved by paying the buyer"
+  },
+  "closedRefundedSeller": "You refunded the seller",
+  "@closedRefundedSeller": {
+    "description": "A closed dispute this key resolved by refunding the seller"
+  },
+  "closedCooperatively": "The parties canceled it before your decision",
+  "@closedCooperatively": {
+    "description": "A closed dispute: CooperativeCancelAccepted answered this key's request"
+  },
+  "detailResult": "Result",
+  "@detailResult": {
+    "description": "Dispute detail, Info: row with how a closed dispute ended"
   }
 }

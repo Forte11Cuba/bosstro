@@ -1328,4 +1328,164 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get observerFileOther => 'File';
+
+  @override
+  String get resolveCardTitle => 'Resolve the dispute';
+
+  @override
+  String get resolveCardBody =>
+      'Once you have heard both parties, decide where the sats go. It cannot be undone.';
+
+  @override
+  String get payBuyerAction => 'Pay the buyer';
+
+  @override
+  String get refundSellerAction => 'Refund the seller';
+
+  @override
+  String get payBuyerAnswer => 'Pay the buyer';
+
+  @override
+  String get refundSellerAnswer => 'Refund the seller';
+
+  @override
+  String get resolveReadOnlyNote =>
+      'Your solver key can mediate on this node but not pay or refund. Ask the operator for read-write permission.';
+
+  @override
+  String get resolveUnansweredPayNote =>
+      'Your request to pay the buyer got no answer. The node may have paid all the same: check the dispute\'s status before you try again.';
+
+  @override
+  String get resolveUnansweredRefundNote =>
+      'Your request to refund the seller got no answer. The node may have refunded all the same: check the dispute\'s status before you try again.';
+
+  @override
+  String get payBuyerTitle => 'Pay the buyer?';
+
+  @override
+  String get refundSellerTitle => 'Refund the seller?';
+
+  @override
+  String get payBuyerRecipient => 'The buyer receives';
+
+  @override
+  String get refundSellerRecipient => 'The seller gets back';
+
+  @override
+  String payBuyerBreakdown(String amount, String fee) {
+    return 'The order\'s $amount less the node\'s fee of $fee.';
+  }
+
+  @override
+  String refundSellerBreakdown(String amount, String fee) {
+    return 'The order\'s $amount plus the node\'s fee of $fee, as the seller locked them.';
+  }
+
+  @override
+  String resolveTradeFiat(String fiat) {
+    return 'Trade: $fiat';
+  }
+
+  @override
+  String get payBuyerOtherSide =>
+      'The seller\'s hold invoice is settled: the seller does not get these sats back.';
+
+  @override
+  String get refundSellerOtherSide =>
+      'The seller\'s hold invoice is canceled: the buyer receives nothing from this trade.';
+
+  @override
+  String get resolveBondsNote =>
+      'Bonds, if any, go back to both parties; none is slashed.';
+
+  @override
+  String get resolveIrreversible =>
+      'This cannot be undone. Once sent, Bosstro never sends it again by itself.';
+
+  @override
+  String get resolveWaiting =>
+      'Waiting for the node\'s answer. Keep Bosstro open.';
+
+  @override
+  String get resolvedPaidTitle => 'Resolved: you paid the buyer';
+
+  @override
+  String get resolvedPaidBody =>
+      'The node settled the seller\'s hold invoice and pays the buyer. The dispute is closed.';
+
+  @override
+  String get resolvedRefundedTitle => 'Resolved: you refunded the seller';
+
+  @override
+  String get resolvedRefundedBody =>
+      'The node canceled the seller\'s hold invoice: the sats go back to the seller. The dispute is closed.';
+
+  @override
+  String get resolvedCoopTitle => 'The parties had already canceled';
+
+  @override
+  String get resolvedCoopBody =>
+      'Buyer and seller canceled the trade between them before your request, so nothing was paid or refunded by you. The dispute is closed.';
+
+  @override
+  String get readOnlySolverTitle => 'You cannot pay or refund on this node';
+
+  @override
+  String get takenOverTitle => 'Another solver holds this dispute now';
+
+  @override
+  String get takenOverBody =>
+      'The node gave it to another solver, so nothing was paid or refunded. It has left Your disputes.';
+
+  @override
+  String get notInDisputeTitle => 'This order is no longer in dispute';
+
+  @override
+  String get notInDisputeBody =>
+      'It was paid, refunded or released already, perhaps by an earlier request whose answer was lost. The dispute\'s status will say how it ended.';
+
+  @override
+  String get resolveRefusedTitle => 'The node refused the request';
+
+  @override
+  String get resolveRefusedBody =>
+      'Nothing was paid or refunded. Try again later, or ask the node\'s operator.';
+
+  @override
+  String get resolveNoAnswerBody =>
+      'It may have acted all the same: the sats may have moved. Bosstro did not send the request again. Check the dispute\'s status before you try again; it changes as soon as the node publishes it.';
+
+  @override
+  String get resolveClosedBody =>
+      'This dispute is closed: there is nothing to resolve.';
+
+  @override
+  String get resolveNoOrderBody =>
+      'Bosstro does not know this dispute\'s order, and the request needs it. Recover the dispute to read it again.';
+
+  @override
+  String get resolveBackToDispute => 'Back to the dispute';
+
+  @override
+  String get resolveGoToDisputes => 'Go to Your disputes';
+
+  @override
+  String get inProgressClosedHeading => 'Closed';
+
+  @override
+  String get inProgressNoneOpen => 'You hold no dispute now.';
+
+  @override
+  String get closedPaidBuyer => 'You paid the buyer';
+
+  @override
+  String get closedRefundedSeller => 'You refunded the seller';
+
+  @override
+  String get closedCooperatively =>
+      'The parties canceled it before your decision';
+
+  @override
+  String get detailResult => 'Result';
 }

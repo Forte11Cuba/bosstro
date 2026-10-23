@@ -8,6 +8,7 @@ pub mod node_info;
 pub mod nodes;
 pub mod observer;
 pub mod relays;
+pub mod resolve;
 pub mod solver;
 pub mod take;
 

@@ -118,3 +118,90 @@ eval "$(SOLVER_PK=<solver pubkey hex> integration_test/new_dispute.sh <home copy
 ```
 
 The helpers the runs share are in `e2e_support.dart`.
+
+## Resolution (phase 6), with real regtest sats
+
+`resolve_against_local_mostrod_test.dart` drives the phase 6 screens, and
+`resolve_against_a_local_mostrod` (an `#[ignore]` test in
+`rust/src/mostro/resolve.rs`) sends one `AdminSettle` / `AdminCancel` from the
+Rust core for the answers the app reaches only in a race. **The disputes must
+be real trades**: `new_dispute.sh` clones orders with no hold invoice, and
+settle or cancel would fail in LND. Never against a real node or public relays.
+
+The setup (no keys are written here; generate your own):
+
+- **Lightning:** Polar's regtest network: mostrod on `alice` (its
+  `settings.toml` points at `~/.polar/networks/1/volumes/lnd/alice`), the
+  seller's wallet `bob`, the buyer's `carol`. `lncli` runs inside the
+  containers: `docker exec -u lnd polar-n1-<node> lncli --network=regtest
+  --lnddir=/home/lnd/.lnd …`. With an old chain tip LND reads "not synced",
+  and mostrod 0.20.1 goes into **automatic maintenance**
+  (`daemon_state.maintenance_mode`, reason `lnd_unsynced`), which answers
+  `NewOrder` and the takes with `CantDo(MaintenanceMode)` until LND has been
+  synced for a while. Mine a block first (`bitcoin-cli … generatetoaddress 1
+  <addr>` in `polar-n1-backend1`), and clear the row in the copy if it is set.
+- **mostrod** from a copy of a home whose `[nostr] relays` lists only a local
+  relay (`nak serve --port <port>`), with a **node key of its own** (a fresh
+  `nsec_privkey`) when another test mostrod runs from a copy of the same
+  home: two daemons with one key on one relay would both answer. Solvers are
+  rows in its `users` table: `is_solver = 1`, `category` 1 (Read) or 2
+  (Read-Write).
+- **The parties:** `../mostro-cli`, **built from its current main** (0.16.3;
+  an older build cannot read mostrod 0.20's answers: "Error serializing
+  message"), one `MCLI_DIR` per party so each has its own keys, with
+  `MOSTRO_PUBKEY`, `RELAYS` (the local relay only) and `TRANSPORT=nip44`.
+  Each dispute: the seller's `neworder -k sell … -a <sats>`; the buyer's
+  `takesell -o <order> -i <invoice>` with carol's invoice for `sats - fee`
+  (mostrod's fee is `fee * sats / 2`, here 0.5 %); the seller's hold
+  invoice from `getdm`, for `sats + fee`, paid by `bob` (`payinvoice -f`
+  blocks until it is settled or canceled: run it in the background); the
+  buyer's `fiatsent` and `dispute`. The dispute id is the 38386's `d`; its
+  order id is in the node's `disputes` table (ids are 16-byte blobs).
+
+The app run has two steps, each its own `flutter test` (the core starts once
+per process):
+
+```bash
+# A Read solver takes dispute 2 and asks to pay its buyer: refused, said so.
+flutter test integration_test/resolve_against_local_mostrod_test.dart -d linux \
+  --dart-define=E2E_RELAY=ws://localhost:<port> \
+  --dart-define=E2E_NODE=<node hex> \
+  --dart-define=E2E_SOLVER=<Read solver secret> \
+  --dart-define=E2E_STEP=read-only \
+  --dart-define=E2E_DISPUTE_2=<dispute 2>
+
+# A Read-Write solver pays dispute 1's buyer, takes dispute 3, takes dispute 2
+# over from the Read solver (Recover a dispute) and refunds its seller.
+flutter test integration_test/resolve_against_local_mostrod_test.dart -d linux \
+  --dart-define=E2E_RELAY=ws://localhost:<port> \
+  --dart-define=E2E_NODE=<node hex> \
+  --dart-define=E2E_SOLVER=<Read-Write solver secret> \
+  --dart-define=E2E_STEP=resolve \
+  --dart-define=E2E_DISPUTE=<dispute 1> \
+  --dart-define=E2E_DISPUTE_2=<dispute 2> \
+  --dart-define=E2E_DISPUTE_3=<dispute 3>
+```
+
+Check the sats outside, before and after: `alice lookupinvoice <order hash>`
+(the seller's hold invoice: `SETTLED` after paying the buyer, `CANCELED` after
+a refund), `carol listinvoices` (the buyer's invoice `SETTLED` for
+`sats - fee`), bob's `payinvoice` output (`SUCCEEDED`, or `FAILED` with
+`INCORRECT_PAYMENT_DETAILS` and "0 + 0 sat" after a refund) and the channel
+balances.
+
+Then the Rust test, once per answer (the feed does not follow the node, so
+the request leaves even for a dispute the node has closed):
+
+```bash
+cd rust && BOSSTRO_E2E_RELAY=ws://localhost:<port> BOSSTRO_E2E_NODE=<node hex> \
+  BOSSTRO_E2E_SOLVER=<secret> BOSSTRO_E2E_DISPUTE=<dispute> BOSSTRO_E2E_ORDER=<its order> \
+  BOSSTRO_E2E_RESOLUTION=pay|refund BOSSTRO_E2E_EXPECT=<outcome> \
+  cargo test --lib resolve_against_a_local_mostrod -- --ignored --nocapture
+```
+
+- dispute 1 again, `pay`, Read-Write key → `not-in-dispute`
+  (`invalid_order_status`): a retry after a settle that happened pays nothing;
+- dispute 2, the Read key → `taken-over` (`IsNotYourDispute`), its take dropped;
+- dispute 3 after `cancel -o <order>` from both parties (mostro-cli) →
+  `cooperatively-canceled`; the seller's hold invoice is `CANCELED` by the
+  parties' cancel, and the node's 38386 reads `cooperatively-canceled`.

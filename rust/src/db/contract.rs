@@ -160,6 +160,7 @@ pub(crate) async fn disputes_round_trip(storage: &impl Storage) {
         initiator_pubkey: Some("11".into()),
         buyer_pubkey: Some("22".into()),
         seller_pubkey: None,
+        resolved_as: None,
     });
     storage.save_dispute(&row).await.unwrap();
     assert_eq!(
@@ -179,6 +180,43 @@ pub(crate) async fn disputes_round_trip(storage: &impl Storage) {
     let mut all = storage.list_disputes("aa").await.unwrap();
     all.sort_by(|a, b| a.dispute_id.cmp(&b.dispute_id));
     assert_eq!(all, vec![bare, row]);
+}
+
+/// Phase 6: how this key resolved a dispute is kept with its take, every
+/// word of it, and gone with the take.
+pub(crate) async fn a_resolution_round_trips(storage: &impl Storage) {
+    use crate::api::resolve::ResolvedAs;
+    let mut row = dispute("aa", DISPUTE_A);
+    row.taken = Some(crate::disputes::tests::taken());
+    for (status, resolved) in [
+        (DisputeStatus::Settled, ResolvedAs::PaidBuyer),
+        (DisputeStatus::SellerRefunded, ResolvedAs::RefundedSeller),
+        (
+            DisputeStatus::CooperativelyCanceled,
+            ResolvedAs::CooperativelyCanceled,
+        ),
+    ] {
+        row.status = status;
+        row.taken.as_mut().unwrap().resolved_as = Some(resolved);
+        storage.save_dispute(&row).await.unwrap();
+        assert_eq!(
+            storage.get_dispute("aa", DISPUTE_A).await.unwrap(),
+            Some(row.clone())
+        );
+        assert_eq!(
+            storage
+                .list_disputes_with_status("aa", status)
+                .await
+                .unwrap(),
+            vec![row.clone()]
+        );
+    }
+    row.taken = None;
+    storage.save_dispute(&row).await.unwrap();
+    assert_eq!(
+        storage.get_dispute("aa", DISPUTE_A).await.unwrap(),
+        Some(row)
+    );
 }
 
 /// D6: the same dispute id under two nodes is two rows, and a node's list
@@ -260,6 +298,7 @@ pub(crate) async fn takes_keep_their_solver(storage: &impl Storage) {
         initiator_pubkey: None,
         buyer_pubkey: None,
         seller_pubkey: None,
+        resolved_as: None,
     };
     let mut mine = dispute("aa", DISPUTE_A);
     mine.status = DisputeStatus::InProgress;

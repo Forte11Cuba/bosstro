@@ -13,6 +13,7 @@
 use anyhow::Result;
 
 use crate::api::disputes::{DisputeInitiator, DisputeStatus, DisputeSummary};
+use crate::api::resolve::{Resolution, ResolvedAs};
 
 /// Whether this key is a solver on a node, as its answers have shown.
 /// Cached per node and solver key (D6, D12).
@@ -29,11 +30,12 @@ pub enum SolverStatus {
     No,
 }
 
-/// What this key may do on a node (D12), as its answers have shown. Phase 4
-/// never learns it: a take succeeds for a Read and a Read-Write solver
+/// What this key may do on a node (D12), as its answers have shown. A take
+/// never teaches it: a take succeeds for a Read and a Read-Write solver
 /// alike, and the take-over a Read solver cannot make is indistinguishable
-/// from recovering one's own dispute. Phase 6 learns it from settle and
-/// cancel.
+/// from recovering one's own dispute. Settle and cancel do (phase 6):
+/// `NotAuthorized` → Read; `AdminSettled`, `AdminCanceled` or
+/// `CooperativeCancelAccepted` → Read-Write.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum SolverPermission {
@@ -129,13 +131,20 @@ pub struct TakenDisputeSummary {
     /// From the order's kind 38383, when the relays have it (the take's
     /// answer carries none).
     pub fiat_code: Option<String>,
+    /// How this key resolved it, once closed by its own request.
+    pub resolved_as: Option<ResolvedAs>,
 }
 
-/// The disputes this key took on the active node and still holds.
+/// The disputes this key took on the active node: the ones it still holds,
+/// and the ones that closed while it held them.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InProgressDisputes {
     pub mostro_pubkey: String,
+    /// `in-progress`, the one that has waited longest first.
     pub disputes: Vec<TakenDisputeSummary>,
+    /// Closed (settled, refunded, released, cancelled by the parties), the
+    /// one that closed last first. Read only.
+    pub closed: Vec<TakenDisputeSummary>,
 }
 
 /// Send `AdminTakeDispute` for `dispute_id`, a stored dispute of the active
@@ -150,8 +159,8 @@ pub async fn take_dispute(dispute_id: String) -> Result<TakeResult, TakeError> {
 }
 
 /// The disputes this key holds on the active node (`in-progress`, taken by
-/// it), the one that has waited longest first; `None` without a node or a
-/// key.
+/// it), the one that has waited longest first, and those it held that closed;
+/// `None` without a node or a key.
 pub async fn in_progress_disputes() -> Result<Option<InProgressDisputes>> {
     crate::mostro::take::in_progress().await
 }
@@ -195,9 +204,22 @@ pub struct DisputeDetail {
     /// The parties' trade keys (hex), when the node named them.
     pub buyer_pubkey: Option<String>,
     pub seller_pubkey: Option<String>,
-    /// Whether the dispute is over (its 38386 is terminal): the chats are
-    /// read only.
+    /// Whether the dispute is over (its 38386 is terminal, or this key's own
+    /// resolution closed it): the chats are read only, nothing can be
+    /// resolved.
     pub is_closed: bool,
+    /// How this key resolved it, when its own request closed it.
+    pub resolved_as: Option<ResolvedAs>,
+    /// What paying the buyer sends them, sats: the order amount less the
+    /// node's fee (mostrod's `do_payment` pays `amount - fee`).
+    pub buyer_payout: Option<i64>,
+    /// What refunding the seller gives back, sats: the seller's hold invoice,
+    /// the order amount plus the node's fee (`amount + fee`).
+    pub seller_refund: Option<i64>,
+    /// A resolution this key sent that got no answer in time and is still
+    /// waited for (in this process only, for ten minutes): the node may have
+    /// acted on it. The detail warns before another is sent.
+    pub unanswered_resolution: Option<Resolution>,
 }
 
 /// The detail of `dispute_id` on the active node, when this key took it;

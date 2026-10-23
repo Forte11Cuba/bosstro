@@ -468,7 +468,9 @@ async fn no_key_or_content_reaches_storage_or_the_logs() {
             .unwrap(),
     ));
     let b = bench_with(Store::Db(storage), ChatStore::Db(storage)).await;
-    let secret_text = "the receipt number is 7731";
+    // "zq" is not hex: the capture holds every test's lines, and random
+    // keys and ids in them can contain any run of hex digits.
+    let secret_text = "the receipt number is zq7731";
     p2p_say(&b.buyer, &b.seller, secret_text).await;
     let (conv, sign) = p2p_keys(&b);
     let hex = conv.secret_key().to_secret_hex();
@@ -522,5 +524,6 @@ async fn no_key_or_content_reaches_storage_or_the_logs() {
         "the capture sees the observer"
     );
     assert!(!logged.to_lowercase().contains(&hex));
-    assert!(!logged.contains("7731"));
+    assert!(!logged.contains("zq7731"));
+    assert!(!logged.contains("receipt number"));
 }

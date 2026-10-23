@@ -35,7 +35,7 @@ use mostro_core::error::CantDoReason;
 use mostro_core::message::{Action, Message, Payload};
 use nostr_sdk::prelude::*;
 
-use super::replies::{self, Request};
+use super::replies::{self, Purpose, Reply, Request};
 use crate::api::disputes::{DisputeStatus, DisputeSummary};
 use crate::api::node_info::ProtocolSupport;
 use crate::api::take::{
@@ -103,17 +103,23 @@ pub(crate) fn classify(
 }
 
 /// A `CantDoReason` as the wire writes it (`not_found`).
-fn reason_marker(reason: &CantDoReason) -> String {
+pub(crate) fn reason_marker(reason: &CantDoReason) -> String {
     serde_json::to_value(reason)
         .ok()
         .and_then(|v| v.as_str().map(str::to_string))
         .unwrap_or_else(|| format!("{reason:?}"))
 }
 
-/// Apply the node's answer to `request`: store the take, or what it says
-/// about this key, and return the result the caller sees. Runs whether or
-/// not the caller is still waiting, so a late answer is kept too.
-pub(crate) async fn settle(feed: &Feed, request: &Request, message: &Message) -> TakeResult {
+/// Apply the node's answer to `request`, a take sent while the dispute was
+/// `status_at_send`: store the take, or what it says about this key, and
+/// return the result the caller sees. Runs whether or not the caller is
+/// still waiting, so a late answer is kept too.
+pub(crate) async fn settle(
+    feed: &Feed,
+    request: &Request,
+    status_at_send: DisputeStatus,
+    message: &Message,
+) -> TakeResult {
     let answer = read_answer(&request.dispute_id, message);
     let status_now = match feed.row(&request.node, &request.dispute_id).await {
         Ok(row) => row.map(|r| r.status),
@@ -122,7 +128,7 @@ pub(crate) async fn settle(feed: &Feed, request: &Request, message: &Message) ->
             None
         }
     };
-    let (outcome, reason) = classify(&answer, request.status_at_send, status_now);
+    let (outcome, reason) = classify(&answer, status_at_send, status_now);
     match (&answer, outcome) {
         (Answer::Took(info), TakeOutcome::Taken) => {
             let existing = feed
@@ -192,6 +198,7 @@ pub(crate) fn taken_from(
         initiator_pubkey: non_empty(&info.initiator_pubkey),
         buyer_pubkey: info.buyer_pubkey.clone(),
         seller_pubkey: info.seller_pubkey.clone(),
+        resolved_as: None,
     }
 }
 
@@ -203,7 +210,7 @@ pub(crate) fn take_pow(pow: Option<u32>, pow_first_contact: Option<u32>) -> u8 {
 
 /// A request id the node echoes: random, and within 53 bits so any JSON
 /// reader keeps it whole.
-fn new_request_id() -> u64 {
+pub(crate) fn new_request_id() -> u64 {
     (uuid::Uuid::new_v4().as_u128() as u64) & ((1 << 53) - 1)
 }
 
@@ -303,9 +310,13 @@ pub(crate) async fn send_take(
         node: node.to_string(),
         solver: keys.public_key().to_hex(),
         dispute_id: dispute_id.to_string(),
-        status_at_send: row.status,
+        purpose: Purpose::Take {
+            status_at_send: row.status,
+        },
     };
-    let answer = router.register(request_id, request)?;
+    let answer = router
+        .register(request_id, request)
+        .map_err(|_| TakeError::AlreadyTaking)?;
     let message = Message::new_dispute(
         Some(dispute_uuid),
         Some(request_id),
@@ -337,7 +348,7 @@ pub(crate) async fn send_take(
     }
 
     match crate::rt::time::timeout(wait, answer).await {
-        Ok(Ok(result)) => Ok(result),
+        Ok(Ok(Reply::Take(result))) => Ok(result),
         // Timed out, or the router dropped the request (the node or the
         // key changed). The request stays registered for a late answer.
         _ => Ok(TakeResult {
@@ -353,7 +364,7 @@ pub(crate) async fn send_take(
 /// (`SingleThreadPow`): natively that runs on the blocking pool, off the
 /// runtime's workers; the web has no other thread and the page waits
 /// (AGENTS.md → "Accepted limits").
-async fn wrap_mined(
+pub(crate) async fn wrap_mined(
     keys: &Keys,
     node: &PublicKey,
     message: &Message,
@@ -448,11 +459,60 @@ pub(crate) async fn in_progress() -> anyhow::Result<Option<InProgressDisputes>> 
     let Some((node, solver)) = node_and_solver().await else {
         return Ok(None);
     };
-    let rows = crate::disputes::rows_with_status(&node, DisputeStatus::InProgress).await?;
+    let mut rows = crate::disputes::rows_with_status(&node, DisputeStatus::InProgress).await?;
+    let open = held_by(&rows, &solver, crate::rt::unix_now());
+    rows.clear();
+    for status in TERMINAL {
+        rows.extend(crate::disputes::rows_with_status(&node, status).await?);
+    }
     Ok(Some(InProgressDisputes {
-        disputes: held_by(&rows, &solver, crate::rt::unix_now()),
+        disputes: open,
+        closed: closed_by(&rows, &solver),
         mostro_pubkey: node,
     }))
+}
+
+/// Every status a dispute ends in.
+const TERMINAL: [DisputeStatus; 4] = [
+    DisputeStatus::Settled,
+    DisputeStatus::SellerRefunded,
+    DisputeStatus::Released,
+    DisputeStatus::CooperativelyCanceled,
+];
+
+fn summary_of(row: &DisputeRecord, taken: &TakenDispute) -> TakenDisputeSummary {
+    TakenDisputeSummary {
+        mostro_pubkey: row.mostro_pubkey.clone(),
+        dispute_id: row.dispute_id.clone(),
+        status: row.status,
+        initiator: row.initiator,
+        opened_at: row.opened_at,
+        taken_at: taken.taken_at,
+        amount: taken.amount,
+        fiat_amount: taken.fiat_amount,
+        fiat_code: taken.fiat_code.clone(),
+        resolved_as: taken.resolved_as,
+    }
+}
+
+/// The closed rows `solver` took, the one closed last first: by the
+/// revision that closed it (the node's), then by id. Expired ones stay: the
+/// row is this key's record, not the relays'.
+pub(crate) fn closed_by(rows: &[DisputeRecord], solver: &str) -> Vec<TakenDisputeSummary> {
+    let mut closed: Vec<(&DisputeRecord, TakenDisputeSummary)> = rows
+        .iter()
+        .filter(|row| row.status.is_terminal())
+        .filter_map(|row| {
+            let taken = row.taken.as_ref().filter(|t| t.solver_pubkey == solver)?;
+            Some((row, summary_of(row, taken)))
+        })
+        .collect();
+    closed.sort_by(|(a, _), (b, _)| {
+        b.event_created_at
+            .cmp(&a.event_created_at)
+            .then_with(|| a.dispute_id.cmp(&b.dispute_id))
+    });
+    closed.into_iter().map(|(_, s)| s).collect()
 }
 
 /// The rows `solver` holds, oldest first.
@@ -462,17 +522,11 @@ pub(crate) fn held_by(rows: &[DisputeRecord], solver: &str, now: i64) -> Vec<Tak
         .filter(|row| row.status == DisputeStatus::InProgress && !row.is_expired(now))
         .filter_map(|row| {
             let taken = row.taken.as_ref().filter(|t| t.solver_pubkey == solver)?;
-            Some(TakenDisputeSummary {
-                mostro_pubkey: row.mostro_pubkey.clone(),
-                dispute_id: row.dispute_id.clone(),
-                status: row.status,
-                initiator: row.initiator,
-                opened_at: row.opened_at,
-                taken_at: taken.taken_at,
-                amount: taken.amount,
-                fiat_amount: taken.fiat_amount,
-                fiat_code: taken.fiat_code.clone(),
-            })
+            // Resolved here, the node's closing revision not in yet.
+            if taken.resolved_as.is_some() {
+                return None;
+            }
+            Some(summary_of(row, taken))
         })
         .collect();
     list.sort_by(|a, b| oldest_first((a.opened_at, &a.dispute_id), (b.opened_at, &b.dispute_id)));
@@ -511,7 +565,13 @@ pub(crate) async fn detail(dispute_id: &str) -> anyhow::Result<Option<DisputeDet
             None => None,
         },
     };
-    Ok(row.as_ref().and_then(|row| detail_of(row, &solver)))
+    let Some(mut detail) = row.as_ref().and_then(|row| detail_of(row, &solver)) else {
+        return Ok(None);
+    };
+    if let Some(router) = replies::router() {
+        detail.unanswered_resolution = router.unanswered_resolution(&node, &solver, dispute_id);
+    }
+    Ok(Some(detail))
 }
 
 /// `row` as its detail, when `solver` took it.
@@ -534,7 +594,15 @@ pub(crate) fn detail_of(row: &DisputeRecord, solver: &str) -> Option<DisputeDeta
         fee: taken.fee,
         buyer_pubkey: taken.buyer_pubkey.clone(),
         seller_pubkey: taken.seller_pubkey.clone(),
-        is_closed: row.status.is_terminal(),
+        is_closed: row.status.is_terminal() || taken.resolved_as.is_some(),
+        resolved_as: taken.resolved_as,
+        buyer_payout: taken
+            .amount
+            .map(|amount| amount.saturating_sub(taken.fee.unwrap_or(0)).max(0)),
+        seller_refund: taken
+            .amount
+            .map(|amount| amount.saturating_add(taken.fee.unwrap_or(0))),
+        unanswered_resolution: None,
     })
 }
 

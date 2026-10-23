@@ -43,6 +43,7 @@ use tokio::sync::{broadcast, mpsc};
 use super::event::{parse_dispute_event, KIND_DISPUTE};
 use super::{merge, DisputeRecord, TakenDispute};
 use crate::api::disputes::{DisputeInitiator, DisputeStatus, DisputeUpdate};
+use crate::api::resolve::ResolvedAs;
 use crate::db::Storage;
 use crate::nostr::live_subs::LiveSubs;
 
@@ -486,6 +487,84 @@ impl Feed {
         };
         self.announce(&row);
         Ok(())
+    }
+
+    /// Record that this key's own resolution of `dispute_id` closed it, as
+    /// the node answered (phase 6). Only while the row is still taken by
+    /// `solver` for `order_id`; the first answer wins. A row the node has not
+    /// republished yet reads closed at once, with the status the node gives
+    /// that end; its own revision, newer, replaces it as any other.
+    pub(crate) async fn record_resolution(
+        &self,
+        node: &str,
+        dispute_id: &str,
+        solver: &str,
+        order_id: &str,
+        resolved: ResolvedAs,
+    ) -> anyhow::Result<()> {
+        let row = {
+            let _guard = self.ingest_lock.lock().await;
+            let Some(mut row) = self.store.get(node, dispute_id).await? else {
+                return Ok(());
+            };
+            match row.taken.as_mut() {
+                Some(t)
+                    if t.solver_pubkey == solver
+                        && t.order_id.as_deref() == Some(order_id)
+                        && t.resolved_as.is_none() =>
+                {
+                    t.resolved_as = Some(resolved);
+                }
+                _ => return Ok(()),
+            }
+            if !row.status.is_terminal() {
+                row.status = resolved.status();
+            }
+            self.store.save(&row).await?;
+            row
+        };
+        self.announce(&row);
+        Ok(())
+    }
+
+    /// Drop `solver`'s take of `dispute_id` (for `order_id`): the node said
+    /// another solver holds it now (phase 6). The row stays, as any dispute
+    /// of the node; it leaves this key's lists, and its chats close.
+    pub(crate) async fn drop_take(
+        &self,
+        node: &str,
+        dispute_id: &str,
+        solver: &str,
+        order_id: &str,
+    ) -> anyhow::Result<()> {
+        let row = {
+            let _guard = self.ingest_lock.lock().await;
+            let Some(mut row) = self.store.get(node, dispute_id).await? else {
+                return Ok(());
+            };
+            let mine = row.taken.as_ref().is_some_and(|t| {
+                t.solver_pubkey == solver && t.order_id.as_deref() == Some(order_id)
+            });
+            if !mine {
+                return Ok(());
+            }
+            row.taken = None;
+            self.store.save(&row).await?;
+            row
+        };
+        self.announce(&row);
+        Ok(())
+    }
+
+    /// Announce `dispute_id` as stored, changed or not: what is shown about
+    /// it may depend on more than its row (the solver's standing, a request
+    /// still waiting).
+    pub(crate) async fn announce_stored(&self, node: &str, dispute_id: &str) {
+        match self.store.get(node, dispute_id).await {
+            Ok(Some(row)) => self.announce(&row),
+            Ok(None) => {}
+            Err(e) => log::warn!("[disputes] stored dispute not read: {e}"),
+        }
     }
 
     /// `node`'s stored rows with `status` (the chat's channels).
