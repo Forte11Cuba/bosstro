@@ -1,13 +1,13 @@
 //! Relay pool — manages connections to Nostr relays. From ../app's
-//! `nostr/relay_pool.rs`, trimmed for phase 2.
+//! `nostr/relay_pool.rs`.
 //!
 //! Connection state is derived: Online if ≥1 relay is connected, Reconnecting
 //! while one is trying, Offline otherwise.
 //!
-//! Left out of ../app's pool until a phase needs them: the liveness probe
-//! (`relay_probe.rs`, which bounces a connected relay that stopped delivering)
-//! and the subscription repair (`live_subs.rs`), since phase 2 keeps no live
-//! subscription. Phase 3's kind 38386 subscription brings both back.
+//! Since phase 3 keeps a live subscription (the active node's kind 38386), the
+//! pool also runs ../app's liveness probe (`relay_probe.rs`): a `Connected`
+//! relay that has gone quiet is asked whether it still answers, and bounced
+//! when it does not, so `live_subs` re-issues its subscriptions.
 use anyhow::{anyhow, Result};
 use nostr_sdk::prelude::*;
 // The SDK re-exports its own `RelayStatus`; alias it to keep ours unambiguous.
@@ -18,9 +18,15 @@ use std::time::Duration;
 use tokio::sync::{broadcast, RwLock};
 
 use crate::api::relays::{ConnectionState, RelayInfo, RelaySource, RelayStatus};
+use crate::nostr::relay_probe::{self, RelayLiveness};
 
 /// How often the background task polls each relay's SDK status (seconds).
 const STATUS_POLL_INTERVAL_SECS: u64 = 2;
+
+/// How often the probe monitor looks for a relay worth asking. Shorter than
+/// `relay_probe::PROBE_INTERVAL`, which is what actually spaces the probes:
+/// the tick only decides when a relay becomes eligible.
+const PROBE_TICK: Duration = Duration::from_secs(30);
 
 /// How often it looks while the pool has never been connected, and for how
 /// long: a handshake is over in a few hundred milliseconds, and the app bar
@@ -51,6 +57,9 @@ pub struct RelayPool {
     /// only ever sees real transitions — see `broadcast_if_changed`.
     last_broadcast: Arc<Mutex<Option<ConnectionState>>>,
     relay_tx: broadcast::Sender<RelayInfo>,
+    /// When each relay was last heard from and last asked, for the liveness
+    /// probe (`nostr::relay_probe`).
+    liveness: Arc<RwLock<RelayLiveness>>,
 }
 
 impl RelayPool {
@@ -69,6 +78,7 @@ impl RelayPool {
             conn_tx,
             last_broadcast: Arc::new(Mutex::new(None)),
             relay_tx,
+            liveness: Arc::new(RwLock::new(RelayLiveness::default())),
         });
 
         for url in relay_urls {
@@ -82,6 +92,8 @@ impl RelayPool {
         // written by the status monitor alone, which has not run yet.
         pool.broadcast_connection_state().await;
         pool.spawn_status_monitor();
+        pool.spawn_liveness_observer();
+        pool.spawn_probe_monitor();
         Ok(pool)
     }
 
@@ -176,6 +188,7 @@ impl RelayPool {
         let mut removed = relays.remove(pos);
         drop(relays);
         removed.status = RelayStatus::Disconnected;
+        self.liveness.write().await.forget(url);
         self.blacklist.write().await.insert(url.to_string());
 
         let _ = self.relay_tx.send(removed.clone());
@@ -329,6 +342,83 @@ impl RelayPool {
                 if any_changed {
                     let relays_r = relays.read().await;
                     broadcast_if_changed(&last_broadcast, &conn_tx, &relays_r);
+                }
+            }
+        });
+    }
+
+    /// Stamp every relay we hear from, so the probe can skip the ones that
+    /// are plainly working (../app).
+    ///
+    /// One pool-owned receiver rather than instrumenting each consumer: the
+    /// signal has to outlive any single subscription being dropped and
+    /// rebuilt. `Message` covers every relay message, not only novel events,
+    /// which is the broadest "this socket delivers" evidence available.
+    fn spawn_liveness_observer(self: &Arc<Self>) {
+        let client = self.client.clone();
+        let liveness = self.liveness.clone();
+
+        crate::rt::spawn(async move {
+            let mut notifications = client.notifications();
+            loop {
+                match notifications.next().await {
+                    Some(ClientNotification::Event { relay_url, .. })
+                    | Some(ClientNotification::Message { relay_url, .. }) => {
+                        liveness
+                            .write()
+                            .await
+                            .record_traffic(relay_url.as_str(), crate::rt::unix_now());
+                    }
+                    Some(_) => continue,
+                    None => break,
+                }
+            }
+        });
+    }
+
+    /// Ask a quiet `Connected` relay whether it is still there, and bounce
+    /// its connection when it does not answer (../app).
+    ///
+    /// The reconnect is the point: it produces the `→Connected` transition
+    /// `live_subs` repairs on, and that repair re-REQs — which is what
+    /// replays what was missed.
+    fn spawn_probe_monitor(self: &Arc<Self>) {
+        let client = self.client.clone();
+        let relays = self.relays.clone();
+        let liveness = self.liveness.clone();
+
+        crate::rt::spawn(async move {
+            loop {
+                crate::rt::time::sleep(PROBE_TICK).await;
+
+                let relay_urls: Vec<String> =
+                    relays.read().await.iter().map(|r| r.url.clone()).collect();
+
+                for url in relay_urls {
+                    let Ok(Some(sdk_relay)) = client.relay(&url).await else {
+                        continue;
+                    };
+                    let now = crate::rt::unix_now();
+                    let (last_seen, last_probe) = {
+                        let liveness_r = liveness.read().await;
+                        (liveness_r.last_seen(&url), liveness_r.last_probe(&url))
+                    };
+                    if !relay_probe::should_probe(sdk_relay.status(), last_seen, last_probe, now) {
+                        continue;
+                    }
+                    // Stamped on the attempt, not the outcome: a relay that
+                    // never answers must not be re-asked on the next tick.
+                    liveness.write().await.record_probe(&url, now);
+
+                    if relay_probe::probe_once(&sdk_relay).await {
+                        continue;
+                    }
+                    log::warn!(
+                        "[relay] liveness probe unanswered relay={} — Connected but not \
+                         delivering; reconnecting it",
+                        display_relay(&url)
+                    );
+                    relay_probe::force_reconnect(&client, &url).await;
                 }
             }
         });

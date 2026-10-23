@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api.dart';
+import 'api/disputes.dart';
 import 'api/node_info.dart';
 import 'api/nodes.dart';
 import 'api/relays.dart';
@@ -27,6 +28,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStreamPtr;
 
   CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_DisputeUpdateStreamPtr =>
+      wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStreamPtr;
+
+  CrossPlatformFinalizerArg
   get rust_arc_decrement_strong_count_RelayStatusStreamPtr =>
       wire._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStreamPtr;
 
@@ -36,6 +41,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   ConnectionStateStream
   dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    dynamic raw,
+  );
+
+  @protected
+  DisputeUpdateStream
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
     dynamic raw,
   );
 
@@ -52,6 +63,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DisputeUpdateStream
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+    dynamic raw,
+  );
+
+  @protected
   RelayStatusStream
   dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
     dynamic raw,
@@ -60,6 +77,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   ConnectionStateStream
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    dynamic raw,
+  );
+
+  @protected
+  DisputeUpdateStream
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
     dynamic raw,
   );
 
@@ -82,6 +105,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ConnectionState dco_decode_box_autoadd_connection_state(dynamic raw);
 
   @protected
+  DisputeSummary dco_decode_box_autoadd_dispute_summary(dynamic raw);
+
+  @protected
+  DisputeUpdate dco_decode_box_autoadd_dispute_update(dynamic raw);
+
+  @protected
   double dco_decode_box_autoadd_f_64(dynamic raw);
 
   @protected
@@ -92,6 +121,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   NodeInfo dco_decode_box_autoadd_node_info(dynamic raw);
+
+  @protected
+  PendingDisputes dco_decode_box_autoadd_pending_disputes(dynamic raw);
 
   @protected
   RelayInfo dco_decode_box_autoadd_relay_info(dynamic raw);
@@ -106,6 +138,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ConnectionState dco_decode_connection_state(dynamic raw);
 
   @protected
+  DisputeInitiator dco_decode_dispute_initiator(dynamic raw);
+
+  @protected
+  DisputeStatus dco_decode_dispute_status(dynamic raw);
+
+  @protected
+  DisputeSummary dco_decode_dispute_summary(dynamic raw);
+
+  @protected
+  DisputeUpdate dco_decode_dispute_update(dynamic raw);
+
+  @protected
   double dco_decode_f_64(dynamic raw);
 
   @protected
@@ -116,6 +160,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<String> dco_decode_list_String(dynamic raw);
+
+  @protected
+  List<DisputeSummary> dco_decode_list_dispute_summary(dynamic raw);
 
   @protected
   List<MostroNodeEntry> dco_decode_list_mostro_node_entry(dynamic raw);
@@ -151,6 +198,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ConnectionState? dco_decode_opt_box_autoadd_connection_state(dynamic raw);
 
   @protected
+  DisputeSummary? dco_decode_opt_box_autoadd_dispute_summary(dynamic raw);
+
+  @protected
+  DisputeUpdate? dco_decode_opt_box_autoadd_dispute_update(dynamic raw);
+
+  @protected
   double? dco_decode_opt_box_autoadd_f_64(dynamic raw);
 
   @protected
@@ -165,6 +218,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   NodeInfo? dco_decode_opt_box_autoadd_node_info(dynamic raw);
 
   @protected
+  PendingDisputes? dco_decode_opt_box_autoadd_pending_disputes(dynamic raw);
+
+  @protected
   RelayInfo? dco_decode_opt_box_autoadd_relay_info(dynamic raw);
 
   @protected
@@ -172,6 +228,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int? dco_decode_opt_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  PendingDisputes dco_decode_pending_disputes(dynamic raw);
 
   @protected
   ProtocolSupport dco_decode_protocol_support(dynamic raw);
@@ -213,6 +272,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DisputeUpdateStream
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   RelayStatusStream
   sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
     SseDeserializer deserializer,
@@ -225,6 +290,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DisputeUpdateStream
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   RelayStatusStream
   sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
     SseDeserializer deserializer,
@@ -233,6 +304,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   ConnectionStateStream
   sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  DisputeUpdateStream
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
     SseDeserializer deserializer,
   );
 
@@ -257,6 +334,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DisputeSummary sse_decode_box_autoadd_dispute_summary(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  DisputeUpdate sse_decode_box_autoadd_dispute_update(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   double sse_decode_box_autoadd_f_64(SseDeserializer deserializer);
 
   @protected
@@ -269,6 +356,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   NodeInfo sse_decode_box_autoadd_node_info(SseDeserializer deserializer);
+
+  @protected
+  PendingDisputes sse_decode_box_autoadd_pending_disputes(
+    SseDeserializer deserializer,
+  );
 
   @protected
   RelayInfo sse_decode_box_autoadd_relay_info(SseDeserializer deserializer);
@@ -285,6 +377,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ConnectionState sse_decode_connection_state(SseDeserializer deserializer);
 
   @protected
+  DisputeInitiator sse_decode_dispute_initiator(SseDeserializer deserializer);
+
+  @protected
+  DisputeStatus sse_decode_dispute_status(SseDeserializer deserializer);
+
+  @protected
+  DisputeSummary sse_decode_dispute_summary(SseDeserializer deserializer);
+
+  @protected
+  DisputeUpdate sse_decode_dispute_update(SseDeserializer deserializer);
+
+  @protected
   double sse_decode_f_64(SseDeserializer deserializer);
 
   @protected
@@ -295,6 +399,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
+
+  @protected
+  List<DisputeSummary> sse_decode_list_dispute_summary(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<MostroNodeEntry> sse_decode_list_mostro_node_entry(
@@ -336,6 +445,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DisputeSummary? sse_decode_opt_box_autoadd_dispute_summary(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  DisputeUpdate? sse_decode_opt_box_autoadd_dispute_update(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   double? sse_decode_opt_box_autoadd_f_64(SseDeserializer deserializer);
 
   @protected
@@ -350,6 +469,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   NodeInfo? sse_decode_opt_box_autoadd_node_info(SseDeserializer deserializer);
 
   @protected
+  PendingDisputes? sse_decode_opt_box_autoadd_pending_disputes(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   RelayInfo? sse_decode_opt_box_autoadd_relay_info(
     SseDeserializer deserializer,
   );
@@ -361,6 +485,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  PendingDisputes sse_decode_pending_disputes(SseDeserializer deserializer);
 
   @protected
   ProtocolSupport sse_decode_protocol_support(SseDeserializer deserializer);
@@ -407,6 +534,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+    DisputeUpdateStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
     RelayStatusStream self,
     SseSerializer serializer,
@@ -421,6 +555,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+    DisputeUpdateStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
     RelayStatusStream self,
     SseSerializer serializer,
@@ -430,6 +571,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
     ConnectionStateStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+    DisputeUpdateStream self,
     SseSerializer serializer,
   );
 
@@ -456,6 +604,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_dispute_summary(
+    DisputeSummary self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_dispute_update(
+    DisputeUpdate self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_f_64(double self, SseSerializer serializer);
 
   @protected
@@ -473,6 +633,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_node_info(
     NodeInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_pending_disputes(
+    PendingDisputes self,
     SseSerializer serializer,
   );
 
@@ -498,6 +664,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_dispute_initiator(
+    DisputeInitiator self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_dispute_status(DisputeStatus self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_dispute_summary(
+    DisputeSummary self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_dispute_update(DisputeUpdate self, SseSerializer serializer);
+
+  @protected
   void sse_encode_f_64(double self, SseSerializer serializer);
 
   @protected
@@ -508,6 +692,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_dispute_summary(
+    List<DisputeSummary> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_mostro_node_entry(
@@ -564,6 +754,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_dispute_summary(
+    DisputeSummary? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_dispute_update(
+    DisputeUpdate? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_f_64(double? self, SseSerializer serializer);
 
   @protected
@@ -585,6 +787,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_pending_disputes(
+    PendingDisputes? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_relay_info(
     RelayInfo? self,
     SseSerializer serializer,
@@ -598,6 +806,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_pending_disputes(
+    PendingDisputes self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_protocol_support(
@@ -682,6 +896,40 @@ class RustLibWire implements BaseWire {
       );
   late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream =
       _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStreamPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStreamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_bosstro_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream',
+      );
+  late final _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream =
+      _rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStreamPtr
+          .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+    ffi.Pointer<ffi.Void> ptr,
+  ) {
+    return _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream(
+      ptr,
+    );
+  }
+
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStreamPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+        'frbgen_bosstro_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream',
+      );
+  late final _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStream =
+      _rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDisputeUpdateStreamPtr
           .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
 
   void

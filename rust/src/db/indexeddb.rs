@@ -1,18 +1,22 @@
 //! IndexedDB storage backend — wasm only. From ../app's `db/indexeddb.rs`,
-//! trimmed to phase 2's stores.
+//! trimmed to Bosstro's stores.
 //!
 //! Each record is keyed the way the SQLite table keys its row: settings by
 //! key, relays by URL (a JSON document), node pictures by node pubkey (the
 //! bytes as a `Uint8Array`, with a small JSON index naming the URL, so a sync
-//! compares URLs without loading a picture). This backend has no compound
-//! writes: each method is one `put` or `delete` (a picture's bytes and index
-//! in one transaction), so it needs none of ../app's `web_lock`.
+//! compares URLs without loading a picture), disputes by `node:dispute id` (a
+//! JSON document). This backend has no compound writes: each method is one
+//! `put` or `delete` (a picture's bytes and index in one transaction), so it
+//! needs none of ../app's `web_lock`.
 //!
 //! Its callers can still read, modify and write back: `api::nodes` does so
 //! with the registry's settings blobs (`CUSTOM_MOSTRO_NODES`,
 //! `MOSTRO_NODE_METADATA`), under `REGISTRY_LOCK`, which serialises only
 //! within one process — one browser tab. Two tabs of the app open at once
 //! can each read a blob and write it back, and one tab's change is lost.
+//! `crate::disputes::feed` does the same with a dispute row (read, merge,
+//! save); two tabs merge the same relay events, so at worst one tab writes a
+//! revision the other already replaced, and the next event corrects it.
 //! Accepted for the web (A2; AGENTS.md → "Accepted limits"); ../app's
 //! `web_lock` is the fix if it ever matters.
 use anyhow::{anyhow, Result};
@@ -22,19 +26,28 @@ use web_sys::wasm_bindgen::{JsCast, JsValue};
 use crate::api::nodes::MostroNodePicture;
 use crate::api::relays::RelayInfo;
 use crate::db::Storage;
+use crate::disputes::DisputeRecord;
 
 /// Bumped when a store is added; `open_db` creates whatever is missing.
-const DB_VERSION: u32 = 1;
+/// 2: disputes (phase 3).
+const DB_VERSION: u32 = 2;
 const SETTINGS_STORE: &str = "settings";
 const RELAYS_STORE: &str = "relays";
 const NODE_PICTURES_STORE: &str = "node_pictures";
 const NODE_PICTURE_INDEX_STORE: &str = "node_picture_index";
-const ALL_STORES: [&str; 4] = [
+const DISPUTES_STORE: &str = "disputes";
+const ALL_STORES: [&str; 5] = [
     SETTINGS_STORE,
     RELAYS_STORE,
     NODE_PICTURES_STORE,
     NODE_PICTURE_INDEX_STORE,
+    DISPUTES_STORE,
 ];
+
+/// The key of a dispute's record: one per node and dispute (D6).
+fn dispute_key(mostro_pubkey: &str, dispute_id: &str) -> String {
+    format!("{mostro_pubkey}:{dispute_id}")
+}
 
 /// What [`NODE_PICTURE_INDEX_STORE`] keeps of one node's picture.
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -261,6 +274,38 @@ impl Storage for IndexedDbStorage {
         tx.await.into_result().map_err(|e| js_err("tx commit", e))?;
         Ok(())
     }
+
+    // ── Disputes ─────────────────────────────────────────────────────────────
+
+    async fn save_dispute(&self, dispute: &DisputeRecord) -> Result<()> {
+        let json = serde_json::to_string(dispute)?;
+        let key = dispute_key(&dispute.mostro_pubkey, &dispute.dispute_id);
+        self.put_string(DISPUTES_STORE, &key, &json).await
+    }
+
+    async fn get_dispute(
+        &self,
+        mostro_pubkey: &str,
+        dispute_id: &str,
+    ) -> Result<Option<DisputeRecord>> {
+        let key = dispute_key(mostro_pubkey, dispute_id);
+        Ok(self
+            .get_string(DISPUTES_STORE, &key)
+            .await?
+            .and_then(|json| serde_json::from_str(&json).ok()))
+    }
+
+    async fn list_disputes(&self, mostro_pubkey: &str) -> Result<Vec<DisputeRecord>> {
+        // Every node's rows are read and the others dropped: a few hundred
+        // small documents, not worth a key range.
+        Ok(self
+            .get_all_strings(DISPUTES_STORE)
+            .await?
+            .iter()
+            .filter_map(|json| serde_json::from_str::<DisputeRecord>(json).ok())
+            .filter(|row| row.mostro_pubkey == mostro_pubkey)
+            .collect())
+    }
 }
 
 /// The same checks as the SQLite backend's, in a browser
@@ -296,5 +341,15 @@ mod tests {
     #[wasm_bindgen_test]
     async fn node_pictures_round_trip() {
         contract::node_pictures_round_trip(&store("pictures").await).await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn disputes_round_trip() {
+        contract::disputes_round_trip(&store("disputes").await).await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn disputes_never_mix_nodes() {
+        contract::disputes_never_mix_nodes(&store("disputes_nodes").await).await;
     }
 }

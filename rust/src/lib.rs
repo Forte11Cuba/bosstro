@@ -7,6 +7,7 @@ pub mod api;
 mod config;
 pub mod crypto;
 mod db;
+mod disputes;
 mod node_pictures;
 mod nostr;
 mod rt;

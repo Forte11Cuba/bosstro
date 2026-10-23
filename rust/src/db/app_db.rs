@@ -7,10 +7,11 @@
 use anyhow::Result;
 use tokio::sync::OnceCell;
 
+/// The platform's backend.
 #[cfg(target_arch = "wasm32")]
-use crate::db::indexeddb::IndexedDbStorage as AppStorage;
+pub(crate) type AppStorage = crate::db::indexeddb::IndexedDbStorage;
 #[cfg(not(target_arch = "wasm32"))]
-use crate::db::sqlite::SqliteStorage as AppStorage;
+pub(crate) type AppStorage = crate::db::sqlite::SqliteStorage;
 
 static APP_DB: OnceCell<AppStorage> = OnceCell::const_new();
 

@@ -2339,6 +2339,7 @@ dependencies = [
  "sqlx",
  "tokio",
  "universal-time",
+ "uuid",
  "wasm-bindgen-futures",
  "wasm-bindgen-test",
  "wasmtimer",

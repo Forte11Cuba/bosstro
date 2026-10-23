@@ -25,6 +25,9 @@ nostr-sdk = { version = "0.45", default-features = false }
 # nostr-sdk's copy too).
 nostr = { version = "0.45", default-features = false, features = ["std", "nip44"] }
 mostro-core = "0.17.3"
+# Dispute ids (the kind 38386 `d` tag) are UUIDs. Already in the tree through
+# mostro-core; same declaration as ../app.
+uuid = { version = "1", features = ["v4"] }
 
 # Serialization: the rows Storage keeps as JSON documents (relays, the node
 # registry's settings blobs), as in ../app.

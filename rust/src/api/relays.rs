@@ -116,6 +116,12 @@ pub async fn initialize_relays() -> Result<()> {
         }
     }
 
+    // A REQ issued while a relay is down never exists on it, reconnect or
+    // not (nostr-sdk 0.45): re-issue what each relay misses as it connects.
+    crate::nostr::live_subs::spawn_repair(pool);
+    // The active node's disputes (kind 38386), followed from now on.
+    crate::disputes::feed::start(pool.client()).await;
+
     // Each time the pool comes online, the active node's relay list and
     // instance info are read again. Subscribed before the state is read, so
     // an `Online` sent in between is not lost (../app).
