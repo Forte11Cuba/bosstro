@@ -862,4 +862,93 @@ mod rig_tests {
             .unwrap();
         assert_eq!(rig.row().await.status, DisputeStatus::Settled);
     }
+
+    /// Against a real mostrod and relay, by hand (not in CI): a dispute this
+    /// key holds there (`DISPUTE`, its order `ORDER`) is resolved, and
+    /// mostrod's answer is checked against `EXPECT`. The feed does not
+    /// follow the node, so the dispute stays open here whatever the node
+    /// published since (as when a cooperative cancel lands between the
+    /// node's revision and the solver's tap): the request always leaves.
+    ///
+    /// ```text
+    /// BOSSTRO_E2E_RELAY=ws://localhost:7010 BOSSTRO_E2E_NODE=<hex> \
+    /// BOSSTRO_E2E_SOLVER=<nsec or hex> BOSSTRO_E2E_DISPUTE=<uuid> \
+    /// BOSSTRO_E2E_ORDER=<uuid> BOSSTRO_E2E_RESOLUTION=pay|refund \
+    /// BOSSTRO_E2E_EXPECT=paid-buyer|refunded-seller|cooperatively-canceled|read-only|taken-over|not-in-dispute \
+    ///   cargo test --lib resolve_against_a_local_mostrod -- --ignored --nocapture
+    /// ```
+    #[tokio::test]
+    #[ignore = "needs a local mostrod and relay"]
+    async fn resolve_against_a_local_mostrod() {
+        use crate::disputes::feed::Store;
+        use crate::mostro::replies::tests::connected;
+        use crate::mostro::replies::Router;
+        use crate::nostr::live_subs::LiveSubs;
+
+        let env = |name: &str| std::env::var(name).unwrap_or_else(|_| panic!("{name} unset"));
+        let relay = nostr_sdk::prelude::RelayUrl::parse(&env("BOSSTRO_E2E_RELAY")).unwrap();
+        let node = env("BOSSTRO_E2E_NODE");
+        let solver = Keys::parse(&env("BOSSTRO_E2E_SOLVER")).unwrap();
+        let dispute = env("BOSSTRO_E2E_DISPUTE");
+        let order = env("BOSSTRO_E2E_ORDER");
+        let resolution = match env("BOSSTRO_E2E_RESOLUTION").as_str() {
+            "pay" => PayBuyer,
+            "refund" => RefundSeller,
+            other => panic!("unknown RESOLUTION {other}"),
+        };
+        let expect = match env("BOSSTRO_E2E_EXPECT").as_str() {
+            "paid-buyer" => ResolveOutcome::PaidBuyer,
+            "refunded-seller" => ResolveOutcome::RefundedSeller,
+            "cooperatively-canceled" => ResolveOutcome::CooperativelyCanceled,
+            "read-only" => ResolveOutcome::ReadOnlySolver,
+            "taken-over" => ResolveOutcome::TakenOver,
+            "not-in-dispute" => ResolveOutcome::NotInDispute,
+            other => panic!("unknown EXPECT {other}"),
+        };
+
+        let client = connected(&relay).await;
+        let subs: &'static LiveSubs = Box::leak(Box::default());
+        let (tx, _) = tokio::sync::broadcast::channel(256);
+        let feed = Feed::new(client.clone(), Store::memory(), subs, tx);
+        let taken = crate::disputes::TakenDispute {
+            order_id: Some(order.clone()),
+            ..taken_from(&info(), &solver.public_key().to_hex(), None, crate::rt::unix_now())
+        };
+        feed.record_take(&node, &dispute, taken).await.unwrap();
+
+        let router = Router::new(client.clone(), subs, feed.clone());
+        router.spawn_reader();
+        router
+            .retarget(Some(node.clone()), Some(solver.clone()))
+            .await;
+        let started = std::time::Instant::now();
+        let result = resolve_on(
+            &router,
+            &feed,
+            &client,
+            &solver,
+            &node,
+            &dispute,
+            resolution,
+            ANSWER_WAIT,
+        )
+        .await
+        .unwrap();
+        println!(
+            "answer in {:?}: {:?} {:?}",
+            started.elapsed(),
+            result.outcome,
+            result.reason
+        );
+        let row = feed.row(&node, &dispute).await.unwrap().unwrap();
+        println!(
+            "row: {:?}, resolved as {:?}, taken {}",
+            row.status,
+            row.taken.as_ref().and_then(|t| t.resolved_as),
+            row.taken.is_some()
+        );
+        let standing = crate::mostro::standing::read(&node, &solver.public_key().to_hex()).await;
+        println!("standing: {standing:?}");
+        assert_eq!(result.outcome, expect);
+    }
 }
