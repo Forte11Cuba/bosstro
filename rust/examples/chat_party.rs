@@ -5,7 +5,8 @@
 //! ```text
 //! cargo run --example chat_party -- <relay> <party secret hex> <solver pubkey hex> \
 //!     [--say <text>] [--expect <text>] \
-//!     [--blossom <url>] [--send-file <path>] [--expect-file <out path>]
+//!     [--blossom <url>] [--send-file <path>] [--expect-file <out path>] \
+//!     [--peer <other party pubkey hex>] [--share-key] [--print-key] [--print-pubkey]
 //! ```
 //!
 //! `--say` writes `text` to the solver. `--expect` waits (up to 60 s) until a
@@ -21,6 +22,16 @@
 //! JSON in the chat. `--expect-file` waits for the solver's newest
 //! attachment, downloads it, checks its hash against the URL, decrypts it and
 //! writes it to the path, printing its type.
+//!
+//! The parties' own chat (phase 5c), as ../app writes it: with `--peer`, the
+//! other party's trade pubkey, `--say` and `--send-file` go to the chat
+//! between the two parties instead (the envelope keyed between the two trade
+//! keys, the inner event signed by this party; a file encrypted under the raw
+//! ECDH x of the two trade keys, ../app's `send_file`). `--share-key` sends
+//! the solver, in this party's dispute chat, `Shared key: ` + the secret of
+//! that chat's `K_conv`, as ../app's `share_chat_key_with_solver`.
+//! `--print-key` prints that secret (`key: …`) for a test to paste, and
+//! `--print-pubkey` this party's trade pubkey (`pubkey: …`), the other's peer.
 
 use std::time::Duration;
 
@@ -40,16 +51,34 @@ type Failure = Box<dyn std::error::Error>;
 async fn main() -> Result<(), Failure> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let usage = "chat_party <relay> <party secret hex> <solver pubkey hex> [--say T] \
-                 [--expect T] [--blossom URL] [--send-file PATH] [--expect-file PATH]";
+                 [--expect T] [--blossom URL] [--send-file PATH] [--expect-file PATH] \
+                 [--peer PUBKEY] [--share-key] [--print-key] [--print-pubkey]";
     let [relay, secret, solver, rest @ ..] = args.as_slice() else {
         return Err(usage.into());
     };
     let (mut say, mut expect, mut blossom, mut send_file, mut expect_file) =
         (None, None, None, None, None);
+    let (mut peer, mut share_key, mut print_key, mut print_pubkey) = (None, false, false, false);
     let mut rest = rest.iter();
     while let Some(flag) = rest.next() {
+        match flag.as_str() {
+            "--share-key" => {
+                share_key = true;
+                continue;
+            }
+            "--print-key" => {
+                print_key = true;
+                continue;
+            }
+            "--print-pubkey" => {
+                print_pubkey = true;
+                continue;
+            }
+            _ => {}
+        }
         let value = rest.next().cloned();
         match flag.as_str() {
+            "--peer" => peer = value,
             "--say" => say = value,
             "--expect" => expect = value,
             "--blossom" => blossom = value,
@@ -60,24 +89,52 @@ async fn main() -> Result<(), Failure> {
     }
 
     let party = Keys::parse(secret)?;
+    if print_pubkey {
+        println!("pubkey: {}", party.public_key().to_hex());
+        return Ok(());
+    }
     let solver = PublicKey::parse(solver)?;
     let (conv, sign) = derive_chat_keys(&party, &solver)?;
+    let peer = peer.map(|p| PublicKey::parse(&p)).transpose()?;
+    // Where `--say` and `--send-file` go: the solver, or the other party.
+    let (to, (to_conv, to_sign)) = match peer {
+        Some(peer) => (peer, derive_chat_keys(&party, &peer)?),
+        None => (solver, (conv.clone(), sign.clone())),
+    };
+    if print_key {
+        let peer = peer.ok_or("--print-key needs --peer")?;
+        let (p2p, _) = derive_chat_keys(&party, &peer)?;
+        println!("key: {}", p2p.secret_key().to_secret_hex());
+        return Ok(());
+    }
     let client = Client::new();
     client.add_relay(relay.as_str()).await?;
     client.connect().and_wait(Duration::from_secs(5)).await;
 
     if let Some(path) = send_file {
         let server = blossom.as_deref().ok_or("--send-file needs --blossom")?;
-        say = Some(upload_file(&party, &solver, &path, server).await?);
+        say = Some(upload_file(&party, &to, &path, server).await?);
     }
 
     if let Some(text) = say {
-        let event = wrap_chat_message(&party, &conv, &sign, &text).await?;
+        let event = wrap_chat_message(&party, &to_conv, &to_sign, &text).await?;
         let output = client.send_event(&event).await?;
         if output.success.is_empty() {
             return Err("no relay took the message".into());
         }
         println!("sent: {text}");
+    }
+
+    if share_key {
+        let peer = peer.ok_or("--share-key needs --peer")?;
+        let (p2p, _) = derive_chat_keys(&party, &peer)?;
+        let text = format!("Shared key: {}", p2p.secret_key().to_secret_hex());
+        let event = wrap_chat_message(&party, &conv, &sign, &text).await?;
+        let output = client.send_event(&event).await?;
+        if output.success.is_empty() {
+            return Err("no relay took the key".into());
+        }
+        println!("shared the chat key with the solver");
     }
 
     let allowed = [party.public_key(), solver];
@@ -150,9 +207,10 @@ async fn main() -> Result<(), Failure> {
     Err(format!("the solver's message {expected:?} never arrived").into())
 }
 
-/// The file key: the raw ECDH x-coordinate, unhashed, as ../app.
-fn file_key(party: &Keys, solver: &PublicKey) -> Result<[u8; 32], Failure> {
-    let shared = SharedKey::derive(party.secret_key(), solver)?;
+/// The file key: the raw ECDH x-coordinate, unhashed, as ../app, with the
+/// solver or (in the parties' own chat) the other party.
+fn file_key(party: &Keys, counterpart: &PublicKey) -> Result<[u8; 32], Failure> {
+    let shared = SharedKey::derive(party.secret_key(), counterpart)?;
     Ok(shared.keys().secret_key().to_secret_bytes())
 }
 
@@ -172,10 +230,11 @@ fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
-/// Encrypt and upload the file at `path`; the JSON message ../app writes.
+/// Encrypt and upload the file at `path` for `counterpart`; the JSON message
+/// ../app writes.
 async fn upload_file(
     party: &Keys,
-    solver: &PublicKey,
+    counterpart: &PublicKey,
     path: &str,
     server: &str,
 ) -> Result<String, Failure> {
@@ -183,7 +242,7 @@ async fn upload_file(
     let mime = sniff(&file).ok_or("not a JPEG, PNG or PDF")?;
     let mut nonce = [0u8; 12];
     rand::rngs::OsRng.fill_bytes(&mut nonce);
-    let cipher = ChaCha20Poly1305::new(&file_key(party, solver)?.into());
+    let cipher = ChaCha20Poly1305::new(&file_key(party, counterpart)?.into());
     let sealed = cipher
         .encrypt(Nonce::from_slice(&nonce), file.as_slice())
         .map_err(|e| format!("encryption failed: {e}"))?;

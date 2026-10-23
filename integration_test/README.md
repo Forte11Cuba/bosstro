@@ -79,6 +79,34 @@ flutter test integration_test/attachments_against_local_mostrod_test.dart -d lin
   --dart-define=E2E_FILES=<directory>
 ```
 
+`observer_against_local_mostrod_test.dart` drives the phase 5c screens: the
+buyer and the seller write to each other in their own chat (`chat_party
+--peer <other pubkey> --say`), the seller sends a PDF there (`--send-file`,
+encrypted as ../app does under the two trade keys) and then shares the chat
+key with the solver (`--share-key`). The app takes the dispute, sees the
+disclosure in Info, reads both sides, shows the file as one that cannot be
+opened and offers no message field; a random key pasted opens nothing and
+says so; the right key (`--print-key`) pasted reads; Refresh brings a later
+message, none twice. Same defines as the attachments run (`E2E_FILES` needs
+only `bank-statement.pdf`), with one dispute:
+
+```bash
+(cd rust && cargo build --example chat_party --example blossom_server)
+rust/target/debug/examples/blossom_server 7001 &
+BOSSTRO_TEST_BLOSSOM_SERVER=http://127.0.0.1:7001 \
+flutter test integration_test/observer_against_local_mostrod_test.dart -d linux \
+  --dart-define=E2E_RELAY=ws://localhost:7000 \
+  --dart-define=E2E_NODE=<node hex> \
+  --dart-define=E2E_SOLVER=<solver secret> \
+  --dart-define=E2E_SOLVER_PUBKEY=<solver pubkey hex> \
+  --dart-define=E2E_DISPUTE=<dispute id> \
+  --dart-define=E2E_BUYER=<buyer trade secret hex> \
+  --dart-define=E2E_SELLER=<seller trade secret hex> \
+  --dart-define=E2E_PARTY_BIN=$PWD/rust/target/debug/examples/chat_party \
+  --dart-define=E2E_BLOSSOM=http://127.0.0.1:7001 \
+  --dart-define=E2E_FILES=<directory>
+```
+
 `new_dispute.sh` adds such a dispute (an order cloned with fresh trade keys,
 its 38386 published with the node key) to a copy of a mostrod home, and with
 `SOLVER_PK` registers that key as a read-write solver; it refuses
