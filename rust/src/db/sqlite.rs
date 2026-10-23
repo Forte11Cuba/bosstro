@@ -79,14 +79,6 @@ impl Storage for SqliteStorage {
         Ok(())
     }
 
-    async fn delete_relay(&self, url: &str) -> Result<()> {
-        sqlx::query("DELETE FROM relays WHERE url = ?")
-            .bind(url)
-            .execute(&self.pool)
-            .await?;
-        Ok(())
-    }
-
     async fn list_relays(&self) -> Result<Vec<RelayInfo>> {
         let rows: Vec<(String,)> = sqlx::query_as("SELECT data FROM relays")
             .fetch_all(&self.pool)

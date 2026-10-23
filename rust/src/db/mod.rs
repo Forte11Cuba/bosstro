@@ -86,8 +86,6 @@ pub trait Storage: Send + Sync {
 
     /// Insert or replace the row of `relay.url`.
     async fn save_relay(&self, relay: &RelayInfo) -> Result<()>;
-    /// Remove the row of `url`. Absent rows are not an error.
-    async fn delete_relay(&self, url: &str) -> Result<()>;
     /// Every stored relay. A row that no longer parses is skipped.
     async fn list_relays(&self) -> Result<Vec<RelayInfo>>;
 

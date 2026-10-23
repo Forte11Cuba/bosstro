@@ -51,11 +51,14 @@ mod tests {
         expected.sort();
         assert_eq!(urls, expected);
 
-        // The user removed every default but one: a second launch keeps that.
-        for url in &config::DEFAULT_RELAYS[1..] {
-            storage.delete_relay(url).await.unwrap();
-        }
+        // Any stored row — a removed default kept blacklisted included —
+        // means the list is the solver's: a second launch seeds nothing.
+        let mut removed = storage.list_relays().await.unwrap()[0].clone();
+        removed.is_blacklisted = true;
+        storage.save_relay(&removed).await.unwrap();
         seed_default_relays(&storage).await.unwrap();
-        assert_eq!(storage.list_relays().await.unwrap().len(), 1);
+        let rows = storage.list_relays().await.unwrap();
+        assert_eq!(rows.len(), config::DEFAULT_RELAYS.len());
+        assert_eq!(rows.iter().filter(|r| r.is_blacklisted).count(), 1);
     }
 }

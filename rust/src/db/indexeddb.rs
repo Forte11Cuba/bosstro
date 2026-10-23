@@ -159,10 +159,6 @@ impl Storage for IndexedDbStorage {
         self.put_string(RELAYS_STORE, &relay.url, &json).await
     }
 
-    async fn delete_relay(&self, url: &str) -> Result<()> {
-        self.delete_key(RELAYS_STORE, url).await
-    }
-
     async fn list_relays(&self) -> Result<Vec<RelayInfo>> {
         Ok(self
             .get_all_strings(RELAYS_STORE)

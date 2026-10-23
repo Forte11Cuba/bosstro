@@ -70,16 +70,6 @@ pub(crate) async fn relays_round_trip(storage: &impl Storage) {
     assert_eq!(rows[0], announced);
     assert_eq!(rows[1], relay("wss://b.example"));
 
-    storage.delete_relay("wss://a.example").await.unwrap();
-    storage.delete_relay("wss://a.example").await.unwrap();
-    let urls: Vec<String> = storage
-        .list_relays()
-        .await
-        .unwrap()
-        .into_iter()
-        .map(|r| r.url)
-        .collect();
-    assert_eq!(urls, vec!["wss://b.example".to_string()]);
 }
 
 pub(crate) async fn node_pictures_round_trip(storage: &impl Storage) {

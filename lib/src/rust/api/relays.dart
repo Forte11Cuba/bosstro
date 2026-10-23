@@ -6,7 +6,7 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `apply_relay_list`, `load_persisted_relays`, `persist_relay`, `pool`, `removal_effect`, `unpersist_relay`, `watch_online`
+// These functions are ignored because they are not marked as `pub`: `apply_relay_list`, `load_persisted_relays`, `persist_relay`, `pool`, `removal_effect`, `starting_defaults`, `watch_online`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`
 
 /// Start the relay pool with the persisted relay list — every active relay
@@ -27,8 +27,10 @@ Future<void> initializeRelays() =>
 Future<RelayInfo> addRelay({required String url}) =>
     RustLib.instance.api.crateApiRelaysAddRelay(url: url);
 
-/// Remove a relay and disconnect. A relay a node announced stays persisted as
-/// blacklisted, so the node's list cannot bring it back on the next start.
+/// Remove a relay and disconnect. The relay stays persisted as a
+/// blacklisted row, whatever its source, so neither a node's relay list nor
+/// the defaults bring it back on the next sync or start; only the solver's
+/// own [`add_relay`] does.
 Future<void> removeRelay({required String url}) =>
     RustLib.instance.api.crateApiRelaysRemoveRelay(url: url);
 
@@ -73,8 +75,8 @@ class RelayInfo {
   final bool isDefault;
   final RelaySource source;
 
-  /// A node-announced relay the solver removed: kept as a row so the node's
-  /// list does not bring it back, never connected.
+  /// A relay the solver removed (of any source): kept as a row so neither a
+  /// node's list nor the defaults bring it back, never connected.
   final bool isBlacklisted;
   final RelayStatus status;
   final PlatformInt64? lastConnectedAt;

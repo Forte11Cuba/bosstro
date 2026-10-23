@@ -4,8 +4,10 @@
 //! One relay list for the device (not one per node): the defaults, the
 //! relays the solver adds, and those the active node announces in its kind
 //! 10002 list. An announced relay keeps the pubkey of the node that announced
-//! it (`announced_by`, D6). Every change is persisted best effort: a failed
-//! write is logged and the pool keeps working from memory.
+//! it (`announced_by`, D6). A relay the solver removes, whatever its source,
+//! is kept as a blacklisted row so no sync brings it back. Every change is
+//! persisted best effort: a failed write is logged and the pool keeps
+//! working from memory.
 //!
 //! Errors are stable markers (`NotInitialized`, `InvalidRelayUrl`,
 //! `RelayAlreadyExists`, `RelayNotFound`, `LastRelay`); Dart maps them to
@@ -54,8 +56,8 @@ pub struct RelayInfo {
     pub is_active: bool,
     pub is_default: bool,
     pub source: RelaySource,
-    /// A node-announced relay the solver removed: kept as a row so the node's
-    /// list does not bring it back, never connected.
+    /// A relay the solver removed (of any source): kept as a row so neither a
+    /// node's list nor the defaults bring it back, never connected.
     pub is_blacklisted: bool,
     pub status: RelayStatus,
     pub last_connected_at: Option<i64>,
@@ -95,10 +97,7 @@ pub async fn initialize_relays() -> Result<()> {
         .map(|r| r.url.clone())
         .collect();
     let urls = if active.is_empty() {
-        crate::config::DEFAULT_RELAYS
-            .iter()
-            .map(|s| s.to_string())
-            .collect()
+        starting_defaults(&persisted)
     } else {
         active
     };
@@ -124,6 +123,30 @@ pub async fn initialize_relays() -> Result<()> {
     let current = pool.connection_state().await;
     crate::rt::spawn(watch_online(rx, current));
     Ok(())
+}
+
+/// The defaults to start with when no relay in use is stored: the ones the
+/// solver did not remove, or all of them when they removed every one (an
+/// app with no relay is worse than one with a removed relay back).
+fn starting_defaults(persisted: &[RelayInfo]) -> Vec<String> {
+    let all: Vec<String> = crate::config::DEFAULT_RELAYS
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+    let kept: Vec<String> = all
+        .iter()
+        .filter(|url| {
+            !persisted
+                .iter()
+                .any(|r| r.is_blacklisted && &&r.url == url)
+        })
+        .cloned()
+        .collect();
+    if kept.is_empty() {
+        all
+    } else {
+        kept
+    }
 }
 
 /// Run [`crate::api::nodes::refresh_active_node`] for every `Online` on
@@ -159,27 +182,22 @@ pub async fn add_relay(url: String) -> Result<RelayInfo> {
     Ok(info)
 }
 
-/// Remove a relay and disconnect. A relay a node announced stays persisted as
-/// blacklisted, so the node's list cannot bring it back on the next start.
+/// Remove a relay and disconnect. The relay stays persisted as a
+/// blacklisted row, whatever its source, so neither a node's relay list nor
+/// the defaults bring it back on the next sync or start; only the solver's
+/// own [`add_relay`] does.
 pub async fn remove_relay(url: String) -> Result<()> {
     let removed = pool()?.remove_relay(&url).await?;
-    match removal_effect(removed) {
-        Some(row) => persist_relay(&row).await,
-        None => unpersist_relay(&url).await,
-    }
+    persist_relay(&removal_effect(removed)).await;
     Ok(())
 }
 
-/// What removing a relay leaves in storage: `Some(row)` to persist, `None` to
-/// delete the row outright. Only an announced relay is kept, blacklisted.
-fn removal_effect(mut removed: RelayInfo) -> Option<RelayInfo> {
-    if !matches!(removed.source, RelaySource::MostroDiscovered) {
-        return None;
-    }
+/// The row a removed relay leaves in storage: kept, blacklisted and inactive.
+fn removal_effect(mut removed: RelayInfo) -> RelayInfo {
     removed.is_active = false;
     removed.is_blacklisted = true;
     removed.status = RelayStatus::Disconnected;
-    Some(removed)
+    removed
 }
 
 /// Every configured relay with its current status.
@@ -298,14 +316,6 @@ async fn persist_relay(info: &RelayInfo) {
     }
 }
 
-async fn unpersist_relay(url: &str) {
-    if let Some(db) = crate::db::app_db::db() {
-        if let Err(e) = db.delete_relay(url).await {
-            log::warn!("[relay] {} not removed from storage: {e}", display_relay(url));
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -325,14 +335,52 @@ mod tests {
     }
 
     #[test]
-    fn only_a_removed_announced_relay_stays_stored_blacklisted() {
-        let kept = removal_effect(row(RelaySource::MostroDiscovered)).unwrap();
-        assert!(kept.is_blacklisted);
-        assert!(!kept.is_active);
-        assert_eq!(kept.status, RelayStatus::Disconnected);
-        assert_eq!(kept.announced_by.as_deref(), Some("aa"));
-        assert_eq!(removal_effect(row(RelaySource::UserAdded)), None);
-        assert_eq!(removal_effect(row(RelaySource::Default)), None);
+    fn every_removed_relay_stays_stored_blacklisted() {
+        for source in [
+            RelaySource::MostroDiscovered,
+            RelaySource::Default,
+            RelaySource::UserAdded,
+        ] {
+            let kept = removal_effect(row(source.clone()));
+            assert!(kept.is_blacklisted, "{source:?}");
+            assert!(!kept.is_active);
+            assert_eq!(kept.status, RelayStatus::Disconnected);
+            assert_eq!(kept.source, source);
+            assert_eq!(kept.announced_by.as_deref(), Some("aa"));
+        }
+    }
+
+    fn blacklisted(url: &str, source: RelaySource) -> RelayInfo {
+        RelayInfo {
+            url: url.into(),
+            is_blacklisted: true,
+            is_active: false,
+            status: RelayStatus::Disconnected,
+            ..row(source)
+        }
+    }
+
+    /// A default the solver removed is not reconnected at the next start,
+    /// even when nothing else is stored to start from.
+    #[test]
+    fn a_removed_default_is_not_a_starting_relay() {
+        let removed = blacklisted(crate::config::DEFAULT_RELAYS[0], RelaySource::Default);
+        let urls = starting_defaults(&[removed]);
+        assert_eq!(urls.len(), crate::config::DEFAULT_RELAYS.len() - 1);
+        assert!(!urls.contains(&crate::config::DEFAULT_RELAYS[0].to_string()));
+    }
+
+    #[test]
+    fn with_every_default_removed_the_app_still_starts_with_them() {
+        let all: Vec<RelayInfo> = crate::config::DEFAULT_RELAYS
+            .iter()
+            .map(|u| blacklisted(u, RelaySource::Default))
+            .collect();
+        assert_eq!(
+            starting_defaults(&all).len(),
+            crate::config::DEFAULT_RELAYS.len()
+        );
+        assert_eq!(starting_defaults(&[]).len(), crate::config::DEFAULT_RELAYS.len());
     }
 
     /// A row stored before `announced_by` existed still loads.

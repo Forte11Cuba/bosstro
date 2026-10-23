@@ -40,9 +40,10 @@ pub(crate) fn display_relay(url: &str) -> String {
 pub struct RelayPool {
     client: Arc<Client>,
     relays: Arc<RwLock<Vec<RelayInfo>>>,
-    /// Relays the user removed after a Mostro node announced them. A node's
-    /// kind 10002 list is re-applied on every reconnect and node switch, so
-    /// without this the removed relay would come straight back.
+    /// Relays the solver removed, whatever their source. A node's kind 10002
+    /// list is re-applied on every reconnect and node switch, and the
+    /// defaults are the Mostro node's own list, so without this a removed
+    /// relay would come straight back.
     blacklist: RwLock<HashSet<String>>,
     conn_tx: broadcast::Sender<ConnectionState>,
     /// The last state actually sent on `conn_tx`, shared by every path that
@@ -113,7 +114,19 @@ impl RelayPool {
             announced_by,
         };
 
-        self.relays.write().await.push(info.clone());
+        {
+            // Checked with the write lock held, right before the push: two
+            // adds of one URL (a node switch's sync racing the `Online` sync,
+            // or the solver's add racing either) both pass any earlier check,
+            // and the second would add a duplicate row. The SDK's own
+            // `add_relay` above is idempotent, so the loser leaves nothing
+            // behind there.
+            let mut relays = self.relays.write().await;
+            if relays.iter().any(|r| r.url == url) {
+                return Err(anyhow!("RelayAlreadyExists"));
+            }
+            relays.push(info.clone());
+        }
         let _ = self.relay_tx.send(info.clone());
         self.broadcast_connection_state().await;
         Ok(info)
@@ -124,41 +137,46 @@ impl RelayPool {
     /// An explicit add lifts the relay off the blacklist: the user asking for
     /// it back overrides their earlier removal.
     pub async fn add_relay(&self, url: &str) -> Result<RelayInfo> {
+        // A fast refusal; `add_relay_internal` makes the check that counts.
         if self.relays.read().await.iter().any(|r| r.url == url) {
             return Err(anyhow!("RelayAlreadyExists"));
         }
+        let info = self
+            .add_relay_internal(url, RelaySource::UserAdded, None)
+            .await?;
         self.blacklist.write().await.remove(url);
-        self.add_relay_internal(url, RelaySource::UserAdded, None)
-            .await
+        Ok(info)
     }
 
     /// Remove a relay and disconnect. The last relay cannot be removed.
     ///
-    /// Removing a node-announced relay blacklists it (see `blacklist`), so
-    /// the next relay-list sync leaves it out. Defaults and user-added relays
-    /// are not blacklisted: they only come back if the user re-adds them.
+    /// Every removed relay is blacklisted (see `blacklist`), whatever its
+    /// source: the defaults are the relays the Mostro node announces in its
+    /// kind 10002 list, so a removed default would otherwise come straight
+    /// back with the next relay-list sync. Only the solver's own add lifts
+    /// it ([`Self::add_relay`]).
+    ///
+    /// The SDK is asked first, with the list locked: if it refuses, the
+    /// error leaves the list, the blacklist and storage as they were.
     pub async fn remove_relay(&self, url: &str) -> Result<RelayInfo> {
         let mut relays = self.relays.write().await;
-        let active_count = relays.iter().filter(|r| r.is_active).count();
         let pos = relays
             .iter()
             .position(|r| r.url == url)
             .ok_or_else(|| anyhow!("RelayNotFound"))?;
-        if active_count <= 1 {
+        // The in-memory list never holds a blacklisted row, so every one
+        // counted here is in use.
+        if relays.iter().filter(|r| r.is_active).count() <= 1 {
             return Err(anyhow!("LastRelay"));
         }
-        let mut removed = relays.remove(pos);
-        removed.status = RelayStatus::Disconnected;
-        drop(relays);
-
-        if matches!(removed.source, RelaySource::MostroDiscovered) {
-            self.blacklist.write().await.insert(url.to_string());
-        }
-
         self.client
             .remove_relay(url)
             .await
             .map_err(|e| anyhow!("remove relay failed: {e}"))?;
+        let mut removed = relays.remove(pos);
+        drop(relays);
+        removed.status = RelayStatus::Disconnected;
+        self.blacklist.write().await.insert(url.to_string());
 
         let _ = self.relay_tx.send(removed.clone());
         self.broadcast_connection_state().await;
@@ -194,7 +212,7 @@ impl RelayPool {
         .await;
     }
 
-    /// Relays the user removed after a node announced them.
+    /// Relays the solver removed.
     #[cfg(test)]
     pub async fn blacklist(&self) -> Vec<String> {
         let mut urls: Vec<String> = self.blacklist.read().await.iter().cloned().collect();
@@ -220,6 +238,8 @@ impl RelayPool {
                 .await
             {
                 Ok(_) => added.push(url),
+                // Another add of the same URL won the race: nothing to do.
+                Err(e) if e.to_string() == "RelayAlreadyExists" => {}
                 Err(e) => log::warn!(
                     "[relay] discovered relay {} not added: {e}",
                     display_relay(&url)
@@ -541,6 +561,127 @@ mod tests {
             .is_empty());
 
         pool.add_relay("ws://127.0.0.1:2").await.unwrap();
+        assert!(pool.blacklist().await.is_empty());
+    }
+
+    /// Two syncs of one announced URL at once (a node switch's refresh
+    /// meeting the pool's `Online` refresh) leave one row, never two. Before
+    /// the check moved under the write lock this failed on every run.
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn concurrent_syncs_of_one_url_add_one_row() {
+        for round in 0..200 {
+            let pool = RelayPool::new(urls(&["ws://127.0.0.1:1"])).await.unwrap();
+            let url = "ws://127.0.0.1:2".to_string();
+            let tasks: Vec<_> = (0..2)
+                .map(|_| {
+                    let pool = pool.clone();
+                    let url = url.clone();
+                    tokio::spawn(async move { pool.sync_discovered(&[url], "aa").await })
+                })
+                .collect();
+            let mut added = 0;
+            for task in tasks {
+                added += task.await.unwrap().len();
+            }
+            let rows = pool
+                .get_relays()
+                .await
+                .into_iter()
+                .filter(|r| r.url == url)
+                .count();
+            assert_eq!(rows, 1, "round {round}: {rows} rows");
+            assert_eq!(added, 1, "round {round}: reported {added} additions");
+        }
+    }
+
+    /// The solver's add racing a sync of the same URL: one row, and the
+    /// loser is told the relay exists.
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn an_add_racing_a_sync_adds_one_row() {
+        for round in 0..200 {
+            let pool = RelayPool::new(urls(&["ws://127.0.0.1:1"])).await.unwrap();
+            let url = "ws://127.0.0.1:2";
+            let sync = {
+                let pool = pool.clone();
+                tokio::spawn(async move { pool.sync_discovered(&urls(&[url]), "aa").await })
+            };
+            let add = {
+                let pool = pool.clone();
+                tokio::spawn(async move { pool.add_relay(url).await })
+            };
+            let synced = sync.await.unwrap().len();
+            let added = add.await.unwrap();
+            let rows = pool.get_relays().await.iter().filter(|r| r.url == url).count();
+            assert_eq!(rows, 1, "round {round}");
+            match added {
+                Ok(_) => assert_eq!(synced, 0, "round {round}"),
+                Err(e) => {
+                    assert_eq!(e.to_string(), "RelayAlreadyExists", "round {round}");
+                    assert_eq!(synced, 1, "round {round}");
+                }
+            }
+        }
+    }
+
+    /// The defaults are the Mostro node's own kind 10002 list: a removed one
+    /// must not come back with the next sync, only when the solver adds it.
+    #[tokio::test]
+    async fn a_removed_default_stays_out_until_added_by_hand() {
+        let pool = RelayPool::new(urls(&["ws://127.0.0.1:1", "ws://127.0.0.1:2"]))
+            .await
+            .unwrap();
+        pool.remove_relay("ws://127.0.0.1:2").await.unwrap();
+        assert_eq!(pool.blacklist().await, urls(&["ws://127.0.0.1:2"]));
+        assert!(pool
+            .sync_discovered(&urls(&["ws://127.0.0.1:2"]), "aa")
+            .await
+            .is_empty());
+        assert_eq!(pool.get_relays().await.len(), 1);
+
+        pool.add_relay("ws://127.0.0.1:2").await.unwrap();
+        assert!(pool.blacklist().await.is_empty());
+        assert_eq!(pool.get_relays().await.len(), 2);
+    }
+
+    /// Blacklisted rows of any source restore as the blacklist and never
+    /// join the pool, so they never count for `LastRelay`.
+    #[tokio::test]
+    async fn restored_blacklisted_rows_of_any_source_stay_out() {
+        let pool = RelayPool::new(urls(&["ws://127.0.0.1:1"])).await.unwrap();
+        let gone = |url: &str, source| RelayInfo {
+            is_active: false,
+            is_blacklisted: true,
+            ..relay(url, source, RelayStatus::Disconnected)
+        };
+        pool.restore_persisted(&[
+            gone("ws://127.0.0.1:2", RelaySource::Default),
+            gone("ws://127.0.0.1:3", RelaySource::UserAdded),
+            gone("ws://127.0.0.1:4", RelaySource::MostroDiscovered),
+        ])
+        .await;
+        assert_eq!(pool.blacklist().await.len(), 3);
+        assert!(pool
+            .sync_discovered(&urls(&["ws://127.0.0.1:2", "ws://127.0.0.1:3"]), "aa")
+            .await
+            .is_empty());
+        let err = pool.remove_relay("ws://127.0.0.1:1").await.unwrap_err();
+        assert_eq!(err.to_string(), "LastRelay");
+    }
+
+    /// A removal the SDK refuses changes nothing: the row stays listed and
+    /// nothing is blacklisted. Here the SDK refuses because the row was put
+    /// in the list without being registered with it.
+    #[tokio::test]
+    async fn a_refused_removal_leaves_everything_as_it_was() {
+        let pool = RelayPool::new(urls(&["ws://127.0.0.1:1"])).await.unwrap();
+        pool.relays.write().await.push(relay(
+            "ws://127.0.0.1:9",
+            RelaySource::Default,
+            RelayStatus::Connected,
+        ));
+        let err = pool.remove_relay("ws://127.0.0.1:9").await.unwrap_err();
+        assert!(err.to_string().starts_with("remove relay failed"), "{err}");
+        assert_eq!(pool.get_relays().await.len(), 2);
         assert!(pool.blacklist().await.is_empty());
     }
 
