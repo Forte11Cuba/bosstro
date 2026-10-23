@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/settings_palette.dart';
+import 'package:bosstro/features/disputes/providers/pending_providers.dart';
+import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/features/nodes/providers/relay_providers.dart';
@@ -19,9 +21,10 @@ import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 import 'package:bosstro/shared/widgets/tab_app_bar.dart';
 
-/// Settings tab: the active node and its relays, the solver key (npub,
-/// backup, log out) and the app's version. Permission and trusted senders
-/// arrive with their phases.
+/// Settings tab: the active node and its relays, whether this key is a
+/// solver there and its permission (once the node's answers told), the
+/// solver key (npub, backup, log out) and the app's version. Trusted senders
+/// arrive with phase 5b.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -34,6 +37,17 @@ class SettingsScreen extends ConsumerWidget {
     final active = ref.watch(activeNodeProvider);
     final entry = ref.watch(activeNodeEntryProvider);
     final link = ref.watch(relayLinkProvider);
+    final standing = ref.watch(solverStandingProvider).valueOrNull;
+    final solverValue = switch (standing?.status) {
+      SolverStatus.yes => l10n.settingsSolverYes,
+      SolverStatus.no => l10n.settingsSolverNo,
+      _ => null,
+    };
+    final permissionValue = switch (standing?.permission) {
+      SolverPermission.read => l10n.permissionRead,
+      SolverPermission.readWrite => l10n.permissionReadWrite,
+      _ => null,
+    };
 
     return ColoredBox(
       color: pal.bg,
@@ -84,6 +98,19 @@ class SettingsScreen extends ConsumerWidget {
                               ),
                       onTap: () => context.push(AppRoute.relays),
                     ),
+                    // Known only from the node's answers (D12).
+                    if (active != null && solverValue != null)
+                      OrderDataRow(
+                        icon: Icons.gavel_rounded,
+                        label: l10n.settingsSolverStatus,
+                        value: OrderDataValue(solverValue),
+                      ),
+                    if (active != null && permissionValue != null)
+                      OrderDataRow(
+                        icon: Icons.verified_user_outlined,
+                        label: l10n.settingsPermission,
+                        value: OrderDataValue(permissionValue),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 20),

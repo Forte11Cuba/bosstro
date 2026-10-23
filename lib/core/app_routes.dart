@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bosstro/features/disputes/screens/in_progress_screen.dart';
 import 'package:bosstro/features/disputes/screens/pending_screen.dart';
+import 'package:bosstro/features/disputes/screens/recover_screen.dart';
 import 'package:bosstro/features/nodes/screens/choose_node_screen.dart';
 import 'package:bosstro/features/nodes/screens/node_info_screen.dart';
 import 'package:bosstro/features/nodes/screens/relays_screen.dart';
@@ -24,6 +25,9 @@ abstract final class AppRoute {
 
   static const pending = '/pending';
   static const inProgress = '/in-progress';
+
+  /// Recover a dispute, from the In progress header.
+  static const recover = '/in-progress/recover';
   static const settings = '/settings';
   static const backup = '/settings/backup';
 
@@ -121,6 +125,14 @@ GoRouter buildRouter({
               GoRoute(
                 path: AppRoute.inProgress,
                 builder: (context, state) => const InProgressScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'recover',
+                    // Over the shell, as the other pushed screens.
+                    parentNavigatorKey: rootKey,
+                    builder: (context, state) => const RecoverScreen(),
+                  ),
+                ],
               ),
             ],
           ),

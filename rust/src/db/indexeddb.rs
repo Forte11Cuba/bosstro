@@ -393,4 +393,37 @@ mod tests {
     async fn disputes_by_status() {
         contract::disputes_by_status(&store("disputes_status").await).await;
     }
+
+    #[wasm_bindgen_test]
+    async fn takes_keep_their_solver() {
+        contract::takes_keep_their_solver(&store("disputes_takes").await).await;
+    }
+
+    /// A take written before phase 4 named its solver (none was, but a row
+    /// is JSON here) still reads, with no solver: it is no key's.
+    #[wasm_bindgen_test]
+    async fn a_take_without_its_solver_still_reads() {
+        let mut row = contract::dispute("aa", contract::DISPUTE_A);
+        row.taken = Some(crate::disputes::tests::taken());
+        let mut json: serde_json::Value = serde_json::to_value(&row).unwrap();
+        json["taken"]
+            .as_object_mut()
+            .unwrap()
+            .remove("solver_pubkey");
+        let storage = store("disputes_legacy").await;
+        storage
+            .put_string(
+                DISPUTES_STORE,
+                &dispute_key("aa", contract::DISPUTE_A),
+                &json.to_string(),
+            )
+            .await
+            .unwrap();
+        let read = storage
+            .get_dispute("aa", contract::DISPUTE_A)
+            .await
+            .unwrap()
+            .unwrap();
+        assert_eq!(read.taken.unwrap().solver_pubkey, "");
+    }
 }

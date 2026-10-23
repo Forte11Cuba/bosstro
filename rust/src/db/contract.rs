@@ -144,6 +144,7 @@ pub(crate) async fn disputes_round_trip(storage: &impl Storage) {
     row.status = DisputeStatus::InProgress;
     row.event_created_at += 1;
     row.taken = Some(TakenDispute {
+        solver_pubkey: "ab".repeat(32),
         taken_at: 1_700_000_200,
         order_id: Some("5b9e1f7e-6f0e-4b8a-9c3d-2e1f0a9b8c7d".into()),
         order_kind: Some("sell".into()),
@@ -237,4 +238,39 @@ pub(crate) async fn disputes_by_status(storage: &impl Storage) {
         .await
         .unwrap()
         .is_empty());
+}
+
+/// Phase 4: a take keeps the key that made it, so In progress and Recover
+/// can tell this key's disputes from another key's on the same device.
+pub(crate) async fn takes_keep_their_solver(storage: &impl Storage) {
+    let take = |solver: &str| TakenDispute {
+        solver_pubkey: solver.to_string(),
+        taken_at: 1_700_000_200,
+        order_id: None,
+        order_kind: None,
+        amount: Some(21_000),
+        fiat_amount: None,
+        fiat_code: None,
+        payment_method: None,
+        premium: None,
+        fee: None,
+        initiator_pubkey: None,
+        buyer_pubkey: None,
+        seller_pubkey: None,
+    };
+    let mut mine = dispute("aa", DISPUTE_A);
+    mine.status = DisputeStatus::InProgress;
+    mine.taken = Some(take(&"11".repeat(32)));
+    let mut other_key = dispute("aa", DISPUTE_B);
+    other_key.status = DisputeStatus::InProgress;
+    other_key.taken = Some(take(&"22".repeat(32)));
+    storage.save_dispute(&mine).await.unwrap();
+    storage.save_dispute(&other_key).await.unwrap();
+
+    let mut rows = storage
+        .list_disputes_with_status("aa", DisputeStatus::InProgress)
+        .await
+        .unwrap();
+    rows.sort_by(|a, b| a.dispute_id.cmp(&b.dispute_id));
+    assert_eq!(rows, vec![other_key, mine]);
 }

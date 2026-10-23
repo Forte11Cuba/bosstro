@@ -41,8 +41,8 @@ use nostr_sdk::prelude::{
 use tokio::sync::{broadcast, mpsc};
 
 use super::event::{parse_dispute_event, KIND_DISPUTE};
-use super::{merge, DisputeRecord};
-use crate::api::disputes::{DisputeStatus, DisputeUpdate};
+use super::{merge, DisputeRecord, TakenDispute};
+use crate::api::disputes::{DisputeInitiator, DisputeStatus, DisputeUpdate};
 use crate::db::Storage;
 use crate::nostr::live_subs::LiveSubs;
 
@@ -109,7 +109,7 @@ pub(crate) struct MemoryRows {
 }
 
 impl Store {
-    fn memory() -> Self {
+    pub(crate) fn memory() -> Self {
         Store::Memory(MemoryRows::default())
     }
 
@@ -414,6 +414,97 @@ impl Feed {
         Some(row)
     }
 
+    /// Store what the node said when it gave `dispute_id` to this key
+    /// (phase 4), under the same lock as the 38386 revisions, and announce
+    /// it. The public fields are the 38386's and stay as they are, but for
+    /// one: a dispute still `initiated` here reads `in-progress` until the
+    /// node's own revision arrives (which wins, being newer), so it leaves
+    /// Pending for In progress at once. A dispute not stored yet gets a row
+    /// any revision replaces.
+    pub(crate) async fn record_take(
+        &self,
+        node: &str,
+        dispute_id: &str,
+        taken: TakenDispute,
+    ) -> anyhow::Result<DisputeRecord> {
+        let row = {
+            let _guard = self.ingest_lock.lock().await;
+            let mut row = match self.store.get(node, dispute_id).await? {
+                Some(row) => row,
+                None => DisputeRecord {
+                    mostro_pubkey: node.to_string(),
+                    dispute_id: dispute_id.to_string(),
+                    status: DisputeStatus::InProgress,
+                    initiator: DisputeInitiator::Unknown,
+                    opened_at: None,
+                    expires_at: None,
+                    // Older than any revision: the first 38386 replaces it.
+                    event_id: String::new(),
+                    event_created_at: 0,
+                    taken: None,
+                },
+            };
+            if row.status == DisputeStatus::Initiated {
+                row.status = DisputeStatus::InProgress;
+            }
+            row.taken = Some(taken);
+            self.store.save(&row).await?;
+            row
+        };
+        self.announce(&row);
+        Ok(row)
+    }
+
+    /// Fill in the fiat code of a take, read after it from the order's kind
+    /// 38383. Only while the row is still taken by `solver` for `order_id`
+    /// and has none: a reopen or another take in between wins.
+    pub(crate) async fn record_fiat_code(
+        &self,
+        node: &str,
+        dispute_id: &str,
+        solver: &str,
+        order_id: &str,
+        fiat_code: &str,
+    ) -> anyhow::Result<()> {
+        let row = {
+            let _guard = self.ingest_lock.lock().await;
+            let Some(mut row) = self.store.get(node, dispute_id).await? else {
+                return Ok(());
+            };
+            match row.taken.as_mut() {
+                Some(t)
+                    if t.solver_pubkey == solver
+                        && t.order_id.as_deref() == Some(order_id)
+                        && t.fiat_code.is_none() =>
+                {
+                    t.fiat_code = Some(fiat_code.to_string());
+                }
+                _ => return Ok(()),
+            }
+            self.store.save(&row).await?;
+            row
+        };
+        self.announce(&row);
+        Ok(())
+    }
+
+    /// One stored row of `node`.
+    pub(crate) async fn row(
+        &self,
+        node: &str,
+        dispute_id: &str,
+    ) -> anyhow::Result<Option<DisputeRecord>> {
+        self.store.get(node, dispute_id).await
+    }
+
+    fn announce(&self, row: &DisputeRecord) {
+        self.send(DisputeUpdate {
+            mostro_pubkey: row.mostro_pubkey.clone(),
+            dispute: Some(row.summary(crate::rt::unix_now())),
+            synced: self.is_synced(&row.mostro_pubkey),
+        });
+    }
+
     /// Remember `id` as handled, if the feed still follows `node`: an event
     /// handled for a node the feed has just left must not be skipped for
     /// the next.
@@ -499,6 +590,11 @@ pub(crate) async fn start(client: Arc<Client>) {
         feed
     });
     feed.retarget(crate::config::active_mostro_pubkey()).await;
+}
+
+/// The running feed, once the pool started it.
+pub(crate) fn feed() -> Option<Arc<Feed>> {
+    FEED.get().cloned()
 }
 
 /// Re-point the feed at the active node after a selection. A no-op before

@@ -238,11 +238,18 @@ pub async fn cached_node_info(pubkey: String) -> Result<Option<NodeInfo>> {
 /// **Errors**: `InvalidPubkey`, `NotInitialized` (no relay pool), or the
 /// relay query failing outright (the cache is then untouched).
 pub async fn fetch_node_info(pubkey: String) -> Result<Option<NodeInfo>> {
+    let client = crate::api::relays::pool()?.client();
+    fetch_node_info_on(&client, &pubkey).await
+}
+
+/// [`fetch_node_info`] on `client` (the take reads the info through it when
+/// none is cached, `crate::mostro::take`).
+#[flutter_rust_bridge::frb(ignore)]
+pub(crate) async fn fetch_node_info_on(client: &Client, pubkey: &str) -> Result<Option<NodeInfo>> {
     use futures_util::StreamExt;
 
     let node = parse_node(&pubkey.to_lowercase())?;
     let hex = node.to_hex();
-    let client = crate::api::relays::pool()?.client();
 
     // A small window, so a forged "newest" event cannot wholly hide an
     // authentic revision when a relay returns a mixed set (Mostrix).

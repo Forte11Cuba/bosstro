@@ -13,6 +13,7 @@ class ListEmptyState extends StatelessWidget {
     required this.title,
     required this.body,
     this.action,
+    this.header,
   });
 
   /// The sticker's name, as in `assets/images/mascot/mostro-<name>.webp`.
@@ -22,6 +23,10 @@ class ListEmptyState extends StatelessWidget {
 
   /// The fix, when there is one: a `PrimaryButton` or a link.
   final Widget? action;
+
+  /// Something the screen says above the state, in the same scroll (a
+  /// banner).
+  final Widget? header;
 
   static const double _artHeight = 120;
 
@@ -35,6 +40,7 @@ class ListEmptyState extends StatelessWidget {
       ),
       child: Column(
         children: [
+          if (header case final top?) ...[top, const SizedBox(height: 24)],
           ExcludeSemantics(
             child: Image.asset(
               MostroMascot.stickerAsset(sticker),

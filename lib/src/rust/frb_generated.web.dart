@@ -12,6 +12,7 @@ import 'api/node_info.dart';
 import 'api/nodes.dart';
 import 'api/relays.dart';
 import 'api/solver.dart';
+import 'api/take.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -119,6 +120,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 dco_decode_box_autoadd_i_64(dynamic raw);
 
   @protected
+  InProgressDisputes dco_decode_box_autoadd_in_progress_disputes(dynamic raw);
+
+  @protected
   MostroNodePicture dco_decode_box_autoadd_mostro_node_picture(dynamic raw);
 
   @protected
@@ -132,6 +136,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   SolverKeyInfo dco_decode_box_autoadd_solver_key_info(dynamic raw);
+
+  @protected
+  SolverStanding dco_decode_box_autoadd_solver_standing(dynamic raw);
 
   @protected
   int dco_decode_box_autoadd_u_32(dynamic raw);
@@ -161,6 +168,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 dco_decode_i_64(dynamic raw);
 
   @protected
+  InProgressDisputes dco_decode_in_progress_disputes(dynamic raw);
+
+  @protected
   List<String> dco_decode_list_String(dynamic raw);
 
   @protected
@@ -177,6 +187,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<RelayInfo> dco_decode_list_relay_info(dynamic raw);
+
+  @protected
+  List<TakenDisputeSummary> dco_decode_list_taken_dispute_summary(dynamic raw);
 
   @protected
   MostroNodeEntry dco_decode_mostro_node_entry(dynamic raw);
@@ -212,6 +225,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64? dco_decode_opt_box_autoadd_i_64(dynamic raw);
 
   @protected
+  InProgressDisputes? dco_decode_opt_box_autoadd_in_progress_disputes(
+    dynamic raw,
+  );
+
+  @protected
   MostroNodePicture? dco_decode_opt_box_autoadd_mostro_node_picture(
     dynamic raw,
   );
@@ -229,7 +247,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   SolverKeyInfo? dco_decode_opt_box_autoadd_solver_key_info(dynamic raw);
 
   @protected
+  SolverStanding? dco_decode_opt_box_autoadd_solver_standing(dynamic raw);
+
+  @protected
   int? dco_decode_opt_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  List<DisputeSummary>? dco_decode_opt_list_dispute_summary(dynamic raw);
 
   @protected
   PendingDisputes dco_decode_pending_disputes(dynamic raw);
@@ -251,6 +275,27 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   SolverKeyInfo dco_decode_solver_key_info(dynamic raw);
+
+  @protected
+  SolverPermission dco_decode_solver_permission(dynamic raw);
+
+  @protected
+  SolverStanding dco_decode_solver_standing(dynamic raw);
+
+  @protected
+  SolverStatus dco_decode_solver_status(dynamic raw);
+
+  @protected
+  TakeError dco_decode_take_error(dynamic raw);
+
+  @protected
+  TakeOutcome dco_decode_take_outcome(dynamic raw);
+
+  @protected
+  TakeResult dco_decode_take_result(dynamic raw);
+
+  @protected
+  TakenDisputeSummary dco_decode_taken_dispute_summary(dynamic raw);
 
   @protected
   int dco_decode_u_32(dynamic raw);
@@ -352,6 +397,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 sse_decode_box_autoadd_i_64(SseDeserializer deserializer);
 
   @protected
+  InProgressDisputes sse_decode_box_autoadd_in_progress_disputes(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   MostroNodePicture sse_decode_box_autoadd_mostro_node_picture(
     SseDeserializer deserializer,
   );
@@ -369,6 +419,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   SolverKeyInfo sse_decode_box_autoadd_solver_key_info(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  SolverStanding sse_decode_box_autoadd_solver_standing(
     SseDeserializer deserializer,
   );
 
@@ -400,6 +455,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
 
   @protected
+  InProgressDisputes sse_decode_in_progress_disputes(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
 
   @protected
@@ -420,6 +480,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<RelayInfo> sse_decode_list_relay_info(SseDeserializer deserializer);
+
+  @protected
+  List<TakenDisputeSummary> sse_decode_list_taken_dispute_summary(
+    SseDeserializer deserializer,
+  );
 
   @protected
   MostroNodeEntry sse_decode_mostro_node_entry(SseDeserializer deserializer);
@@ -463,6 +528,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64? sse_decode_opt_box_autoadd_i_64(SseDeserializer deserializer);
 
   @protected
+  InProgressDisputes? sse_decode_opt_box_autoadd_in_progress_disputes(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   MostroNodePicture? sse_decode_opt_box_autoadd_mostro_node_picture(
     SseDeserializer deserializer,
   );
@@ -486,7 +556,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  SolverStanding? sse_decode_opt_box_autoadd_solver_standing(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  List<DisputeSummary>? sse_decode_opt_list_dispute_summary(
+    SseDeserializer deserializer,
+  );
 
   @protected
   PendingDisputes sse_decode_pending_disputes(SseDeserializer deserializer);
@@ -508,6 +588,29 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   SolverKeyInfo sse_decode_solver_key_info(SseDeserializer deserializer);
+
+  @protected
+  SolverPermission sse_decode_solver_permission(SseDeserializer deserializer);
+
+  @protected
+  SolverStanding sse_decode_solver_standing(SseDeserializer deserializer);
+
+  @protected
+  SolverStatus sse_decode_solver_status(SseDeserializer deserializer);
+
+  @protected
+  TakeError sse_decode_take_error(SseDeserializer deserializer);
+
+  @protected
+  TakeOutcome sse_decode_take_outcome(SseDeserializer deserializer);
+
+  @protected
+  TakeResult sse_decode_take_result(SseDeserializer deserializer);
+
+  @protected
+  TakenDisputeSummary sse_decode_taken_dispute_summary(
+    SseDeserializer deserializer,
+  );
 
   @protected
   int sse_decode_u_32(SseDeserializer deserializer);
@@ -627,6 +730,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_in_progress_disputes(
+    InProgressDisputes self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_mostro_node_picture(
     MostroNodePicture self,
     SseSerializer serializer,
@@ -653,6 +762,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_solver_key_info(
     SolverKeyInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_solver_standing(
+    SolverStanding self,
     SseSerializer serializer,
   );
 
@@ -693,6 +808,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
 
   @protected
+  void sse_encode_in_progress_disputes(
+    InProgressDisputes self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
 
   @protected
@@ -719,6 +840,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_relay_info(
     List<RelayInfo> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_taken_dispute_summary(
+    List<TakenDisputeSummary> self,
     SseSerializer serializer,
   );
 
@@ -777,6 +904,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_in_progress_disputes(
+    InProgressDisputes? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_mostro_node_picture(
     MostroNodePicture? self,
     SseSerializer serializer,
@@ -807,7 +940,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_solver_standing(
+    SolverStanding? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_list_dispute_summary(
+    List<DisputeSummary>? self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_pending_disputes(
@@ -838,6 +983,36 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_solver_key_info(SolverKeyInfo self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_solver_permission(
+    SolverPermission self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_solver_standing(
+    SolverStanding self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_solver_status(SolverStatus self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_take_error(TakeError self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_take_outcome(TakeOutcome self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_take_result(TakeResult self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_taken_dispute_summary(
+    TakenDisputeSummary self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_u_32(int self, SseSerializer serializer);

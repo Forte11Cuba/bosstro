@@ -38,9 +38,14 @@ pub struct DisputeRecord {
 }
 
 /// What `AdminTookDispute` (`SolverDisputeInfo`) tells the solver who took a
-/// dispute. Phase 4 fills it; phase 3 only keeps it across 38386 updates.
+/// dispute (`crate::mostro::take`), kept across 38386 updates.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct TakenDispute {
+    /// The solver key that took it (hex). A take belongs to one key: another
+    /// nsec logged in on this device does not see it as its own.
+    #[serde(default)]
+    pub solver_pubkey: String,
+    /// When the node answered the take (this device's clock, Unix seconds).
     pub taken_at: i64,
     pub order_id: Option<String>,
     pub order_kind: Option<String>,
@@ -183,27 +188,34 @@ pub fn merge(existing: Option<&DisputeRecord>, incoming: &ParsedDispute) -> Opti
     })
 }
 
-/// Pending disputes of `node`, oldest first: the one that has waited longest
-/// on top. A dispute with no open time sorts last; ties go by id, so the
-/// order is stable.
+/// Disputes as the lists show them, oldest first: the one that has waited
+/// longest on top. A dispute with no open time sorts last; ties go by id, so
+/// the order is stable.
 pub fn sort_pending(list: &mut [DisputeSummary]) {
-    list.sort_by(|a, b| {
-        let key = |d: &DisputeSummary| (d.opened_at.is_none(), d.opened_at.unwrap_or(0));
-        key(a)
-            .cmp(&key(b))
-            .then_with(|| a.dispute_id.cmp(&b.dispute_id))
-    });
+    list.sort_by(|a, b| oldest_first((a.opened_at, &a.dispute_id), (b.opened_at, &b.dispute_id)));
+}
+
+/// The order of [`sort_pending`], on an open time and a dispute id.
+pub(crate) fn oldest_first(a: (Option<i64>, &str), b: (Option<i64>, &str)) -> std::cmp::Ordering {
+    let key = |opened_at: Option<i64>| (opened_at.is_none(), opened_at.unwrap_or(0));
+    key(a.0).cmp(&key(b.0)).then_with(|| a.1.cmp(b.1))
+}
+
+/// `node`'s stored rows with `status`: from storage, or from the feed's
+/// memory when storage never opened.
+pub(crate) async fn rows_with_status(
+    node: &str,
+    status: DisputeStatus,
+) -> Result<Vec<DisputeRecord>> {
+    Ok(match crate::db::app_db::db() {
+        Some(db) => db.list_disputes_with_status(node, status).await?,
+        None => feed::memory_rows(node, status).await,
+    })
 }
 
 /// The pending disputes of `node` as stored now, sorted for the list.
 pub async fn pending_for(node: &str) -> Result<Vec<DisputeSummary>> {
-    let rows = match crate::db::app_db::db() {
-        Some(db) => {
-            db.list_disputes_with_status(node, DisputeStatus::Initiated)
-                .await?
-        }
-        None => feed::memory_rows(node, DisputeStatus::Initiated).await,
-    };
+    let rows = rows_with_status(node, DisputeStatus::Initiated).await?;
     Ok(pending_of(&rows, crate::rt::unix_now()))
 }
 
@@ -238,8 +250,17 @@ pub(crate) mod tests {
         }
     }
 
+    /// A stored row of [`NODE`] with `status`, not taken.
+    pub(crate) fn row_with(status: DisputeStatus) -> DisputeRecord {
+        DisputeRecord {
+            status,
+            ..merge(None, &parsed(DisputeStatus::Initiated, 1, &"a".repeat(64))).unwrap()
+        }
+    }
+
     pub(crate) fn taken() -> TakenDispute {
         TakenDispute {
+            solver_pubkey: "ab".repeat(32),
             taken_at: 1_500,
             order_id: Some("5b9e1f7e-6f0e-4b8a-9c3d-2e1f0a9b8c7d".into()),
             order_kind: Some("sell".into()),

@@ -8,6 +8,7 @@ mod config;
 pub mod crypto;
 mod db;
 mod disputes;
+mod mostro;
 mod node_pictures;
 mod nostr;
 mod rt;

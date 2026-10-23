@@ -18,7 +18,7 @@ use crate::disputes::{DisputeRecord, TakenDispute};
 const DISPUTE_COLUMNS: &str = "mostro_pubkey, dispute_id, status, initiator, opened_at, \
      expires_at, event_id, event_created_at, taken_at, order_id, order_kind, amount, \
      fiat_amount, fiat_code, payment_method, premium, fee, initiator_pubkey, buyer_pubkey, \
-     seller_pubkey";
+     seller_pubkey, solver_pubkey";
 
 /// Size of the connection pool, as in ../app.
 const MAX_CONNECTIONS: u32 = 4;
@@ -143,7 +143,7 @@ impl Storage for SqliteStorage {
         let t = d.taken.as_ref();
         sqlx::query(&format!(
             "INSERT OR REPLACE INTO disputes ({DISPUTE_COLUMNS})
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         ))
         .bind(&d.mostro_pubkey)
         .bind(&d.dispute_id)
@@ -165,6 +165,7 @@ impl Storage for SqliteStorage {
         .bind(t.and_then(|t| t.initiator_pubkey.clone()))
         .bind(t.and_then(|t| t.buyer_pubkey.clone()))
         .bind(t.and_then(|t| t.seller_pubkey.clone()))
+        .bind(t.map(|t| t.solver_pubkey.clone()))
         .execute(&self.pool)
         .await?;
         Ok(())
@@ -230,6 +231,9 @@ fn dispute_from_row(row: &sqlx::sqlite::SqliteRow) -> Result<DisputeRecord> {
     let taken_at: Option<i64> = row.try_get("taken_at")?;
     let taken = match taken_at {
         Some(taken_at) => Some(TakenDispute {
+            solver_pubkey: row
+                .try_get::<Option<String>, _>("solver_pubkey")?
+                .unwrap_or_default(),
             taken_at,
             order_id: row.try_get("order_id")?,
             order_kind: row.try_get("order_kind")?,
@@ -311,6 +315,11 @@ pub(crate) mod tests {
     #[tokio::test]
     async fn disputes_by_status() {
         contract::disputes_by_status(&store().await).await;
+    }
+
+    #[tokio::test]
+    async fn takes_keep_their_solver() {
+        contract::takes_keep_their_solver(&store().await).await;
     }
 
     /// The Pending query uses the index, not a scan of the table.

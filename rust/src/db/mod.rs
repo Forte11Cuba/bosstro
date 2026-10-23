@@ -52,6 +52,17 @@ pub mod settings_keys {
     pub fn node_info(pubkey: &str) -> String {
         format!("{NODE_INFO_PREFIX}{pubkey}")
     }
+
+    /// What one solver key has learned about itself on one node, as JSON
+    /// (`crate::mostro::standing`): whether it is a solver there, and its
+    /// permission (D12). Keyed by node and key, so neither a node switch nor
+    /// another nsec inherits it.
+    pub const SOLVER_STANDING_PREFIX: &str = "solver_standing:";
+
+    /// [`SOLVER_STANDING_PREFIX`] for `node` and `solver` (both hex).
+    pub fn solver_standing(node: &str, solver: &str) -> String {
+        format!("{SOLVER_STANDING_PREFIX}{node}:{solver}")
+    }
 }
 
 /// Storage trait — implemented by SQLite (native) and IndexedDB (wasm).

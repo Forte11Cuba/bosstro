@@ -124,32 +124,46 @@ class TabAppBar extends StatelessWidget {
   }
 }
 
-/// The screen's title under the tab app bar: 19/600 (§3.2, screen headline).
+/// The screen's title under the tab app bar: 19/600 (§3.2, screen headline),
+/// and the screen's own action at its end, when it has one (a
+/// [LabeledIconAction]).
 class TabHeader extends StatelessWidget {
-  const TabHeader({super.key, required this.title});
+  const TabHeader({super.key, required this.title, this.action});
 
   final String title;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
     final pal = ShellPalette.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         redesignSidePadding,
         4,
-        redesignSidePadding,
-        12,
+        // The action's own padding lines its label up with the content.
+        action == null ? redesignSidePadding : redesignSidePadding - 10,
+        action == null ? 12 : 4,
       ),
-      child: Semantics(
-        header: true,
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 19,
-            fontWeight: FontWeight.w600,
-            color: pal.textPrimary,
+      // The action follows the title on its line while both fit, and moves
+      // under it when they do not (a long title, a large text scale).
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w600,
+                color: pal.textPrimary,
+              ),
+            ),
           ),
-        ),
+          if (action case final a?) a,
+        ],
       ),
     );
   }

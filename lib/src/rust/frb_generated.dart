@@ -9,6 +9,7 @@ import 'api/node_info.dart';
 import 'api/nodes.dart';
 import 'api/relays.dart';
 import 'api/solver.dart';
+import 'api/take.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -71,7 +72,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1157209261;
+  int get rustContentHash => 1927965328;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -121,6 +122,8 @@ abstract class RustLibApi extends BaseApi {
 
   Future<List<RelayInfo>> crateApiRelaysGetRelays();
 
+  Future<InProgressDisputes?> crateApiTakeInProgressDisputes();
+
   Future<void> crateApiInitApp();
 
   Future<void> crateApiInitDb({required String path});
@@ -147,6 +150,8 @@ abstract class RustLibApi extends BaseApi {
 
   Future<ProtocolSupport> crateApiNodeInfoProtocolSupportDefault();
 
+  Future<List<DisputeSummary>?> crateApiTakeRecoverCandidates();
+
   Future<List<MostroNodeEntry>> crateApiNodesRefreshMostroNodeMetadata();
 
   Future<String?> crateApiNodesRehydrateActiveNode();
@@ -157,9 +162,17 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiNodesSelectActiveNode({required String pubkey});
 
+  Future<SolverPermission> crateApiTakeSolverPermissionDefault();
+
   Future<SolverKeyInfo?> crateApiSolverSolverPubkey();
 
+  Future<SolverStanding?> crateApiTakeSolverStanding();
+
+  Future<SolverStatus> crateApiTakeSolverStatusDefault();
+
   Future<List<String>> crateApiNodesSyncMostroNodePictures();
+
+  Future<TakeResult> crateApiTakeTakeDispute({required String disputeId});
 
   Future<bool> crateApiSolverUnloadSolverKey();
 
@@ -611,7 +624,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "get_relays", argNames: []);
 
   @override
-  Future<void> crateApiInitApp() {
+  Future<InProgressDisputes?> crateApiTakeInProgressDisputes() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -620,6 +633,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             generalizedFrbRustBinding,
             serializer,
             funcId: 15,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_in_progress_disputes,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiTakeInProgressDisputesConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiTakeInProgressDisputesConstMeta =>
+      const TaskConstMeta(debugName: "in_progress_disputes", argNames: []);
+
+  @override
+  Future<void> crateApiInitApp() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 16,
             port: port_,
           );
         },
@@ -647,7 +687,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 16,
+            funcId: 17,
             port: port_,
           );
         },
@@ -674,7 +714,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 18,
             port: port_,
           );
         },
@@ -701,7 +741,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 19,
             port: port_,
           );
         },
@@ -731,7 +771,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 19,
+            funcId: 20,
             port: port_,
           );
         },
@@ -758,7 +798,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 21,
             port: port_,
           );
         },
@@ -785,7 +825,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 22,
             port: port_,
           );
         },
@@ -816,7 +856,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 23,
             port: port_,
           );
         },
@@ -844,7 +884,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 23,
+            funcId: 24,
             port: port_,
           );
         },
@@ -872,7 +912,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 24,
+            funcId: 25,
             port: port_,
           );
         },
@@ -897,7 +937,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_list_prim_u_8_loose(secret, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 25)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 26)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -922,7 +962,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 26,
+            funcId: 27,
             port: port_,
           );
         },
@@ -941,6 +981,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "protocol_support_default", argNames: []);
 
   @override
+  Future<List<DisputeSummary>?> crateApiTakeRecoverCandidates() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 28,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_dispute_summary,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiTakeRecoverCandidatesConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiTakeRecoverCandidatesConstMeta =>
+      const TaskConstMeta(debugName: "recover_candidates", argNames: []);
+
+  @override
   Future<List<MostroNodeEntry>> crateApiNodesRefreshMostroNodeMetadata() {
     return handler.executeNormal(
       NormalTask(
@@ -949,7 +1016,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 27,
+            funcId: 29,
             port: port_,
           );
         },
@@ -979,7 +1046,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 28,
+            funcId: 30,
             port: port_,
           );
         },
@@ -1007,7 +1074,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 29,
+            funcId: 31,
             port: port_,
           );
         },
@@ -1038,7 +1105,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 30,
+            funcId: 32,
             port: port_,
           );
         },
@@ -1066,7 +1133,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 31,
+            funcId: 33,
             port: port_,
           );
         },
@@ -1088,6 +1155,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<SolverPermission> crateApiTakeSolverPermissionDefault() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 34,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_solver_permission,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiTakeSolverPermissionDefaultConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiTakeSolverPermissionDefaultConstMeta =>
+      const TaskConstMeta(debugName: "solver_permission_default", argNames: []);
+
+  @override
   Future<SolverKeyInfo?> crateApiSolverSolverPubkey() {
     return handler.executeNormal(
       NormalTask(
@@ -1096,7 +1190,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 32,
+            funcId: 35,
             port: port_,
           );
         },
@@ -1115,6 +1209,60 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "solver_pubkey", argNames: []);
 
   @override
+  Future<SolverStanding?> crateApiTakeSolverStanding() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 36,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_solver_standing,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiTakeSolverStandingConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiTakeSolverStandingConstMeta =>
+      const TaskConstMeta(debugName: "solver_standing", argNames: []);
+
+  @override
+  Future<SolverStatus> crateApiTakeSolverStatusDefault() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 37,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_solver_status,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiTakeSolverStatusDefaultConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiTakeSolverStatusDefaultConstMeta =>
+      const TaskConstMeta(debugName: "solver_status_default", argNames: []);
+
+  @override
   Future<List<String>> crateApiNodesSyncMostroNodePictures() {
     return handler.executeNormal(
       NormalTask(
@@ -1123,7 +1271,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 33,
+            funcId: 38,
             port: port_,
           );
         },
@@ -1142,6 +1290,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "sync_mostro_node_pictures", argNames: []);
 
   @override
+  Future<TakeResult> crateApiTakeTakeDispute({required String disputeId}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(disputeId, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 39,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_take_result,
+          decodeErrorData: sse_decode_take_error,
+        ),
+        constMeta: kCrateApiTakeTakeDisputeConstMeta,
+        argValues: [disputeId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiTakeTakeDisputeConstMeta =>
+      const TaskConstMeta(debugName: "take_dispute", argNames: ["disputeId"]);
+
+  @override
   Future<bool> crateApiSolverUnloadSolverKey() {
     return handler.executeNormal(
       NormalTask(
@@ -1150,7 +1326,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 34,
+            funcId: 40,
             port: port_,
           );
         },
@@ -1328,6 +1504,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  InProgressDisputes dco_decode_box_autoadd_in_progress_disputes(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_in_progress_disputes(raw);
+  }
+
+  @protected
   MostroNodePicture dco_decode_box_autoadd_mostro_node_picture(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_mostro_node_picture(raw);
@@ -1355,6 +1537,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   SolverKeyInfo dco_decode_box_autoadd_solver_key_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_solver_key_info(raw);
+  }
+
+  @protected
+  SolverStanding dco_decode_box_autoadd_solver_standing(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_solver_standing(raw);
   }
 
   @protected
@@ -1429,6 +1617,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  InProgressDisputes dco_decode_in_progress_disputes(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return InProgressDisputes(
+      mostroPubkey: dco_decode_String(arr[0]),
+      disputes: dco_decode_list_taken_dispute_summary(arr[1]),
+    );
+  }
+
+  @protected
   List<String> dco_decode_list_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_String).toList();
@@ -1462,6 +1662,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   List<RelayInfo> dco_decode_list_relay_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_relay_info).toList();
+  }
+
+  @protected
+  List<TakenDisputeSummary> dco_decode_list_taken_dispute_summary(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>)
+        .map(dco_decode_taken_dispute_summary)
+        .toList();
   }
 
   @protected
@@ -1587,6 +1795,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  InProgressDisputes? dco_decode_opt_box_autoadd_in_progress_disputes(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null
+        ? null
+        : dco_decode_box_autoadd_in_progress_disputes(raw);
+  }
+
+  @protected
   MostroNodePicture? dco_decode_opt_box_autoadd_mostro_node_picture(
     dynamic raw,
   ) {
@@ -1619,9 +1837,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  SolverStanding? dco_decode_opt_box_autoadd_solver_standing(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_solver_standing(raw);
+  }
+
+  @protected
   int? dco_decode_opt_box_autoadd_u_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_u_32(raw);
+  }
+
+  @protected
+  List<DisputeSummary>? dco_decode_opt_list_dispute_summary(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_list_dispute_summary(raw);
   }
 
   @protected
@@ -1689,6 +1919,76 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return SolverKeyInfo(
       npub: dco_decode_String(arr[0]),
       publicKeyHex: dco_decode_String(arr[1]),
+    );
+  }
+
+  @protected
+  SolverPermission dco_decode_solver_permission(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return SolverPermission.values[raw as int];
+  }
+
+  @protected
+  SolverStanding dco_decode_solver_standing(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return SolverStanding(
+      mostroPubkey: dco_decode_String(arr[0]),
+      status: dco_decode_solver_status(arr[1]),
+      permission: dco_decode_solver_permission(arr[2]),
+    );
+  }
+
+  @protected
+  SolverStatus dco_decode_solver_status(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return SolverStatus.values[raw as int];
+  }
+
+  @protected
+  TakeError dco_decode_take_error(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return TakeError.values[raw as int];
+  }
+
+  @protected
+  TakeOutcome dco_decode_take_outcome(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return TakeOutcome.values[raw as int];
+  }
+
+  @protected
+  TakeResult dco_decode_take_result(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return TakeResult(
+      mostroPubkey: dco_decode_String(arr[0]),
+      disputeId: dco_decode_String(arr[1]),
+      outcome: dco_decode_take_outcome(arr[2]),
+      reason: dco_decode_opt_String(arr[3]),
+    );
+  }
+
+  @protected
+  TakenDisputeSummary dco_decode_taken_dispute_summary(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 9)
+      throw Exception('unexpected arr length: expect 9 but see ${arr.length}');
+    return TakenDisputeSummary(
+      mostroPubkey: dco_decode_String(arr[0]),
+      disputeId: dco_decode_String(arr[1]),
+      status: dco_decode_dispute_status(arr[2]),
+      initiator: dco_decode_dispute_initiator(arr[3]),
+      openedAt: dco_decode_opt_box_autoadd_i_64(arr[4]),
+      takenAt: dco_decode_i_64(arr[5]),
+      amount: dco_decode_opt_box_autoadd_i_64(arr[6]),
+      fiatAmount: dco_decode_opt_box_autoadd_i_64(arr[7]),
+      fiatCode: dco_decode_opt_String(arr[8]),
     );
   }
 
@@ -1887,6 +2187,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  InProgressDisputes sse_decode_box_autoadd_in_progress_disputes(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_in_progress_disputes(deserializer));
+  }
+
+  @protected
   MostroNodePicture sse_decode_box_autoadd_mostro_node_picture(
     SseDeserializer deserializer,
   ) {
@@ -1920,6 +2228,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_solver_key_info(deserializer));
+  }
+
+  @protected
+  SolverStanding sse_decode_box_autoadd_solver_standing(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_solver_standing(deserializer));
   }
 
   @protected
@@ -2000,6 +2316,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  InProgressDisputes sse_decode_in_progress_disputes(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_mostroPubkey = sse_decode_String(deserializer);
+    var var_disputes = sse_decode_list_taken_dispute_summary(deserializer);
+    return InProgressDisputes(
+      mostroPubkey: var_mostroPubkey,
+      disputes: var_disputes,
+    );
+  }
+
+  @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -2061,6 +2390,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var ans_ = <RelayInfo>[];
     for (var idx_ = 0; idx_ < len_; ++idx_) {
       ans_.add(sse_decode_relay_info(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<TakenDisputeSummary> sse_decode_list_taken_dispute_summary(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <TakenDisputeSummary>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_taken_dispute_summary(deserializer));
     }
     return ans_;
   }
@@ -2261,6 +2604,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  InProgressDisputes? sse_decode_opt_box_autoadd_in_progress_disputes(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_in_progress_disputes(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   MostroNodePicture? sse_decode_opt_box_autoadd_mostro_node_picture(
     SseDeserializer deserializer,
   ) {
@@ -2324,11 +2680,37 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  SolverStanding? sse_decode_opt_box_autoadd_solver_standing(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_solver_standing(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_box_autoadd_u_32(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  List<DisputeSummary>? sse_decode_opt_list_dispute_summary(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_list_dispute_summary(deserializer));
     } else {
       return null;
     }
@@ -2406,6 +2788,89 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_npub = sse_decode_String(deserializer);
     var var_publicKeyHex = sse_decode_String(deserializer);
     return SolverKeyInfo(npub: var_npub, publicKeyHex: var_publicKeyHex);
+  }
+
+  @protected
+  SolverPermission sse_decode_solver_permission(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return SolverPermission.values[inner];
+  }
+
+  @protected
+  SolverStanding sse_decode_solver_standing(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_mostroPubkey = sse_decode_String(deserializer);
+    var var_status = sse_decode_solver_status(deserializer);
+    var var_permission = sse_decode_solver_permission(deserializer);
+    return SolverStanding(
+      mostroPubkey: var_mostroPubkey,
+      status: var_status,
+      permission: var_permission,
+    );
+  }
+
+  @protected
+  SolverStatus sse_decode_solver_status(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return SolverStatus.values[inner];
+  }
+
+  @protected
+  TakeError sse_decode_take_error(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return TakeError.values[inner];
+  }
+
+  @protected
+  TakeOutcome sse_decode_take_outcome(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return TakeOutcome.values[inner];
+  }
+
+  @protected
+  TakeResult sse_decode_take_result(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_mostroPubkey = sse_decode_String(deserializer);
+    var var_disputeId = sse_decode_String(deserializer);
+    var var_outcome = sse_decode_take_outcome(deserializer);
+    var var_reason = sse_decode_opt_String(deserializer);
+    return TakeResult(
+      mostroPubkey: var_mostroPubkey,
+      disputeId: var_disputeId,
+      outcome: var_outcome,
+      reason: var_reason,
+    );
+  }
+
+  @protected
+  TakenDisputeSummary sse_decode_taken_dispute_summary(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_mostroPubkey = sse_decode_String(deserializer);
+    var var_disputeId = sse_decode_String(deserializer);
+    var var_status = sse_decode_dispute_status(deserializer);
+    var var_initiator = sse_decode_dispute_initiator(deserializer);
+    var var_openedAt = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_takenAt = sse_decode_i_64(deserializer);
+    var var_amount = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_fiatAmount = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_fiatCode = sse_decode_opt_String(deserializer);
+    return TakenDisputeSummary(
+      mostroPubkey: var_mostroPubkey,
+      disputeId: var_disputeId,
+      status: var_status,
+      initiator: var_initiator,
+      openedAt: var_openedAt,
+      takenAt: var_takenAt,
+      amount: var_amount,
+      fiatAmount: var_fiatAmount,
+      fiatCode: var_fiatCode,
+    );
   }
 
   @protected
@@ -2618,6 +3083,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_in_progress_disputes(
+    InProgressDisputes self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_in_progress_disputes(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_mostro_node_picture(
     MostroNodePicture self,
     SseSerializer serializer,
@@ -2660,6 +3134,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_solver_key_info(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_solver_standing(
+    SolverStanding self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_solver_standing(self, serializer);
   }
 
   @protected
@@ -2733,6 +3216,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_in_progress_disputes(
+    InProgressDisputes self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.mostroPubkey, serializer);
+    sse_encode_list_taken_dispute_summary(self.disputes, serializer);
+  }
+
+  @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
@@ -2796,6 +3289,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_relay_info(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_taken_dispute_summary(
+    List<TakenDisputeSummary> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_taken_dispute_summary(item, serializer);
     }
   }
 
@@ -2954,6 +3459,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_in_progress_disputes(
+    InProgressDisputes? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_in_progress_disputes(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_mostro_node_picture(
     MostroNodePicture? self,
     SseSerializer serializer,
@@ -3019,12 +3537,38 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_solver_standing(
+    SolverStanding? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_solver_standing(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_u_32(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_list_dispute_summary(
+    List<DisputeSummary>? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_list_dispute_summary(self, serializer);
     }
   }
 
@@ -3091,6 +3635,70 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.npub, serializer);
     sse_encode_String(self.publicKeyHex, serializer);
+  }
+
+  @protected
+  void sse_encode_solver_permission(
+    SolverPermission self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_solver_standing(
+    SolverStanding self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.mostroPubkey, serializer);
+    sse_encode_solver_status(self.status, serializer);
+    sse_encode_solver_permission(self.permission, serializer);
+  }
+
+  @protected
+  void sse_encode_solver_status(SolverStatus self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_take_error(TakeError self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_take_outcome(TakeOutcome self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_take_result(TakeResult self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.mostroPubkey, serializer);
+    sse_encode_String(self.disputeId, serializer);
+    sse_encode_take_outcome(self.outcome, serializer);
+    sse_encode_opt_String(self.reason, serializer);
+  }
+
+  @protected
+  void sse_encode_taken_dispute_summary(
+    TakenDisputeSummary self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.mostroPubkey, serializer);
+    sse_encode_String(self.disputeId, serializer);
+    sse_encode_dispute_status(self.status, serializer);
+    sse_encode_dispute_initiator(self.initiator, serializer);
+    sse_encode_opt_box_autoadd_i_64(self.openedAt, serializer);
+    sse_encode_i_64(self.takenAt, serializer);
+    sse_encode_opt_box_autoadd_i_64(self.amount, serializer);
+    sse_encode_opt_box_autoadd_i_64(self.fiatAmount, serializer);
+    sse_encode_opt_String(self.fiatCode, serializer);
   }
 
   @protected

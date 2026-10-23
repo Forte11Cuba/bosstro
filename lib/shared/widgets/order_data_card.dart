@@ -12,20 +12,43 @@ import 'package:bosstro/shared/widgets/snackbar.dart';
 /// the design guide cites.
 
 /// A block on the page: surface fill, hairline border, radius 18, no
-/// elevation (DS-CMP-8).
+/// elevation (DS-CMP-8). With [onTap] it is `Material` + `InkWell`, so the
+/// ripple follows the radius.
 class SurfaceCard extends StatelessWidget {
   const SurfaceCard({
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(14),
+    this.onTap,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final pal = ShellPalette.of(context);
+    if (onTap case final tap?) {
+      final shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.block),
+        side: BorderSide(color: pal.border),
+      );
+      return Material(
+        color: pal.surface,
+        shape: shape,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: tap,
+          customBorder: shape,
+          child: Container(
+            width: double.infinity,
+            padding: padding,
+            child: child,
+          ),
+        ),
+      );
+    }
     return Container(
       width: double.infinity,
       padding: padding,
