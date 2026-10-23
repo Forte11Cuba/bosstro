@@ -773,6 +773,110 @@ mod tests {
         assert_eq!(rig.router.waiting_len(), 0);
     }
 
+    /// Against a real mostrod and relay, by hand (not in CI): the active
+    /// node's 38386 is read from the relay, the take goes out signed by the
+    /// solver key, and mostrod's answer is checked against `EXPECT`.
+    ///
+    /// ```text
+    /// BOSSTRO_E2E_RELAY=ws://localhost:7000 BOSSTRO_E2E_NODE=<hex> \
+    /// BOSSTRO_E2E_SOLVER=<nsec or hex> BOSSTRO_E2E_DISPUTE=<uuid> \
+    /// BOSSTRO_E2E_EXPECT=taken|not-solver|cannot-take-over \
+    ///   cargo test --lib against_a_local_mostrod -- --ignored --nocapture
+    /// ```
+    #[tokio::test]
+    #[ignore = "needs a local mostrod and relay"]
+    async fn against_a_local_mostrod() {
+        let env = |name: &str| std::env::var(name).unwrap_or_else(|_| panic!("{name} unset"));
+        let relay = nostr_sdk::prelude::RelayUrl::parse(&env("BOSSTRO_E2E_RELAY")).unwrap();
+        let node = env("BOSSTRO_E2E_NODE");
+        let solver = Keys::parse(&env("BOSSTRO_E2E_SOLVER")).unwrap();
+        let dispute = env("BOSSTRO_E2E_DISPUTE");
+        let expect = match env("BOSSTRO_E2E_EXPECT").as_str() {
+            "taken" => TakeOutcome::Taken,
+            "not-solver" => TakeOutcome::NotSolver,
+            "cannot-take-over" => TakeOutcome::CannotTakeOver,
+            other => panic!("unknown EXPECT {other}"),
+        };
+
+        let client = connected(&relay).await;
+        let subs: &'static LiveSubs = Box::leak(Box::default());
+        let (tx, _) = tokio::sync::broadcast::channel(256);
+        let feed = Feed::new(client.clone(), Store::memory(), subs, tx);
+        feed.spawn_reader();
+        feed.retarget(Some(node.clone())).await;
+        let mut before = None;
+        for _ in 0..100 {
+            before = feed.row(&node, &dispute).await.unwrap();
+            if before.is_some() {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+        let before = before.expect("the node's 38386 of the dispute, from the relay");
+        println!("before: {:?}", before.status);
+
+        let router = Router::new(client.clone(), subs, feed.clone());
+        router.spawn_reader();
+        router
+            .retarget(Some(node.clone()), Some(solver.clone()))
+            .await;
+        let started = std::time::Instant::now();
+        let result = send_take(
+            &router,
+            &feed,
+            &client,
+            &solver,
+            &node,
+            &dispute,
+            0,
+            crate::mostro::take::ANSWER_WAIT,
+        )
+        .await
+        .unwrap();
+        println!(
+            "answer in {:?}: {:?} {:?}",
+            started.elapsed(),
+            result.outcome,
+            result.reason
+        );
+        assert_eq!(result.outcome, expect);
+
+        let after = feed.row(&node, &dispute).await.unwrap().unwrap();
+        if expect == TakeOutcome::Taken {
+            let taken = after.taken.as_ref().expect("taken");
+            assert_eq!(taken.solver_pubkey, solver.public_key().to_hex());
+            println!(
+                "taken: {} sats, {:?} fiat, order {:?}, method {:?}",
+                taken.amount.unwrap_or_default(),
+                taken.fiat_amount,
+                taken.order_id,
+                taken.payment_method
+            );
+            // mostrod republishes the dispute as in-progress.
+            let mut republished = false;
+            for _ in 0..50 {
+                let row = feed.row(&node, &dispute).await.unwrap().unwrap();
+                if row.status == DisputeStatus::InProgress && row.event_id != before.event_id {
+                    republished = true;
+                    break;
+                }
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
+            assert!(republished, "the node's in-progress 38386 arrived");
+            assert!(feed
+                .row(&node, &dispute)
+                .await
+                .unwrap()
+                .unwrap()
+                .taken
+                .is_some());
+        } else {
+            assert_eq!(after.taken, None);
+        }
+        let standing = crate::mostro::standing::read(&node, &solver.public_key().to_hex()).await;
+        println!("standing: {standing:?}");
+    }
+
     #[test]
     fn the_subscription_is_the_nodes_answers_to_this_key() {
         let (node, solver) = (Keys::generate().public_key(), Keys::generate().public_key());
