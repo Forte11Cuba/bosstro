@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bosstro/core/app.dart';
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/services/solver_key_service.dart';
+import 'package:bosstro/features/chat/providers/chat_providers.dart';
 import 'package:bosstro/features/disputes/providers/pending_providers.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
@@ -15,11 +16,13 @@ import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/providers/core_providers.dart';
 import 'package:bosstro/shared/providers/device_security_providers.dart';
 
+import 'fake_chat.dart';
 import 'fake_device_security.dart';
 import 'fake_disputes.dart';
 import 'fake_nodes.dart';
 import 'fake_solver_key.dart';
 
+export 'fake_chat.dart';
 export 'fake_device_security.dart';
 export 'fake_disputes.dart';
 export 'fake_nodes.dart';
@@ -64,6 +67,7 @@ List<Override> fakeCoreOverrides({
   FakeNodesCore? nodes,
   FakeRelaysCore? relays,
   FakeDisputesCore? disputes,
+  FakeChatCore? chat,
 }) {
   final nodeCore = nodes ?? FakeNodesCore(active: mostroNodePubkey);
   final keys =
@@ -87,6 +91,7 @@ List<Override> fakeCoreOverrides({
       disputes ??
           FakeDisputesCore(node: null, followNode: () => nodeCore.active),
     ),
+    chatCoreProvider.overrideWithValue(chat ?? FakeChatCore()),
   ];
 }
 

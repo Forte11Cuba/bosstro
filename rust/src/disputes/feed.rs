@@ -488,6 +488,15 @@ impl Feed {
         Ok(())
     }
 
+    /// `node`'s stored rows with `status` (the chat's channels).
+    pub(crate) async fn rows_with_status(
+        &self,
+        node: &str,
+        status: DisputeStatus,
+    ) -> anyhow::Result<Vec<DisputeRecord>> {
+        self.store.list_with_status(node, status).await
+    }
+
     /// One stored row of `node`.
     pub(crate) async fn row(
         &self,

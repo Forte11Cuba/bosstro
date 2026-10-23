@@ -21,6 +21,22 @@ class DisputesPalette {
     required this.chipNeutralBorder,
     required this.chipNeutralInk,
     required this.chipNeutralDot,
+    required this.segmentTrack,
+    required this.segmentActiveFill,
+    required this.segmentActiveBorder,
+    required this.segmentActiveInk,
+    required this.segmentInk,
+    required this.bubbleMineFill,
+    required this.bubbleMineBorder,
+    required this.bubblePartyFill,
+    required this.bubblePartyBorder,
+    required this.bubbleInk,
+    required this.bubbleMeta,
+    required this.bubbleYouLabel,
+    required this.composerFill,
+    required this.composerBorder,
+    required this.composerFocusBorder,
+    required this.composerPlaceholder,
   });
 
   /// Hairline between the rows of a data card.
@@ -42,6 +58,38 @@ class DisputesPalette {
   final Color chipNeutralInk;
   final Color chipNeutralDot;
 
+  /// The Info / Buyer / Seller control of the dispute detail: a pill track,
+  /// the chosen segment tinted lime (as ../app's `PillSegmented`).
+  final Color segmentTrack;
+  final Color segmentActiveFill;
+  final Color segmentActiveBorder;
+  final Color segmentActiveInk;
+  final Color segmentInk;
+
+  /// Chat bubbles. The solver's own sit on a lime tint, the party's on the
+  /// card surface; the sender is always named in words too (DS-COL-10). The
+  /// legacy purple and hue bubbles of ../app are not used (amendment 2).
+  final Color bubbleMineFill;
+  final Color bubbleMineBorder;
+  final Color bubblePartyFill;
+  final Color bubblePartyBorder;
+
+  /// Message text, on either bubble.
+  final Color bubbleInk;
+
+  /// Time and delivery, on either bubble. "Not sent" is not on the bubble:
+  /// it sits under it, on the page, in the shell's `dangerText`.
+  final Color bubbleMeta;
+
+  /// The "You" sender label, on the solver's bubble.
+  final Color bubbleYouLabel;
+
+  /// The message field (DS-CMP-11): boxed, radius 14.
+  final Color composerFill;
+  final Color composerBorder;
+  final Color composerFocusBorder;
+  final Color composerPlaceholder;
+
   static const dark = DisputesPalette(
     rowDivider: Color(0x0DFFFFFF), // white 5%
     groupHeader: Color(0xFF808A9E),
@@ -53,6 +101,22 @@ class DisputesPalette {
     chipNeutralBorder: Color(0x14FFFFFF), // white 8%
     chipNeutralInk: Color(0xFFA6B0C2),
     chipNeutralDot: Color(0xFF5D6879),
+    segmentTrack: Color(0x0AFFFFFF), // white 4%
+    segmentActiveFill: Color(0x2492D64F), // lime 14%
+    segmentActiveBorder: Color(0x4D92D64F), // lime 30%
+    segmentActiveInk: Color(0xFFC6F09A),
+    segmentInk: Color(0xFF8B97AD),
+    bubbleMineFill: Color(0x1F92D64F), // lime 12%
+    bubbleMineBorder: Color(0x3392D64F), // lime 20%
+    bubblePartyFill: Color(0xFF1A2030),
+    bubblePartyBorder: Color(0x0FFFFFFF), // white 6%
+    bubbleInk: Color(0xFFEEF1F6),
+    bubbleMeta: Color(0xFF8B97AD),
+    bubbleYouLabel: Color(0xFFC6F09A),
+    composerFill: Color(0xFF1A2030),
+    composerBorder: Color(0x14FFFFFF), // white 8%
+    composerFocusBorder: Color(0x8092D64F), // lime 50%
+    composerPlaceholder: Color(0xFF8B97AD),
   );
 
   static const light = DisputesPalette(
@@ -66,6 +130,22 @@ class DisputesPalette {
     chipNeutralBorder: Color(0x1712161F), // ink 9%
     chipNeutralInk: Color(0xFF3F4756),
     chipNeutralDot: Color(0xFF8A94A6),
+    segmentTrack: Color(0x0F12161F), // ink 6%
+    segmentActiveFill: Color(0x3392D64F), // lime 20%
+    segmentActiveBorder: Color(0x665C9130), // rgba(92,145,48,0.40)
+    segmentActiveInk: Color(0xFF3E6B1C),
+    segmentInk: Color(0xFF5A6474),
+    bubbleMineFill: Color(0x2492D64F), // lime 14%
+    bubbleMineBorder: Color(0x4D5C9130), // rgba(92,145,48,0.30)
+    bubblePartyFill: Color(0xFFFFFFFF),
+    bubblePartyBorder: Color(0x1412161F), // ink 8%
+    bubbleInk: Color(0xFF12161F),
+    bubbleMeta: Color(0xFF5A6474),
+    bubbleYouLabel: Color(0xFF3E6B1C),
+    composerFill: Color(0xFFFFFFFF),
+    composerBorder: Color(0x1F12161F), // ink 12%
+    composerFocusBorder: Color(0xFF5C9130),
+    composerPlaceholder: Color(0xFF5A6474),
   );
 
   static DisputesPalette of(BuildContext context) =>

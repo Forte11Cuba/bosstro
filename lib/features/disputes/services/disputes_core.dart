@@ -5,7 +5,7 @@ import 'package:bosstro/src/rust/api/disputes.dart'
     show DisputeSummary, DisputeUpdate, PendingDisputes;
 import 'package:bosstro/src/rust/api/take.dart' as take_api;
 import 'package:bosstro/src/rust/api/take.dart'
-    show InProgressDisputes, SolverStanding, TakeResult;
+    show DisputeDetail, InProgressDisputes, SolverStanding, TakeResult;
 
 export 'package:bosstro/src/rust/api/disputes.dart'
     show
@@ -16,6 +16,7 @@ export 'package:bosstro/src/rust/api/disputes.dart'
         PendingDisputes;
 export 'package:bosstro/src/rust/api/take.dart'
     show
+        DisputeDetail,
         InProgressDisputes,
         SolverPermission,
         SolverStanding,
@@ -50,6 +51,10 @@ abstract interface class DisputesCore {
 
   /// This key's standing on the active node, or null without a node or a key.
   Future<SolverStanding?> standing();
+
+  /// The detail of [disputeId] when this key took it on the active node;
+  /// null otherwise (reopened, another key's, no node or key).
+  Future<DisputeDetail?> detail(String disputeId);
 }
 
 class RustDisputesCore implements DisputesCore {
@@ -81,4 +86,8 @@ class RustDisputesCore implements DisputesCore {
 
   @override
   Future<SolverStanding?> standing() => take_api.solverStanding();
+
+  @override
+  Future<DisputeDetail?> detail(String disputeId) =>
+      take_api.disputeDetail(disputeId: disputeId);
 }

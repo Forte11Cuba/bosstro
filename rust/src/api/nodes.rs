@@ -482,6 +482,8 @@ pub async fn select_active_node(pubkey: String) -> Result<()> {
     // So do the node's answers to the solver key: a take's answer from the
     // previous node is not taken any more.
     crate::rt::spawn(crate::mostro::replies::follow());
+    // And the chats: the previous node's close.
+    crate::rt::spawn(crate::chat::router::follow());
     Ok(())
 }
 

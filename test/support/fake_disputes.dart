@@ -129,6 +129,13 @@ class FakeDisputesCore implements DisputesCore {
     );
   }
 
+  /// What `dispute_detail` answers, by dispute id (absent: not this key's).
+  final Map<String, DisputeDetail> details = {};
+
+  @override
+  Future<DisputeDetail?> detail(String disputeId) async =>
+      node == null ? null : details[disputeId];
+
   /// Announce a change of [dispute] (or of the list, without one) for
   /// [forNode], as the feed does.
   void push({DisputeSummary? dispute, String? forNode}) {
@@ -178,4 +185,39 @@ TakenDisputeSummary sampleTaken({
   amount: amount,
   fiatAmount: fiatAmount,
   fiatCode: fiatCode,
+);
+
+/// A dispute's detail, as the core answers it.
+DisputeDetail sampleDetail({
+  String id = '8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c',
+  DisputeStatus status = DisputeStatus.inProgress,
+  DisputeInitiator initiator = DisputeInitiator.seller,
+  int? openedAt = 1700000000,
+  int takenAt = 1700003600,
+  String? buyerPubkey =
+      'b0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecf',
+  String? sellerPubkey =
+      'd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeef',
+  String node = mostroNodePubkey,
+}) => DisputeDetail(
+  mostroPubkey: node,
+  disputeId: id,
+  status: status,
+  initiator: initiator,
+  openedAt: openedAt,
+  takenAt: takenAt,
+  orderId: '5b9e1f7e-6f0e-4b8a-9c3d-2e1f0a9b8c7d',
+  orderKind: 'sell',
+  amount: 75000,
+  fiatAmount: 50,
+  fiatCode: 'EUR',
+  paymentMethod: 'Transferencia bancaria nacional',
+  premium: 2,
+  fee: 750,
+  buyerPubkey: buyerPubkey,
+  sellerPubkey: sellerPubkey,
+  isClosed: switch (status) {
+    DisputeStatus.initiated || DisputeStatus.inProgress => false,
+    _ => true,
+  },
 );

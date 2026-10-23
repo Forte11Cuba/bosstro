@@ -1150,5 +1150,229 @@
   "permissionReadWrite": "Mediate, pay and refund",
   "@permissionReadWrite": {
     "description": "Permission value: read-write solver"
+  },
+  "disputeDetailTitle": "Dispute",
+  "@disputeDetailTitle": {
+    "description": "App bar title of the dispute detail"
+  },
+  "detailSegmentInfo": "Info",
+  "@detailSegmentInfo": {
+    "description": "Segment of the dispute detail with the dispute's data"
+  },
+  "detailSegmentBuyer": "Buyer",
+  "@detailSegmentBuyer": {
+    "description": "Segment of the dispute detail with the chat with the buyer"
+  },
+  "detailSegmentSeller": "Seller",
+  "@detailSegmentSeller": {
+    "description": "Segment of the dispute detail with the chat with the seller"
+  },
+  "detailSegmentsLabel": "Dispute sections",
+  "@detailSegmentsLabel": {
+    "description": "Screen-reader label of the Info / Buyer / Seller control"
+  },
+  "detailDisputeId": "Dispute ID",
+  "@detailDisputeId": {
+    "description": "Data row: the dispute id, copyable"
+  },
+  "detailOrderId": "Order ID",
+  "@detailOrderId": {
+    "description": "Data row: the order id, copyable"
+  },
+  "detailStatus": "Status",
+  "@detailStatus": {
+    "description": "Data row: the dispute's status"
+  },
+  "detailOpenedBy": "Opened by",
+  "@detailOpenedBy": {
+    "description": "Data row: who opened the dispute"
+  },
+  "detailOpenedAt": "Opened",
+  "@detailOpenedAt": {
+    "description": "Data row: when the dispute was opened"
+  },
+  "detailTakenAt": "Taken",
+  "@detailTakenAt": {
+    "description": "Data row: when this solver took the dispute"
+  },
+  "detailAmount": "Amount",
+  "@detailAmount": {
+    "description": "Data row: the order's amount in sats"
+  },
+  "detailFiatAmount": "Fiat amount",
+  "@detailFiatAmount": {
+    "description": "Data row: the order's fiat amount"
+  },
+  "detailPaymentMethod": "Payment method",
+  "@detailPaymentMethod": {
+    "description": "Data row: the order's payment method"
+  },
+  "detailPremium": "Premium",
+  "@detailPremium": {
+    "description": "Data row: the order's premium over the market price"
+  },
+  "detailFee": "Node fee",
+  "@detailFee": {
+    "description": "Data row: the node's fee for the order, in sats"
+  },
+  "detailOrderKind": "Order type",
+  "@detailOrderKind": {
+    "description": "Data row: whether the order was a buy or a sell order"
+  },
+  "detailBuyerKey": "Buyer's trade key",
+  "@detailBuyerKey": {
+    "description": "Data row: the buyer's trade public key, copyable"
+  },
+  "detailSellerKey": "Seller's trade key",
+  "@detailSellerKey": {
+    "description": "Data row: the seller's trade public key, copyable"
+  },
+  "detailPartyBuyer": "Buyer",
+  "@detailPartyBuyer": {
+    "description": "Value of the Opened by row: the buyer"
+  },
+  "detailPartySeller": "Seller",
+  "@detailPartySeller": {
+    "description": "Value of the Opened by row: the seller"
+  },
+  "detailPartyUnknown": "Not known",
+  "@detailPartyUnknown": {
+    "description": "Value of a data row the node did not send"
+  },
+  "detailOrderKindBuy": "Buy order",
+  "@detailOrderKindBuy": {
+    "description": "Value of the Order type row: a buy order"
+  },
+  "detailOrderKindSell": "Sell order",
+  "@detailOrderKindSell": {
+    "description": "Value of the Order type row: a sell order"
+  },
+  "detailPremiumValue": "{value} %",
+  "@detailPremiumValue": {
+    "description": "Value of the Premium row",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "detailNotYoursTitle": "This dispute is not yours now",
+  "@detailNotYoursTitle": {
+    "description": "Shown in the detail when the dispute is no longer held by this solver key"
+  },
+  "detailNotYoursBody": "The node reopened it, or it belongs to another key. It is no longer in Your disputes.",
+  "@detailNotYoursBody": {
+    "description": "Explanation under detailNotYoursTitle"
+  },
+  "detailSelectTitle": "Choose a dispute",
+  "@detailSelectTitle": {
+    "description": "Tablet split view: shown on the right before a dispute is chosen"
+  },
+  "detailSelectBody": "Its data and the chats with the buyer and the seller show here.",
+  "@detailSelectBody": {
+    "description": "Explanation under detailSelectTitle"
+  },
+  "chatSenderYou": "You",
+  "@chatSenderYou": {
+    "description": "Sender label of the solver's own chat message"
+  },
+  "chatSenderBuyer": "Buyer",
+  "@chatSenderBuyer": {
+    "description": "Sender label of a chat message from the buyer"
+  },
+  "chatSenderSeller": "Seller",
+  "@chatSenderSeller": {
+    "description": "Sender label of a chat message from the seller"
+  },
+  "chatEmptyBuyerTitle": "No messages with the buyer",
+  "@chatEmptyBuyerTitle": {
+    "description": "Empty state title of the chat with the buyer"
+  },
+  "chatEmptySellerTitle": "No messages with the seller",
+  "@chatEmptySellerTitle": {
+    "description": "Empty state title of the chat with the seller"
+  },
+  "chatEmptyBody": "Only you and this party can read this conversation. The other party does not see it.",
+  "@chatEmptyBody": {
+    "description": "Empty state explanation of a dispute chat"
+  },
+  "chatNoPartyKeyTitle": "No chat with this party",
+  "@chatNoPartyKeyTitle": {
+    "description": "Shown instead of a chat when the node did not name the party's trade key"
+  },
+  "chatNoPartyKeyBody": "The node's answer to the take did not include this party's key, so Bosstro cannot reach them.",
+  "@chatNoPartyKeyBody": {
+    "description": "Explanation under chatNoPartyKeyTitle"
+  },
+  "chatClosedNote": "This dispute is closed. The chat is read only.",
+  "@chatClosedNote": {
+    "description": "Shown in place of the message field when the dispute is over"
+  },
+  "chatComposerBuyerHint": "Write to the buyer",
+  "@chatComposerBuyerHint": {
+    "description": "Placeholder of the message field in the chat with the buyer"
+  },
+  "chatComposerSellerHint": "Write to the seller",
+  "@chatComposerSellerHint": {
+    "description": "Placeholder of the message field in the chat with the seller"
+  },
+  "chatSend": "Send",
+  "@chatSend": {
+    "description": "Tooltip and screen-reader label of the send button"
+  },
+  "chatSending": "Sending…",
+  "@chatSending": {
+    "description": "Status of a solver's message being sent"
+  },
+  "chatNotSent": "Not sent",
+  "@chatNotSent": {
+    "description": "Status of a solver's message no relay took"
+  },
+  "chatRetry": "Retry",
+  "@chatRetry": {
+    "description": "Action on a message that was not sent: send it again"
+  },
+  "chatErrorTooLong": "The message is too long. Split it in two.",
+  "@chatErrorTooLong": {
+    "description": "Shown under the message field when the message is over the limit"
+  },
+  "chatErrorClosed": "This dispute is closed. The chat is read only.",
+  "@chatErrorClosed": {
+    "description": "Shown under the message field when the dispute closed meanwhile"
+  },
+  "chatErrorNoRelays": "Not connected to any relay. Check your connection.",
+  "@chatErrorNoRelays": {
+    "description": "Shown under the message field when the relays are not running"
+  },
+  "chatErrorNotYours": "This dispute is no longer yours.",
+  "@chatErrorNotYours": {
+    "description": "Shown under the message field when the dispute is no longer held by this key"
+  },
+  "chatErrorGeneric": "The message could not be sent.",
+  "@chatErrorGeneric": {
+    "description": "Shown under the message field for any other refusal"
+  },
+  "chatLoading": "Loading the messages",
+  "@chatLoading": {
+    "description": "Screen-reader label of the chat's loading skeleton"
+  },
+  "chatMessageLabel": "{sender}, {time}: {text}",
+  "@chatMessageLabel": {
+    "description": "Screen-reader label of one chat message",
+    "placeholders": {
+      "sender": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "openDisputeHint": "Open the dispute",
+  "@openDisputeHint": {
+    "description": "Screen-reader hint of a row in Your disputes"
   }
 }

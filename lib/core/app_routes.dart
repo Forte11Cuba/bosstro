@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:bosstro/features/disputes/screens/dispute_detail_screen.dart';
 import 'package:bosstro/features/disputes/screens/in_progress_screen.dart';
 import 'package:bosstro/features/disputes/screens/pending_screen.dart';
 import 'package:bosstro/features/disputes/screens/recover_screen.dart';
@@ -28,6 +29,11 @@ abstract final class AppRoute {
 
   /// Recover a dispute, from the In progress header.
   static const recover = '/in-progress/recover';
+
+  /// A dispute this solver holds: its data and its chats (pushed on a
+  /// phone; beside the list on a tablet).
+  static String disputeDetail(String disputeId) =>
+      '/in-progress/dispute/$disputeId';
   static const settings = '/settings';
   static const backup = '/settings/backup';
 
@@ -131,6 +137,14 @@ GoRouter buildRouter({
                     // Over the shell, as the other pushed screens.
                     parentNavigatorKey: rootKey,
                     builder: (context, state) => const RecoverScreen(),
+                  ),
+                  GoRoute(
+                    path: 'dispute/:id',
+                    parentNavigatorKey: rootKey,
+                    builder:
+                        (context, state) => DisputeDetailScreen(
+                          disputeId: state.pathParameters['id']!,
+                        ),
                   ),
                 ],
               ),

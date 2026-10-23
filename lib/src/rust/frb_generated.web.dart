@@ -7,6 +7,7 @@
 // ignore_for_file: argument_type_not_assignable
 
 import 'api.dart';
+import 'api/chat.dart';
 import 'api/disputes.dart';
 import 'api/node_info.dart';
 import 'api/nodes.dart';
@@ -27,6 +28,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   });
 
   CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_ChatUpdateStreamPtr =>
+      wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream;
+
+  CrossPlatformFinalizerArg
   get rust_arc_decrement_strong_count_ConnectionStateStreamPtr =>
       wire.rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream;
 
@@ -40,6 +45,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
+
+  @protected
+  ChatUpdateStream
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    dynamic raw,
+  );
 
   @protected
   ConnectionStateStream
@@ -60,6 +71,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ChatUpdateStream
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    dynamic raw,
+  );
+
+  @protected
   ConnectionStateStream
   dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
     dynamic raw,
@@ -74,6 +91,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   RelayStatusStream
   dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    dynamic raw,
+  );
+
+  @protected
+  ChatUpdateStream
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
     dynamic raw,
   );
 
@@ -105,7 +128,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_box_autoadd_bool(dynamic raw);
 
   @protected
+  ChatParty dco_decode_box_autoadd_chat_party(dynamic raw);
+
+  @protected
+  ChatThread dco_decode_box_autoadd_chat_thread(dynamic raw);
+
+  @protected
+  ChatUpdate dco_decode_box_autoadd_chat_update(dynamic raw);
+
+  @protected
   ConnectionState dco_decode_box_autoadd_connection_state(dynamic raw);
+
+  @protected
+  DisputeDetail dco_decode_box_autoadd_dispute_detail(dynamic raw);
 
   @protected
   DisputeSummary dco_decode_box_autoadd_dispute_summary(dynamic raw);
@@ -144,7 +179,34 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   int dco_decode_box_autoadd_u_32(dynamic raw);
 
   @protected
+  ChatChannelState dco_decode_chat_channel_state(dynamic raw);
+
+  @protected
+  ChatDelivery dco_decode_chat_delivery(dynamic raw);
+
+  @protected
+  ChatError dco_decode_chat_error(dynamic raw);
+
+  @protected
+  ChatMessageView dco_decode_chat_message_view(dynamic raw);
+
+  @protected
+  ChatParty dco_decode_chat_party(dynamic raw);
+
+  @protected
+  ChatSender dco_decode_chat_sender(dynamic raw);
+
+  @protected
+  ChatThread dco_decode_chat_thread(dynamic raw);
+
+  @protected
+  ChatUpdate dco_decode_chat_update(dynamic raw);
+
+  @protected
   ConnectionState dco_decode_connection_state(dynamic raw);
+
+  @protected
+  DisputeDetail dco_decode_dispute_detail(dynamic raw);
 
   @protected
   DisputeInitiator dco_decode_dispute_initiator(dynamic raw);
@@ -172,6 +234,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<String> dco_decode_list_String(dynamic raw);
+
+  @protected
+  List<ChatMessageView> dco_decode_list_chat_message_view(dynamic raw);
 
   @protected
   List<DisputeSummary> dco_decode_list_dispute_summary(dynamic raw);
@@ -210,7 +275,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool? dco_decode_opt_box_autoadd_bool(dynamic raw);
 
   @protected
+  ChatParty? dco_decode_opt_box_autoadd_chat_party(dynamic raw);
+
+  @protected
+  ChatThread? dco_decode_opt_box_autoadd_chat_thread(dynamic raw);
+
+  @protected
+  ChatUpdate? dco_decode_opt_box_autoadd_chat_update(dynamic raw);
+
+  @protected
   ConnectionState? dco_decode_opt_box_autoadd_connection_state(dynamic raw);
+
+  @protected
+  DisputeDetail? dco_decode_opt_box_autoadd_dispute_detail(dynamic raw);
 
   @protected
   DisputeSummary? dco_decode_opt_box_autoadd_dispute_summary(dynamic raw);
@@ -313,6 +390,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
+  ChatUpdateStream
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ConnectionStateStream
   sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
     SseDeserializer deserializer,
@@ -331,6 +414,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ChatUpdateStream
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ConnectionStateStream
   sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
     SseDeserializer deserializer,
@@ -345,6 +434,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   RelayStatusStream
   sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ChatUpdateStream
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
     SseDeserializer deserializer,
   );
 
@@ -376,7 +471,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_box_autoadd_bool(SseDeserializer deserializer);
 
   @protected
+  ChatParty sse_decode_box_autoadd_chat_party(SseDeserializer deserializer);
+
+  @protected
+  ChatThread sse_decode_box_autoadd_chat_thread(SseDeserializer deserializer);
+
+  @protected
+  ChatUpdate sse_decode_box_autoadd_chat_update(SseDeserializer deserializer);
+
+  @protected
   ConnectionState sse_decode_box_autoadd_connection_state(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  DisputeDetail sse_decode_box_autoadd_dispute_detail(
     SseDeserializer deserializer,
   );
 
@@ -431,7 +540,34 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
 
   @protected
+  ChatChannelState sse_decode_chat_channel_state(SseDeserializer deserializer);
+
+  @protected
+  ChatDelivery sse_decode_chat_delivery(SseDeserializer deserializer);
+
+  @protected
+  ChatError sse_decode_chat_error(SseDeserializer deserializer);
+
+  @protected
+  ChatMessageView sse_decode_chat_message_view(SseDeserializer deserializer);
+
+  @protected
+  ChatParty sse_decode_chat_party(SseDeserializer deserializer);
+
+  @protected
+  ChatSender sse_decode_chat_sender(SseDeserializer deserializer);
+
+  @protected
+  ChatThread sse_decode_chat_thread(SseDeserializer deserializer);
+
+  @protected
+  ChatUpdate sse_decode_chat_update(SseDeserializer deserializer);
+
+  @protected
   ConnectionState sse_decode_connection_state(SseDeserializer deserializer);
+
+  @protected
+  DisputeDetail sse_decode_dispute_detail(SseDeserializer deserializer);
 
   @protected
   DisputeInitiator sse_decode_dispute_initiator(SseDeserializer deserializer);
@@ -461,6 +597,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer);
+
+  @protected
+  List<ChatMessageView> sse_decode_list_chat_message_view(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<DisputeSummary> sse_decode_list_dispute_summary(
@@ -507,7 +648,27 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool? sse_decode_opt_box_autoadd_bool(SseDeserializer deserializer);
 
   @protected
+  ChatParty? sse_decode_opt_box_autoadd_chat_party(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ChatThread? sse_decode_opt_box_autoadd_chat_thread(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ChatUpdate? sse_decode_opt_box_autoadd_chat_update(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ConnectionState? sse_decode_opt_box_autoadd_connection_state(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  DisputeDetail? sse_decode_opt_box_autoadd_dispute_detail(
     SseDeserializer deserializer,
   );
 
@@ -632,6 +793,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    ChatUpdateStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
     ConnectionStateStream self,
     SseSerializer serializer,
@@ -653,6 +821,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    ChatUpdateStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
     ConnectionStateStream self,
     SseSerializer serializer,
@@ -669,6 +844,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void
   sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayStatusStream(
     RelayStatusStream self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    ChatUpdateStream self,
     SseSerializer serializer,
   );
 
@@ -703,8 +885,32 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_box_autoadd_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_box_autoadd_chat_party(
+    ChatParty self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_chat_thread(
+    ChatThread self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_chat_update(
+    ChatUpdate self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_connection_state(
     ConnectionState self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_dispute_detail(
+    DisputeDetail self,
     SseSerializer serializer,
   );
 
@@ -775,10 +981,43 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
 
   @protected
+  void sse_encode_chat_channel_state(
+    ChatChannelState self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_chat_delivery(ChatDelivery self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_chat_error(ChatError self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_chat_message_view(
+    ChatMessageView self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_chat_party(ChatParty self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_chat_sender(ChatSender self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_chat_thread(ChatThread self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_chat_update(ChatUpdate self, SseSerializer serializer);
+
+  @protected
   void sse_encode_connection_state(
     ConnectionState self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_dispute_detail(DisputeDetail self, SseSerializer serializer);
 
   @protected
   void sse_encode_dispute_initiator(
@@ -815,6 +1054,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_chat_message_view(
+    List<ChatMessageView> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_dispute_summary(
@@ -877,8 +1122,32 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_box_autoadd_bool(bool? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_chat_party(
+    ChatParty? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_chat_thread(
+    ChatThread? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_chat_update(
+    ChatUpdate? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_connection_state(
     ConnectionState? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_dispute_detail(
+    DisputeDetail? self,
     SseSerializer serializer,
   );
 
@@ -1033,6 +1302,22 @@ class RustLibWire implements BaseWire {
   RustLibWire.fromExternalLibrary(ExternalLibrary lib);
 
   void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+        ptr,
+      );
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+        ptr,
+      );
+
+  void
   rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
     int ptr,
   ) => wasmModule
@@ -1087,6 +1372,16 @@ external RustLibWasmModule get wasmModule;
 @JS()
 @anonymous
 extension type RustLibWasmModule._(JSObject _) implements JSObject {
+  external void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    int ptr,
+  );
+
+  external void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerChatUpdateStream(
+    int ptr,
+  );
+
   external void
   rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerConnectionStateStream(
     int ptr,

@@ -942,4 +942,172 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get permissionReadWrite => 'Mediar, pagar y devolver';
+
+  @override
+  String get disputeDetailTitle => 'Disputa';
+
+  @override
+  String get detailSegmentInfo => 'Info';
+
+  @override
+  String get detailSegmentBuyer => 'Comprador';
+
+  @override
+  String get detailSegmentSeller => 'Vendedor';
+
+  @override
+  String get detailSegmentsLabel => 'Secciones de la disputa';
+
+  @override
+  String get detailDisputeId => 'ID de la disputa';
+
+  @override
+  String get detailOrderId => 'ID de la orden';
+
+  @override
+  String get detailStatus => 'Estado';
+
+  @override
+  String get detailOpenedBy => 'Abierta por';
+
+  @override
+  String get detailOpenedAt => 'Abierta';
+
+  @override
+  String get detailTakenAt => 'Tomada';
+
+  @override
+  String get detailAmount => 'Monto';
+
+  @override
+  String get detailFiatAmount => 'Monto en fiat';
+
+  @override
+  String get detailPaymentMethod => 'Método de pago';
+
+  @override
+  String get detailPremium => 'Prima';
+
+  @override
+  String get detailFee => 'Comisión del nodo';
+
+  @override
+  String get detailOrderKind => 'Tipo de orden';
+
+  @override
+  String get detailBuyerKey => 'Clave de trade del comprador';
+
+  @override
+  String get detailSellerKey => 'Clave de trade del vendedor';
+
+  @override
+  String get detailPartyBuyer => 'Comprador';
+
+  @override
+  String get detailPartySeller => 'Vendedor';
+
+  @override
+  String get detailPartyUnknown => 'No se sabe';
+
+  @override
+  String get detailOrderKindBuy => 'Orden de compra';
+
+  @override
+  String get detailOrderKindSell => 'Orden de venta';
+
+  @override
+  String detailPremiumValue(String value) {
+    return '$value %';
+  }
+
+  @override
+  String get detailNotYoursTitle => 'Esta disputa ya no es tuya';
+
+  @override
+  String get detailNotYoursBody =>
+      'El nodo la reabrió, o es de otra clave. Ya no está en Tus disputas.';
+
+  @override
+  String get detailSelectTitle => 'Elige una disputa';
+
+  @override
+  String get detailSelectBody =>
+      'Aquí se ven sus datos y los chats con el comprador y el vendedor.';
+
+  @override
+  String get chatSenderYou => 'Tú';
+
+  @override
+  String get chatSenderBuyer => 'Comprador';
+
+  @override
+  String get chatSenderSeller => 'Vendedor';
+
+  @override
+  String get chatEmptyBuyerTitle => 'Sin mensajes con el comprador';
+
+  @override
+  String get chatEmptySellerTitle => 'Sin mensajes con el vendedor';
+
+  @override
+  String get chatEmptyBody =>
+      'Solo tú y esta parte pueden leer esta conversación. La otra parte no la ve.';
+
+  @override
+  String get chatNoPartyKeyTitle => 'Sin chat con esta parte';
+
+  @override
+  String get chatNoPartyKeyBody =>
+      'La respuesta del nodo a la toma no incluyó la clave de esta parte, así que Bosstro no puede escribirle.';
+
+  @override
+  String get chatClosedNote =>
+      'Esta disputa está cerrada. El chat es solo de lectura.';
+
+  @override
+  String get chatComposerBuyerHint => 'Escribe al comprador';
+
+  @override
+  String get chatComposerSellerHint => 'Escribe al vendedor';
+
+  @override
+  String get chatSend => 'Enviar';
+
+  @override
+  String get chatSending => 'Enviando…';
+
+  @override
+  String get chatNotSent => 'No enviado';
+
+  @override
+  String get chatRetry => 'Reintentar';
+
+  @override
+  String get chatErrorTooLong =>
+      'El mensaje es demasiado largo. Divídelo en dos.';
+
+  @override
+  String get chatErrorClosed =>
+      'Esta disputa está cerrada. El chat es solo de lectura.';
+
+  @override
+  String get chatErrorNoRelays =>
+      'Sin conexión a ningún relay. Revisa tu conexión.';
+
+  @override
+  String get chatErrorNotYours => 'Esta disputa ya no es tuya.';
+
+  @override
+  String get chatErrorGeneric => 'No se pudo enviar el mensaje.';
+
+  @override
+  String get chatLoading => 'Cargando los mensajes';
+
+  @override
+  String chatMessageLabel(String sender, String time, String text) {
+    return '$sender, $time: $text';
+  }
+
+  @override
+  String get openDisputeHint => 'Abrir la disputa';
 }
