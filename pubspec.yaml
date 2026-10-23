@@ -46,8 +46,11 @@ dependencies:
 
   # Chat attachments, as ../app: PDFs and the save dialog (file_picker; SAF on
   # Android), gallery and camera (image_picker), and the browser download of a
-  # saved file on the web (web).
-  file_picker: ^8.3.7
+  # saved file on the web (web). file_picker is ahead of ../app's ^8.3.7: 8.x
+  # compiles against Android 34, and AGP 9 refuses it next to
+  # flutter_plugin_android_lifecycle 2.0.35, which needs 36; 10.x compiles
+  # against Flutter's own compileSdk.
+  file_picker: ^10.3.7
   image_picker: ^1.2.3
   web: ^1.1.1
 
