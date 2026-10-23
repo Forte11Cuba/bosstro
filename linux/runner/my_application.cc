@@ -45,14 +45,31 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "bosstro");
+    gtk_header_bar_set_title(header_bar, "Bosstro");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "bosstro");
+    gtk_window_set_title(window, "Bosstro");
   }
 
   gtk_window_set_default_size(window, 1280, 720);
+
+  // The app's emblem (icons/bosstro.png, A8) as the window icon, from the
+  // copy CMakeLists.txt installs in the bundle's data/, next to the binary.
+  g_autofree gchar* exe = g_file_read_link("/proc/self/exe", nullptr);
+  if (exe != nullptr) {
+    g_autofree gchar* dir = g_path_get_dirname(exe);
+    g_autofree gchar* icon =
+        g_build_filename(dir, "data", "bosstro.png", nullptr);
+    g_autoptr(GError) error = nullptr;
+    g_autoptr(GdkPixbuf) pixbuf = gdk_pixbuf_new_from_file(icon, &error);
+    if (pixbuf != nullptr) {
+      gtk_window_set_icon(window, pixbuf);
+      gtk_window_set_default_icon(pixbuf);
+    } else {
+      g_warning("Window icon not loaded from %s: %s", icon, error->message);
+    }
+  }
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(
