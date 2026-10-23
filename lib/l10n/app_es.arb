@@ -29,6 +29,7 @@
   "loginTitle": "Iniciar sesión",
   "loginHeading": "Tu clave secreta de solver",
   "loginBody": "Pega o escanea la clave secreta (nsec) cuyo npub tu operador de nodo registró como solver.",
+  "loginBodyPaste": "Pega la clave secreta (nsec) cuyo npub tu operador de nodo registró como solver.",
   "secretKeyHint": "nsec1…",
   "showSecretKey": "Mostrar clave",
   "hideSecretKey": "Ocultar clave",

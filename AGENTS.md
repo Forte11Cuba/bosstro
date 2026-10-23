@@ -33,7 +33,7 @@ ARB files (`lib/l10n/app_en.arb` is the source).
 | D12 | Solver permissions are *Read* (take and chat) or *Read-Write* (also settle / cancel, and take over an `in-progress` dispute held by a Read solver). Bosstro learns the permission from the daemon's answers and caches it per node. |
 | D13 | Serbero (the assistant Read solver) is supported: its `send-dm` messages and handoffs are read only from trusted senders. |
 | A1 | License AGPL-3.0-or-later (code is copied from `app`, which is AGPL). |
-| A2 | Android only for the MVP. The bridge layout stays multi-platform so iOS can come later; no web target. |
+| A2 | **Android is the target** the app is built for. **Linux and web** also build and run, for development and convenience, without the Android-only key protections: no screenshot blocking, no nsec copy (`PlatformCapabilities`), no QR scanning, and on the web the key sits in browser storage, much weaker than the Keystore. iOS can come later. |
 | A3 | l10n: `en` and `es` for the MVP. |
 | A4 | SQLCipher is a later phase; until then the database relies on the Android app sandbox. |
 | A8 | Android `applicationId` / namespace `foundation.mostro.bosstro` (it must differ from `app`'s, or one install replaces the other). |
@@ -64,6 +64,15 @@ tool/                # design_check.dart, launcher_icon/build_sources.py
 .specify/DESIGN_SYSTEM.md
 ```
 
+### Platform code
+
+- Android-only behaviour is gated in one place, `lib/core/platform_capabilities.dart`, with pure
+  functions tests can drive for every platform. A feature that needs a protection only Android has
+  (FLAG_SECURE, the sensitive clipboard) is **off** elsewhere, never on without it.
+- Rust that differs on the web goes behind `cfg(target_arch = "wasm32")` (`rust/Cargo.toml`,
+  `rust/src/rt.rs`). Tokio's runtime and SQLite are native only. `cargo check` does not catch wasm
+  link errors; `./scripts/build-web.sh` does.
+
 ### Generated code
 
 - `lib/src/rust/`, `rust/src/frb_generated.rs` and `lib/l10n/app_localizations*.dart` are
@@ -88,6 +97,9 @@ flutter gen-l10n                 # after editing lib/l10n/*.arb
 flutter analyze && flutter test
 dart tool/design_check.dart      # design guide auto rules (--all for every line)
 flutter run -d android           # Rust is a library — there is no `cargo run`
+flutter run -d linux             # desktop, for development (README → "Linux and web")
+./scripts/build-web.sh           # web only: the Rust core to web/pkg/ (nightly, wasm threads)
+flutter run -d chrome --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
 python3 tool/launcher_icon/build_sources.py && dart run flutter_launcher_icons  # after changing icons/bosstro.png
 ```
 

@@ -13,6 +13,8 @@ different icons. This script writes:
   opaque, for store listings that refuse transparency.
 - `icons/bosstro.webp`: the disc at 512 px, lossless WebP.
 - `icons/bosstro.ico`: 16 to 256 px, for desktop and web uses.
+- `web/favicon.png` and `web/icons/Icon-*.png`: the web favicon and PWA icons; the
+  maskable ones put the disc inside the 80 % safe zone on the dark background.
 - `assets/images/bosstro_emblem.webp`: the disc at 512 px for in-app use
   (welcome screen, about).
 - `android/app/src/main/res/drawable-*/splash_logo.png`: the disc at 160 dp,
@@ -47,6 +49,9 @@ ICO_SIDES = [16, 24, 32, 48, 64, 128, 256]
 STORE_SIDE = 512
 WEBP_SIDE = 512
 SPLASH_LOGO_DP = 160
+# A maskable web icon may be cut to any shape inside a circle of 80 % of its
+# side (the "safe zone"), so the disc sits at that size on its background.
+MASKABLE_SAFE_ZONE = 0.8
 ANDROID_DENSITIES = {'mdpi': 1, 'hdpi': 1.5, 'xhdpi': 2, 'xxhdpi': 3, 'xxxhdpi': 4}
 
 
@@ -96,6 +101,16 @@ def main():
     scaled(icon, WEBP_SIDE).save(
         ROOT / 'assets' / 'images' / 'bosstro_emblem.webp', quality=90, method=6
     )
+
+    web = ROOT / 'web'
+    save_png(icon, 32, web / 'favicon.png')
+    for side in (192, 512):
+        save_png(icon, side, web / 'icons' / f'Icon-{side}.png')
+        maskable = Image.new('RGBA', (SIZE, SIZE), BACKGROUND + (255,))
+        inner = round(SIZE * MASKABLE_SAFE_ZONE)
+        offset = (SIZE - inner) // 2
+        maskable.alpha_composite(scaled(icon, inner), (offset, offset))
+        save_png(maskable.convert('RGB'), side, web / 'icons' / f'Icon-maskable-{side}.png')
 
     res = ROOT / 'android' / 'app' / 'src' / 'main' / 'res'
     for density, factor in ANDROID_DENSITIES.items():

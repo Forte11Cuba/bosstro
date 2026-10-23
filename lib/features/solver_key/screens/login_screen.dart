@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/app_theme.dart';
+import 'package:bosstro/core/platform_capabilities.dart';
 import 'package:bosstro/core/services/solver_key_service.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/features/solver_key/widgets/key_widgets.dart';
@@ -176,7 +177,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   List<Widget> _keyEntry(ShellPalette pal, AppLocalizations l10n) => [
     StepHeading(l10n.loginHeading),
     const SizedBox(height: 8),
-    StepBody(l10n.loginBody),
+    StepBody(
+      PlatformCapabilities.scanQr ? l10n.loginBody : l10n.loginBodyPaste,
+    ),
     const SizedBox(height: 18),
     SecretField(
       controller: _secret,
@@ -199,15 +202,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             onTap: _paste,
           ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: InputSourceAction(
-            icon: Icons.qr_code_scanner_rounded,
-            label: l10n.scanQrAction,
-            accent: true,
-            onTap: _scan,
+        if (PlatformCapabilities.scanQr) ...[
+          const SizedBox(width: 10),
+          Expanded(
+            child: InputSourceAction(
+              icon: Icons.qr_code_scanner_rounded,
+              label: l10n.scanQrAction,
+              accent: true,
+              onTap: _scan,
+            ),
           ),
-        ),
+        ],
       ],
     ),
     const SizedBox(height: 18),

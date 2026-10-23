@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:bosstro/core/app_theme.dart';
+import 'package:bosstro/core/platform_capabilities.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/features/solver_key/widgets/key_widgets.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
@@ -63,7 +64,10 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                     label: l10n.secretKeyLabel,
                     value: secret,
                     copyLabel: l10n.copySecretKey,
-                    onCopy: () => copySecretKey(context, ref, secret),
+                    onCopy:
+                        PlatformCapabilities.copySecret
+                            ? () => copySecretKey(context, ref, secret)
+                            : null,
                   );
                 },
               ),

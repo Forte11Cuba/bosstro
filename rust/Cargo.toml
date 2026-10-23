@@ -33,6 +33,24 @@ anyhow = "1"
 # into `Keys` (whose `SecretKey` wipes itself on drop). Same crate as ../app.
 zeroize = "1"
 
-# Async runtime and persistence. Android only for the MVP, so no wasm split.
+# Native only (Android, Linux): the Tokio runtime and SQLite do not compile to
+# wasm32. The web build gets its own block below, as in ../app.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync"] }
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros", "migrate"] }
+
+# Web only (scripts/build-web.sh). Same crates and reasons as ../app.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# tokio's sync primitives (the solver slot's locks) are runtime-agnostic and
+# compile to wasm; nothing else of tokio does.
+tokio = { version = "1", default-features = false, features = ["sync"] }
+# Browser-backed clock for `universal-time` (rt.rs).
+wasmtimer = "0.4"
+# The getrandom versions under nostr, k256 and friends have no default backend on
+# wasm32-unknown-unknown and must be told to use the browser's crypto.
+getrandom = { version = "0.2", features = ["js"] }
+getrandom_04 = { package = "getrandom", version = "0.4", features = ["wasm_js"] }
+# nostr 0.45 reads the clock through universal-time, which on
+# wasm32-unknown-unknown refuses to *link* until the final crate names a time
+# provider (rt.rs). `cargo check` does not catch it; the web build does.
+universal-time = { version = "0.3", default-features = false }

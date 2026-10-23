@@ -105,6 +105,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Paste or scan the secret key (nsec) whose npub your node operator registered as a solver.';
 
   @override
+  String get loginBodyPaste =>
+      'Paste the secret key (nsec) whose npub your node operator registered as a solver.';
+
+  @override
   String get secretKeyHint => 'nsec1…';
 
   @override
