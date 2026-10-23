@@ -1,7 +1,7 @@
 // The phase 5 screens against a real mostrod and relay, on Linux, by hand:
-// take a dispute, open it, and trade messages with its buyer and its seller,
-// played by `rust/examples/chat_party.rs` with their trade keys. Never
-// against a real node. Skipped unless the dart-defines below are set
+// take two disputes, open them, and trade messages with their buyers and
+// sellers, played by `rust/examples/chat_party.rs` with their trade keys.
+// Never against a real node. Skipped unless the dart-defines below are set
 // (README.md here).
 import 'dart:io';
 
@@ -32,6 +32,9 @@ const _solverPubkey = String.fromEnvironment('E2E_SOLVER_PUBKEY');
 const _dispute = String.fromEnvironment('E2E_DISPUTE');
 const _buyer = String.fromEnvironment('E2E_BUYER');
 const _seller = String.fromEnvironment('E2E_SELLER');
+const _dispute2 = String.fromEnvironment('E2E_DISPUTE_2');
+const _buyer2 = String.fromEnvironment('E2E_BUYER_2');
+const _seller2 = String.fromEnvironment('E2E_SELLER_2');
 const _party = String.fromEnvironment('E2E_PARTY_BIN');
 
 /// The key in memory: the desktop keyring is never touched.
@@ -143,6 +146,52 @@ Future<void> _exchange(
   );
 }
 
+/// Take [dispute] from Pending.
+Future<void> _take(WidgetTester tester, String dispute) async {
+  await tester.tap(find.text('Pending'));
+  final row = find.byWidgetPredicate(
+    (w) => w is PendingDisputeRow && w.dispute.disputeId == dispute,
+  );
+  await _until(tester, row, what: 'dispute $dispute in Pending');
+  await tester.ensureVisible(row);
+  await tester.tap(row);
+  await _until(tester, find.text('Take dispute'));
+  await tester.tap(find.text('Take dispute'));
+  await _until(
+    tester,
+    find.text('Dispute taken. It is in Your disputes.'),
+    what: 'the take of $dispute',
+  );
+  // The confirmation floats over the message field for its two seconds;
+  // this test types faster than that, so it waits it out.
+  for (var i = 0; i < 40 && find.byType(SnackBar).evaluate().isNotEmpty; i++) {
+    await tester.pump(const Duration(milliseconds: 250));
+  }
+}
+
+/// Open [dispute] from Your disputes (pushed, or beside the list).
+Future<void> _open(WidgetTester tester, String dispute) async {
+  if (find.byType(DisputeDetailScreen).evaluate().isNotEmpty) {
+    await tester.pageBack();
+    await tester.pump(const Duration(milliseconds: 500));
+  }
+  await tester.tap(find.text('In progress'));
+  final held = find.byWidgetPredicate(
+    (w) => w is InProgressDisputeRow && w.dispute.disputeId == dispute,
+  );
+  await _until(tester, held, what: 'dispute $dispute in Your disputes');
+  await tester.ensureVisible(held);
+  await tester.tap(held);
+  await _until(
+    tester,
+    find.byWidgetPredicate(
+      (w) => w is DisputeDetailView && w.disputeId == dispute,
+    ),
+    what: 'the detail of $dispute',
+  );
+  await _until(tester, find.text('Dispute ID'), what: 'the Info rows');
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -177,73 +226,72 @@ void main() {
         ),
       );
 
-      // ── 1. Take the test dispute from Pending ───────────────────────────
-      final row = find.byWidgetPredicate(
-        (w) => w is PendingDisputeRow && w.dispute.disputeId == _dispute,
-      );
-      await _until(tester, row, what: 'the test dispute in Pending');
-      await tester.ensureVisible(row);
-      await tester.tap(row);
-      await _until(tester, find.text('Take dispute'));
-      await tester.tap(find.text('Take dispute'));
-      await _until(
-        tester,
-        find.text('Dispute taken. It is in Your disputes.'),
-        what: 'the take',
-      );
-      debugPrint('[e2e] 1. taken $_dispute');
-      // The take's confirmation floats over the message field for its two
-      // seconds; this test types faster than that, so it waits it out.
-      for (
-        var i = 0;
-        i < 40 && find.byType(SnackBar).evaluate().isNotEmpty;
-        i++
-      ) {
-        await tester.pump(const Duration(milliseconds: 250));
-      }
+      final stamp = DateTime.now().millisecondsSinceEpoch;
 
-      // ── 2. Open it from Your disputes ───────────────────────────────────
-      await tester.tap(find.text('In progress'));
-      final held = find.byWidgetPredicate(
-        (w) => w is InProgressDisputeRow && w.dispute.disputeId == _dispute,
-      );
-      await _until(tester, held, what: 'the dispute in Your disputes');
-      await tester.ensureVisible(held);
-      await tester.tap(held);
-      await _until(tester, find.byType(DisputeDetailView), what: 'the detail');
-      await _until(tester, find.text('Dispute ID'), what: 'the Info rows');
+      // ── 1. The first dispute: take it, talk with its buyer ─────────────
+      await _take(tester, _dispute);
+      await _open(tester, _dispute);
       debugPrint(
-        '[e2e] 2. detail open '
+        '[e2e] 1. took and opened $_dispute '
         '(${find.byType(DisputeDetailScreen).evaluate().isEmpty ? 'beside the list' : 'pushed'})',
       );
-
-      // ── 3. The buyer, then the seller ───────────────────────────────────
-      final stamp = DateTime.now().millisecondsSinceEpoch;
       await _exchange(
         tester,
         segment: 'Buyer',
         secret: _buyer,
-        said: 'Buyer here: the fiat went out at 10:00 ($stamp)',
-        answer: 'Thanks. Please send the bank receipt ($stamp)',
+        said: 'Buyer 1: the fiat went out at 10:00 ($stamp)',
+        answer: 'Thanks, buyer 1. Send the receipt ($stamp)',
       );
-      debugPrint('[e2e] 3. buyer: both ways');
+      debugPrint('[e2e] 1. dispute 1, buyer: both ways');
+
+      // ── 2. A second dispute: the shared REQ is rebuilt ──────────────────
+      await _take(tester, _dispute2);
+      await _open(tester, _dispute2);
+      debugPrint('[e2e] 2. took and opened $_dispute2');
+      await _exchange(
+        tester,
+        segment: 'Buyer',
+        secret: _buyer2,
+        said: 'Buyer 2: I paid by SEPA ($stamp)',
+        answer: 'Thanks, buyer 2 ($stamp)',
+      );
+      await _exchange(
+        tester,
+        segment: 'Seller',
+        secret: _seller2,
+        said: 'Seller 2: nothing arrived ($stamp)',
+        answer: 'Please check again, seller 2 ($stamp)',
+      );
+      debugPrint('[e2e] 2. dispute 2, buyer and seller: both ways');
+
+      // ── 3. Back on the first, over the rebuilt REQ ──────────────────────
+      await _open(tester, _dispute);
       await _exchange(
         tester,
         segment: 'Seller',
         secret: _seller,
-        said: 'Seller here: nothing arrived yet ($stamp)',
-        answer: 'Please check again and send a statement ($stamp)',
+        said: 'Seller 1: still waiting ($stamp)',
+        answer: 'Noted, seller 1 ($stamp)',
       );
-      debugPrint('[e2e] 3. seller: both ways');
+      debugPrint('[e2e] 3. dispute 1, seller: both ways after the rebuild');
 
-      // The two conversations did not mix.
+      // Nothing crossed: dispute 1's buyer chat has only its own messages.
       await tester.tap(_segment('Buyer'));
       await tester.pump(const Duration(milliseconds: 500));
-      expect(
-        find.text('Seller here: nothing arrived yet ($stamp)').hitTestable(),
-        findsNothing,
-      );
-      debugPrint('[e2e] the conversations stay apart');
+      final bubbles =
+          find
+              .descendant(
+                of: find.byType(IndexedStack),
+                matching: find.byType(ChatBubble),
+              )
+              .evaluate()
+              .map((e) => (e.widget as ChatBubble).message.content)
+              .toList();
+      debugPrint('[e2e] dispute 1, buyer chat: $bubbles');
+      expect(bubbles.toSet(), {
+        'Buyer 1: the fiat went out at 10:00 ($stamp)',
+        'Thanks, buyer 1. Send the receipt ($stamp)',
+      });
     },
     skip:
         _relay.isEmpty ||
@@ -253,6 +301,9 @@ void main() {
         _dispute.isEmpty ||
         _buyer.isEmpty ||
         _seller.isEmpty ||
+        _dispute2.isEmpty ||
+        _buyer2.isEmpty ||
+        _seller2.isEmpty ||
         _party.isEmpty,
   );
 }

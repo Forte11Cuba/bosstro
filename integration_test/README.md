@@ -17,10 +17,11 @@ flutter test integration_test/take_against_local_mostrod_test.dart -d linux \
 ```
 
 `chat_against_local_mostrod_test.dart` drives the phase 5 screens: it takes
-one `initiated` dispute, opens it, and trades a message each way with its
-buyer and its seller. The parties are played by `rust/examples/chat_party.rs`
-with their trade secret keys, so the dispute's order must name trade keys you
-hold: create a test order and dispute for them in a copy of the node's
+two `initiated` disputes, opens them, and trades a message each way with
+their buyers and sellers (the second take rebuilds the chat's shared REQ;
+the first dispute's seller is reached after it). The parties are played by `rust/examples/chat_party.rs`
+with their trade secret keys, so each dispute's order must name trade keys you
+hold: create a test order and dispute for each in a copy of the node's
 database, and publish its kind 38386 (signed by the node key) to the local
 relay. The solver key must be a solver there (`users.is_solver = 1`).
 
@@ -34,6 +35,9 @@ flutter test integration_test/chat_against_local_mostrod_test.dart -d linux \
   --dart-define=E2E_DISPUTE=<dispute id> \
   --dart-define=E2E_BUYER=<buyer trade secret hex> \
   --dart-define=E2E_SELLER=<seller trade secret hex> \
+  --dart-define=E2E_DISPUTE_2=<second dispute id> \
+  --dart-define=E2E_BUYER_2=<its buyer trade secret hex> \
+  --dart-define=E2E_SELLER_2=<its seller trade secret hex> \
   --dart-define=E2E_PARTY_BIN=$PWD/rust/target/debug/examples/chat_party
 ```
 
