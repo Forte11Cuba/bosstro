@@ -479,6 +479,9 @@ pub async fn select_active_node(pubkey: String) -> Result<()> {
     // The disputes feed follows the new node (it reads the active node when
     // it runs, so two quick selections end on the last one).
     crate::rt::spawn(crate::disputes::feed::follow_active_node());
+    // So do the node's answers to the solver key: a take's answer from the
+    // previous node is not taken any more.
+    crate::rt::spawn(crate::mostro::replies::follow());
     Ok(())
 }
 

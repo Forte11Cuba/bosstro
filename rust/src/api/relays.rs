@@ -121,6 +121,10 @@ pub async fn initialize_relays() -> Result<()> {
     crate::nostr::live_subs::spawn_repair(pool);
     // The active node's disputes (kind 38386), followed from now on.
     crate::disputes::feed::start(pool.client()).await;
+    // The node's answers to the solver key (phase 4), beside the feed.
+    if let Some(feed) = crate::disputes::feed::feed() {
+        crate::mostro::replies::start(pool.client(), feed).await;
+    }
 
     // Each time the pool comes online, the active node's relay list and
     // instance info are read again. Subscribed before the state is read, so

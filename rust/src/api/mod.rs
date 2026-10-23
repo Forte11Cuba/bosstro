@@ -7,6 +7,7 @@ pub mod node_info;
 pub mod nodes;
 pub mod relays;
 pub mod solver;
+pub mod take;
 
 /// The crate version, which is also the app version (`pubspec.yaml` without
 /// the `+build` suffix). Settings shows it; it is the phase 0 proof that Dart

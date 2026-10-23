@@ -95,12 +95,17 @@ pub fn preview_npub(secret: Vec<u8>) -> Result<String, SolverKeyError> {
 /// [`SolverKeyError::AlreadyLoaded`] while another key is loaded.
 pub async fn load_solver_key(secret: Vec<u8>) -> Result<SolverKeyInfo, SolverKeyError> {
     let keys = SOLVER_SLOT.load(secret).await?;
+    // The node's answers to this key are followed from now on.
+    crate::mostro::replies::follow().await;
     Ok(info_of(&keys))
 }
 
 /// Drops the loaded key. Returns whether one was loaded.
 pub async fn unload_solver_key() -> bool {
-    SOLVER_SLOT.unload().await
+    let had = SOLVER_SLOT.unload().await;
+    // The answers to the old key are not followed, nor taken, any more.
+    crate::mostro::replies::follow().await;
+    had
 }
 
 /// The loaded key, if any.
