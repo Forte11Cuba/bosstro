@@ -115,6 +115,10 @@ tool/                # design_check.dart, launcher_icon/build_sources.py
 - **The observed chat is stored in plain text** (`observed_messages`), as the solver's own chat
   (A4); so is a disclosed chat key, which is the text of a party's message. A pasted key is never
   stored: after a restart the stored messages still read, and Refresh needs the key pasted again.
+- **Messages of the same second in the observed chat are in id order**, not the order they were
+  written: `created_at` has one-second resolution, the chat arrives in one query, and relays order
+  same-second events as they like (`nak` by id, strfry by insertion). The solver's own chat sorts
+  such ties by arrival (`received_at`, then `seq`, the order they were stored in).
 - **An observed read cannot tell a wrong key from a quiet chat:** a key that opens nothing since a
   week before the dispute opened is "the key opens no message of this dispute" either way.
 - **Files on the web:** decrypting and re-encoding (up to 25 MiB) run on the page's only

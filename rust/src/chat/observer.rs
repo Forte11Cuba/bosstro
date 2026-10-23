@@ -249,6 +249,11 @@ impl Scope {
             .iter()
             .map(ObservedRecord::view)
             .collect();
+        // Ties of one second by id: unlike the solver's own chat, this one
+        // has no arrival order. It comes in one query, and relays answer
+        // same-second events in an order of their own (`nak` by id, strfry
+        // by insertion), so nothing reliable orders them (accepted limit,
+        // AGENTS.md).
         messages.sort_by(|a, b| {
             a.created_at
                 .cmp(&b.created_at)

@@ -396,7 +396,11 @@ impl Storage for IndexedDbStorage {
         if self.get_string(CHAT_STORE, &key).await?.is_some() {
             return Ok(false);
         }
-        let json = serde_json::to_string(message)?;
+        let stored = ChatRecord {
+            seq: crate::chat::next_seq(),
+            ..message.clone()
+        };
+        let json = serde_json::to_string(&stored)?;
         self.put_string(CHAT_STORE, &key, &json).await?;
         Ok(true)
     }
@@ -637,6 +641,11 @@ mod tests {
     #[wasm_bindgen_test]
     async fn chat_messages_round_trip() {
         contract::chat_messages_round_trip(&store("chat").await).await;
+    }
+
+    #[wasm_bindgen_test]
+    async fn chat_messages_keep_their_arrival_order() {
+        contract::chat_messages_keep_their_arrival_order(&store("chat_order").await).await;
     }
 
     #[wasm_bindgen_test]

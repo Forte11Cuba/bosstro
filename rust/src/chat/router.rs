@@ -119,7 +119,10 @@ impl ChatStore {
                 if rows.iter().any(|r| r.message_id == record.message_id) {
                     return Ok(false);
                 }
-                rows.push(record.clone());
+                rows.push(ChatRecord {
+                    seq: super::next_seq(),
+                    ..record.clone()
+                });
                 Ok(true)
             }
         }
@@ -737,6 +740,7 @@ impl Router {
             created_at: message.created_at.as_secs() as i64,
             received_at: crate::rt::unix_now(),
             delivery: ChatDelivery::Sent,
+            seq: 0,
         };
         let changed = {
             let _guard = self.ingest_lock.lock().await;
@@ -887,6 +891,7 @@ impl Router {
             created_at: opened.created_at.as_secs() as i64,
             received_at: crate::rt::unix_now(),
             delivery: ChatDelivery::Sending,
+            seq: 0,
         };
         lock(&self.in_flight).insert(record.message_id.clone());
         {
@@ -979,7 +984,8 @@ impl Router {
         Ok(sent)
     }
 
-    /// The conversation as the chat shows it: oldest first, ties by id.
+    /// The conversation as the chat shows it: oldest first, a second's ties
+    /// in arrival order ([`sorted_views`]).
     pub(crate) async fn messages(
         &self,
         channel: &ChannelRef,
@@ -991,18 +997,23 @@ impl Router {
     }
 }
 
-/// `records` oldest first (ties by id), as views.
+/// `records` oldest first, as views. Messages of the same second (the
+/// resolution of `created_at`) go in the order they arrived here: by
+/// `received_at`, then the order they were stored in (`seq`); the random
+/// inner id only decides between rows that predate `seq`.
 fn sorted_views(records: &[ChatRecord], in_flight: impl Fn(&str) -> bool) -> Vec<ChatMessageView> {
-    let mut views: Vec<ChatMessageView> = records
-        .iter()
-        .map(|r| r.view(in_flight(&r.message_id)))
-        .collect();
-    views.sort_by(|a, b| {
+    let mut sorted: Vec<&ChatRecord> = records.iter().collect();
+    sorted.sort_by(|a, b| {
         a.created_at
             .cmp(&b.created_at)
-            .then_with(|| a.id.cmp(&b.id))
+            .then_with(|| a.received_at.cmp(&b.received_at))
+            .then_with(|| a.seq.cmp(&b.seq))
+            .then_with(|| a.message_id.cmp(&b.message_id))
     });
-    views
+    sorted
+        .into_iter()
+        .map(|r| r.view(in_flight(&r.message_id)))
+        .collect()
 }
 
 // ── The process-wide router ───────────────────────────────────────────────────
@@ -1696,6 +1707,49 @@ pub(crate) mod tests {
         let all = b.messages(DISPUTE_A, ChatParty::Seller).await;
         assert_eq!(all.len(), 1, "the retry replaced it");
         assert_eq!(all[0].id, later.id);
+    }
+
+    /// Messages of the same second show in the order they arrived, not by
+    /// their random ids: three stored in arrival order read in that order,
+    /// in memory and in SQLite.
+    #[tokio::test]
+    async fn messages_of_the_same_second_keep_their_arrival_order() {
+        let path = crate::db::sqlite::tests::temp_db_path();
+        let storage: &'static crate::db::sqlite::SqliteStorage = Box::leak(Box::new(
+            crate::db::sqlite::SqliteStorage::open(path.to_str().unwrap())
+                .await
+                .unwrap(),
+        ));
+        for store in [ChatStore::memory(), ChatStore::Db(storage)] {
+            let b = bench_with(Store::memory(), store).await;
+            let channel = b.channel(DISPUTE_A, ChatParty::Buyer);
+            // Ids against the arrival order, so sorting by id would invert it.
+            let arrived = [
+                ("ff", ChatSender::Buyer, "Hola, ya te hice la transferencia"),
+                ("88", ChatSender::You, "Gracias, lo reviso"),
+                ("00", ChatSender::Buyer, "Te mando el comprobante"),
+            ];
+            for (id, sender, text) in arrived {
+                let record = ChatRecord {
+                    channel: channel.clone(),
+                    message_id: id.into(),
+                    sender,
+                    content: text.into(),
+                    created_at: 1_700_000_000,
+                    received_at: 1_700_000_001,
+                    delivery: ChatDelivery::Sent,
+                    seq: 0,
+                };
+                assert!(b.router.store.insert(&record).await.unwrap());
+            }
+            let shown: Vec<String> = b
+                .messages(DISPUTE_A, ChatParty::Buyer)
+                .await
+                .into_iter()
+                .map(|m| m.id)
+                .collect();
+            assert_eq!(shown, ["ff", "88", "00"]);
+        }
     }
 
     /// Nothing secret reaches the database: neither the solver's key, nor

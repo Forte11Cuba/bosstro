@@ -230,8 +230,10 @@ impl Storage for SqliteStorage {
 
     async fn insert_chat_message(&self, m: &ChatRecord) -> Result<bool> {
         let done = sqlx::query(&format!(
-            "INSERT OR IGNORE INTO dispute_messages ({CHAT_COLUMNS})
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            // `seq`: one more than the highest stored, the arrival order.
+            "INSERT OR IGNORE INTO dispute_messages ({CHAT_COLUMNS}, seq)
+             SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(seq), 0) + 1
+             FROM dispute_messages"
         ))
         .bind(&m.channel.mostro_pubkey)
         .bind(&m.channel.dispute_id)
@@ -255,7 +257,7 @@ impl Storage for SqliteStorage {
     ) -> Result<Option<ChatRecord>> {
         let row = bind_channel(
             sqlx::query(&format!(
-                "SELECT {CHAT_COLUMNS} FROM dispute_messages WHERE {CHANNEL_WHERE} AND message_id = ?"
+                "SELECT {CHAT_COLUMNS}, seq FROM dispute_messages WHERE {CHANNEL_WHERE} AND message_id = ?"
             )),
             channel,
         )
@@ -268,7 +270,7 @@ impl Storage for SqliteStorage {
     async fn list_chat_messages(&self, channel: &ChannelRef) -> Result<Vec<ChatRecord>> {
         let rows = bind_channel(
             sqlx::query(&format!(
-                "SELECT {CHAT_COLUMNS} FROM dispute_messages WHERE {CHANNEL_WHERE}"
+                "SELECT {CHAT_COLUMNS}, seq FROM dispute_messages WHERE {CHANNEL_WHERE}"
             )),
             channel,
         )
@@ -514,6 +516,7 @@ fn chat_from_row(row: &sqlx::sqlite::SqliteRow) -> Result<ChatRecord> {
         received_at: row.try_get("received_at")?,
         delivery: ChatDelivery::from_wire(&delivery)
             .ok_or_else(|| anyhow::anyhow!("unknown chat delivery {delivery:?}"))?,
+        seq: row.try_get("seq")?,
     })
 }
 
@@ -597,6 +600,11 @@ pub(crate) mod tests {
     #[tokio::test]
     async fn chat_messages_round_trip() {
         contract::chat_messages_round_trip(&store().await).await;
+    }
+
+    #[tokio::test]
+    async fn chat_messages_keep_their_arrival_order() {
+        contract::chat_messages_keep_their_arrival_order(&store().await).await;
     }
 
     #[tokio::test]

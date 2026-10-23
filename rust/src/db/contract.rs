@@ -296,7 +296,36 @@ pub(crate) fn message(channel: &ChannelRef, id: &str, created_at: i64) -> ChatRe
         created_at,
         received_at: created_at,
         delivery: ChatDelivery::Sent,
+        seq: 0,
     }
+}
+
+/// A stored message without the arrival order the store gave it.
+fn unseq(record: ChatRecord) -> ChatRecord {
+    ChatRecord { seq: 0, ..record }
+}
+
+/// Three messages of the same second stored in the order they arrived keep
+/// it: their `seq` grows with each insert (a copy takes none), whatever their
+/// ids say.
+pub(crate) async fn chat_messages_keep_their_arrival_order(storage: &impl Storage) {
+    let buyer = channel("aa", DISPUTE_A, ChatParty::Buyer, "ss");
+    let arrived = ["m3", "m1", "m2"];
+    for id in arrived {
+        assert!(storage
+            .insert_chat_message(&message(&buyer, id, 100))
+            .await
+            .unwrap());
+    }
+    assert!(!storage
+        .insert_chat_message(&message(&buyer, "m3", 100))
+        .await
+        .unwrap());
+    let mut rows = storage.list_chat_messages(&buyer).await.unwrap();
+    rows.sort_by_key(|r| r.seq);
+    let order: Vec<&str> = rows.iter().map(|r| r.message_id.as_str()).collect();
+    assert_eq!(order, arrived);
+    assert!(rows.windows(2).all(|w| w[0].seq < w[1].seq), "strictly growing");
 }
 
 pub(crate) async fn chat_messages_round_trip(storage: &impl Storage) {
@@ -311,7 +340,7 @@ pub(crate) async fn chat_messages_round_trip(storage: &impl Storage) {
     copy.content = "something else".into();
     assert!(!storage.insert_chat_message(&copy).await.unwrap());
     assert_eq!(
-        storage.get_chat_message(&buyer, "m1").await.unwrap(),
+        storage.get_chat_message(&buyer, "m1").await.unwrap().map(unseq),
         Some(first.clone())
     );
 
@@ -342,11 +371,12 @@ pub(crate) async fn chat_messages_round_trip(storage: &impl Storage) {
     let mut rows = storage.list_chat_messages(&buyer).await.unwrap();
     rows.sort_by(|a, b| a.message_id.cmp(&b.message_id));
     assert_eq!(rows.len(), 2);
-    assert_eq!(rows[0], first);
+    assert_eq!(unseq(rows[0].clone()), first);
     assert_eq!(storage.chat_cursor(&buyer).await.unwrap(), Some(200));
 
     storage.delete_chat_message(&buyer, "m2").await.unwrap();
-    assert_eq!(storage.list_chat_messages(&buyer).await.unwrap(), vec![first]);
+    let rows = storage.list_chat_messages(&buyer).await.unwrap();
+    assert_eq!(rows.into_iter().map(unseq).collect::<Vec<_>>(), vec![first]);
     assert_eq!(storage.chat_cursor(&buyer).await.unwrap(), Some(100));
 }
 
