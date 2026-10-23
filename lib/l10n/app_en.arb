@@ -1884,5 +1884,73 @@
   "detailResult": "Result",
   "@detailResult": {
     "description": "Dispute detail, Info: row with how a closed dispute ended"
+  },
+  "bondsTitle": "Bonds",
+  "@bondsTitle": {
+    "description": "Confirmation: heading of the anti-abuse bond choice, on a node that uses bonds"
+  },
+  "bondsPickerHint": "This node uses anti-abuse bonds. Choose whose is slashed, if anyone's. It goes in the same request.",
+  "@bondsPickerHint": {
+    "description": "Confirmation: under bondsTitle"
+  },
+  "bondNoSlash": "Don't slash",
+  "@bondNoSlash": {
+    "description": "Bond choice: release both bonds (the default)"
+  },
+  "bondNoSlashDetail": "Both bonds go back to their owners.",
+  "@bondNoSlashDetail": {
+    "description": "Under bondNoSlash"
+  },
+  "bondSlashBuyer": "Slash the buyer",
+  "@bondSlashBuyer": {
+    "description": "Bond choice: the buyer loses their bond"
+  },
+  "bondSlashBuyerDetail": "The buyer loses their bond; the seller can claim their share.",
+  "@bondSlashBuyerDetail": {
+    "description": "Under bondSlashBuyer"
+  },
+  "bondSlashSeller": "Slash the seller",
+  "@bondSlashSeller": {
+    "description": "Bond choice: the seller loses their bond"
+  },
+  "bondSlashSellerDetail": "The seller loses their bond; the buyer can claim their share.",
+  "@bondSlashSellerDetail": {
+    "description": "Under bondSlashSeller"
+  },
+  "bondSlashBoth": "Slash both",
+  "@bondSlashBoth": {
+    "description": "Bond choice: both parties lose their bond"
+  },
+  "bondSlashBothDetail": "Both lose their bond.",
+  "@bondSlashBothDetail": {
+    "description": "Under bondSlashBoth"
+  },
+  "bondNotPostedTitle": "That party posted no bond",
+  "@bondNotPostedTitle": {
+    "description": "Result: the node refused the slash of a party without a bond; nothing was resolved"
+  },
+  "bondNotPostedBody": "The node has no bond from the party you chose to slash, so nothing was paid or refunded. Choose another bond option.",
+  "@bondNotPostedBody": {
+    "description": "Under bondNotPostedTitle"
+  },
+  "bondChooseAgain": "Choose another option",
+  "@bondChooseAgain": {
+    "description": "Result button: back to the confirmation to change the bond choice"
+  },
+  "resolvedSlashedBuyer": "The buyer's bond was slashed.",
+  "@resolvedSlashedBuyer": {
+    "description": "Result: added under a successful resolution that slashed the buyer"
+  },
+  "resolvedSlashedSeller": "The seller's bond was slashed.",
+  "@resolvedSlashedSeller": {
+    "description": "Result: added under a successful resolution that slashed the seller"
+  },
+  "resolvedSlashedBoth": "Both bonds were slashed.",
+  "@resolvedSlashedBoth": {
+    "description": "Result: added under a successful resolution that slashed both"
+  },
+  "detailBonds": "Bonds",
+  "@detailBonds": {
+    "description": "Info row label: which bonds this solver's resolution slashed"
   }
 }

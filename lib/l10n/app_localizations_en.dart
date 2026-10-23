@@ -1495,4 +1495,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detailResult => 'Result';
+
+  @override
+  String get bondsTitle => 'Bonds';
+
+  @override
+  String get bondsPickerHint =>
+      'This node uses anti-abuse bonds. Choose whose is slashed, if anyone\'s. It goes in the same request.';
+
+  @override
+  String get bondNoSlash => 'Don\'t slash';
+
+  @override
+  String get bondNoSlashDetail => 'Both bonds go back to their owners.';
+
+  @override
+  String get bondSlashBuyer => 'Slash the buyer';
+
+  @override
+  String get bondSlashBuyerDetail =>
+      'The buyer loses their bond; the seller can claim their share.';
+
+  @override
+  String get bondSlashSeller => 'Slash the seller';
+
+  @override
+  String get bondSlashSellerDetail =>
+      'The seller loses their bond; the buyer can claim their share.';
+
+  @override
+  String get bondSlashBoth => 'Slash both';
+
+  @override
+  String get bondSlashBothDetail => 'Both lose their bond.';
+
+  @override
+  String get bondNotPostedTitle => 'That party posted no bond';
+
+  @override
+  String get bondNotPostedBody =>
+      'The node has no bond from the party you chose to slash, so nothing was paid or refunded. Choose another bond option.';
+
+  @override
+  String get bondChooseAgain => 'Choose another option';
+
+  @override
+  String get resolvedSlashedBuyer => 'The buyer\'s bond was slashed.';
+
+  @override
+  String get resolvedSlashedSeller => 'The seller\'s bond was slashed.';
+
+  @override
+  String get resolvedSlashedBoth => 'Both bonds were slashed.';
+
+  @override
+  String get detailBonds => 'Bonds';
 }

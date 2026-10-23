@@ -419,5 +419,22 @@
   "closedPaidBuyer": "Pagaste al comprador",
   "closedRefundedSeller": "Devolviste al vendedor",
   "closedCooperatively": "Las partes la cancelaron antes de tu decisión",
-  "detailResult": "Resultado"
+  "detailResult": "Resultado",
+  "bondsTitle": "Fianzas",
+  "bondsPickerHint": "Este nodo usa fianzas antiabuso. Elige a quién se le penaliza, si a alguien. Va en la misma petición.",
+  "bondNoSlash": "No penalizar",
+  "bondNoSlashDetail": "Las fianzas vuelven a las dos partes.",
+  "bondSlashBuyer": "Penalizar al comprador",
+  "bondSlashBuyerDetail": "El comprador pierde su fianza; el vendedor puede reclamar su parte.",
+  "bondSlashSeller": "Penalizar al vendedor",
+  "bondSlashSellerDetail": "El vendedor pierde su fianza; el comprador puede reclamar su parte.",
+  "bondSlashBoth": "Penalizar a los dos",
+  "bondSlashBothDetail": "Los dos pierden su fianza.",
+  "bondNotPostedTitle": "Esa parte no depositó fianza",
+  "bondNotPostedBody": "El nodo no tiene fianza de la parte que elegiste penalizar, así que no se pagó ni se devolvió nada. Elige otra opción de fianzas.",
+  "bondChooseAgain": "Elegir otra opción",
+  "resolvedSlashedBuyer": "Se penalizó la fianza del comprador.",
+  "resolvedSlashedSeller": "Se penalizó la fianza del vendedor.",
+  "resolvedSlashedBoth": "Se penalizaron las fianzas de los dos.",
+  "detailBonds": "Fianzas"
 }

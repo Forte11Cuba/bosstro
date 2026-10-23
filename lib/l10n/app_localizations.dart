@@ -2617,6 +2617,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Result'**
   String get detailResult;
+
+  /// Confirmation: heading of the anti-abuse bond choice, on a node that uses bonds
+  ///
+  /// In en, this message translates to:
+  /// **'Bonds'**
+  String get bondsTitle;
+
+  /// Confirmation: under bondsTitle
+  ///
+  /// In en, this message translates to:
+  /// **'This node uses anti-abuse bonds. Choose whose is slashed, if anyone\'s. It goes in the same request.'**
+  String get bondsPickerHint;
+
+  /// Bond choice: release both bonds (the default)
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t slash'**
+  String get bondNoSlash;
+
+  /// Under bondNoSlash
+  ///
+  /// In en, this message translates to:
+  /// **'Both bonds go back to their owners.'**
+  String get bondNoSlashDetail;
+
+  /// Bond choice: the buyer loses their bond
+  ///
+  /// In en, this message translates to:
+  /// **'Slash the buyer'**
+  String get bondSlashBuyer;
+
+  /// Under bondSlashBuyer
+  ///
+  /// In en, this message translates to:
+  /// **'The buyer loses their bond; the seller can claim their share.'**
+  String get bondSlashBuyerDetail;
+
+  /// Bond choice: the seller loses their bond
+  ///
+  /// In en, this message translates to:
+  /// **'Slash the seller'**
+  String get bondSlashSeller;
+
+  /// Under bondSlashSeller
+  ///
+  /// In en, this message translates to:
+  /// **'The seller loses their bond; the buyer can claim their share.'**
+  String get bondSlashSellerDetail;
+
+  /// Bond choice: both parties lose their bond
+  ///
+  /// In en, this message translates to:
+  /// **'Slash both'**
+  String get bondSlashBoth;
+
+  /// Under bondSlashBoth
+  ///
+  /// In en, this message translates to:
+  /// **'Both lose their bond.'**
+  String get bondSlashBothDetail;
+
+  /// Result: the node refused the slash of a party without a bond; nothing was resolved
+  ///
+  /// In en, this message translates to:
+  /// **'That party posted no bond'**
+  String get bondNotPostedTitle;
+
+  /// Under bondNotPostedTitle
+  ///
+  /// In en, this message translates to:
+  /// **'The node has no bond from the party you chose to slash, so nothing was paid or refunded. Choose another bond option.'**
+  String get bondNotPostedBody;
+
+  /// Result button: back to the confirmation to change the bond choice
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another option'**
+  String get bondChooseAgain;
+
+  /// Result: added under a successful resolution that slashed the buyer
+  ///
+  /// In en, this message translates to:
+  /// **'The buyer\'s bond was slashed.'**
+  String get resolvedSlashedBuyer;
+
+  /// Result: added under a successful resolution that slashed the seller
+  ///
+  /// In en, this message translates to:
+  /// **'The seller\'s bond was slashed.'**
+  String get resolvedSlashedSeller;
+
+  /// Result: added under a successful resolution that slashed both
+  ///
+  /// In en, this message translates to:
+  /// **'Both bonds were slashed.'**
+  String get resolvedSlashedBoth;
+
+  /// Info row label: which bonds this solver's resolution slashed
+  ///
+  /// In en, this message translates to:
+  /// **'Bonds'**
+  String get detailBonds;
 }
 
 class _AppLocalizationsDelegate
