@@ -404,6 +404,10 @@ class TakenDisputeSummary {
   /// How this key resolved it, once closed by its own request.
   final ResolvedAs? resolvedAs;
 
+  /// When it closed (Unix seconds), once closed: when the node answered
+  /// this key's resolution, else the node's revision that closed it.
+  final PlatformInt64? closedAt;
+
   const TakenDisputeSummary({
     required this.mostroPubkey,
     required this.disputeId,
@@ -415,6 +419,7 @@ class TakenDisputeSummary {
     this.fiatAmount,
     this.fiatCode,
     this.resolvedAs,
+    this.closedAt,
   });
 
   @override
@@ -428,7 +433,8 @@ class TakenDisputeSummary {
       amount.hashCode ^
       fiatAmount.hashCode ^
       fiatCode.hashCode ^
-      resolvedAs.hashCode;
+      resolvedAs.hashCode ^
+      closedAt.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -444,5 +450,6 @@ class TakenDisputeSummary {
           amount == other.amount &&
           fiatAmount == other.fiatAmount &&
           fiatCode == other.fiatCode &&
-          resolvedAs == other.resolvedAs;
+          resolvedAs == other.resolvedAs &&
+          closedAt == other.closedAt;
 }

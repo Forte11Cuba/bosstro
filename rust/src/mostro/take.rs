@@ -201,6 +201,7 @@ pub(crate) fn taken_from(
         seller_pubkey: info.seller_pubkey.clone(),
         resolved_as: None,
         bond_slash: None,
+        resolved_at: None,
     }
 }
 
@@ -494,6 +495,10 @@ fn summary_of(row: &DisputeRecord, taken: &TakenDispute) -> TakenDisputeSummary 
         fiat_amount: taken.fiat_amount,
         fiat_code: taken.fiat_code.clone(),
         resolved_as: taken.resolved_as,
+        closed_at: row
+            .status
+            .is_terminal()
+            .then(|| taken.resolved_at.unwrap_or(row.event_created_at)),
     }
 }
 
@@ -838,6 +843,25 @@ pub(crate) mod tests {
             .map(|d| d.dispute_id)
             .collect();
         assert_eq!(candidates, vec!["other-key", "nobody"]);
+    }
+
+    #[test]
+    fn a_closed_dispute_reads_when_it_closed() {
+        let me = "aa".repeat(32);
+        let mut row = DisputeRecord {
+            event_created_at: 900,
+            taken: Some(taken_from(&info(), &me, None, 5)),
+            ..crate::disputes::tests::row_with(InProgress)
+        };
+        let closed_at = |row: &DisputeRecord| summary_of(row, row.taken.as_ref().unwrap()).closed_at;
+        assert_eq!(closed_at(&row), None, "open");
+        // Closed by the parties: the node's revision that closed it.
+        row.status = Settled;
+        assert_eq!(closed_at(&row), Some(900));
+        // Closed by this key's request: when the node answered it, before
+        // (or whatever) the node's 38386 says.
+        row.taken.as_mut().unwrap().resolved_at = Some(950);
+        assert_eq!(closed_at(&row), Some(950));
     }
 
     #[test]

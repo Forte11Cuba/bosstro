@@ -516,6 +516,7 @@ impl Feed {
                 {
                     t.resolved_as = Some(resolved);
                     t.bond_slash = Some(bond);
+                    t.resolved_at = Some(crate::rt::unix_now());
                 }
                 _ => return Ok(()),
             }

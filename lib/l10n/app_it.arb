@@ -417,8 +417,6 @@
   "resolveNoOrderBody": "Bosstro non conosce l'ordine di questa disputa, e la richiesta ne ha bisogno. Recupera la disputa per leggerlo di nuovo.",
   "resolveBackToDispute": "Torna alla disputa",
   "resolveGoToDisputes": "Vai a «Le tue dispute»",
-  "inProgressClosedHeading": "Chiuse",
-  "inProgressNoneOpen": "Ora non hai nessuna disputa in carico.",
   "closedPaidBuyer": "Hai pagato l'acquirente",
   "closedRefundedSeller": "Hai rimborsato il venditore",
   "closedCooperatively": "Le parti l'hanno annullata prima della tua decisione",
@@ -442,5 +440,14 @@
   "detailBonds": "Depositi",
   "detailPreviousStatus": "Stato prima della disputa",
   "orderStatusActive": "Attivo",
-  "orderStatusFiatSent": "Fiat inviato"
+  "orderStatusFiatSent": "Fiat inviato",
+  "myDisputesOpenSegment": "In corso · {count}",
+  "myDisputesClosedSegment": "Chiuse · {count}",
+  "myDisputesSegmentsLabel": "Dispute aperte o chiuse",
+  "closedEmptyTitle": "Nessuna disputa chiusa per ora",
+  "closedEmptyBody": "Le dispute che prendi in carico compaiono qui quando si chiudono, che le abbia risolte tu o che le parti abbiano concluso lo scambio da sole.",
+  "disputeClosedJustNow": "Chiusa poco fa",
+  "disputeClosedMinutesAgo": "{count, plural, =1{Chiusa 1 minuto fa} other{Chiusa {count} minuti fa}}",
+  "disputeClosedHoursAgo": "{count, plural, =1{Chiusa 1 ora fa} other{Chiusa {count} ore fa}}",
+  "disputeClosedDaysAgo": "{count, plural, =1{Chiusa 1 giorno fa} other{Chiusa {count} giorni fa}}"
 }

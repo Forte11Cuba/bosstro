@@ -1494,12 +1494,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resolveGoToDisputes => 'Ir a Tus disputas';
 
   @override
-  String get inProgressClosedHeading => 'Cerradas';
-
-  @override
-  String get inProgressNoneOpen => 'Ahora no tienes ninguna disputa.';
-
-  @override
   String get closedPaidBuyer => 'Pagaste al comprador';
 
   @override
@@ -1575,4 +1569,60 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get orderStatusFiatSent => 'Fiat enviado';
+
+  @override
+  String myDisputesOpenSegment(int count) {
+    return 'En curso · $count';
+  }
+
+  @override
+  String myDisputesClosedSegment(int count) {
+    return 'Cerradas · $count';
+  }
+
+  @override
+  String get myDisputesSegmentsLabel => 'Disputas abiertas o cerradas';
+
+  @override
+  String get closedEmptyTitle => 'Todavía no has cerrado ninguna disputa';
+
+  @override
+  String get closedEmptyBody =>
+      'Las disputas que tomes aparecen aquí cuando se cierran, las resuelvas tú o terminen las partes la operación por su cuenta.';
+
+  @override
+  String get disputeClosedJustNow => 'Cerrada hace un momento';
+
+  @override
+  String disputeClosedMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cerrada hace $count minutos',
+      one: 'Cerrada hace 1 minuto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeClosedHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cerrada hace $count horas',
+      one: 'Cerrada hace 1 hora',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeClosedDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cerrada hace $count días',
+      one: 'Cerrada hace 1 día',
+    );
+    return '$_temp0';
+  }
 }

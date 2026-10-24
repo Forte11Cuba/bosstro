@@ -74,6 +74,11 @@ pub struct TakenDispute {
     /// was kept; a recovery reads it again.
     #[serde(default)]
     pub order_previous_status: Option<String>,
+    /// When the node answered this key's resolution (Unix seconds, this
+    /// device's clock); `None` while open, for a dispute that closed some
+    /// other way, and for one resolved before this was kept.
+    #[serde(default)]
+    pub resolved_at: Option<i64>,
 }
 
 impl DisputeStatus {
@@ -351,6 +356,7 @@ pub(crate) mod tests {
             resolved_as: None,
             bond_slash: None,
             order_previous_status: None,
+            resolved_at: None,
         }
     }
 

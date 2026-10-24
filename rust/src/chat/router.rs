@@ -1286,6 +1286,7 @@ pub(crate) mod tests {
             resolved_as: None,
             bond_slash: None,
             order_previous_status: None,
+            resolved_at: None,
         }
     }
 

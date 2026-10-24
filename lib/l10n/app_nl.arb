@@ -417,8 +417,6 @@
   "resolveNoOrderBody": "Bosstro kent de order van dit dispuut niet, en het verzoek heeft die nodig. Haal het dispuut terug om hem opnieuw te lezen.",
   "resolveBackToDispute": "Terug naar het dispuut",
   "resolveGoToDisputes": "Naar Jouw disputen",
-  "inProgressClosedHeading": "Gesloten",
-  "inProgressNoneOpen": "Je hebt nu geen dispuut in handen.",
   "closedPaidBuyer": "Je hebt de koper betaald",
   "closedRefundedSeller": "Je hebt de verkoper terugbetaald",
   "closedCooperatively": "De partijen annuleerden het vóór je beslissing",
@@ -442,5 +440,14 @@
   "detailBonds": "Borg",
   "detailPreviousStatus": "Status vóór het dispuut",
   "orderStatusActive": "Actief",
-  "orderStatusFiatSent": "Fiat verstuurd"
+  "orderStatusFiatSent": "Fiat verstuurd",
+  "myDisputesOpenSegment": "Lopend · {count}",
+  "myDisputesClosedSegment": "Gesloten · {count}",
+  "myDisputesSegmentsLabel": "Open of gesloten disputen",
+  "closedEmptyTitle": "Nog geen gesloten disputen",
+  "closedEmptyBody": "De disputen die je oppakt verschijnen hier zodra ze gesloten zijn, of je ze nu zelf oploste of de partijen de handel zelf afrondden.",
+  "disputeClosedJustNow": "Zojuist gesloten",
+  "disputeClosedMinutesAgo": "{count, plural, =1{1 minuut geleden gesloten} other{{count} minuten geleden gesloten}}",
+  "disputeClosedHoursAgo": "{count, plural, =1{1 uur geleden gesloten} other{{count} uur geleden gesloten}}",
+  "disputeClosedDaysAgo": "{count, plural, =1{1 dag geleden gesloten} other{{count} dagen geleden gesloten}}"
 }

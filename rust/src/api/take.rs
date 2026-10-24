@@ -133,6 +133,9 @@ pub struct TakenDisputeSummary {
     pub fiat_code: Option<String>,
     /// How this key resolved it, once closed by its own request.
     pub resolved_as: Option<ResolvedAs>,
+    /// When it closed (Unix seconds), once closed: when the node answered
+    /// this key's resolution, else the node's revision that closed it.
+    pub closed_at: Option<i64>,
 }
 
 /// The disputes this key took on the active node: the ones it still holds,

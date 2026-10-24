@@ -417,8 +417,6 @@
   "resolveNoOrderBody": "Bosstro ne connaît pas l'ordre de ce litige, et la demande en a besoin. Récupérez le litige pour obtenir à nouveau son ordre.",
   "resolveBackToDispute": "Retour au litige",
   "resolveGoToDisputes": "Aller à Vos litiges",
-  "inProgressClosedHeading": "Clos",
-  "inProgressNoneOpen": "Vous ne détenez aucun litige pour le moment.",
   "closedPaidBuyer": "Vous avez payé l'acheteur",
   "closedRefundedSeller": "Vous avez remboursé le vendeur",
   "closedCooperatively": "Les parties l'ont annulé avant votre décision",
@@ -442,5 +440,14 @@
   "detailBonds": "Dépôts",
   "detailPreviousStatus": "Statut avant le litige",
   "orderStatusActive": "Actif",
-  "orderStatusFiatSent": "Fiat envoyé"
+  "orderStatusFiatSent": "Fiat envoyé",
+  "myDisputesOpenSegment": "En cours · {count}",
+  "myDisputesClosedSegment": "Clos · {count}",
+  "myDisputesSegmentsLabel": "Litiges ouverts ou clos",
+  "closedEmptyTitle": "Aucun litige clos pour l'instant",
+  "closedEmptyBody": "Les litiges que vous prenez en charge apparaissent ici une fois clos, que vous les ayez résolus ou que les parties aient terminé l'échange elles-mêmes.",
+  "disputeClosedJustNow": "Clos à l'instant",
+  "disputeClosedMinutesAgo": "{count, plural, =1{Clos il y a 1 minute} other{Clos il y a {count} minutes}}",
+  "disputeClosedHoursAgo": "{count, plural, =1{Clos il y a 1 heure} other{Clos il y a {count} heures}}",
+  "disputeClosedDaysAgo": "{count, plural, =1{Clos il y a 1 jour} other{Clos il y a {count} jours}}"
 }

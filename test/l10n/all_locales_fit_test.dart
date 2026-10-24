@@ -9,6 +9,7 @@ import 'package:bosstro/features/chat/services/chat_core.dart';
 import 'package:bosstro/features/chat/widgets/chat_composer.dart';
 import 'package:bosstro/features/disputes/screens/dispute_detail_screen.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
+import 'package:bosstro/features/disputes/widgets/in_progress_dispute_row.dart';
 import 'package:bosstro/features/disputes/widgets/detail_segments.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
@@ -43,6 +44,13 @@ FakeDisputesCore _disputes({bool? bonds = true}) =>
         ],
       )
       ..held = [sampleTaken(id: _a)]
+      ..closed = [
+        sampleTaken(
+          id: _c,
+          status: DisputeStatus.settled,
+          resolvedAs: ResolvedAs.paidBuyer,
+        ),
+      ]
       ..details[_a] = sampleDetail(id: _a, bondsEnabled: bonds)
       ..candidates = [sampleDispute(id: _c, status: DisputeStatus.inProgress)]
       ..status = SolverStatus.yes
@@ -213,6 +221,9 @@ void main() {
       testWidgets('In progress, Recover and its confirmation', (tester) async {
         await _pump(tester, locale, AppRoute.inProgress);
         await _fitsToTheEnd(tester, 'In progress');
+        await _tap(tester, find.text(l10n.myDisputesClosedSegment(1)));
+        expect(find.byType(ClosedDisputeRow), findsOneWidget);
+        await _fitsToTheEnd(tester, 'Closed');
         await _pump(tester, locale, AppRoute.recover);
         await _fitsToTheEnd(tester, 'Recover');
         await _tap(tester, find.byType(PendingDisputeRow).first);
