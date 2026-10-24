@@ -100,15 +100,48 @@ List<Override> fakeCoreOverrides({
   ];
 }
 
-/// Sets the test surface to [width] × [height] logical pixels.
+/// A phone's system bars: a 24 dp status bar and a 48 dp navigation bar
+/// (three buttons), as ../app's layout tests. Android 15 draws the app
+/// behind them (edge to edge), so the app must keep its content clear.
+const systemBars = FakeViewPadding(top: 24, bottom: 48);
+
+/// Sets the test surface to [width] × [height] logical pixels, with the
+/// system bars of [padding] (none unless given).
 void setSurface(
   WidgetTester tester, {
   double width = 320,
   double height = 640,
+  FakeViewPadding padding = FakeViewPadding.zero,
 }) {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(width, height);
+  tester.view.padding = padding;
   addTearDown(tester.view.reset);
+}
+
+/// Scroll [scrollable] to its end and expect [last] to end above the
+/// navigation bar the surface was set with ([setSurface]'s `padding`).
+Future<void> expectClearOfNavBar(
+  WidgetTester tester, {
+  required Finder scrollable,
+  required Finder last,
+}) async {
+  final position = tester.state<ScrollableState>(scrollable).position;
+  // A lazy list learns its length as it builds: jump until the end holds.
+  double? end;
+  while (end != position.maxScrollExtent) {
+    end = position.maxScrollExtent;
+    position.jumpTo(end);
+    await tester.pumpAndSettle();
+  }
+  final view = tester.view;
+  final navBarTop =
+      (view.physicalSize.height - view.padding.bottom) / view.devicePixelRatio;
+  expect(
+    tester.getBottomLeft(last).dy,
+    lessThanOrEqualTo(navBarTop),
+    reason: 'the end of the content lies under the navigation bar',
+  );
 }
 
 /// Pumps the whole app at [location], in [locale], [brightness] and
