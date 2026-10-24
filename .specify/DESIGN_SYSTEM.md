@@ -54,7 +54,7 @@ the first time a screen needs it.
 4. **One component per job.** There is one way to show a dialog, one primary button, one chip
    shape. Before a new widget is built, the existing one is reused or extended.
 5. **Both themes, every locale, every text size.** Dark is the default, and light is a full theme,
-   not a fallback. Each screen holds up in Spanish at 320 dp wide with text scaled to 2×.
+   not a fallback. Each screen holds up in every locale at 320 dp wide with text scaled to 2×.
 6. **Calm.** Surfaces are flat. Motion is short. A screen in a waiting state has no call to
    action that shouts.
 7. **No theme defaults.** Bosstro's `ThemeData` is built from `ShellPalette` (amendment 1), so a
@@ -299,7 +299,7 @@ DS-CMP-7), and text scaling in §3 (DS-TYP-7). In addition:
 | DS-A11Y-1 | **MUST.** A custom tappable widget (an `InkWell` or `GestureDetector` that is not a Material button) is wrapped in `Semantics(button: true, label: …)`, with `enabled` reflecting its state. The exception is a gesture on decoration that only plays itself or shows a seasonal greeting (the mascot's tap and long press, `MostroMascot`): it changes nothing in the app and tells nothing the user needs, so it stays under `ExcludeSemantics` with the decoration (DS-A11Y-3), and the gesture detector sets `excludeFromSemantics: true`. A gesture that navigates, changes a setting or shows any other information is not an exception. | review |
 | DS-A11Y-2 | **MUST.** A status that changes while the user watches (a countdown result, a payment received) is announced through `liveRegion` or `SemanticsService`. | review |
 | DS-A11Y-3 | **MUST.** Focus and reading order follow the visual order. Decoration is excluded with `ExcludeSemantics`. | review |
-| DS-A11Y-4 | **MUST.** A new screen, or a changed action bar or modal, has a widget test at 2× text scale and 320 dp wide in the longest locale (Spanish, while Bosstro ships `en` and `es`) that expects no overflow (`tester.takeException()` is null). Precedent: `test/features/tabs_layout_test.dart`. | test |
+| DS-A11Y-4 | **MUST.** A new screen, or a changed action bar or modal, has a widget test at 2× text scale and 320 dp wide that expects no overflow (`tester.takeException()` is null), in Spanish beside its feature's tests and in every locale in `test/l10n/all_locales_fit_test.dart`. Precedent: `test/features/tabs_layout_test.dart`. | test |
 
 ---
 
@@ -307,14 +307,14 @@ DS-CMP-7), and text scaling in §3 (DS-TYP-7). In addition:
 
 | ID | Rule | Check |
 |---|---|---|
-| DS-L10N-1 | **MUST.** Every user-facing string comes from `AppLocalizations`, in every ARB file (en and es for the MVP). CI fails on an untranslated key. | test |
-| DS-L10N-2 | **MUST.** A layout is sized for the longest translation, Spanish while Bosstro ships en and es, never for English. A button label fits or scales down, and never truncates a verb. | review |
+| DS-L10N-1 | **MUST.** Every user-facing string comes from `AppLocalizations`, in every ARB file (en, es, it, fr, de, nl, pt). CI fails on an untranslated key. | test |
+| DS-L10N-2 | **MUST.** A layout is sized for the longest translation, never for English: the longest differs per string (often German or French), so every locale is laid out (`test/l10n/all_locales_fit_test.dart`). A button label fits or scales down, and never truncates a verb. | review, test |
 | DS-L10N-3 | **MUST.** Numbers, amounts and dates are formatted for the locale, never by hand. | review |
 | DS-L10N-4 | **MUST.** One word per concept, in every locale: a string names a trade concept with the word the glossary below gives it, and a new concept joins the glossary in the same change that first uses it. Protocol jargon ("hold", "bolt11", "NIP") is not shown to the user as a term to know; the string says what it does in plain words. | review |
 | DS-L10N-5 | **MUST.** One datum, one format. A value shown in more than one place reads the same on every screen: same precision, same unit, same word. Each screen gets it from one shared formatter or string, never one written per widget. A user's **reputation** reads the same wherever it appears (order card and detail, trade, chat, invoice, Account, import): the **rating** is the node's average to two decimals, without trailing zeros, in the locale's format (`4.97`, `4.9`, `5`; `4,97` in Spanish), through `formatRating` (`lib/shared/utils/rating_format.dart`), never rounded to one decimal, which once showed `5,0` on the Account card for a user the book showed at `4,97`; the **ratings count** is `687 ratings` (`no ratings` at zero), through `reputationRatingsCount`, never a count of trades; the **age** is the month of the first trade, `since Mar 2023`, through `reputationSinceText` (`lib/shared/utils/reputation_age.dart`), never a day count: a date does not go stale and reads without arithmetic. A **count** in a plural string is grouped for the locale (`1,323`; `1.323` in Spanish): its placeholder sets `"format": "decimalPattern"` in `app_en.arb`. | review, test |
 
 **Glossary.** The words the app uses, in English and Spanish; the other locales keep the same
-one-to-one choice in their ARB files.
+one-to-one choice in their ARB files, listed after this table.
 
 | Concept | en | es | Not |
 |---|---|---|---|
@@ -341,6 +341,27 @@ one-to-one choice in their ARB files.
 | The app's settings | settings | configuración | ajustes |
 | The key of a trade's chat a party gives the solver (as `app`) | chat key | clave del chat | shared key, clave compartida |
 | The buyer ↔ seller chat a solver reads | chat between the parties | chat entre las partes | observer, observador |
+
+**In the other locales.** The words come from `app`'s translation of the same language, except the
+role, which stays *solver* everywhere. Register: `it` tu, `fr` vous, `de` du, `nl` je, `pt`
+você (Brazil).
+
+| Concept | it | fr | de | nl | pt |
+|---|---|---|---|---|---|
+| dispute | disputa | litige | Streitfall | dispuut | disputa |
+| take a dispute | prendere in carico | prendre en charge | übernehmen | oppakken | assumir |
+| recover a dispute | recuperare | récupérer | zurückholen | terughalen | recuperar |
+| buyer, seller | acquirente, venditore | acheteur, vendeur | Käufer, Verkäufer | koper, verkoper | comprador, vendedor |
+| pay the buyer | pagare l'acquirente | payer l'acheteur | den Käufer bezahlen | de koper betalen | pagar o comprador |
+| refund the seller | rimborsare il venditore | rembourser le vendeur | dem Verkäufer erstatten | de verkoper terugbetalen | reembolsar o vendedor |
+| deposit (anti-abuse) | deposito | dépôt (de garantie) | Einlage (Sicherheitseinlage) | borg | depósito |
+| slash a deposit (`app`: forfeit) | confiscare | confisquer | einziehen | inhouden | confiscar |
+| hold invoice | fattura di trattenuta | facture de retenue | Sperr-Rechnung | (the sats the seller locked) | fatura de retenção |
+| order, trade | ordine, operazione | ordre, transaction | Order, Trade | order, trade | ordem, operação |
+| node | nodo | nœud | Node | node | nó |
+| secret key | chiave segreta | clé secrète | geheimer Schlüssel | geheime sleutel | chave secreta |
+| chat key | chiave della chat | clé du chat | Chat-Schlüssel | chatsleutel | chave do chat |
+| settings | impostazioni | paramètres | Einstellungen | instellingen | configurações |
 
 ---
 
@@ -423,7 +444,7 @@ For the reviewer of a UI change. Each line is a MUST unless marked.
       (DS-CMP-6, DS-CMP-7, DS-A11Y-1).
 - [ ] Existing components reused: app bars, chips, cards, inputs, skeletons, empty states
       (DS-CMP-8 to DS-CMP-14).
-- [ ] Works at 320 dp, at 2× text and in Spanish, with a test that proves it (DS-SPC-5,
+- [ ] Works at 320 dp, at 2× text and in every locale, with a test that proves it (DS-SPC-5,
       DS-TYP-7, DS-A11Y-4, DS-L10N-2).
 - [ ] A value shown on another screen too (a rating, a count, an age, an amount) reads the
       same here, from its shared formatter (DS-L10N-3, DS-L10N-5).
@@ -449,8 +470,9 @@ Applied in place above; listed here so a reviewer coming from `app` sees what di
    `SettingsPalette`, with canonical values (§2.3).
 5. **Glossary additions** (§9): solver, take a dispute, pay the buyer, refund the seller, node,
    settings / configuración.
-6. **Locales and layout tests**: en and es for the MVP; Spanish is the longest locale, so it is
-   the one DS-A11Y-4 and DS-L10N-2 test.
+6. **Locales and layout tests**: en, es, it, fr, de, nl and pt (Brazil), as `app`. Feature tests
+   run in Spanish; `test/l10n/all_locales_fit_test.dart` lays the main screens out in every
+   locale, since the longest translation differs per string (DS-A11Y-4, DS-L10N-2).
 7. **Radius tokens by role** (§4): `pill`, `modal`, `block`, `pageCta`, `cta`, `tile`,
    `thumbnail`; `app`'s v1 names are never defined (DS-SHP-4).
 8. **The chat between the parties** (amends DS-COL-9, maintainer 2026-10-23): in the observed chat
