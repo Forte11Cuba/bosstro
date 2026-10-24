@@ -17,8 +17,6 @@
   "languageSheetTitle": "Scegli una lingua",
   "languageSystem": "Lingua di sistema",
   "languageSystemDetail": "Come il tuo dispositivo: {language}",
-  "settingsGroupAbout": "Informazioni",
-  "settingsVersion": "Versione",
   "copied": "Copiato",
   "chatKeyCopied": "Chiave della chat copiata. Verrà cancellata dagli appunti tra 60 secondi.",
   "chatCopyHint": "Copia il messaggio",

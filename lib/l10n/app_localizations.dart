@@ -210,18 +210,6 @@ abstract class AppLocalizations {
   /// **'Same as your device: {language}'**
   String languageSystemDetail(String language);
 
-  /// Settings group header: information about the app
-  ///
-  /// In en, this message translates to:
-  /// **'About'**
-  String get settingsGroupAbout;
-
-  /// Settings row label: the app version, read from the Rust core
-  ///
-  /// In en, this message translates to:
-  /// **'Version'**
-  String get settingsVersion;
-
   /// Snackbar confirming a value was copied to the clipboard
   ///
   /// In en, this message translates to:

@@ -17,8 +17,6 @@
   "languageSheetTitle": "Taal kiezen",
   "languageSystem": "Systeemtaal",
   "languageSystemDetail": "Taal van je apparaat: {language}",
-  "settingsGroupAbout": "Over",
-  "settingsVersion": "Versie",
   "copied": "Gekopieerd",
   "chatKeyCopied": "Chatsleutel gekopieerd. Na 60 seconden wordt hij van het klembord gewist.",
   "chatCopyHint": "Bericht kopiëren",

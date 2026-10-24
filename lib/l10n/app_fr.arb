@@ -17,8 +17,6 @@
   "languageSheetTitle": "Choisissez une langue",
   "languageSystem": "Langue du système",
   "languageSystemDetail": "Celle de votre appareil : {language}",
-  "settingsGroupAbout": "À propos",
-  "settingsVersion": "Version",
   "copied": "Copié",
   "chatKeyCopied": "Clé du chat copiée. Elle sera effacée du presse-papiers dans 60 secondes.",
   "chatCopyHint": "Copier le message",

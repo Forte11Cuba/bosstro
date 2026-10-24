@@ -64,12 +64,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get settingsGroupAbout => 'Acerca de';
-
-  @override
-  String get settingsVersion => 'Versión';
-
-  @override
   String get copied => 'Copiado';
 
   @override

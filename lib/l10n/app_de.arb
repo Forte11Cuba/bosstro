@@ -17,8 +17,6 @@
   "languageSheetTitle": "Sprache auswählen",
   "languageSystem": "Systemsprache",
   "languageSystemDetail": "Wie dein Gerät: {language}",
-  "settingsGroupAbout": "Über",
-  "settingsVersion": "Version",
   "copied": "Kopiert",
   "chatKeyCopied": "Chat-Schlüssel kopiert. Er wird in 60 Sekunden aus der Zwischenablage gelöscht.",
   "chatCopyHint": "Nachricht kopieren",

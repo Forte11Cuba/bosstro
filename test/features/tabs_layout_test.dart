@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/core/app_routes.dart';
+import 'package:bosstro/features/disputes/services/disputes_core.dart';
 
 import '../support/screen_harness.dart';
 
@@ -36,9 +37,7 @@ void main() {
 
     await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();
-    expect(find.text('Version'), findsOneWidget);
-    // The version comes from the Rust core (faked here).
-    expect(find.text(fakeAppVersion), findsOneWidget);
+    expect(find.text('Language'), findsOneWidget);
   });
 
   testWidgets('a data row puts its value flush right (DS-CMP-24)', (
@@ -50,9 +49,13 @@ void main() {
       location: AppRoute.settings,
       locale: const Locale('en'),
       textScale: 1,
+      overrides: fakeCoreOverrides(
+        disputes: FakeDisputesCore()..status = SolverStatus.yes,
+      ),
     );
-    // Side inset 18, the card's 1-px border, card padding 14.
-    expect(tester.getRect(find.text(fakeAppVersion)).right, 400 - 18 - 1 - 14);
+    // "Solver on this node: Yes". Side inset 18, the card's 1-px border,
+    // card padding 14.
+    expect(tester.getRect(find.text('Yes')).right, 400 - 18 - 1 - 14);
   });
 
   testWidgets('empty lists explain themselves (DS-CMP-14)', (tester) async {
