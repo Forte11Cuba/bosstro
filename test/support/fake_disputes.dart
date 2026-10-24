@@ -94,6 +94,9 @@ class FakeDisputesCore implements DisputesCore {
               taken.isEmpty ? DisputeInitiator.seller : taken.first.initiator,
         ),
       );
+      // The core stores the take (`record_take`) before it answers, so the
+      // detail is there as soon as the take returns.
+      details[disputeId] ??= sampleDetail(id: disputeId);
       status = SolverStatus.yes;
       push();
     } else if (takeOutcome == TakeOutcome.notSolver) {

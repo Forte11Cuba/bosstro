@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/core/app_routes.dart';
+import 'package:bosstro/features/disputes/screens/dispute_detail_screen.dart';
 import 'package:bosstro/features/disputes/screens/recover_screen.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/in_progress_dispute_row.dart';
@@ -150,7 +151,7 @@ void main() {
 
   group('taking from Pending', () {
     testWidgets('a confirmed take waits for the node in the dialog, then '
-        'moves the dispute to Your disputes', (tester) async {
+        'opens the dispute, with In progress under it', (tester) async {
       setSurface(tester, width: 400, height: 800);
       final core = _withPending()..takeAnswer = Completer();
       await _pump(tester, core, locale: const Locale('en'), textScale: 1);
@@ -182,12 +183,26 @@ void main() {
         find.text('Dispute taken. It is in Your disputes.'),
         findsOneWidget,
       );
-      await _afterUpdates(tester);
-      expect(find.byType(PendingDisputeRow), findsNothing);
+      // Straight to the dispute taken.
+      expect(find.byType(DisputeDetailScreen), findsOneWidget);
+      expect(
+        tester
+            .widget<DisputeDetailScreen>(find.byType(DisputeDetailScreen))
+            .disputeId,
+        _a,
+      );
+      expect(find.text('Dispute ID'), findsOneWidget);
 
-      await tester.tap(find.text('In progress'));
-      await tester.pumpAndSettle();
+      // Back: In progress, where the dispute stays.
+      await tester.binding.handlePopRoute();
+      await _afterUpdates(tester);
+      expect(find.byType(DisputeDetailScreen), findsNothing);
       expect(find.byType(InProgressDisputeRow), findsOneWidget);
+
+      // Pending kept its place, without the dispute.
+      await tester.tap(find.text('Pending'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PendingDisputeRow), findsNothing);
     });
 
     testWidgets('a double tap opens one dialog and sends one take', (
@@ -289,6 +304,11 @@ void main() {
 
       expect(find.text('The node did not answer'), findsOneWidget);
       expect(core.takes, [_a], reason: 'asked once');
+      expect(
+        find.byType(DisputeDetailScreen),
+        findsNothing,
+        reason: 'only a dispute taken opens',
+      );
       await tester.tap(find.text('Recover a dispute'));
       await tester.pumpAndSettle();
       expect(find.byType(RecoverScreen), findsOneWidget);
@@ -436,8 +456,21 @@ void main() {
         find.text('Dispute recovered. It is in Your disputes.'),
         findsOneWidget,
       );
+      // Straight to the dispute recovered, in place of Recover.
+      expect(find.byType(RecoverScreen), findsNothing);
+      expect(
+        tester
+            .widget<DisputeDetailScreen>(find.byType(DisputeDetailScreen))
+            .disputeId,
+        _a,
+      );
+
+      // Back: In progress, not Recover (the dispute left that list).
+      await tester.binding.handlePopRoute();
       await _afterUpdates(tester);
-      expect(find.byType(PendingDisputeRow), findsOneWidget);
+      expect(find.byType(DisputeDetailScreen), findsNothing);
+      expect(find.byType(RecoverScreen), findsNothing);
+      expect(find.byType(InProgressDisputeRow), findsOneWidget);
     });
 
     testWidgets('a dispute held by another solver cannot be taken over', (
