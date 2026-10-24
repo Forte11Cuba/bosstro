@@ -132,86 +132,106 @@ void main() {
       // The order's 75,000 less the node's 750.
       expect(find.text('74.250 sats'), findsOneWidget);
       expect(
-        find.text('Los 75.000 sats de la orden menos la comisión del nodo, 750 sats.'),
-        findsOneWidget,
-      );
-      await _scrollScreenTo(tester, find.text('Operación: 50 EUR'));
-      await _scrollScreenTo(tester, find.textContaining('el vendedor no recupera'));
-      await _scrollScreenTo(tester, find.textContaining('No se puede deshacer'));
-      expect(tester.takeException(), isNull);
-      // DS-CMP-26: the red answer repeats the action.
-      expect(_answer('Pagar al comprador'), findsOneWidget);
-      expect(core.resolutions, isEmpty, reason: 'nothing leaves before the answer');
-    });
-
-    testWidgets('refund the seller: who, how much, and that it is final, $theme', (
-      tester,
-    ) async {
-      setSurface(tester);
-      await _pump(tester, _held(), brightness: brightness);
-      await _open(tester, 'Devolver al vendedor');
-      expect(tester.takeException(), isNull);
-      expect(find.text('¿Devolver al vendedor?'), findsOneWidget);
-      expect(find.text('El vendedor recupera'), findsOneWidget);
-      expect(find.text('75.750 sats'), findsOneWidget);
-      await _scrollScreenTo(tester, find.textContaining('el comprador no recibe nada'));
-      await _scrollScreenTo(tester, find.textContaining('No se puede deshacer'));
-      expect(_answer('Devolver al vendedor'), findsOneWidget);
-    });
-
-    testWidgets('waiting for the node: no way back, no centered spinner, $theme', (
-      tester,
-    ) async {
-      setSurface(tester);
-      final core = _held()..resolveAnswer = Completer<void>();
-      await _pump(tester, core, brightness: brightness);
-      await _open(tester, 'Pagar al comprador');
-      await _scrollScreenTo(tester, _answer('Pagar al comprador'));
-      await tester.tap(_answer('Pagar al comprador'));
-      await tester.pump();
-      expect(core.resolutions, [(_a, Resolution.payBuyer)]);
-      // The answer's spinner never settles: pump frames instead.
-      await tester.scrollUntilVisible(
-        find.textContaining('Esperando la respuesta'),
-        200,
-        scrollable:
-            find
-                .descendant(
-                  of: find.byType(ResolutionScreen),
-                  matching: find.byType(Scrollable),
-                )
-                .first,
-      );
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(tester.takeException(), isNull);
-      // The answer's own spinner, inside the button (DS-CMP-13).
-      expect(
-        find.descendant(
-          of: find.byType(FilledButton),
-          matching: find.byType(CircularProgressIndicator),
+        find.text(
+          'Los 75.000 sats de la orden menos la comisión del nodo, 750 sats.',
         ),
         findsOneWidget,
       );
-      expect(find.byTooltip('Atrás'), findsNothing);
-      // The system back does not leave either.
-      await tester.binding.handlePopRoute();
-      await tester.pump();
-      expect(find.byType(ResolutionScreen), findsOneWidget);
-      // A second tap sends nothing more (the busy answer shows no label).
-      final busyAnswer = find.descendant(
-        of: find.byType(ResolutionScreen),
-        matching: find.byType(FilledButton),
+      await _scrollScreenTo(tester, find.text('Operación: 50 EUR'));
+      await _scrollScreenTo(
+        tester,
+        find.textContaining('el vendedor no recupera'),
       );
-      await tester.ensureVisible(busyAnswer);
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.tap(busyAnswer, warnIfMissed: false);
-      await tester.pump();
-      expect(core.resolutions, hasLength(1));
-
-      core.resolveAnswer!.complete();
-      await tester.pumpAndSettle();
-      expect(find.text('Resuelta: pagaste al comprador'), findsOneWidget);
+      await _scrollScreenTo(
+        tester,
+        find.textContaining('No se puede deshacer'),
+      );
+      expect(tester.takeException(), isNull);
+      // DS-CMP-26: the red answer repeats the action.
+      expect(_answer('Pagar al comprador'), findsOneWidget);
+      expect(
+        core.resolutions,
+        isEmpty,
+        reason: 'nothing leaves before the answer',
+      );
     });
+
+    testWidgets(
+      'refund the seller: who, how much, and that it is final, $theme',
+      (tester) async {
+        setSurface(tester);
+        await _pump(tester, _held(), brightness: brightness);
+        await _open(tester, 'Devolver al vendedor');
+        expect(tester.takeException(), isNull);
+        expect(find.text('¿Devolver al vendedor?'), findsOneWidget);
+        expect(find.text('El vendedor recupera'), findsOneWidget);
+        expect(find.text('75.750 sats'), findsOneWidget);
+        await _scrollScreenTo(
+          tester,
+          find.textContaining('el comprador no recibe nada'),
+        );
+        await _scrollScreenTo(
+          tester,
+          find.textContaining('No se puede deshacer'),
+        );
+        expect(_answer('Devolver al vendedor'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'waiting for the node: no way back, no centered spinner, $theme',
+      (tester) async {
+        setSurface(tester);
+        final core = _held()..resolveAnswer = Completer<void>();
+        await _pump(tester, core, brightness: brightness);
+        await _open(tester, 'Pagar al comprador');
+        await _scrollScreenTo(tester, _answer('Pagar al comprador'));
+        await tester.tap(_answer('Pagar al comprador'));
+        await tester.pump();
+        expect(core.resolutions, [(_a, Resolution.payBuyer)]);
+        // The answer's spinner never settles: pump frames instead.
+        await tester.scrollUntilVisible(
+          find.textContaining('Esperando la respuesta'),
+          200,
+          scrollable:
+              find
+                  .descendant(
+                    of: find.byType(ResolutionScreen),
+                    matching: find.byType(Scrollable),
+                  )
+                  .first,
+        );
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(tester.takeException(), isNull);
+        // The answer's own spinner, inside the button (DS-CMP-13).
+        expect(
+          find.descendant(
+            of: find.byType(FilledButton),
+            matching: find.byType(CircularProgressIndicator),
+          ),
+          findsOneWidget,
+        );
+        expect(find.byTooltip('Atrás'), findsNothing);
+        // The system back does not leave either.
+        await tester.binding.handlePopRoute();
+        await tester.pump();
+        expect(find.byType(ResolutionScreen), findsOneWidget);
+        // A second tap sends nothing more (the busy answer shows no label).
+        final busyAnswer = find.descendant(
+          of: find.byType(ResolutionScreen),
+          matching: find.byType(FilledButton),
+        );
+        await tester.ensureVisible(busyAnswer);
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.tap(busyAnswer, warnIfMissed: false);
+        await tester.pump();
+        expect(core.resolutions, hasLength(1));
+
+        core.resolveAnswer!.complete();
+        await tester.pumpAndSettle();
+        expect(find.text('Resuelta: pagaste al comprador'), findsOneWidget);
+      },
+    );
 
     const titles = {
       ResolveOutcome.paidBuyer: 'Resuelta: pagaste al comprador',
@@ -266,7 +286,9 @@ void main() {
       });
     }
 
-    testWidgets('a request that did not leave says why, $theme', (tester) async {
+    testWidgets('a request that did not leave says why, $theme', (
+      tester,
+    ) async {
       setSurface(tester);
       final core = _held()..resolveError = ResolveError.nodeInfoUnavailable;
       await _pump(tester, core, brightness: brightness);
@@ -309,7 +331,9 @@ void main() {
         brightness: brightness,
       );
       await tester.scrollUntilVisible(
-        find.textContaining('Tu petición de pagar al comprador no tuvo respuesta'),
+        find.textContaining(
+          'Tu petición de pagar al comprador no tuvo respuesta',
+        ),
         200,
         scrollable: _info(),
       );
@@ -352,6 +376,7 @@ void main() {
       expect(tester.takeException(), isNull);
       // The detail: its result, no way to resolve it again.
       expect(find.byType(ResolutionCard), findsNothing);
+      await openDisputeFacts(tester);
       await tester.scrollUntilVisible(
         find.text('Resultado'),
         200,
@@ -359,7 +384,10 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        find.descendant(of: _info(), matching: find.text('Pagaste al comprador')),
+        find.descendant(
+          of: _info(),
+          matching: find.text('Pagaste al comprador'),
+        ),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);

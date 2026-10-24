@@ -228,6 +228,8 @@ void main() {
         tester,
       ) async {
         await _pump(tester, locale, AppRoute.disputeDetail(_a));
+        // Unfolded, so the dispute's and the order's rows are measured too.
+        await openDisputeFacts(tester);
         await _fitsToTheEnd(tester, 'Info', within: find.byType(IndexedStack));
         await _tapText(
           tester,

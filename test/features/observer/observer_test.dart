@@ -55,7 +55,9 @@ FakeObserverCore _observer(ObservedChat chat) =>
 
 ObservedChat _sharedByBuyer({List<ObservedMessage>? messages}) =>
     sampleObserved(
-      disclosures: [const KeyDisclosure(party: ChatParty.buyer, sharedAt: _sharedAt)],
+      disclosures: [
+        const KeyDisclosure(party: ChatParty.buyer, sharedAt: _sharedAt),
+      ],
       messages: messages ?? _talk(),
     );
 

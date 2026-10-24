@@ -191,7 +191,7 @@ void main() {
             .disputeId,
         _a,
       );
-      expect(find.text('Dispute ID'), findsOneWidget);
+      expect(find.text('Dispute information'), findsOneWidget);
 
       // Back: In progress, where the dispute stays.
       await tester.binding.handlePopRoute();

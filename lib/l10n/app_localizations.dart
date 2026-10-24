@@ -123,7 +123,7 @@ abstract class AppLocalizations {
   /// Bottom bar destination: disputes this solver took and is resolving
   ///
   /// In en, this message translates to:
-  /// **'In progress'**
+  /// **'My disputes'**
   String get navInProgress;
 
   /// Bottom bar destination: settings
@@ -1757,6 +1757,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount'**
   String get detailAmount;
+
+  /// Data row: the fiat currency the order trades in (its code, as CUP or EUR)
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get detailCurrency;
+
+  /// Title of the Info card that folds the dispute's, the order's and the parties' facts; closed by default
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute information'**
+  String get detailFactsTitle;
 
   /// Data row: the order's fiat amount
   ///

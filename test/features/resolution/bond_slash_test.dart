@@ -238,6 +238,7 @@ void main() {
             bondsEnabled: true,
           );
     await _pump(tester, core);
+    await openDisputeFacts(tester);
     await tester.scrollUntilVisible(
       find.text('Penalizar al vendedor'),
       200,

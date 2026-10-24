@@ -8,7 +8,7 @@
   "@navPending": {
     "description": "Bottom bar destination: disputes waiting for a solver to take them"
   },
-  "navInProgress": "In progress",
+  "navInProgress": "My disputes",
   "@navInProgress": {
     "description": "Bottom bar destination: disputes this solver took and is resolving"
   },
@@ -1224,6 +1224,14 @@
   "detailAmount": "Amount",
   "@detailAmount": {
     "description": "Data row: the order's amount in sats"
+  },
+  "detailCurrency": "Currency",
+  "@detailCurrency": {
+    "description": "Data row: the fiat currency the order trades in (its code, as CUP or EUR)"
+  },
+  "detailFactsTitle": "Dispute information",
+  "@detailFactsTitle": {
+    "description": "Title of the Info card that folds the dispute's, the order's and the parties' facts; closed by default"
   },
   "detailFiatAmount": "Fiat amount",
   "@detailFiatAmount": {

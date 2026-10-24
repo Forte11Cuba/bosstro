@@ -17,6 +17,7 @@ import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart'
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/providers/core_providers.dart';
 import 'package:bosstro/shared/providers/device_security_providers.dart';
+import 'package:bosstro/shared/widgets/order_data_card.dart';
 
 import 'fake_chat.dart';
 import 'fake_device_security.dart';
@@ -209,6 +210,20 @@ Future<void> pumpWidgetAlone(
         home: Scaffold(body: child),
       ),
     ),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// Unfold the dispute detail's facts (the dispute and the order), closed by
+/// default, so their rows are built.
+Future<void> openDisputeFacts(WidgetTester tester) async {
+  await tester.tap(
+    find
+        .descendant(
+          of: find.byType(CollapsibleDataCard),
+          matching: find.byType(InkWell),
+        )
+        .first,
   );
   await tester.pumpAndSettle();
 }

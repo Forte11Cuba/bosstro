@@ -15,7 +15,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get navPending => 'In attesa';
 
   @override
-  String get navInProgress => 'In corso';
+  String get navInProgress => 'Le mie dispute';
 
   @override
   String get navSettings => 'Impostazioni';
@@ -997,6 +997,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get detailAmount => 'Importo';
+
+  @override
+  String get detailCurrency => 'Valuta';
+
+  @override
+  String get detailFactsTitle => 'Informazioni sulla disputa';
 
   @override
   String get detailFiatAmount => 'Importo fiat';

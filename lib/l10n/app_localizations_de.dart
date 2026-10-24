@@ -15,7 +15,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navPending => 'Offen';
 
   @override
-  String get navInProgress => 'In Bearbeitung';
+  String get navInProgress => 'Meine Streitfälle';
 
   @override
   String get navSettings => 'Einstellungen';
@@ -1003,6 +1003,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get detailAmount => 'Betrag';
+
+  @override
+  String get detailCurrency => 'Währung';
+
+  @override
+  String get detailFactsTitle => 'Informationen zum Streitfall';
 
   @override
   String get detailFiatAmount => 'Fiat-Betrag';

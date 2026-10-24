@@ -34,6 +34,7 @@ Future<void> _pump(
 
 /// Scroll Info to its "Status before the dispute" row.
 Future<void> _toRow(WidgetTester tester) async {
+  await openDisputeFacts(tester);
   await tester.scrollUntilVisible(
     find.text('Estado antes de la disputa'),
     200,

@@ -15,7 +15,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get navPending => 'Openstaand';
 
   @override
-  String get navInProgress => 'Lopend';
+  String get navInProgress => 'Mijn disputen';
 
   @override
   String get navSettings => 'Instellingen';
@@ -1000,6 +1000,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get detailAmount => 'Bedrag';
+
+  @override
+  String get detailCurrency => 'Valuta';
+
+  @override
+  String get detailFactsTitle => 'Informatie over het dispuut';
 
   @override
   String get detailFiatAmount => 'Fiatbedrag';

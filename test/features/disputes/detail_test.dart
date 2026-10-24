@@ -12,6 +12,8 @@ import 'package:bosstro/features/disputes/screens/dispute_detail_screen.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/detail_segments.dart';
 import 'package:bosstro/features/disputes/widgets/in_progress_dispute_row.dart';
+import 'package:bosstro/features/observer/widgets/observer_card.dart';
+import 'package:bosstro/features/resolution/widgets/resolution_card.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
 
 import '../../support/screen_harness.dart';
@@ -167,7 +169,12 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       expect(find.text('Disputa'), findsOneWidget);
+      // Folded until the solver opens it.
+      expect(find.text('Información de la disputa'), findsOneWidget);
+      expect(find.text('ID de la disputa'), findsNothing);
+      await openDisputeFacts(tester);
       expect(find.text('ID de la disputa'), findsOneWidget);
+      expect(tester.takeException(), isNull);
       // Every row, down to the last, fits.
       for (final text in [
         '75.000 sats',
@@ -251,7 +258,7 @@ void main() {
                   matching: find.byType(Scrollable),
                 )
                 .first,
-        last: _shown(find.byType(OrderDataCard)).last,
+        last: _shown(find.byType(ResolutionCard)),
       );
     });
 
@@ -276,7 +283,7 @@ void main() {
       await tester.tap(find.byType(InProgressDisputeRow).first);
       await tester.pumpAndSettle();
       expect(find.byType(DisputeDetailScreen), findsOneWidget);
-      expect(find.text('ID de la disputa'), findsOneWidget);
+      expect(find.text('Información de la disputa'), findsOneWidget);
     });
 
     testWidgets('a row says it opens the dispute', (tester) async {
@@ -306,6 +313,42 @@ void main() {
       expect(find.text('Esta disputa ya no es tuya'), findsOneWidget);
     });
 
+    testWidgets('the facts come first, the resolution last', (tester) async {
+      // Tall enough that the whole list is built.
+      setSurface(tester, width: 600, height: 3000);
+      await _pump(
+        tester,
+        _held(),
+        location: AppRoute.disputeDetail(_a),
+        textScale: 1,
+      );
+      await openDisputeFacts(tester);
+      double top(Finder finder) => tester.getTopLeft(finder).dy;
+      // One card holds the dispute, the order and the parties' keys.
+      expect(_shown(find.byType(CollapsibleDataCard)), findsOneWidget);
+      expect(_shown(find.byType(OrderDataCard)), findsNothing);
+      expect(
+        top(find.text('ID de la disputa')),
+        lessThan(top(find.text('ID de la orden'))),
+      );
+      expect(
+        top(find.text('Comisión del nodo')),
+        lessThan(top(find.text('Clave de trade del comprador'))),
+      );
+      expect(
+        top(find.text('Moneda')),
+        lessThan(top(find.text('Monto en fiat'))),
+      );
+      expect(
+        top(find.text('Clave de trade del comprador')),
+        lessThan(top(_shown(find.byType(ObserverCard)))),
+      );
+      expect(
+        top(_shown(find.byType(ObserverCard))),
+        lessThan(top(_shown(find.byType(ResolutionCard)))),
+      );
+    });
+
     testWidgets('ids and keys copy whole', (tester) async {
       String? copied;
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -323,6 +366,7 @@ void main() {
         location: AppRoute.disputeDetail(_a),
         textScale: 1,
       );
+      await openDisputeFacts(tester);
       await _scrollInfoTo(tester, find.text('ID de la orden'));
       await tester.tap(find.text('ID de la orden'));
       await tester.pump();

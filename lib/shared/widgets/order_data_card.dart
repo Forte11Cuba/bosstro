@@ -92,6 +92,90 @@ class OrderDataCard extends StatelessWidget {
   }
 }
 
+/// An [OrderDataCard] folded under a titled header, closed until [expanded]
+/// opens it: facts the solver reads when needed, not every time. The header
+/// is the 48-dp tap target and says whether it is open (DS-A11Y-1, DS-CMP-6);
+/// the rows appear without an animation (DS-MOT-1).
+class CollapsibleDataCard extends StatefulWidget {
+  const CollapsibleDataCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.rows,
+    this.expanded = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final List<Widget> rows;
+
+  /// Whether it opens unfolded.
+  final bool expanded;
+
+  @override
+  State<CollapsibleDataCard> createState() => _CollapsibleDataCardState();
+}
+
+class _CollapsibleDataCardState extends State<CollapsibleDataCard> {
+  late bool _open = widget.expanded;
+
+  @override
+  Widget build(BuildContext context) {
+    final pal = ShellPalette.of(context);
+    final rowPal = DisputesPalette.of(context);
+    final header = Semantics(
+      button: true,
+      expanded: _open,
+      child: InkWell(
+        onTap: () => setState(() => _open = !_open),
+        borderRadius: BorderRadius.circular(AppRadius.tile),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                Icon(widget.icon, size: 16, color: pal.textTertiary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: pal.textPrimary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  _open ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                  size: 24,
+                  color: pal.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    return SurfaceCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          if (_open)
+            for (final row in widget.rows) ...[
+              Divider(height: 1, thickness: 1, color: rowPal.rowDivider),
+              row,
+            ],
+        ],
+      ),
+    );
+  }
+}
+
 /// One row of the data card: a 16-dp icon, the label, and the value flush
 /// right, 14 above and below.
 class OrderDataRow extends StatelessWidget {
