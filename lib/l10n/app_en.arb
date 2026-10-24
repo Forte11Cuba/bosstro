@@ -1229,9 +1229,9 @@
   "@detailCurrency": {
     "description": "Data row: the fiat currency the order trades in (its code, as CUP or EUR)"
   },
-  "detailFactsTitle": "Dispute and order",
+  "detailFactsTitle": "Dispute information",
   "@detailFactsTitle": {
-    "description": "Title of the Info card that folds the dispute's and the order's facts; closed by default"
+    "description": "Title of the Info card that folds the dispute's, the order's and the parties' facts; closed by default"
   },
   "detailFiatAmount": "Fiat amount",
   "@detailFiatAmount": {

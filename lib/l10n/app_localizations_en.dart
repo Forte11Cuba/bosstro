@@ -999,7 +999,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailCurrency => 'Currency';
 
   @override
-  String get detailFactsTitle => 'Dispute and order';
+  String get detailFactsTitle => 'Dispute information';
 
   @override
   String get detailFiatAmount => 'Fiat amount';

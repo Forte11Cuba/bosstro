@@ -276,7 +276,7 @@
   "detailTakenAt": "Tomada",
   "detailAmount": "Monto",
   "detailCurrency": "Moneda",
-  "detailFactsTitle": "Disputa y orden",
+  "detailFactsTitle": "Información de la disputa",
   "detailFiatAmount": "Monto en fiat",
   "detailPaymentMethod": "Método de pago",
   "detailPremium": "Prima",

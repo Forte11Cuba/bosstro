@@ -1764,10 +1764,10 @@ abstract class AppLocalizations {
   /// **'Currency'**
   String get detailCurrency;
 
-  /// Title of the Info card that folds the dispute's and the order's facts; closed by default
+  /// Title of the Info card that folds the dispute's, the order's and the parties' facts; closed by default
   ///
   /// In en, this message translates to:
-  /// **'Dispute and order'**
+  /// **'Dispute information'**
   String get detailFactsTitle;
 
   /// Data row: the order's fiat amount

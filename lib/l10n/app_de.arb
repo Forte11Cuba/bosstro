@@ -276,7 +276,7 @@
   "detailTakenAt": "Übernommen",
   "detailAmount": "Betrag",
   "detailCurrency": "Währung",
-  "detailFactsTitle": "Streitfall und Order",
+  "detailFactsTitle": "Informationen zum Streitfall",
   "detailFiatAmount": "Fiat-Betrag",
   "detailPaymentMethod": "Zahlungsmethode",
   "detailPremium": "Aufschlag",

@@ -1005,7 +1005,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get detailCurrency => 'Valuta';
 
   @override
-  String get detailFactsTitle => 'Dispuut en order';
+  String get detailFactsTitle => 'Informatie over het dispuut';
 
   @override
   String get detailFiatAmount => 'Fiatbedrag';

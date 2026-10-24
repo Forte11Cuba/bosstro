@@ -170,7 +170,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Disputa'), findsOneWidget);
       // Folded until the solver opens it.
-      expect(find.text('Disputa y orden'), findsOneWidget);
+      expect(find.text('Información de la disputa'), findsOneWidget);
       expect(find.text('ID de la disputa'), findsNothing);
       await openDisputeFacts(tester);
       expect(find.text('ID de la disputa'), findsOneWidget);
@@ -283,7 +283,7 @@ void main() {
       await tester.tap(find.byType(InProgressDisputeRow).first);
       await tester.pumpAndSettle();
       expect(find.byType(DisputeDetailScreen), findsOneWidget);
-      expect(find.text('Disputa y orden'), findsOneWidget);
+      expect(find.text('Información de la disputa'), findsOneWidget);
     });
 
     testWidgets('a row says it opens the dispute', (tester) async {
@@ -324,14 +324,17 @@ void main() {
       );
       await openDisputeFacts(tester);
       double top(Finder finder) => tester.getTopLeft(finder).dy;
-      final cards = _shown(find.byType(OrderDataCard));
-      expect(find.byType(CollapsibleDataCard), findsOneWidget);
-      expect(cards, findsOneWidget);
+      // One card holds the dispute, the order and the parties' keys.
+      expect(_shown(find.byType(CollapsibleDataCard)), findsOneWidget);
+      expect(_shown(find.byType(OrderDataCard)), findsNothing);
       expect(
         top(find.text('ID de la disputa')),
         lessThan(top(find.text('ID de la orden'))),
       );
-      expect(top(find.text('Comisión del nodo')), lessThan(top(cards)));
+      expect(
+        top(find.text('Comisión del nodo')),
+        lessThan(top(find.text('Clave de trade del comprador'))),
+      );
       expect(
         top(find.text('Moneda')),
         lessThan(top(find.text('Monto en fiat'))),

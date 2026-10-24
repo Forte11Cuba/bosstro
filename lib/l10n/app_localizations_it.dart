@@ -1002,7 +1002,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get detailCurrency => 'Valuta';
 
   @override
-  String get detailFactsTitle => 'Disputa e ordine';
+  String get detailFactsTitle => 'Informazioni sulla disputa';
 
   @override
   String get detailFiatAmount => 'Importo fiat';

@@ -14,8 +14,8 @@ import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 /// The Info segment of the dispute detail: what the take told this solver,
 /// as label → value rows (DS-CMP-24). Ids and keys read short and copy whole
 /// (DS-CMP-22); a value the node did not send reads "Not known". The facts
-/// come first (the dispute, with how it ended once closed, and the order,
-/// folded in one card the solver opens when needed; the parties' keys), then the way into the chat between the parties (phase
+/// come first (the dispute, with how it ended once closed, the order and the
+/// parties' keys, folded in one card the solver opens when needed), then the way into the chat between the parties (phase
 /// 5c), and last, while it is open, the way to resolve it (phase 6): the
 /// irreversible step comes after everything it is decided on.
 class DisputeInfoPane extends StatelessWidget {
@@ -170,11 +170,6 @@ class DisputeInfoPane extends StatelessWidget {
                   : l10n.disputeAmountSats(number.format(detail.fee!.toInt())),
               figures: true,
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        OrderDataCard(
-          rows: [
             idRow(Icons.key_outlined, l10n.detailBuyerKey, detail.buyerPubkey),
             idRow(
               Icons.key_outlined,
