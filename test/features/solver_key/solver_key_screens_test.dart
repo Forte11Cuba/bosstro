@@ -5,9 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/services/solver_key_service.dart';
+import 'package:bosstro/features/solver_key/screens/backup_screen.dart';
 import 'package:bosstro/features/solver_key/screens/create_account_screen.dart';
 import 'package:bosstro/features/solver_key/screens/login_screen.dart';
 import 'package:bosstro/features/solver_key/screens/qr_scan_screen.dart';
+import 'package:bosstro/shared/widgets/warning_note.dart';
 
 import '../../support/screen_harness.dart';
 
@@ -134,6 +136,24 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     }
+  });
+
+  testWidgets('the end of Backup clears the system navigation bar', (
+    tester,
+  ) async {
+    setSurface(tester, padding: systemBars);
+    await pumpApp(tester, location: AppRoute.backup);
+    await expectClearOfNavBar(
+      tester,
+      scrollable:
+          find
+              .descendant(
+                of: find.byType(BackupScreen),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+      last: find.byType(WarningNote).last,
+    );
   });
 
   group('routing', () {

@@ -38,42 +38,47 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           title: l10n.backupTitle,
           onBack: () => context.pop(),
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            redesignSidePadding,
-            8,
-            redesignSidePadding,
-            24,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              StepBody(l10n.backupBody),
-              const SizedBox(height: 18),
-              FutureBuilder<String?>(
-                future: _secret,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const SizedBox.shrink();
-                  }
-                  final secret = snapshot.data;
-                  if (snapshot.hasError || secret == null) {
-                    return WarningNote(text: l10n.backupUnavailable);
-                  }
-                  return KeyCard(
-                    label: l10n.secretKeyLabel,
-                    value: secret,
-                    copyLabel: l10n.copySecretKey,
-                    onCopy:
-                        PlatformCapabilities.copySecret
-                            ? () => copySecretKey(context, ref, secret)
-                            : null,
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              WarningNote(text: l10n.traderKeyWarning),
-            ],
+        // Over the shell, with no bottom bar: the SafeArea keeps the last
+        // warning clear of the system navigation bar (../app #267).
+        body: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              redesignSidePadding,
+              8,
+              redesignSidePadding,
+              24,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                StepBody(l10n.backupBody),
+                const SizedBox(height: 18),
+                FutureBuilder<String?>(
+                  future: _secret,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const SizedBox.shrink();
+                    }
+                    final secret = snapshot.data;
+                    if (snapshot.hasError || secret == null) {
+                      return WarningNote(text: l10n.backupUnavailable);
+                    }
+                    return KeyCard(
+                      label: l10n.secretKeyLabel,
+                      value: secret,
+                      copyLabel: l10n.copySecretKey,
+                      onCopy:
+                          PlatformCapabilities.copySecret
+                              ? () => copySecretKey(context, ref, secret)
+                              : null,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                WarningNote(text: l10n.traderKeyWarning),
+              ],
+            ),
           ),
         ),
       ),
