@@ -32,7 +32,13 @@ class DisputeDetailScreen extends StatelessWidget {
         title: AppLocalizations.of(context).disputeDetailTitle,
         onBack: () => context.pop(),
       ),
-      body: DisputeDetailView(disputeId: disputeId),
+      // Over the shell, with no bottom bar: Android draws the app behind the
+      // system navigation bar, so the SafeArea keeps the end of Info clear of
+      // it (../app #267).
+      body: SafeArea(
+        top: false,
+        child: DisputeDetailView(disputeId: disputeId),
+      ),
     );
   }
 }

@@ -208,7 +208,7 @@ Material defaults and is not allowed.
 | DS-SPC-2 | **MUST.** Paddings, gaps and margins come from the 2-pt scale **2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32**. Odd values are not allowed, except 1 for a hairline. | auto |
 | DS-SPC-3 | **SHOULD.** Card inner padding is 14. Rows in a list are 12 apart, sections 18–24 apart. A label sits 6–8 above its field. | review |
 | DS-SPC-4 | **MUST.** Breakpoints come from `AppBreakpoints` (600 tablet, 1200 desktop); no other width threshold. Mobile has 1 column and a bottom bar. From tablet the dispute detail splits beside its list. | auto, review |
-| DS-SPC-5 | **MUST.** Every screen works from 320 dp wide. Content that can outgrow the screen scrolls, and the action bar stays pinned at the bottom inside a `SafeArea`. | test, review |
+| DS-SPC-5 | **MUST.** Every screen works from 320 dp wide. Content that can outgrow the screen scrolls, and the action bar stays pinned at the bottom inside a `SafeArea`. A screen pushed over the shell with no `bottomNavigationBar` wraps its `body` in `SafeArea(top: false)`, so the end of its content clears the system navigation bar (tested with `systemBars`, `test/support/screen_harness.dart`). | test, review |
 
 ---
 
@@ -461,4 +461,9 @@ Applied in place above; listed here so a reviewer coming from `app` sees what di
    weight, never a solid fill (a solid lime would read as the primary CTA, DS-CMP-3); the red
    answer stays the confirmation's (DS-CMP-2).
 9. **Glossary additions** (§9): chat key / clave del chat, chat between the parties.
+10. **The system navigation bar** (amends DS-SPC-5, 2026-10-23): Android 15 draws the app behind
+    the system bars (edge to edge, `targetSdk` 36), and a list given its own padding does not add
+    their inset. `app` keeps each screen clear of the bar by hand (`app` #267); Bosstro writes the
+    rule down: a screen over the shell without a bottom bar puts its body in
+    `SafeArea(top: false)`, and its test scrolls to the end under a 48 dp navigation bar.
 
