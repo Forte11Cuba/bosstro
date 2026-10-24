@@ -22,8 +22,11 @@ NavigatorState? _openOn;
 
 /// Ask the solver to confirm, send the take, and say how it ended. The
 /// dialog stays open while the node answers (its answer button busy), then
-/// either closes with a snackbar (taken) or turns into the outcome. Returns
-/// once it is closed.
+/// either closes with a snackbar and opens the dispute's detail (taken), or
+/// turns into the outcome. Returns once it is closed.
+///
+/// The detail opens with `go`, under In progress: Back leads to Your
+/// disputes, where the dispute stays, not to the list it was taken from.
 Future<void> openTakeDialog(
   BuildContext context, {
   required String disputeId,
@@ -31,6 +34,7 @@ Future<void> openTakeDialog(
 }) async {
   if (_openOn?.mounted ?? false) return;
   final navigator = Navigator.of(context, rootNavigator: true);
+  final router = GoRouter.of(context);
   _openOn = navigator;
   try {
     final taken = await showMostroDialog<bool>(
@@ -44,6 +48,7 @@ Future<void> openTakeDialog(
         context,
         kind == TakeKind.take ? l10n.takeTakenSnack : l10n.recoverTakenSnack,
       );
+      router.go(AppRoute.disputeDetail(disputeId));
     }
   } finally {
     if (identical(_openOn, navigator)) _openOn = null;
