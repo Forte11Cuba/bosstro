@@ -1571,14 +1571,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get orderStatusFiatSent => 'Fiat enviado';
 
   @override
-  String myDisputesOpenSegment(int count) {
-    return 'En curso · $count';
-  }
+  String get myDisputesOpenSegment => 'En curso';
 
   @override
-  String myDisputesClosedSegment(int count) {
-    return 'Cerradas · $count';
-  }
+  String get myDisputesClosedSegment => 'Cerradas';
 
   @override
   String get myDisputesSegmentsLabel => 'Disputas abiertas o cerradas';

@@ -366,10 +366,10 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       // The open ones first: none, so their empty state.
-      expect(find.text('En curso · 0'), findsOneWidget);
+      expect(find.text('En curso'), findsOneWidget);
       expect(find.text('No hay disputas en curso'), findsOneWidget);
       expect(find.byType(ClosedDisputeRow), findsNothing);
-      await tester.tap(find.text('Cerradas · 1'));
+      await tester.tap(find.text('Cerradas'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       // Lighter: how it ended and when, no opener; Recover is not offered.
@@ -422,7 +422,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
     expect(find.byType(DisputeDetailScreen), findsNothing);
-    await tester.tap(find.text('Cerradas · 1'));
+    await tester.tap(find.text('Cerradas'));
     await tester.pumpAndSettle();
     expect(find.byType(ClosedDisputeRow), findsOneWidget);
     expect(core.held, isEmpty);

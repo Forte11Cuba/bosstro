@@ -113,7 +113,7 @@ class _OpenEmpty extends StatelessWidget {
   }
 }
 
-/// The segments (In progress · N / Closed · N) and the chosen part, with
+/// The segments (In progress / Closed) and the chosen part, with
 /// the ages counted to a clock that moves every minute; the same tick reads
 /// the list again (a dispute past its expiration leaves).
 class _MyDisputes extends ConsumerStatefulWidget {
@@ -173,11 +173,11 @@ class _MyDisputesState extends ConsumerState<_MyDisputes> {
         segments: [
           DetailSegment(
             value: MyDisputesSection.open,
-            label: l10n.myDisputesOpenSegment(widget.disputes.length),
+            label: l10n.myDisputesOpenSegment,
           ),
           DetailSegment(
             value: MyDisputesSection.closed,
-            label: l10n.myDisputesClosedSegment(widget.closed.length),
+            label: l10n.myDisputesClosedSegment,
           ),
         ],
       ),

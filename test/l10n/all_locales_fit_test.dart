@@ -221,7 +221,7 @@ void main() {
       testWidgets('In progress, Recover and its confirmation', (tester) async {
         await _pump(tester, locale, AppRoute.inProgress);
         await _fitsToTheEnd(tester, 'In progress');
-        await _tap(tester, find.text(l10n.myDisputesClosedSegment(1)));
+        await _tap(tester, find.text(l10n.myDisputesClosedSegment));
         expect(find.byType(ClosedDisputeRow), findsOneWidget);
         await _fitsToTheEnd(tester, 'Closed');
         await _pump(tester, locale, AppRoute.recover);

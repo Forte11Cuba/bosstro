@@ -1581,14 +1581,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get orderStatusFiatSent => 'Fiat verstuurd';
 
   @override
-  String myDisputesOpenSegment(int count) {
-    return 'Lopend · $count';
-  }
+  String get myDisputesOpenSegment => 'Lopend';
 
   @override
-  String myDisputesClosedSegment(int count) {
-    return 'Gesloten · $count';
-  }
+  String get myDisputesClosedSegment => 'Gesloten';
 
   @override
   String get myDisputesSegmentsLabel => 'Open of gesloten disputen';

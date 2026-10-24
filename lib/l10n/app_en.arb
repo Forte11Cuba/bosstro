@@ -1975,23 +1975,13 @@
   "@orderStatusFiatSent": {
     "description": "Order status before the dispute: the buyer had marked the fiat as sent"
   },
-  "myDisputesOpenSegment": "In progress · {count}",
+  "myDisputesOpenSegment": "In progress",
   "@myDisputesOpenSegment": {
-    "description": "My disputes: the segment of the disputes this key holds, with how many",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+    "description": "My disputes: the segment of the disputes this key holds"
   },
-  "myDisputesClosedSegment": "Closed · {count}",
+  "myDisputesClosedSegment": "Closed",
   "@myDisputesClosedSegment": {
-    "description": "My disputes: the segment of the disputes this key held that closed, with how many",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+    "description": "My disputes: the segment of the disputes this key held that closed"
   },
   "myDisputesSegmentsLabel": "Open or closed disputes",
   "@myDisputesSegmentsLabel": {

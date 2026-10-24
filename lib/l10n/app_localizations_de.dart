@@ -1590,14 +1590,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get orderStatusFiatSent => 'Fiat gesendet';
 
   @override
-  String myDisputesOpenSegment(int count) {
-    return 'In Bearbeitung · $count';
-  }
+  String get myDisputesOpenSegment => 'In Bearbeitung';
 
   @override
-  String myDisputesClosedSegment(int count) {
-    return 'Geschlossen · $count';
-  }
+  String get myDisputesClosedSegment => 'Geschlossen';
 
   @override
   String get myDisputesSegmentsLabel => 'Offene oder geschlossene Streitfälle';

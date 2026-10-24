@@ -2754,17 +2754,17 @@ abstract class AppLocalizations {
   /// **'Fiat sent'**
   String get orderStatusFiatSent;
 
-  /// My disputes: the segment of the disputes this key holds, with how many
+  /// My disputes: the segment of the disputes this key holds
   ///
   /// In en, this message translates to:
-  /// **'In progress · {count}'**
-  String myDisputesOpenSegment(int count);
+  /// **'In progress'**
+  String get myDisputesOpenSegment;
 
-  /// My disputes: the segment of the disputes this key held that closed, with how many
+  /// My disputes: the segment of the disputes this key held that closed
   ///
   /// In en, this message translates to:
-  /// **'Closed · {count}'**
-  String myDisputesClosedSegment(int count);
+  /// **'Closed'**
+  String get myDisputesClosedSegment;
 
   /// Screen-reader label of the In progress / Closed control of My disputes
   ///

@@ -359,9 +359,7 @@ void main() {
   });
 
   group('In progress', () {
-    testWidgets('open and closed are two parts, with how many each holds', (
-      tester,
-    ) async {
+    testWidgets('open and closed are two parts', (tester) async {
       setSurface(tester, width: 400, height: 800);
       final core = FakeDisputesCore()..held = [sampleTaken()];
       await _pump(
@@ -371,19 +369,19 @@ void main() {
         locale: const Locale('en'),
         textScale: 1,
       );
-      expect(find.text('In progress · 1'), findsOneWidget);
-      expect(find.text('Closed · 0'), findsOneWidget);
+      expect(find.text('In progress'), findsOneWidget);
+      expect(find.text('Closed'), findsOneWidget);
       expect(find.byType(InProgressDisputeRow), findsOneWidget);
       expect(find.text('Recover'), findsOneWidget);
 
-      await tester.tap(find.text('Closed · 0'));
+      await tester.tap(find.text('Closed'));
       await tester.pumpAndSettle();
       // Its own empty state; Recover is the open ones' action.
       expect(find.text('No closed disputes yet'), findsOneWidget);
       expect(find.byType(InProgressDisputeRow), findsNothing);
       expect(find.text('Recover'), findsNothing);
 
-      await tester.tap(find.text('In progress · 1'));
+      await tester.tap(find.text('In progress'));
       await tester.pumpAndSettle();
       expect(find.byType(InProgressDisputeRow), findsOneWidget);
     });

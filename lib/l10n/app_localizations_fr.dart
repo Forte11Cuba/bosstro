@@ -1576,14 +1576,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get orderStatusFiatSent => 'Fiat envoyé';
 
   @override
-  String myDisputesOpenSegment(int count) {
-    return 'En cours · $count';
-  }
+  String get myDisputesOpenSegment => 'En cours';
 
   @override
-  String myDisputesClosedSegment(int count) {
-    return 'Clos · $count';
-  }
+  String get myDisputesClosedSegment => 'Clos';
 
   @override
   String get myDisputesSegmentsLabel => 'Litiges ouverts ou clos';
