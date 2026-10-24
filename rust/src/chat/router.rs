@@ -1285,6 +1285,7 @@ pub(crate) mod tests {
             seller_pubkey: seller.map(|k| k.public_key().to_hex()),
             resolved_as: None,
             bond_slash: None,
+            order_previous_status: None,
         }
     }
 

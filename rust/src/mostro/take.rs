@@ -193,6 +193,7 @@ pub(crate) fn taken_from(
         fiat_amount: Some(info.fiat_amount),
         fiat_code: previous.and_then(|t| t.fiat_code.clone()),
         payment_method: non_empty(&info.payment_method),
+        order_previous_status: non_empty(&info.order_previous_status),
         premium: Some(info.premium),
         fee: Some(info.fee),
         initiator_pubkey: non_empty(&info.initiator_pubkey),
@@ -604,6 +605,7 @@ pub(crate) fn detail_of(row: &DisputeRecord, solver: &str) -> Option<DisputeDeta
         is_closed: row.status.is_terminal() || taken.resolved_as.is_some(),
         resolved_as: taken.resolved_as,
         bond_slash: taken.bond_slash,
+        order_previous_status: taken.order_previous_status.clone(),
         bonds_enabled: false,
         buyer_payout: taken
             .amount
@@ -762,6 +764,16 @@ pub(crate) mod tests {
         assert_eq!(taken.fee, Some(225));
         assert_eq!(taken.buyer_pubkey, Some("22".repeat(32)));
         assert_eq!(taken.seller_pubkey, Some("11".repeat(32)));
+        assert_eq!(taken.order_previous_status.as_deref(), Some("active"));
+        let detail = crate::mostro::take::detail_of(
+            &DisputeRecord {
+                taken: Some(taken),
+                ..crate::disputes::tests::row_with(crate::api::disputes::DisputeStatus::InProgress)
+            },
+            &"aa".repeat(32),
+        )
+        .unwrap();
+        assert_eq!(detail.order_previous_status.as_deref(), Some("active"));
     }
 
     /// Recovering a dispute this key holds keeps when it was taken and the

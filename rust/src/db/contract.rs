@@ -162,6 +162,7 @@ pub(crate) async fn disputes_round_trip(storage: &impl Storage) {
         seller_pubkey: None,
         resolved_as: None,
         bond_slash: None,
+        order_previous_status: None,
     });
     storage.save_dispute(&row).await.unwrap();
     assert_eq!(
@@ -210,6 +211,16 @@ pub(crate) async fn a_resolution_round_trips(storage: &impl Storage) {
                 .await
                 .unwrap(),
             vec![row.clone()]
+        );
+    }
+    // The order's status before the dispute, as the node wrote it.
+    for previous in ["active", "fiat-sent"] {
+        row.taken.as_mut().unwrap().order_previous_status = Some(previous.into());
+        storage.save_dispute(&row).await.unwrap();
+        assert_eq!(
+            storage.get_dispute("aa", DISPUTE_A).await.unwrap(),
+            Some(row.clone()),
+            "{previous}"
         );
     }
     // The bonds it slashed, every choice of them.
@@ -312,6 +323,7 @@ pub(crate) async fn takes_keep_their_solver(storage: &impl Storage) {
         seller_pubkey: None,
         resolved_as: None,
         bond_slash: None,
+        order_previous_status: None,
     };
     let mut mine = dispute("aa", DISPUTE_A);
     mine.status = DisputeStatus::InProgress;

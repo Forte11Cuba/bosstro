@@ -1550,4 +1550,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detailBonds => 'Bonds';
+
+  @override
+  String get detailPreviousStatus => 'Status before the dispute';
+
+  @override
+  String get orderStatusActive => 'Active';
+
+  @override
+  String get orderStatusFiatSent => 'Fiat sent';
 }

@@ -85,6 +85,11 @@ class DisputeDetail {
   /// The bonds that resolution slashed, when it was kept.
   final BondSlash? bondSlash;
 
+  /// The order's status when the dispute was opened, as the node wrote it:
+  /// `active` (the buyer had not marked the fiat as sent) or `fiat-sent`
+  /// (they had). `None` when the take did not keep it. Dart words it.
+  final String? orderPreviousStatus;
+
   /// Whether the node uses anti-abuse bonds (`bond_enabled` in its cached
   /// kind 38385): only then the solver chooses which to slash. `false`
   /// when the info was never read, so nothing is offered blind.
@@ -123,6 +128,7 @@ class DisputeDetail {
     required this.isClosed,
     this.resolvedAs,
     this.bondSlash,
+    this.orderPreviousStatus,
     required this.bondsEnabled,
     this.buyerPayout,
     this.sellerRefund,
@@ -150,6 +156,7 @@ class DisputeDetail {
       isClosed.hashCode ^
       resolvedAs.hashCode ^
       bondSlash.hashCode ^
+      orderPreviousStatus.hashCode ^
       bondsEnabled.hashCode ^
       buyerPayout.hashCode ^
       sellerRefund.hashCode ^
@@ -179,6 +186,7 @@ class DisputeDetail {
           isClosed == other.isClosed &&
           resolvedAs == other.resolvedAs &&
           bondSlash == other.bondSlash &&
+          orderPreviousStatus == other.orderPreviousStatus &&
           bondsEnabled == other.bondsEnabled &&
           buyerPayout == other.buyerPayout &&
           sellerRefund == other.sellerRefund &&
