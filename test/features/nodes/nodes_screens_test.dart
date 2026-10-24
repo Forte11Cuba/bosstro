@@ -6,7 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
+import 'package:bosstro/features/nodes/screens/node_info_screen.dart';
 import 'package:bosstro/features/nodes/services/nodes_core.dart';
+import 'package:bosstro/shared/widgets/order_data_card.dart';
+import 'package:bosstro/shared/widgets/primary_button.dart';
 
 import '../../support/screen_harness.dart';
 
@@ -280,6 +283,57 @@ void main() {
       await tester.pumpAndSettle();
       expect(core.log, ['select:$cubaPubkey']);
       expect(find.text('Pending disputes'), findsOneWidget);
+    });
+  });
+
+  group('Node info clears the system navigation bar', () {
+    Finder list() =>
+        find
+            .descendant(
+              of: find.byType(NodeInfoScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first;
+
+    testWidgets('the active node, with no button: the end of the page', (
+      tester,
+    ) async {
+      setSurface(tester, padding: systemBars);
+      await pumpApp(
+        tester,
+        location: AppRoute.nodeInfo(cubaPubkey),
+        overrides: fakeCoreOverrides(
+          nodes: FakeNodesCore(active: cubaPubkey, info: sampleInfo()),
+        ),
+      );
+      expect(find.text('Usar este nodo'), findsNothing);
+      await expectClearOfNavBar(
+        tester,
+        scrollable: list(),
+        last: find.byType(SurfaceCard).last,
+      );
+    });
+
+    testWidgets('another node: the end of the page and its button', (
+      tester,
+    ) async {
+      setSurface(tester, padding: systemBars);
+      await pumpApp(
+        tester,
+        location: AppRoute.nodeInfo(cubaPubkey),
+        overrides: fakeCoreOverrides(
+          nodes: FakeNodesCore(active: mostroNodePubkey, info: sampleInfo()),
+        ),
+      );
+      await expectClearOfNavBar(
+        tester,
+        scrollable: list(),
+        last: find.byType(SurfaceCard).last,
+      );
+      expect(
+        tester.getBottomLeft(find.byType(PrimaryButton)).dy,
+        lessThanOrEqualTo(640 - 48),
+      );
     });
   });
 

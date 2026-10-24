@@ -55,35 +55,43 @@ class NodeInfoScreen extends ConsumerWidget {
         title: l10n.nodeInfoTitle,
         onBack: () => context.pop(),
       ),
-      body: RefreshIndicator(
-        color: pal.lime,
-        onRefresh: () => ref.read(nodeInfoProvider(pubkey).notifier).refresh(),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            redesignSidePadding,
-            4,
-            redesignSidePadding,
-            24,
-          ),
-          children: [
-            _Identity(entry: entry),
-            const SizedBox(height: 20),
-            ..._instanceInfo(context, view.valueOrNull),
-            if (!entry.isTrusted && !entry.isActive) ...[
+      // Over the shell, with no bottom bar when the node is the active one:
+      // the SafeArea keeps the end of the page clear of the system
+      // navigation bar (../app #267). With the bar below, the Scaffold has
+      // already taken the inset away and the SafeArea adds nothing.
+      body: SafeArea(
+        top: false,
+        child: RefreshIndicator(
+          color: pal.lime,
+          onRefresh:
+              () => ref.read(nodeInfoProvider(pubkey).notifier).refresh(),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              redesignSidePadding,
+              4,
+              redesignSidePadding,
+              24,
+            ),
+            children: [
+              _Identity(entry: entry),
               const SizedBox(height: 20),
-              OrderDataCard(
-                rows: [
-                  SettingsRow(
-                    icon: Icons.delete_outline_rounded,
-                    label: l10n.removeNodeAction,
-                    opens: false,
-                    danger: true,
-                    onTap: () => _remove(context, ref, entry),
-                  ),
-                ],
-              ),
+              ..._instanceInfo(context, view.valueOrNull),
+              if (!entry.isTrusted && !entry.isActive) ...[
+                const SizedBox(height: 20),
+                OrderDataCard(
+                  rows: [
+                    SettingsRow(
+                      icon: Icons.delete_outline_rounded,
+                      label: l10n.removeNodeAction,
+                      opens: false,
+                      danger: true,
+                      onTap: () => _remove(context, ref, entry),
+                    ),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       bottomNavigationBar:
