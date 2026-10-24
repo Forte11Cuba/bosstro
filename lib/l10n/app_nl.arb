@@ -2,7 +2,7 @@
   "@@locale": "nl",
   "appName": "Bosstro",
   "navPending": "Openstaand",
-  "navInProgress": "Lopend",
+  "navInProgress": "Mijn disputen",
   "navSettings": "Instellingen",
   "noNodeSelected": "Geen node gekozen",
   "pendingTitle": "Openstaande disputen",

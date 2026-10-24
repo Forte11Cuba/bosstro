@@ -31,7 +31,7 @@ void main() {
     );
     expect(find.text('Pending disputes'), findsOneWidget);
 
-    await tester.tap(find.text('In progress'));
+    await tester.tap(find.text('My disputes'));
     await tester.pumpAndSettle();
     expect(find.text('Your disputes'), findsOneWidget);
 

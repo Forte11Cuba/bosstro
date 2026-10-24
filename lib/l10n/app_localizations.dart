@@ -123,7 +123,7 @@ abstract class AppLocalizations {
   /// Bottom bar destination: disputes this solver took and is resolving
   ///
   /// In en, this message translates to:
-  /// **'In progress'**
+  /// **'My disputes'**
   String get navInProgress;
 
   /// Bottom bar destination: settings

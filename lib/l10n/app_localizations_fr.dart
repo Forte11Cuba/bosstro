@@ -15,7 +15,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navPending => 'En attente';
 
   @override
-  String get navInProgress => 'En cours';
+  String get navInProgress => 'Mes litiges';
 
   @override
   String get navSettings => 'Paramètres';

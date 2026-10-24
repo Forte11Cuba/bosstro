@@ -8,7 +8,7 @@
   "@navPending": {
     "description": "Bottom bar destination: disputes waiting for a solver to take them"
   },
-  "navInProgress": "In progress",
+  "navInProgress": "My disputes",
   "@navInProgress": {
     "description": "Bottom bar destination: disputes this solver took and is resolving"
   },

@@ -15,7 +15,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get navPending => 'Openstaand';
 
   @override
-  String get navInProgress => 'Lopend';
+  String get navInProgress => 'Mijn disputen';
 
   @override
   String get navSettings => 'Instellingen';

@@ -2,7 +2,7 @@
   "@@locale": "it",
   "appName": "Bosstro",
   "navPending": "In attesa",
-  "navInProgress": "In corso",
+  "navInProgress": "Le mie dispute",
   "navSettings": "Impostazioni",
   "noNodeSelected": "Nessun nodo selezionato",
   "pendingTitle": "Dispute in attesa",

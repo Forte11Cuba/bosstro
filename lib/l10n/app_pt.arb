@@ -2,7 +2,7 @@
   "@@locale": "pt",
   "appName": "Bosstro",
   "navPending": "Pendentes",
-  "navInProgress": "Em andamento",
+  "navInProgress": "Minhas disputas",
   "navSettings": "Configurações",
   "noNodeSelected": "Nenhum nó selecionado",
   "pendingTitle": "Disputas pendentes",
