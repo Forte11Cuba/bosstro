@@ -40,7 +40,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 2061052309;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1842601503;
 
 // Section: executor
 
@@ -739,6 +739,41 @@ fn wire__crate__api__relays__get_connection_state_impl(
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || async move {
                         let output_ok = crate::api::relays::get_connection_state().await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__settings__get_language_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_language",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::settings::get_language().await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -1865,6 +1900,42 @@ fn wire__crate__api__chat__send_chat_message_impl(
                             api_text,
                         )
                         .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__settings__set_language_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "set_language",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_code = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::settings::set_language(api_code).await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -3635,90 +3706,92 @@ fn pde_ffi_dispatcher_primary_impl(
         17 => {
             wire__crate__api__relays__get_connection_state_impl(port, ptr, rust_vec_len, data_len)
         }
-        18 => {
+        18 => wire__crate__api__settings__get_language_impl(port, ptr, rust_vec_len, data_len),
+        19 => {
             wire__crate__api__nodes__get_mostro_node_picture_impl(port, ptr, rust_vec_len, data_len)
         }
-        19 => wire__crate__api__relays__get_relays_impl(port, ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__take__in_progress_disputes_impl(port, ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__init_db_impl(port, ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__relays__initialize_relays_impl(port, ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__nodes__list_mostro_nodes_impl(port, ptr, rust_vec_len, data_len),
-        25 => wire__crate__api__solver__load_solver_key_impl(port, ptr, rust_vec_len, data_len),
-        26 => {
+        20 => wire__crate__api__relays__get_relays_impl(port, ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__take__in_progress_disputes_impl(port, ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__init_db_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__relays__initialize_relays_impl(port, ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__nodes__list_mostro_nodes_impl(port, ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__solver__load_solver_key_impl(port, ptr, rust_vec_len, data_len),
+        27 => {
             wire__crate__api__node_info__node_info_default_impl(port, ptr, rust_vec_len, data_len)
         }
-        27 => wire__crate__api__observer__observed_chat_impl(port, ptr, rust_vec_len, data_len),
-        28 => {
+        28 => wire__crate__api__observer__observed_chat_impl(port, ptr, rust_vec_len, data_len),
+        29 => {
             wire__crate__api__chat__on_attachment_progress_impl(port, ptr, rust_vec_len, data_len)
         }
-        29 => wire__crate__api__chat__on_chat_updates_impl(port, ptr, rust_vec_len, data_len),
-        30 => wire__crate__api__relays__on_connection_state_changed_impl(
+        30 => wire__crate__api__chat__on_chat_updates_impl(port, ptr, rust_vec_len, data_len),
+        31 => wire__crate__api__relays__on_connection_state_changed_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        31 => {
+        32 => {
             wire__crate__api__disputes__on_dispute_updates_impl(port, ptr, rust_vec_len, data_len)
         }
-        32 => wire__crate__api__relays__on_relay_status_changed_impl(
+        33 => wire__crate__api__relays__on_relay_status_changed_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        33 => wire__crate__api__chat__open_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__observer__paste_shared_key_impl(port, ptr, rust_vec_len, data_len),
-        35 => wire__crate__api__disputes__pending_disputes_impl(port, ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__node_info__protocol_support_default_impl(
+        34 => wire__crate__api__chat__open_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__observer__paste_shared_key_impl(port, ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__disputes__pending_disputes_impl(port, ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__node_info__protocol_support_default_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        38 => {
+        39 => {
             wire__crate__api__observer__read_observed_chat_impl(port, ptr, rust_vec_len, data_len)
         }
-        39 => wire__crate__api__take__recover_candidates_impl(port, ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__nodes__refresh_mostro_node_metadata_impl(
+        40 => wire__crate__api__take__recover_candidates_impl(port, ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__nodes__refresh_mostro_node_metadata_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        41 => {
+        42 => {
             wire__crate__api__nodes__rehydrate_active_node_impl(port, ptr, rust_vec_len, data_len)
         }
-        42 => wire__crate__api__nodes__remove_custom_mostro_node_impl(
+        43 => wire__crate__api__nodes__remove_custom_mostro_node_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        43 => wire__crate__api__relays__remove_relay_impl(port, ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__resolve__resolve_dispute_impl(port, ptr, rust_vec_len, data_len),
-        45 => wire__crate__api__chat__retry_chat_message_impl(port, ptr, rust_vec_len, data_len),
-        46 => wire__crate__api__nodes__select_active_node_impl(port, ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__chat__send_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__chat__send_chat_message_impl(port, ptr, rust_vec_len, data_len),
-        49 => wire__crate__api__take__solver_permission_default_impl(
+        44 => wire__crate__api__relays__remove_relay_impl(port, ptr, rust_vec_len, data_len),
+        45 => wire__crate__api__resolve__resolve_dispute_impl(port, ptr, rust_vec_len, data_len),
+        46 => wire__crate__api__chat__retry_chat_message_impl(port, ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__nodes__select_active_node_impl(port, ptr, rust_vec_len, data_len),
+        48 => wire__crate__api__chat__send_chat_attachment_impl(port, ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__chat__send_chat_message_impl(port, ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__settings__set_language_impl(port, ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__take__solver_permission_default_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        50 => wire__crate__api__solver__solver_pubkey_impl(port, ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__take__solver_standing_impl(port, ptr, rust_vec_len, data_len),
-        52 => wire__crate__api__take__solver_status_default_impl(port, ptr, rust_vec_len, data_len),
-        53 => wire__crate__api__nodes__sync_mostro_node_pictures_impl(
+        52 => wire__crate__api__solver__solver_pubkey_impl(port, ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__take__solver_standing_impl(port, ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__take__solver_status_default_impl(port, ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__nodes__sync_mostro_node_pictures_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        54 => wire__crate__api__take__take_dispute_impl(port, ptr, rust_vec_len, data_len),
-        55 => wire__crate__api__solver__unload_solver_key_impl(port, ptr, rust_vec_len, data_len),
+        56 => wire__crate__api__take__take_dispute_impl(port, ptr, rust_vec_len, data_len),
+        57 => wire__crate__api__solver__unload_solver_key_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -3734,7 +3807,7 @@ fn pde_ffi_dispatcher_sync_impl(
         6 => wire__crate__api__nodes__active_node_impl(ptr, rust_vec_len, data_len),
         9 => wire__crate__api__app_version_impl(ptr, rust_vec_len, data_len),
         13 => wire__crate__api__solver__create_solver_account_impl(ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__solver__preview_npub_impl(ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__solver__preview_npub_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

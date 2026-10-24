@@ -9,6 +9,7 @@ pub mod nodes;
 pub mod observer;
 pub mod relays;
 pub mod resolve;
+pub mod settings;
 pub mod solver;
 pub mod take;
 
