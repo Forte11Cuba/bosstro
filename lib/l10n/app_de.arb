@@ -417,8 +417,6 @@
   "resolveNoOrderBody": "Bosstro kennt die Order dieses Streitfalls nicht, und die Anfrage braucht sie. Hol den Streitfall zurück, um sie erneut zu lesen.",
   "resolveBackToDispute": "Zurück zum Streitfall",
   "resolveGoToDisputes": "Deine Streitfälle öffnen",
-  "inProgressClosedHeading": "Geschlossen",
-  "inProgressNoneOpen": "Du betreust gerade keinen Streitfall.",
   "closedPaidBuyer": "Du hast den Käufer bezahlt",
   "closedRefundedSeller": "Du hast dem Verkäufer erstattet",
   "closedCooperatively": "Die Parteien haben vor deiner Entscheidung storniert",
@@ -442,5 +440,14 @@
   "detailBonds": "Einlagen",
   "detailPreviousStatus": "Status vor dem Streitfall",
   "orderStatusActive": "Aktiv",
-  "orderStatusFiatSent": "Fiat gesendet"
+  "orderStatusFiatSent": "Fiat gesendet",
+  "myDisputesOpenSegment": "In Bearbeitung",
+  "myDisputesClosedSegment": "Geschlossen",
+  "myDisputesSegmentsLabel": "Offene oder geschlossene Streitfälle",
+  "closedEmptyTitle": "Noch keine geschlossenen Streitfälle",
+  "closedEmptyBody": "Die Streitfälle, die du übernimmst, erscheinen hier, sobald sie geschlossen sind – ob du sie gelöst hast oder die Parteien den Handel selbst beendet haben.",
+  "disputeClosedJustNow": "Gerade geschlossen",
+  "disputeClosedMinutesAgo": "{count, plural, =1{Vor 1 Minute geschlossen} other{Vor {count} Minuten geschlossen}}",
+  "disputeClosedHoursAgo": "{count, plural, =1{Vor 1 Stunde geschlossen} other{Vor {count} Stunden geschlossen}}",
+  "disputeClosedDaysAgo": "{count, plural, =1{Vor 1 Tag geschlossen} other{Vor {count} Tagen geschlossen}}"
 }

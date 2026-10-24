@@ -341,9 +341,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('closed disputes list under the open ones, read only, $theme', (
-      tester,
-    ) async {
+    testWidgets('closed disputes have a segment of their own, read only, '
+        '$theme', (tester) async {
       setSurface(tester);
       final core =
           FakeDisputesCore()
@@ -366,12 +365,20 @@ void main() {
         brightness: brightness,
       );
       expect(tester.takeException(), isNull);
-      expect(find.text('Ahora no tienes ninguna disputa.'), findsOneWidget);
-      await tester.scrollUntilVisible(find.text('Cerradas'), 200);
-      await tester.scrollUntilVisible(find.text('Pagaste al comprador'), 200);
+      // The open ones first: none, so their empty state.
+      expect(find.text('En curso'), findsOneWidget);
+      expect(find.text('No hay disputas en curso'), findsOneWidget);
+      expect(find.byType(ClosedDisputeRow), findsNothing);
+      await tester.tap(find.text('Cerradas'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      await tester.tap(find.byType(InProgressDisputeRow));
+      // Lighter: how it ended and when, no opener; Recover is not offered.
+      expect(find.text('PAGADO AL COMPRADOR'), findsOneWidget);
+      expect(find.text('Cerrada hace 30 minutos'), findsOneWidget);
+      expect(find.text('Abierta por el vendedor'), findsNothing);
+      expect(find.text('Recuperar').hitTestable(), findsNothing);
+      // Its top: at 2× on 320 dp the card's middle is under the bottom bar.
+      await tester.tap(find.text('PAGADO AL COMPRADOR'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       // The detail: its result, no way to resolve it again.
@@ -415,8 +422,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
     expect(find.byType(DisputeDetailScreen), findsNothing);
-    await tester.scrollUntilVisible(find.text('Cerradas'), 200);
-    await tester.scrollUntilVisible(find.text('Pagaste al comprador'), 200);
+    await tester.tap(find.text('Cerradas'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ClosedDisputeRow), findsOneWidget);
     expect(core.held, isEmpty);
     expect(core.permission, SolverPermission.readWrite);
   });

@@ -2610,18 +2610,6 @@ abstract class AppLocalizations {
   /// **'Go to Your disputes'**
   String get resolveGoToDisputes;
 
-  /// In progress: heading of the disputes this key held that are closed
-  ///
-  /// In en, this message translates to:
-  /// **'Closed'**
-  String get inProgressClosedHeading;
-
-  /// In progress: shown above the closed disputes when none is open
-  ///
-  /// In en, this message translates to:
-  /// **'You hold no dispute now.'**
-  String get inProgressNoneOpen;
-
   /// A closed dispute this key resolved by paying the buyer
   ///
   /// In en, this message translates to:
@@ -2765,6 +2753,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fiat sent'**
   String get orderStatusFiatSent;
+
+  /// My disputes: the segment of the disputes this key holds
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get myDisputesOpenSegment;
+
+  /// My disputes: the segment of the disputes this key held that closed
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get myDisputesClosedSegment;
+
+  /// Screen-reader label of the In progress / Closed control of My disputes
+  ///
+  /// In en, this message translates to:
+  /// **'Open or closed disputes'**
+  String get myDisputesSegmentsLabel;
+
+  /// My disputes, Closed: empty state title
+  ///
+  /// In en, this message translates to:
+  /// **'No closed disputes yet'**
+  String get closedEmptyTitle;
+
+  /// My disputes, Closed: empty state explanation
+  ///
+  /// In en, this message translates to:
+  /// **'The disputes you take show up here once they close, whether you resolved them or the parties ended the trade themselves.'**
+  String get closedEmptyBody;
+
+  /// How long ago a dispute closed, under a minute
+  ///
+  /// In en, this message translates to:
+  /// **'Closed just now'**
+  String get disputeClosedJustNow;
+
+  /// How long ago a dispute closed, in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Closed 1 minute ago} other{Closed {count} minutes ago}}'**
+  String disputeClosedMinutesAgo(int count);
+
+  /// How long ago a dispute closed, in hours
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Closed 1 hour ago} other{Closed {count} hours ago}}'**
+  String disputeClosedHoursAgo(int count);
+
+  /// How long ago a dispute closed, in days
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Closed 1 day ago} other{Closed {count} days ago}}'**
+  String disputeClosedDaysAgo(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -1504,12 +1504,6 @@ class AppLocalizationsNl extends AppLocalizations {
   String get resolveGoToDisputes => 'Naar Jouw disputen';
 
   @override
-  String get inProgressClosedHeading => 'Gesloten';
-
-  @override
-  String get inProgressNoneOpen => 'Je hebt nu geen dispuut in handen.';
-
-  @override
   String get closedPaidBuyer => 'Je hebt de koper betaald';
 
   @override
@@ -1585,4 +1579,56 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get orderStatusFiatSent => 'Fiat verstuurd';
+
+  @override
+  String get myDisputesOpenSegment => 'Lopend';
+
+  @override
+  String get myDisputesClosedSegment => 'Gesloten';
+
+  @override
+  String get myDisputesSegmentsLabel => 'Open of gesloten disputen';
+
+  @override
+  String get closedEmptyTitle => 'Nog geen gesloten disputen';
+
+  @override
+  String get closedEmptyBody =>
+      'De disputen die je oppakt verschijnen hier zodra ze gesloten zijn, of je ze nu zelf oploste of de partijen de handel zelf afrondden.';
+
+  @override
+  String get disputeClosedJustNow => 'Zojuist gesloten';
+
+  @override
+  String disputeClosedMinutesAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minuten geleden gesloten',
+      one: '1 minuut geleden gesloten',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeClosedHoursAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count uur geleden gesloten',
+      one: '1 uur geleden gesloten',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String disputeClosedDaysAgo(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dagen geleden gesloten',
+      one: '1 dag geleden gesloten',
+    );
+    return '$_temp0';
+  }
 }

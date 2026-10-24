@@ -417,8 +417,6 @@
   "resolveNoOrderBody": "Bosstro no conoce la orden de esta disputa, y la petición la necesita. Recupera la disputa para volver a leerla.",
   "resolveBackToDispute": "Volver a la disputa",
   "resolveGoToDisputes": "Ir a Tus disputas",
-  "inProgressClosedHeading": "Cerradas",
-  "inProgressNoneOpen": "Ahora no tienes ninguna disputa.",
   "closedPaidBuyer": "Pagaste al comprador",
   "closedRefundedSeller": "Devolviste al vendedor",
   "closedCooperatively": "Las partes la cancelaron antes de tu decisión",
@@ -442,5 +440,14 @@
   "detailBonds": "Depósitos",
   "detailPreviousStatus": "Estado antes de la disputa",
   "orderStatusActive": "Activa",
-  "orderStatusFiatSent": "Fiat enviado"
+  "orderStatusFiatSent": "Fiat enviado",
+  "myDisputesOpenSegment": "En curso",
+  "myDisputesClosedSegment": "Cerradas",
+  "myDisputesSegmentsLabel": "Disputas abiertas o cerradas",
+  "closedEmptyTitle": "Todavía no has cerrado ninguna disputa",
+  "closedEmptyBody": "Las disputas que tomes aparecen aquí cuando se cierran, las resuelvas tú o terminen las partes la operación por su cuenta.",
+  "disputeClosedJustNow": "Cerrada hace un momento",
+  "disputeClosedMinutesAgo": "{count, plural, =1{Cerrada hace 1 minuto} other{Cerrada hace {count} minutos}}",
+  "disputeClosedHoursAgo": "{count, plural, =1{Cerrada hace 1 hora} other{Cerrada hace {count} horas}}",
+  "disputeClosedDaysAgo": "{count, plural, =1{Cerrada hace 1 día} other{Cerrada hace {count} días}}"
 }

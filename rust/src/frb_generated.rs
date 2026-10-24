@@ -3616,6 +3616,7 @@ impl SseDecode for crate::api::take::TakenDisputeSummary {
         let mut var_fiatCode = <Option<String>>::sse_decode(deserializer);
         let mut var_resolvedAs =
             <Option<crate::api::resolve::ResolvedAs>>::sse_decode(deserializer);
+        let mut var_closedAt = <Option<i64>>::sse_decode(deserializer);
         return crate::api::take::TakenDisputeSummary {
             mostro_pubkey: var_mostroPubkey,
             dispute_id: var_disputeId,
@@ -3627,6 +3628,7 @@ impl SseDecode for crate::api::take::TakenDisputeSummary {
             fiat_amount: var_fiatAmount,
             fiat_code: var_fiatCode,
             resolved_as: var_resolvedAs,
+            closed_at: var_closedAt,
         };
     }
 }
@@ -5019,6 +5021,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::take::TakenDisputeSummary {
             self.fiat_amount.into_into_dart().into_dart(),
             self.fiat_code.into_into_dart().into_dart(),
             self.resolved_as.into_into_dart().into_dart(),
+            self.closed_at.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -6261,6 +6264,7 @@ impl SseEncode for crate::api::take::TakenDisputeSummary {
         <Option<i64>>::sse_encode(self.fiat_amount, serializer);
         <Option<String>>::sse_encode(self.fiat_code, serializer);
         <Option<crate::api::resolve::ResolvedAs>>::sse_encode(self.resolved_as, serializer);
+        <Option<i64>>::sse_encode(self.closed_at, serializer);
     }
 }
 

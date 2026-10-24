@@ -3098,8 +3098,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TakenDisputeSummary dco_decode_taken_dispute_summary(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 10)
-      throw Exception('unexpected arr length: expect 10 but see ${arr.length}');
+    if (arr.length != 11)
+      throw Exception('unexpected arr length: expect 11 but see ${arr.length}');
     return TakenDisputeSummary(
       mostroPubkey: dco_decode_String(arr[0]),
       disputeId: dco_decode_String(arr[1]),
@@ -3111,6 +3111,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       fiatAmount: dco_decode_opt_box_autoadd_i_64(arr[7]),
       fiatCode: dco_decode_opt_String(arr[8]),
       resolvedAs: dco_decode_opt_box_autoadd_resolved_as(arr[9]),
+      closedAt: dco_decode_opt_box_autoadd_i_64(arr[10]),
     );
   }
 
@@ -4600,6 +4601,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_fiatAmount = sse_decode_opt_box_autoadd_i_64(deserializer);
     var var_fiatCode = sse_decode_opt_String(deserializer);
     var var_resolvedAs = sse_decode_opt_box_autoadd_resolved_as(deserializer);
+    var var_closedAt = sse_decode_opt_box_autoadd_i_64(deserializer);
     return TakenDisputeSummary(
       mostroPubkey: var_mostroPubkey,
       disputeId: var_disputeId,
@@ -4611,6 +4613,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       fiatAmount: var_fiatAmount,
       fiatCode: var_fiatCode,
       resolvedAs: var_resolvedAs,
+      closedAt: var_closedAt,
     );
   }
 
@@ -5999,6 +6002,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_box_autoadd_i_64(self.fiatAmount, serializer);
     sse_encode_opt_String(self.fiatCode, serializer);
     sse_encode_opt_box_autoadd_resolved_as(self.resolvedAs, serializer);
+    sse_encode_opt_box_autoadd_i_64(self.closedAt, serializer);
   }
 
   @protected

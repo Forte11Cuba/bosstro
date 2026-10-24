@@ -1879,14 +1879,6 @@
   "@resolveGoToDisputes": {
     "description": "Result after a take-over: back to the In progress list"
   },
-  "inProgressClosedHeading": "Closed",
-  "@inProgressClosedHeading": {
-    "description": "In progress: heading of the disputes this key held that are closed"
-  },
-  "inProgressNoneOpen": "You hold no dispute now.",
-  "@inProgressNoneOpen": {
-    "description": "In progress: shown above the closed disputes when none is open"
-  },
   "closedPaidBuyer": "You paid the buyer",
   "@closedPaidBuyer": {
     "description": "A closed dispute this key resolved by paying the buyer"
@@ -1982,5 +1974,56 @@
   "orderStatusFiatSent": "Fiat sent",
   "@orderStatusFiatSent": {
     "description": "Order status before the dispute: the buyer had marked the fiat as sent"
+  },
+  "myDisputesOpenSegment": "In progress",
+  "@myDisputesOpenSegment": {
+    "description": "My disputes: the segment of the disputes this key holds"
+  },
+  "myDisputesClosedSegment": "Closed",
+  "@myDisputesClosedSegment": {
+    "description": "My disputes: the segment of the disputes this key held that closed"
+  },
+  "myDisputesSegmentsLabel": "Open or closed disputes",
+  "@myDisputesSegmentsLabel": {
+    "description": "Screen-reader label of the In progress / Closed control of My disputes"
+  },
+  "closedEmptyTitle": "No closed disputes yet",
+  "@closedEmptyTitle": {
+    "description": "My disputes, Closed: empty state title"
+  },
+  "closedEmptyBody": "The disputes you take show up here once they close, whether you resolved them or the parties ended the trade themselves.",
+  "@closedEmptyBody": {
+    "description": "My disputes, Closed: empty state explanation"
+  },
+  "disputeClosedJustNow": "Closed just now",
+  "@disputeClosedJustNow": {
+    "description": "How long ago a dispute closed, under a minute"
+  },
+  "disputeClosedMinutesAgo": "{count, plural, =1{Closed 1 minute ago} other{Closed {count} minutes ago}}",
+  "@disputeClosedMinutesAgo": {
+    "description": "How long ago a dispute closed, in minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputeClosedHoursAgo": "{count, plural, =1{Closed 1 hour ago} other{Closed {count} hours ago}}",
+  "@disputeClosedHoursAgo": {
+    "description": "How long ago a dispute closed, in hours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "disputeClosedDaysAgo": "{count, plural, =1{Closed 1 day ago} other{Closed {count} days ago}}",
+  "@disputeClosedDaysAgo": {
+    "description": "How long ago a dispute closed, in days",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

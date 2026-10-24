@@ -263,6 +263,7 @@ TakenDisputeSummary sampleTaken({
   int? fiatAmount = 50,
   String? fiatCode = 'EUR',
   String node = mostroNodePubkey,
+  int? closedAt,
 }) => TakenDisputeSummary(
   mostroPubkey: node,
   disputeId: id,
@@ -274,6 +275,12 @@ TakenDisputeSummary sampleTaken({
   fiatAmount: fiatAmount,
   fiatCode: fiatCode,
   resolvedAs: resolvedAs,
+  // A closed one closed half an hour after the take, unless told.
+  closedAt:
+      closedAt ??
+      (status == DisputeStatus.initiated || status == DisputeStatus.inProgress
+          ? null
+          : takenAt + 1800),
 );
 
 /// A dispute's detail, as the core answers it.

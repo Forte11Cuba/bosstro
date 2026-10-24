@@ -8,7 +8,9 @@ import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/features/disputes/screens/dispute_detail_screen.dart';
 import 'package:bosstro/features/disputes/screens/recover_screen.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
+import 'package:bosstro/features/disputes/widgets/detail_segments.dart';
 import 'package:bosstro/features/disputes/widgets/in_progress_dispute_row.dart';
+import 'package:bosstro/features/disputes/screens/in_progress_screen.dart';
 import 'package:bosstro/features/disputes/widgets/not_solver_banner.dart';
 import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
 import 'package:bosstro/features/disputes/widgets/take_dialog.dart';
@@ -359,6 +361,37 @@ void main() {
   });
 
   group('In progress', () {
+    testWidgets('open and closed are two parts', (tester) async {
+      setSurface(tester, width: 400, height: 800);
+      final core = FakeDisputesCore()..held = [sampleTaken()];
+      await _pump(
+        tester,
+        core,
+        location: AppRoute.inProgress,
+        locale: const Locale('en'),
+        textScale: 1,
+      );
+      expect(find.text('In progress'), findsOneWidget);
+      expect(find.text('Closed'), findsOneWidget);
+      expect(find.byType(InProgressDisputeRow), findsOneWidget);
+      expect(find.text('Recover').hitTestable(), findsOneWidget);
+      final segments = find.byType(DetailSegments<MyDisputesSection>);
+      final top = tester.getTopLeft(segments);
+
+      await tester.tap(find.text('Closed'));
+      await tester.pumpAndSettle();
+      // Nothing above them moved: Recover keeps its room, unseen.
+      expect(tester.getTopLeft(segments), top);
+      // Its own empty state; Recover is the open ones' action.
+      expect(find.text('No closed disputes yet'), findsOneWidget);
+      expect(find.byType(InProgressDisputeRow), findsNothing);
+      expect(find.text('Recover').hitTestable(), findsNothing);
+
+      await tester.tap(find.text('In progress'));
+      await tester.pumpAndSettle();
+      expect(find.byType(InProgressDisputeRow), findsOneWidget);
+    });
+
     testWidgets('a row shows the amount, the opener, when it was taken and '
         'the short id, in lime: the solver\'s move', (tester) async {
       setSurface(tester, width: 400, height: 800);
