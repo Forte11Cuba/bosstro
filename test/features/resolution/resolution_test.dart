@@ -135,7 +135,7 @@ void main() {
         find.text('Los 75.000 sats de la orden menos la comisión del nodo, 750 sats.'),
         findsOneWidget,
       );
-      await _scrollScreenTo(tester, find.text('Intercambio: 50 EUR'));
+      await _scrollScreenTo(tester, find.text('Operación: 50 EUR'));
       await _scrollScreenTo(tester, find.textContaining('el vendedor no recupera'));
       await _scrollScreenTo(tester, find.textContaining('No se puede deshacer'));
       expect(tester.takeException(), isNull);

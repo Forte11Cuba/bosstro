@@ -71,6 +71,10 @@ pub mod settings_keys {
     pub fn solver_standing(node: &str, solver: &str) -> String {
         format!("{SOLVER_STANDING_PREFIX}{node}:{solver}")
     }
+
+    /// The language the solver chose for the app (a code such as `es`).
+    /// Absent while the app follows the system's language.
+    pub const LANGUAGE: &str = "language";
 }
 
 /// Storage trait — implemented by SQLite (native) and IndexedDB (wasm).

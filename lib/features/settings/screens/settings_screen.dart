@@ -10,6 +10,9 @@ import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/features/nodes/providers/relay_providers.dart';
+import 'package:bosstro/features/settings/models/languages.dart';
+import 'package:bosstro/features/settings/providers/language_provider.dart';
+import 'package:bosstro/features/settings/widgets/language_sheet.dart';
 import 'package:bosstro/features/settings/widgets/settings_row.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/features/solver_key/widgets/key_widgets.dart';
@@ -21,10 +24,11 @@ import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 import 'package:bosstro/shared/widgets/tab_app_bar.dart';
 
-/// Settings tab: the active node and its relays, whether this key is a
-/// solver there and its permission (once the node's answers told), the
-/// solver key (npub, backup, log out) and the app's version. Trusted senders
-/// arrive with phase 5b.
+/// Settings tab: the app's language; the active node and its relays,
+/// whether this key is a solver there and its permission (once the node's
+/// answers told); the solver key (npub, backup, and log out, the one
+/// destructive row, last); and the app's version as a quiet line at the
+/// end. Trusted senders arrive with phase 5b.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -62,6 +66,25 @@ class SettingsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                GroupHeader(
+                  title: l10n.settingsGroupApp,
+                  color: settings.groupHeader,
+                ),
+                const SizedBox(height: 8),
+                OrderDataCard(
+                  rows: [
+                    SettingsRow(
+                      icon: Icons.language_rounded,
+                      label: l10n.settingsLanguage,
+                      value: switch (ref.watch(languageProvider)) {
+                        null => l10n.languageSystem,
+                        final code => languageName(code),
+                      },
+                      onTap: () => showLanguageSheet(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
                 GroupHeader(
                   title: l10n.settingsGroupNode,
                   color: settings.groupHeader,
@@ -144,23 +167,11 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
                 ],
-                GroupHeader(
-                  title: l10n.settingsGroupAbout,
-                  color: settings.groupHeader,
-                ),
-                const SizedBox(height: 8),
-                OrderDataCard(
-                  rows: [
-                    OrderDataRow(
-                      icon: Icons.info_outline_rounded,
-                      label: l10n.settingsVersion,
-                      value: OrderDataValue(
-                        ref.watch(appVersionProvider),
-                        figures: true,
-                      ),
-                    ),
-                  ],
-                ),
+                // The version is not a setting, so it sits outside the
+                // cards, last and small, as ../app shows it: there when
+                // support asks for it, and nothing to tap.
+                const SizedBox(height: 4),
+                const _VersionLine(),
               ],
             ),
           ),
@@ -245,5 +256,33 @@ class SettingsScreen extends ConsumerWidget {
             ),
       );
     }
+  }
+}
+
+/// "Bosstro 0.1.0" in small grey text, outside the cards: the version is a
+/// fact for support, not a setting, so it neither looks nor acts like a row.
+class _VersionLine extends ConsumerWidget {
+  const _VersionLine();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pal = ShellPalette.of(context);
+    final style = TextStyle(fontSize: 11, color: pal.textTertiary);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: AppLocalizations.of(context).appName),
+            const TextSpan(text: ' '),
+            TextSpan(
+              text: ref.watch(appVersionProvider),
+              style: const TextStyle(fontFamily: AppFonts.figures),
+            ),
+          ],
+        ),
+        style: style,
+      ),
+    );
   }
 }

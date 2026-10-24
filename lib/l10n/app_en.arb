@@ -48,13 +48,31 @@
   "@settingsTitle": {
     "description": "Header of the Settings tab"
   },
-  "settingsGroupAbout": "About",
-  "@settingsGroupAbout": {
-    "description": "Settings group header: information about the app"
+  "settingsGroupApp": "App",
+  "@settingsGroupApp": {
+    "description": "Settings group header: how the app itself looks and reads (its language)"
   },
-  "settingsVersion": "Version",
-  "@settingsVersion": {
-    "description": "Settings row label: the app version, read from the Rust core"
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Settings row label: the app's language; its value is the language in use, or languageSystem"
+  },
+  "languageSheetTitle": "Choose a language",
+  "@languageSheetTitle": {
+    "description": "Title of the sheet that lists the app's languages"
+  },
+  "languageSystem": "System language",
+  "@languageSystem": {
+    "description": "The default choice: the app follows the language of the phone or computer"
+  },
+  "languageSystemDetail": "Same as your device: {language}",
+  "@languageSystemDetail": {
+    "description": "Under languageSystem: the language that choice gives the app now",
+    "placeholders": {
+      "language": {
+        "type": "String",
+        "example": "Español"
+      }
+    }
   },
   "copied": "Copied",
   "@copied": {
@@ -605,7 +623,7 @@
   "@nodeInfoPowFirst": {
     "description": "Row label: pow_first_contact, in bits"
   },
-  "nodeInfoBonds": "Anti-abuse bonds",
+  "nodeInfoBonds": "Anti-abuse deposits",
   "@nodeInfoBonds": {
     "description": "Row label: bond_enabled"
   },
@@ -1769,7 +1787,7 @@
   "@refundSellerOtherSide": {
     "description": "Cancel confirmation: what happens to the other party"
   },
-  "resolveBondsUnknown": "Bosstro does not know whether this node uses bonds: its info could not be read or does not say. If there are any, none is slashed.",
+  "resolveBondsUnknown": "Bosstro does not know whether this node uses deposits: its info could not be read or does not say. If there are any, none is slashed.",
   "@resolveBondsUnknown": {
     "description": "Confirmation: the node's info is missing or does not say whether it uses anti-abuse bonds, so no slash can be chosen and none is sent"
   },
@@ -1877,11 +1895,11 @@
   "@detailResult": {
     "description": "Dispute detail, Info: row with how a closed dispute ended"
   },
-  "bondsTitle": "Bonds",
+  "bondsTitle": "Deposits",
   "@bondsTitle": {
     "description": "Confirmation: heading of the anti-abuse bond choice, on a node that uses bonds"
   },
-  "bondsPickerHint": "This node uses anti-abuse bonds. Choose whose is slashed, if anyone's. It goes in the same request.",
+  "bondsPickerHint": "This node uses anti-abuse deposits. Choose whose is slashed, if anyone's. It goes in the same request.",
   "@bondsPickerHint": {
     "description": "Confirmation: under bondsTitle"
   },
@@ -1889,7 +1907,7 @@
   "@bondNoSlash": {
     "description": "Bond choice: release both bonds (the default)"
   },
-  "bondNoSlashDetail": "Both bonds go back to their owners.",
+  "bondNoSlashDetail": "Every deposit goes back to its owner.",
   "@bondNoSlashDetail": {
     "description": "Under bondNoSlash"
   },
@@ -1897,7 +1915,7 @@
   "@bondSlashBuyer": {
     "description": "Bond choice: the buyer loses their bond"
   },
-  "bondSlashBuyerDetail": "The buyer loses their bond; the seller can claim their share.",
+  "bondSlashBuyerDetail": "The buyer loses their deposit; the seller can claim their share.",
   "@bondSlashBuyerDetail": {
     "description": "Under bondSlashBuyer"
   },
@@ -1905,7 +1923,7 @@
   "@bondSlashSeller": {
     "description": "Bond choice: the seller loses their bond"
   },
-  "bondSlashSellerDetail": "The seller loses their bond; the buyer can claim their share.",
+  "bondSlashSellerDetail": "The seller loses their deposit; the buyer can claim their share.",
   "@bondSlashSellerDetail": {
     "description": "Under bondSlashSeller"
   },
@@ -1913,15 +1931,15 @@
   "@bondSlashBoth": {
     "description": "Bond choice: both parties lose their bond"
   },
-  "bondSlashBothDetail": "Both lose their bond.",
+  "bondSlashBothDetail": "Both lose their deposit.",
   "@bondSlashBothDetail": {
     "description": "Under bondSlashBoth"
   },
-  "bondNotPostedTitle": "That party posted no bond",
+  "bondNotPostedTitle": "That party posted no deposit",
   "@bondNotPostedTitle": {
     "description": "Result: the node refused the slash of a party without a bond; nothing was resolved"
   },
-  "bondNotPostedBody": "The node has no bond from the party you chose to slash, so nothing was paid or refunded. Choose another bond option.",
+  "bondNotPostedBody": "The node has no deposit from the party you chose to slash, so nothing was paid or refunded. Choose another deposit option.",
   "@bondNotPostedBody": {
     "description": "Under bondNotPostedTitle"
   },
@@ -1929,19 +1947,19 @@
   "@bondChooseAgain": {
     "description": "Result button: back to the confirmation to change the bond choice"
   },
-  "resolvedSlashedBuyer": "The buyer's bond was slashed.",
+  "resolvedSlashedBuyer": "The buyer's deposit was slashed.",
   "@resolvedSlashedBuyer": {
     "description": "Result: added under a successful resolution that slashed the buyer"
   },
-  "resolvedSlashedSeller": "The seller's bond was slashed.",
+  "resolvedSlashedSeller": "The seller's deposit was slashed.",
   "@resolvedSlashedSeller": {
     "description": "Result: added under a successful resolution that slashed the seller"
   },
-  "resolvedSlashedBoth": "Both bonds were slashed.",
+  "resolvedSlashedBoth": "Both deposits were slashed.",
   "@resolvedSlashedBoth": {
     "description": "Result: added under a successful resolution that slashed both"
   },
-  "detailBonds": "Bonds",
+  "detailBonds": "Deposits",
   "@detailBonds": {
     "description": "Info row label: which bonds this solver's resolution slashed"
   },

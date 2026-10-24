@@ -11,6 +11,7 @@ import 'api/nodes.dart';
 import 'api/observer.dart';
 import 'api/relays.dart';
 import 'api/resolve.dart';
+import 'api/settings.dart';
 import 'api/solver.dart';
 import 'api/take.dart';
 import 'dart:async';

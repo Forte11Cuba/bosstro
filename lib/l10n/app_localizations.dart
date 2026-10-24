@@ -5,8 +5,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_nl.dart';
+import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
 
@@ -95,7 +100,12 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
+    Locale('de'),
     Locale('es'),
+    Locale('fr'),
+    Locale('it'),
+    Locale('nl'),
+    Locale('pt'),
   ];
 
   /// The app's name. A brand: keep it unchanged in every locale
@@ -170,17 +180,35 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
-  /// Settings group header: information about the app
+  /// Settings group header: how the app itself looks and reads (its language)
   ///
   /// In en, this message translates to:
-  /// **'About'**
-  String get settingsGroupAbout;
+  /// **'App'**
+  String get settingsGroupApp;
 
-  /// Settings row label: the app version, read from the Rust core
+  /// Settings row label: the app's language; its value is the language in use, or languageSystem
   ///
   /// In en, this message translates to:
-  /// **'Version'**
-  String get settingsVersion;
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// Title of the sheet that lists the app's languages
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a language'**
+  String get languageSheetTitle;
+
+  /// The default choice: the app follows the language of the phone or computer
+  ///
+  /// In en, this message translates to:
+  /// **'System language'**
+  String get languageSystem;
+
+  /// Under languageSystem: the language that choice gives the app now
+  ///
+  /// In en, this message translates to:
+  /// **'Same as your device: {language}'**
+  String languageSystemDetail(String language);
 
   /// Snackbar confirming a value was copied to the clipboard
   ///
@@ -959,7 +987,7 @@ abstract class AppLocalizations {
   /// Row label: bond_enabled
   ///
   /// In en, this message translates to:
-  /// **'Anti-abuse bonds'**
+  /// **'Anti-abuse deposits'**
   String get nodeInfoBonds;
 
   /// Group header: the node's LND
@@ -2447,7 +2475,7 @@ abstract class AppLocalizations {
   /// Confirmation: the node's info is missing or does not say whether it uses anti-abuse bonds, so no slash can be chosen and none is sent
   ///
   /// In en, this message translates to:
-  /// **'Bosstro does not know whether this node uses bonds: its info could not be read or does not say. If there are any, none is slashed.'**
+  /// **'Bosstro does not know whether this node uses deposits: its info could not be read or does not say. If there are any, none is slashed.'**
   String get resolveBondsUnknown;
 
   /// Confirmation: the irreversibility warning, in red
@@ -2609,13 +2637,13 @@ abstract class AppLocalizations {
   /// Confirmation: heading of the anti-abuse bond choice, on a node that uses bonds
   ///
   /// In en, this message translates to:
-  /// **'Bonds'**
+  /// **'Deposits'**
   String get bondsTitle;
 
   /// Confirmation: under bondsTitle
   ///
   /// In en, this message translates to:
-  /// **'This node uses anti-abuse bonds. Choose whose is slashed, if anyone\'s. It goes in the same request.'**
+  /// **'This node uses anti-abuse deposits. Choose whose is slashed, if anyone\'s. It goes in the same request.'**
   String get bondsPickerHint;
 
   /// Bond choice: release both bonds (the default)
@@ -2627,7 +2655,7 @@ abstract class AppLocalizations {
   /// Under bondNoSlash
   ///
   /// In en, this message translates to:
-  /// **'Both bonds go back to their owners.'**
+  /// **'Every deposit goes back to its owner.'**
   String get bondNoSlashDetail;
 
   /// Bond choice: the buyer loses their bond
@@ -2639,7 +2667,7 @@ abstract class AppLocalizations {
   /// Under bondSlashBuyer
   ///
   /// In en, this message translates to:
-  /// **'The buyer loses their bond; the seller can claim their share.'**
+  /// **'The buyer loses their deposit; the seller can claim their share.'**
   String get bondSlashBuyerDetail;
 
   /// Bond choice: the seller loses their bond
@@ -2651,7 +2679,7 @@ abstract class AppLocalizations {
   /// Under bondSlashSeller
   ///
   /// In en, this message translates to:
-  /// **'The seller loses their bond; the buyer can claim their share.'**
+  /// **'The seller loses their deposit; the buyer can claim their share.'**
   String get bondSlashSellerDetail;
 
   /// Bond choice: both parties lose their bond
@@ -2663,19 +2691,19 @@ abstract class AppLocalizations {
   /// Under bondSlashBoth
   ///
   /// In en, this message translates to:
-  /// **'Both lose their bond.'**
+  /// **'Both lose their deposit.'**
   String get bondSlashBothDetail;
 
   /// Result: the node refused the slash of a party without a bond; nothing was resolved
   ///
   /// In en, this message translates to:
-  /// **'That party posted no bond'**
+  /// **'That party posted no deposit'**
   String get bondNotPostedTitle;
 
   /// Under bondNotPostedTitle
   ///
   /// In en, this message translates to:
-  /// **'The node has no bond from the party you chose to slash, so nothing was paid or refunded. Choose another bond option.'**
+  /// **'The node has no deposit from the party you chose to slash, so nothing was paid or refunded. Choose another deposit option.'**
   String get bondNotPostedBody;
 
   /// Result button: back to the confirmation to change the bond choice
@@ -2687,25 +2715,25 @@ abstract class AppLocalizations {
   /// Result: added under a successful resolution that slashed the buyer
   ///
   /// In en, this message translates to:
-  /// **'The buyer\'s bond was slashed.'**
+  /// **'The buyer\'s deposit was slashed.'**
   String get resolvedSlashedBuyer;
 
   /// Result: added under a successful resolution that slashed the seller
   ///
   /// In en, this message translates to:
-  /// **'The seller\'s bond was slashed.'**
+  /// **'The seller\'s deposit was slashed.'**
   String get resolvedSlashedSeller;
 
   /// Result: added under a successful resolution that slashed both
   ///
   /// In en, this message translates to:
-  /// **'Both bonds were slashed.'**
+  /// **'Both deposits were slashed.'**
   String get resolvedSlashedBoth;
 
   /// Info row label: which bonds this solver's resolution slashed
   ///
   /// In en, this message translates to:
-  /// **'Bonds'**
+  /// **'Deposits'**
   String get detailBonds;
 
   /// Info row label: the order's status when the dispute was opened (active or fiat sent)
@@ -2737,8 +2765,15 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'de',
+    'en',
+    'es',
+    'fr',
+    'it',
+    'nl',
+    'pt',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2747,10 +2782,20 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
     case 'es':
       return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'nl':
+      return AppLocalizationsNl();
+    case 'pt':
+      return AppLocalizationsPt();
   }
 
   throw FlutterError(

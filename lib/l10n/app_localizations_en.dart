@@ -47,10 +47,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
-  String get settingsGroupAbout => 'About';
+  String get settingsGroupApp => 'App';
 
   @override
-  String get settingsVersion => 'Version';
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get languageSheetTitle => 'Choose a language';
+
+  @override
+  String get languageSystem => 'System language';
+
+  @override
+  String languageSystemDetail(String language) {
+    return 'Same as your device: $language';
+  }
 
   @override
   String get copied => 'Copied';
@@ -502,7 +513,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nodeInfoPowFirst => 'PoW on first contact';
 
   @override
-  String get nodeInfoBonds => 'Anti-abuse bonds';
+  String get nodeInfoBonds => 'Anti-abuse deposits';
 
   @override
   String get nodeInfoGroupLightning => 'Lightning node';
@@ -1397,7 +1408,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resolveBondsUnknown =>
-      'Bosstro does not know whether this node uses bonds: its info could not be read or does not say. If there are any, none is slashed.';
+      'Bosstro does not know whether this node uses deposits: its info could not be read or does not say. If there are any, none is slashed.';
 
   @override
   String get resolveIrreversible =>
@@ -1490,59 +1501,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailResult => 'Result';
 
   @override
-  String get bondsTitle => 'Bonds';
+  String get bondsTitle => 'Deposits';
 
   @override
   String get bondsPickerHint =>
-      'This node uses anti-abuse bonds. Choose whose is slashed, if anyone\'s. It goes in the same request.';
+      'This node uses anti-abuse deposits. Choose whose is slashed, if anyone\'s. It goes in the same request.';
 
   @override
   String get bondNoSlash => 'Don\'t slash';
 
   @override
-  String get bondNoSlashDetail => 'Both bonds go back to their owners.';
+  String get bondNoSlashDetail => 'Every deposit goes back to its owner.';
 
   @override
   String get bondSlashBuyer => 'Slash the buyer';
 
   @override
   String get bondSlashBuyerDetail =>
-      'The buyer loses their bond; the seller can claim their share.';
+      'The buyer loses their deposit; the seller can claim their share.';
 
   @override
   String get bondSlashSeller => 'Slash the seller';
 
   @override
   String get bondSlashSellerDetail =>
-      'The seller loses their bond; the buyer can claim their share.';
+      'The seller loses their deposit; the buyer can claim their share.';
 
   @override
   String get bondSlashBoth => 'Slash both';
 
   @override
-  String get bondSlashBothDetail => 'Both lose their bond.';
+  String get bondSlashBothDetail => 'Both lose their deposit.';
 
   @override
-  String get bondNotPostedTitle => 'That party posted no bond';
+  String get bondNotPostedTitle => 'That party posted no deposit';
 
   @override
   String get bondNotPostedBody =>
-      'The node has no bond from the party you chose to slash, so nothing was paid or refunded. Choose another bond option.';
+      'The node has no deposit from the party you chose to slash, so nothing was paid or refunded. Choose another deposit option.';
 
   @override
   String get bondChooseAgain => 'Choose another option';
 
   @override
-  String get resolvedSlashedBuyer => 'The buyer\'s bond was slashed.';
+  String get resolvedSlashedBuyer => 'The buyer\'s deposit was slashed.';
 
   @override
-  String get resolvedSlashedSeller => 'The seller\'s bond was slashed.';
+  String get resolvedSlashedSeller => 'The seller\'s deposit was slashed.';
 
   @override
-  String get resolvedSlashedBoth => 'Both bonds were slashed.';
+  String get resolvedSlashedBoth => 'Both deposits were slashed.';
 
   @override
-  String get detailBonds => 'Bonds';
+  String get detailBonds => 'Deposits';
 
   @override
   String get detailPreviousStatus => 'Status before the dispute';

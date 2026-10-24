@@ -250,7 +250,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(core.active, cubaPubkey);
       expect(find.text('Now on Mostro Cuba'), findsOneWidget);
-      expect(find.text('Version'), findsOneWidget);
+      // Back on Settings.
+      expect(find.text('Language'), findsOneWidget);
     });
 
     testWidgets('a node is added by its public key', (tester) async {

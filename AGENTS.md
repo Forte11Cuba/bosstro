@@ -34,7 +34,7 @@ ARB files (`lib/l10n/app_en.arb` is the source).
 | D13 | Serbero (the assistant Read solver) is supported: its `send-dm` messages and handoffs are read only from trusted senders. |
 | A1 | License AGPL-3.0-or-later (code is copied from `app`, which is AGPL). |
 | A2 | **Android is the target** the app is built for. **Linux and web** also build and run, for development and convenience, without the Android-only key protections: no screenshot blocking, no nsec copy (`PlatformCapabilities`), no QR scanning, and on the web the key sits in browser storage, much weaker than the Keystore. iOS can come later. |
-| A3 | l10n: `en` and `es` for the MVP. |
+| A3 | l10n: `en`, `es`, `it`, `fr`, `de`, `nl` and `pt` (Brazil), as `app`; English is the source. The app follows the system's language until the solver picks one in Settings (kept in Rust). |
 | A4 | Storage per platform, as `../app`: SQLite (`sqlx`) on native, IndexedDB on the web, behind one `Storage` trait. SQLCipher is post-MVP; until then the database relies on the Android app sandbox (on Linux and the web it is not encrypted). |
 | A8 | Android `applicationId` / namespace `foundation.mostro.bosstro` (it must differ from `app`'s, or one install replaces the other). |
 
@@ -300,8 +300,10 @@ most often:
   when you can act, neutral otherwise. Red is for danger and errors only.
 - Every text color tested at 4.5:1 in both themes (`test/core/*_contrast_test.dart`).
 - Every dialog or sheet through `showMostroDialog` / `showMostroSheet`; at most one primary CTA.
-- Every new screen has a widget test at 2× text, 320 dp, in Spanish, with no overflow.
-- Every string from `AppLocalizations`, in en and es.
+- Every new screen has a widget test at 2× text, 320 dp, in Spanish, with no overflow, and joins
+  `test/l10n/all_locales_fit_test.dart`, which lays it out in every locale.
+- Every string from `AppLocalizations`, in every ARB file, with the words of the glossary
+  (`.specify/DESIGN_SYSTEM.md` §9) and of `app`'s translations.
 
 ## Workflow
 
