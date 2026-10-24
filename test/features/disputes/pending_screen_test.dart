@@ -180,6 +180,21 @@ void main() {
     expect(find.textContaining('waiting for a solver'), findsOneWidget);
   });
 
+  testWidgets('a sync announced before the list listened still ends the '
+      'skeleton', (tester) async {
+    setSurface(tester, width: 400, height: 800);
+    final core = FakeDisputesCore(synced: false);
+    await _pumpPending(tester, core, settle: false);
+    await tester.pump();
+    expect(find.byType(ListSkeleton), findsOneWidget);
+
+    // Synced with no update pushed: the announcement was lost.
+    core.synced = true;
+    await tester.pump(PendingDisputesNotifier.unsyncedRecheck);
+    await tester.pump();
+    expect(find.text('No disputes waiting'), findsOneWidget);
+  });
+
   testWidgets('stored disputes show while the relays have not answered yet', (
     tester,
   ) async {

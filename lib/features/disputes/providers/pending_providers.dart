@@ -85,11 +85,32 @@ final pendingDisputesProvider =
 class PendingDisputesNotifier extends NodeDisputesNotifier<PendingDisputes> {
   static const coalesce = NodeDisputesNotifier.coalesce;
 
+  /// How often an unsynced list is read again. The core marks a node synced
+  /// within ten seconds and announces it, but the announcement can go before
+  /// this notifier's stream is listening (the feed starts before the first
+  /// frame): without a read of its own the skeleton would never leave.
+  static const unsyncedRecheck = Duration(seconds: 2);
+
+  Timer? _recheck;
+
   @override
   bool get followsKey => false;
 
   @override
-  Future<PendingDisputes?> read() => core.pending();
+  Future<PendingDisputes?> build() {
+    ref.onDispose(() => _recheck?.cancel());
+    return super.build();
+  }
+
+  @override
+  Future<PendingDisputes?> read() async {
+    final pending = await core.pending();
+    _recheck?.cancel();
+    if (pending != null && !pending.synced) {
+      _recheck = Timer(unsyncedRecheck, () => unawaited(refresh()));
+    }
+    return pending;
+  }
 }
 
 /// The disputes this key holds on the active node, oldest first, live; null
