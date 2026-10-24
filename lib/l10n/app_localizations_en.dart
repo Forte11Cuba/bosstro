@@ -47,6 +47,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
+  String get settingsGroupApp => 'App';
+
+  @override
+  String get settingsLanguage => 'Language';
+
+  @override
+  String get languageSheetTitle => 'Choose a language';
+
+  @override
+  String get languageSystem => 'System language';
+
+  @override
+  String languageSystemDetail(String language) {
+    return 'Same as your device: $language';
+  }
+
+  @override
   String get settingsGroupAbout => 'About';
 
   @override

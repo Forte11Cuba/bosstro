@@ -12,6 +12,7 @@ import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/features/nodes/providers/relay_providers.dart';
 import 'package:bosstro/features/observer/providers/observer_providers.dart';
+import 'package:bosstro/features/settings/providers/language_provider.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/providers/core_providers.dart';
@@ -22,6 +23,7 @@ import 'fake_device_security.dart';
 import 'fake_disputes.dart';
 import 'fake_nodes.dart';
 import 'fake_observer.dart';
+import 'fake_settings.dart';
 import 'fake_solver_key.dart';
 
 export 'fake_chat.dart';
@@ -29,6 +31,7 @@ export 'fake_device_security.dart';
 export 'fake_disputes.dart';
 export 'fake_nodes.dart';
 export 'fake_observer.dart';
+export 'fake_settings.dart';
 export 'fake_solver_key.dart';
 
 /// The version the fake Rust core reports.
@@ -72,6 +75,7 @@ List<Override> fakeCoreOverrides({
   FakeDisputesCore? disputes,
   FakeChatCore? chat,
   FakeObserverCore? observer,
+  FakeSettingsCore? settings,
 }) {
   final nodeCore = nodes ?? FakeNodesCore(active: mostroNodePubkey);
   final keys =
@@ -97,6 +101,8 @@ List<Override> fakeCoreOverrides({
     ),
     chatCoreProvider.overrideWithValue(chat ?? FakeChatCore()),
     observerCoreProvider.overrideWithValue(observer ?? FakeObserverCore()),
+    settingsCoreProvider.overrideWithValue(settings ?? FakeSettingsCore()),
+    languageProvider.overrideWith(() => LanguageNotifier(settings?.saved)),
   ];
 }
 
@@ -145,17 +151,19 @@ Future<void> expectClearOfNavBar(
 }
 
 /// Pumps the whole app at [location], in [locale], [brightness] and
-/// [textScale] — the DS-A11Y-4 conditions.
+/// [textScale] — the DS-A11Y-4 conditions. [systemLocales], when given, are
+/// the system's preferred languages instead of [locale] alone.
 Future<void> pumpApp(
   WidgetTester tester, {
   required String location,
   Locale locale = const Locale('es'),
+  List<Locale>? systemLocales,
   Brightness brightness = Brightness.dark,
   double textScale = 2,
   List<Override>? overrides,
   bool settle = true,
 }) async {
-  tester.platformDispatcher.localesTestValue = [locale];
+  tester.platformDispatcher.localesTestValue = systemLocales ?? [locale];
   tester.platformDispatcher.textScaleFactorTestValue = textScale;
   addTearDown(tester.platformDispatcher.clearAllTestValues);
   await tester.pumpWidget(

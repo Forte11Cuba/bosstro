@@ -170,6 +170,36 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
+  /// Settings group header: how the app itself looks and reads (its language)
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get settingsGroupApp;
+
+  /// Settings row label: the app's language; its value is the language in use, or languageSystem
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// Title of the sheet that lists the app's languages
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a language'**
+  String get languageSheetTitle;
+
+  /// The default choice: the app follows the language of the phone or computer
+  ///
+  /// In en, this message translates to:
+  /// **'System language'**
+  String get languageSystem;
+
+  /// Under languageSystem: the language that choice gives the app now
+  ///
+  /// In en, this message translates to:
+  /// **'Same as your device: {language}'**
+  String languageSystemDetail(String language);
+
   /// Settings group header: information about the app
   ///
   /// In en, this message translates to:

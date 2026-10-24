@@ -7,10 +7,12 @@ import 'package:bosstro/core/font_licenses.dart';
 import 'package:bosstro/core/services/solver_key_service.dart';
 import 'package:bosstro/core/services/storage/app_storage.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
+import 'package:bosstro/features/settings/providers/language_provider.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/src/rust/api.dart' as rust;
 import 'package:bosstro/src/rust/api/nodes.dart' as nodes_api;
 import 'package:bosstro/src/rust/api/relays.dart' as relays_api;
+import 'package:bosstro/src/rust/api/settings.dart' as settings_api;
 import 'package:bosstro/src/rust/frb_generated.dart';
 
 Future<void> main() async {
@@ -27,6 +29,15 @@ Future<void> main() async {
     await openDatabase(initDb: rust.initDb);
   } catch (e) {
     debugPrint('[startup] database not opened: $e');
+  }
+
+  // The chosen language, before the first frame: the app never opens in
+  // one language and turns to another. None: the system's.
+  String? language;
+  try {
+    language = await settings_api.getLanguage();
+  } catch (e) {
+    debugPrint('[startup] language not loaded: $e');
   }
 
   // The active node, before the relay pool starts, so the pool's first
@@ -68,6 +79,7 @@ Future<void> main() async {
         solverKeyProvider.overrideWith(() => SolverKeyNotifier(key)),
         storedKeyUnreadableProvider.overrideWithValue(unreadable),
         activeNodeProvider.overrideWith(() => ActiveNodeNotifier(activeNode)),
+        languageProvider.overrideWith(() => LanguageNotifier(language)),
       ],
       // A solver with a key but no node yet (the app closed on the node
       // selector) picks one first.

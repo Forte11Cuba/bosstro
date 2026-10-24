@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/app_theme.dart';
+import 'package:bosstro/features/settings/providers/language_provider.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
@@ -56,6 +57,12 @@ class _BosstroAppState extends ConsumerState<BosstroApp> {
       theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
       themeMode: widget.themeMode,
+      // None chosen: Flutter follows the system's languages (English when
+      // it ships none of them, `l10n.yaml`).
+      locale: switch (ref.watch(languageProvider)) {
+        null => null,
+        final code => Locale(code),
+      },
       routerConfig: _router,
       localizationsDelegates: const [
         AppLocalizations.delegate,

@@ -10,6 +10,9 @@ import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/features/nodes/providers/relay_providers.dart';
+import 'package:bosstro/features/settings/models/languages.dart';
+import 'package:bosstro/features/settings/providers/language_provider.dart';
+import 'package:bosstro/features/settings/widgets/language_sheet.dart';
 import 'package:bosstro/features/settings/widgets/settings_row.dart';
 import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart';
 import 'package:bosstro/features/solver_key/widgets/key_widgets.dart';
@@ -23,7 +26,8 @@ import 'package:bosstro/shared/widgets/tab_app_bar.dart';
 
 /// Settings tab: the active node and its relays, whether this key is a
 /// solver there and its permission (once the node's answers told), the
-/// solver key (npub, backup, log out) and the app's version. Trusted senders
+/// solver key (npub, backup, log out), the app's language and its version.
+/// Trusted senders
 /// arrive with phase 5b.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -144,6 +148,25 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
                 ],
+                GroupHeader(
+                  title: l10n.settingsGroupApp,
+                  color: settings.groupHeader,
+                ),
+                const SizedBox(height: 8),
+                OrderDataCard(
+                  rows: [
+                    SettingsRow(
+                      icon: Icons.language_rounded,
+                      label: l10n.settingsLanguage,
+                      value: switch (ref.watch(languageProvider)) {
+                        null => l10n.languageSystem,
+                        final code => languageName(code),
+                      },
+                      onTap: () => showLanguageSheet(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
                 GroupHeader(
                   title: l10n.settingsGroupAbout,
                   color: settings.groupHeader,

@@ -48,6 +48,32 @@
   "@settingsTitle": {
     "description": "Header of the Settings tab"
   },
+  "settingsGroupApp": "App",
+  "@settingsGroupApp": {
+    "description": "Settings group header: how the app itself looks and reads (its language)"
+  },
+  "settingsLanguage": "Language",
+  "@settingsLanguage": {
+    "description": "Settings row label: the app's language; its value is the language in use, or languageSystem"
+  },
+  "languageSheetTitle": "Choose a language",
+  "@languageSheetTitle": {
+    "description": "Title of the sheet that lists the app's languages"
+  },
+  "languageSystem": "System language",
+  "@languageSystem": {
+    "description": "The default choice: the app follows the language of the phone or computer"
+  },
+  "languageSystemDetail": "Same as your device: {language}",
+  "@languageSystemDetail": {
+    "description": "Under languageSystem: the language that choice gives the app now",
+    "placeholders": {
+      "language": {
+        "type": "String",
+        "example": "Español"
+      }
+    }
+  },
   "settingsGroupAbout": "About",
   "@settingsGroupAbout": {
     "description": "Settings group header: information about the app"
