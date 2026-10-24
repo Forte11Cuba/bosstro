@@ -22,7 +22,7 @@ use crate::disputes::{DisputeRecord, TakenDispute};
 const DISPUTE_COLUMNS: &str = "mostro_pubkey, dispute_id, status, initiator, opened_at, \
      expires_at, event_id, event_created_at, taken_at, order_id, order_kind, amount, \
      fiat_amount, fiat_code, payment_method, premium, fee, initiator_pubkey, buyer_pubkey, \
-     seller_pubkey, solver_pubkey, resolved_as, bond_slash";
+     seller_pubkey, solver_pubkey, resolved_as, bond_slash, order_previous_status";
 
 /// Every column of `dispute_messages`, in the order [`chat_from_row`] reads them.
 const CHAT_COLUMNS: &str = "mostro_pubkey, dispute_id, party, solver_pubkey, message_id, \
@@ -160,7 +160,7 @@ impl Storage for SqliteStorage {
         let t = d.taken.as_ref();
         sqlx::query(&format!(
             "INSERT OR REPLACE INTO disputes ({DISPUTE_COLUMNS})
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         ))
         .bind(&d.mostro_pubkey)
         .bind(&d.dispute_id)
@@ -185,6 +185,7 @@ impl Storage for SqliteStorage {
         .bind(t.map(|t| t.solver_pubkey.clone()))
         .bind(t.and_then(|t| t.resolved_as).map(|r| r.as_wire()))
         .bind(t.and_then(|t| t.bond_slash).map(|b| b.as_wire()))
+        .bind(t.and_then(|t| t.order_previous_status.clone()))
         .execute(&self.pool)
         .await?;
         Ok(())
@@ -454,6 +455,7 @@ fn dispute_from_row(row: &sqlx::sqlite::SqliteRow) -> Result<DisputeRecord> {
                 .try_get::<Option<String>, _>("bond_slash")?
                 .as_deref()
                 .and_then(BondSlash::from_wire),
+            order_previous_status: row.try_get("order_previous_status")?,
         }),
         None => None,
     };

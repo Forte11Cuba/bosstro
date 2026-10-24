@@ -2404,8 +2404,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   DisputeDetail dco_decode_dispute_detail(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 23)
-      throw Exception('unexpected arr length: expect 23 but see ${arr.length}');
+    if (arr.length != 24)
+      throw Exception('unexpected arr length: expect 24 but see ${arr.length}');
     return DisputeDetail(
       mostroPubkey: dco_decode_String(arr[0]),
       disputeId: dco_decode_String(arr[1]),
@@ -2426,10 +2426,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       isClosed: dco_decode_bool(arr[16]),
       resolvedAs: dco_decode_opt_box_autoadd_resolved_as(arr[17]),
       bondSlash: dco_decode_opt_box_autoadd_bond_slash(arr[18]),
-      bondsEnabled: dco_decode_bool(arr[19]),
-      buyerPayout: dco_decode_opt_box_autoadd_i_64(arr[20]),
-      sellerRefund: dco_decode_opt_box_autoadd_i_64(arr[21]),
-      unansweredResolution: dco_decode_opt_box_autoadd_resolution(arr[22]),
+      orderPreviousStatus: dco_decode_opt_String(arr[19]),
+      bondsEnabled: dco_decode_bool(arr[20]),
+      buyerPayout: dco_decode_opt_box_autoadd_i_64(arr[21]),
+      sellerRefund: dco_decode_opt_box_autoadd_i_64(arr[22]),
+      unansweredResolution: dco_decode_opt_box_autoadd_resolution(arr[23]),
     );
   }
 
@@ -3605,6 +3606,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_isClosed = sse_decode_bool(deserializer);
     var var_resolvedAs = sse_decode_opt_box_autoadd_resolved_as(deserializer);
     var var_bondSlash = sse_decode_opt_box_autoadd_bond_slash(deserializer);
+    var var_orderPreviousStatus = sse_decode_opt_String(deserializer);
     var var_bondsEnabled = sse_decode_bool(deserializer);
     var var_buyerPayout = sse_decode_opt_box_autoadd_i_64(deserializer);
     var var_sellerRefund = sse_decode_opt_box_autoadd_i_64(deserializer);
@@ -3631,6 +3633,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       isClosed: var_isClosed,
       resolvedAs: var_resolvedAs,
       bondSlash: var_bondSlash,
+      orderPreviousStatus: var_orderPreviousStatus,
       bondsEnabled: var_bondsEnabled,
       buyerPayout: var_buyerPayout,
       sellerRefund: var_sellerRefund,
@@ -5132,6 +5135,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self.isClosed, serializer);
     sse_encode_opt_box_autoadd_resolved_as(self.resolvedAs, serializer);
     sse_encode_opt_box_autoadd_bond_slash(self.bondSlash, serializer);
+    sse_encode_opt_String(self.orderPreviousStatus, serializer);
     sse_encode_bool(self.bondsEnabled, serializer);
     sse_encode_opt_box_autoadd_i_64(self.buyerPayout, serializer);
     sse_encode_opt_box_autoadd_i_64(self.sellerRefund, serializer);

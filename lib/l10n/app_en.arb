@@ -1952,5 +1952,17 @@
   "detailBonds": "Bonds",
   "@detailBonds": {
     "description": "Info row label: which bonds this solver's resolution slashed"
+  },
+  "detailPreviousStatus": "Status before the dispute",
+  "@detailPreviousStatus": {
+    "description": "Info row label: the order's status when the dispute was opened (active or fiat sent)"
+  },
+  "orderStatusActive": "Active",
+  "@orderStatusActive": {
+    "description": "Order status before the dispute: the buyer had not marked the fiat as sent"
+  },
+  "orderStatusFiatSent": "Fiat sent",
+  "@orderStatusFiatSent": {
+    "description": "Order status before the dispute: the buyer had marked the fiat as sent"
   }
 }

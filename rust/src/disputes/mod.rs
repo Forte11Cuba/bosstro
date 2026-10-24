@@ -68,6 +68,12 @@ pub struct TakenDispute {
     /// kept).
     #[serde(default)]
     pub bond_slash: Option<BondSlash>,
+    /// The order's status when the dispute was opened, as the node wrote it
+    /// in `SolverDisputeInfo` (`active` or `fiat-sent`: a dispute opens from
+    /// either, mostrod `dispute.rs`). `None` for a take stored before this
+    /// was kept; a recovery reads it again.
+    #[serde(default)]
+    pub order_previous_status: Option<String>,
 }
 
 impl DisputeStatus {
@@ -344,6 +350,7 @@ pub(crate) mod tests {
             seller_pubkey: Some("cc".into()),
             resolved_as: None,
             bond_slash: None,
+            order_previous_status: None,
         }
     }
 

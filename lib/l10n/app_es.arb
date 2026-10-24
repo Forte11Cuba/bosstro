@@ -436,5 +436,8 @@
   "resolvedSlashedBuyer": "Se penalizó la fianza del comprador.",
   "resolvedSlashedSeller": "Se penalizó la fianza del vendedor.",
   "resolvedSlashedBoth": "Se penalizaron las fianzas de los dos.",
-  "detailBonds": "Fianzas"
+  "detailBonds": "Fianzas",
+  "detailPreviousStatus": "Estado antes de la disputa",
+  "orderStatusActive": "Activa",
+  "orderStatusFiatSent": "Fiat enviado"
 }

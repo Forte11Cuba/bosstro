@@ -2487,6 +2487,7 @@ impl SseDecode for crate::api::take::DisputeDetail {
         let mut var_resolvedAs =
             <Option<crate::api::resolve::ResolvedAs>>::sse_decode(deserializer);
         let mut var_bondSlash = <Option<crate::api::resolve::BondSlash>>::sse_decode(deserializer);
+        let mut var_orderPreviousStatus = <Option<String>>::sse_decode(deserializer);
         let mut var_bondsEnabled = <bool>::sse_decode(deserializer);
         let mut var_buyerPayout = <Option<i64>>::sse_decode(deserializer);
         let mut var_sellerRefund = <Option<i64>>::sse_decode(deserializer);
@@ -2512,6 +2513,7 @@ impl SseDecode for crate::api::take::DisputeDetail {
             is_closed: var_isClosed,
             resolved_as: var_resolvedAs,
             bond_slash: var_bondSlash,
+            order_previous_status: var_orderPreviousStatus,
             bonds_enabled: var_bondsEnabled,
             buyer_payout: var_buyerPayout,
             seller_refund: var_sellerRefund,
@@ -4139,6 +4141,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::take::DisputeDetail {
             self.is_closed.into_into_dart().into_dart(),
             self.resolved_as.into_into_dart().into_dart(),
             self.bond_slash.into_into_dart().into_dart(),
+            self.order_previous_status.into_into_dart().into_dart(),
             self.bonds_enabled.into_into_dart().into_dart(),
             self.buyer_payout.into_into_dart().into_dart(),
             self.seller_refund.into_into_dart().into_dart(),
@@ -5305,6 +5308,7 @@ impl SseEncode for crate::api::take::DisputeDetail {
         <bool>::sse_encode(self.is_closed, serializer);
         <Option<crate::api::resolve::ResolvedAs>>::sse_encode(self.resolved_as, serializer);
         <Option<crate::api::resolve::BondSlash>>::sse_encode(self.bond_slash, serializer);
+        <Option<String>>::sse_encode(self.order_previous_status, serializer);
         <bool>::sse_encode(self.bonds_enabled, serializer);
         <Option<i64>>::sse_encode(self.buyer_payout, serializer);
         <Option<i64>>::sse_encode(self.seller_refund, serializer);

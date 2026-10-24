@@ -2719,6 +2719,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bonds'**
   String get detailBonds;
+
+  /// Info row label: the order's status when the dispute was opened (active or fiat sent)
+  ///
+  /// In en, this message translates to:
+  /// **'Status before the dispute'**
+  String get detailPreviousStatus;
+
+  /// Order status before the dispute: the buyer had not marked the fiat as sent
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get orderStatusActive;
+
+  /// Order status before the dispute: the buyer had marked the fiat as sent
+  ///
+  /// In en, this message translates to:
+  /// **'Fiat sent'**
+  String get orderStatusFiatSent;
 }
 
 class _AppLocalizationsDelegate

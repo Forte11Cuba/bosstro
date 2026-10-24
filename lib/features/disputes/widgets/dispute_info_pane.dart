@@ -130,6 +130,11 @@ class DisputeInfoPane extends StatelessWidget {
               },
             ),
             textRow(
+              Icons.history_rounded,
+              l10n.detailPreviousStatus,
+              previousStatusLabel(l10n, detail.orderPreviousStatus),
+            ),
+            textRow(
               Icons.currency_bitcoin_rounded,
               l10n.detailAmount,
               detail.amount == null
@@ -192,3 +197,14 @@ String? _dateTime(int? seconds, String locale) {
   final at = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
   return DateFormat.yMMMd(locale).add_Hm().format(at);
 }
+
+/// The order's status when the dispute opened, in words: whether the buyer
+/// had marked the fiat as sent. A word the node may add later reads as it
+/// came; null (not kept) reads "Not known".
+String? previousStatusLabel(AppLocalizations l10n, String? status) =>
+    switch (status) {
+      'active' => l10n.orderStatusActive,
+      'fiat-sent' => l10n.orderStatusFiatSent,
+      null || '' => null,
+      final other => other,
+    };
