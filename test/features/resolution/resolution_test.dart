@@ -376,7 +376,7 @@ void main() {
       expect(find.text('PAGADO AL COMPRADOR'), findsOneWidget);
       expect(find.text('Cerrada hace 30 minutos'), findsOneWidget);
       expect(find.text('Abierta por el vendedor'), findsNothing);
-      expect(find.text('Recuperar'), findsNothing);
+      expect(find.text('Recuperar').hitTestable(), findsNothing);
       // Its top: at 2× on 320 dp the card's middle is under the bottom bar.
       await tester.tap(find.text('PAGADO AL COMPRADOR'));
       await tester.pumpAndSettle();

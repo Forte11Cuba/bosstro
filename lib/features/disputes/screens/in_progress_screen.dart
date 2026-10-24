@@ -52,14 +52,19 @@ class InProgressScreen extends ConsumerWidget {
           TabHeader(
             title: l10n.inProgressTitle,
             // Recover brings back an open dispute: not a closed one's job.
-            action:
-                section == MyDisputesSection.open
-                    ? LabeledIconAction(
-                      icon: Icons.history_rounded,
-                      label: l10n.recoverAction,
-                      onPressed: () => context.push(AppRoute.recover),
-                    )
-                    : null,
+            // On Closed it keeps its room, unseen, untappable and unheard,
+            // so the header (and the segments under it) never jump.
+            action: Visibility(
+              visible: section == MyDisputesSection.open,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: LabeledIconAction(
+                icon: Icons.history_rounded,
+                label: l10n.recoverAction,
+                onPressed: () => context.push(AppRoute.recover),
+              ),
+            ),
           ),
           const Expanded(child: _InProgressBody()),
         ],
