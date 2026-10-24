@@ -959,7 +959,7 @@ abstract class AppLocalizations {
   /// Row label: bond_enabled
   ///
   /// In en, this message translates to:
-  /// **'Anti-abuse bonds'**
+  /// **'Anti-abuse deposits'**
   String get nodeInfoBonds;
 
   /// Group header: the node's LND
@@ -2447,7 +2447,7 @@ abstract class AppLocalizations {
   /// Confirmation: the node's info is missing or does not say whether it uses anti-abuse bonds, so no slash can be chosen and none is sent
   ///
   /// In en, this message translates to:
-  /// **'Bosstro does not know whether this node uses bonds: its info could not be read or does not say. If there are any, none is slashed.'**
+  /// **'Bosstro does not know whether this node uses deposits: its info could not be read or does not say. If there are any, none is slashed.'**
   String get resolveBondsUnknown;
 
   /// Confirmation: the irreversibility warning, in red
@@ -2609,13 +2609,13 @@ abstract class AppLocalizations {
   /// Confirmation: heading of the anti-abuse bond choice, on a node that uses bonds
   ///
   /// In en, this message translates to:
-  /// **'Bonds'**
+  /// **'Deposits'**
   String get bondsTitle;
 
   /// Confirmation: under bondsTitle
   ///
   /// In en, this message translates to:
-  /// **'This node uses anti-abuse bonds. Choose whose is slashed, if anyone\'s. It goes in the same request.'**
+  /// **'This node uses anti-abuse deposits. Choose whose is slashed, if anyone\'s. It goes in the same request.'**
   String get bondsPickerHint;
 
   /// Bond choice: release both bonds (the default)
@@ -2627,7 +2627,7 @@ abstract class AppLocalizations {
   /// Under bondNoSlash
   ///
   /// In en, this message translates to:
-  /// **'Both bonds go back to their owners.'**
+  /// **'Every deposit goes back to its owner.'**
   String get bondNoSlashDetail;
 
   /// Bond choice: the buyer loses their bond
@@ -2639,7 +2639,7 @@ abstract class AppLocalizations {
   /// Under bondSlashBuyer
   ///
   /// In en, this message translates to:
-  /// **'The buyer loses their bond; the seller can claim their share.'**
+  /// **'The buyer loses their deposit; the seller can claim their share.'**
   String get bondSlashBuyerDetail;
 
   /// Bond choice: the seller loses their bond
@@ -2651,7 +2651,7 @@ abstract class AppLocalizations {
   /// Under bondSlashSeller
   ///
   /// In en, this message translates to:
-  /// **'The seller loses their bond; the buyer can claim their share.'**
+  /// **'The seller loses their deposit; the buyer can claim their share.'**
   String get bondSlashSellerDetail;
 
   /// Bond choice: both parties lose their bond
@@ -2663,19 +2663,19 @@ abstract class AppLocalizations {
   /// Under bondSlashBoth
   ///
   /// In en, this message translates to:
-  /// **'Both lose their bond.'**
+  /// **'Both lose their deposit.'**
   String get bondSlashBothDetail;
 
   /// Result: the node refused the slash of a party without a bond; nothing was resolved
   ///
   /// In en, this message translates to:
-  /// **'That party posted no bond'**
+  /// **'That party posted no deposit'**
   String get bondNotPostedTitle;
 
   /// Under bondNotPostedTitle
   ///
   /// In en, this message translates to:
-  /// **'The node has no bond from the party you chose to slash, so nothing was paid or refunded. Choose another bond option.'**
+  /// **'The node has no deposit from the party you chose to slash, so nothing was paid or refunded. Choose another deposit option.'**
   String get bondNotPostedBody;
 
   /// Result button: back to the confirmation to change the bond choice
@@ -2687,25 +2687,25 @@ abstract class AppLocalizations {
   /// Result: added under a successful resolution that slashed the buyer
   ///
   /// In en, this message translates to:
-  /// **'The buyer\'s bond was slashed.'**
+  /// **'The buyer\'s deposit was slashed.'**
   String get resolvedSlashedBuyer;
 
   /// Result: added under a successful resolution that slashed the seller
   ///
   /// In en, this message translates to:
-  /// **'The seller\'s bond was slashed.'**
+  /// **'The seller\'s deposit was slashed.'**
   String get resolvedSlashedSeller;
 
   /// Result: added under a successful resolution that slashed both
   ///
   /// In en, this message translates to:
-  /// **'Both bonds were slashed.'**
+  /// **'Both deposits were slashed.'**
   String get resolvedSlashedBoth;
 
   /// Info row label: which bonds this solver's resolution slashed
   ///
   /// In en, this message translates to:
-  /// **'Bonds'**
+  /// **'Deposits'**
   String get detailBonds;
 
   /// Info row label: the order's status when the dispute was opened (active or fiat sent)

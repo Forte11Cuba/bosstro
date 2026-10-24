@@ -504,7 +504,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nodeInfoPowFirst => 'PoW en el primer contacto';
 
   @override
-  String get nodeInfoBonds => 'Fianzas antiabuso';
+  String get nodeInfoBonds => 'Depósitos antiabuso';
 
   @override
   String get nodeInfoGroupLightning => 'Nodo Lightning';
@@ -1403,7 +1403,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get resolveBondsUnknown =>
-      'Bosstro no sabe si este nodo usa fianzas: su información no se pudo leer o no lo dice. Si las hay, no se penaliza ninguna.';
+      'Bosstro no sabe si este nodo usa depósitos: su información no se pudo leer o no lo dice. Si los hay, no se penaliza ninguno.';
 
   @override
   String get resolveIrreversible =>
@@ -1496,59 +1496,59 @@ class AppLocalizationsEs extends AppLocalizations {
   String get detailResult => 'Resultado';
 
   @override
-  String get bondsTitle => 'Fianzas';
+  String get bondsTitle => 'Depósitos';
 
   @override
   String get bondsPickerHint =>
-      'Este nodo usa fianzas antiabuso. Elige a quién se le penaliza, si a alguien. Va en la misma petición.';
+      'Este nodo usa depósitos antiabuso. Elige a quién se le penaliza, si a alguien. Va en la misma petición.';
 
   @override
   String get bondNoSlash => 'No penalizar';
 
   @override
-  String get bondNoSlashDetail => 'Las fianzas vuelven a las dos partes.';
+  String get bondNoSlashDetail => 'Cada depósito vuelve a su dueño.';
 
   @override
   String get bondSlashBuyer => 'Penalizar al comprador';
 
   @override
   String get bondSlashBuyerDetail =>
-      'El comprador pierde su fianza; el vendedor puede reclamar su parte.';
+      'El comprador pierde su depósito; el vendedor puede reclamar su parte.';
 
   @override
   String get bondSlashSeller => 'Penalizar al vendedor';
 
   @override
   String get bondSlashSellerDetail =>
-      'El vendedor pierde su fianza; el comprador puede reclamar su parte.';
+      'El vendedor pierde su depósito; el comprador puede reclamar su parte.';
 
   @override
   String get bondSlashBoth => 'Penalizar a los dos';
 
   @override
-  String get bondSlashBothDetail => 'Los dos pierden su fianza.';
+  String get bondSlashBothDetail => 'Los dos pierden su depósito.';
 
   @override
-  String get bondNotPostedTitle => 'Esa parte no depositó fianza';
+  String get bondNotPostedTitle => 'Esa parte no dejó depósito';
 
   @override
   String get bondNotPostedBody =>
-      'El nodo no tiene fianza de la parte que elegiste penalizar, así que no se pagó ni se devolvió nada. Elige otra opción de fianzas.';
+      'El nodo no tiene depósito de la parte que elegiste penalizar, así que no se pagó ni se devolvió nada. Elige otra opción de depósitos.';
 
   @override
   String get bondChooseAgain => 'Elegir otra opción';
 
   @override
-  String get resolvedSlashedBuyer => 'Se penalizó la fianza del comprador.';
+  String get resolvedSlashedBuyer => 'Se penalizó el depósito del comprador.';
 
   @override
-  String get resolvedSlashedSeller => 'Se penalizó la fianza del vendedor.';
+  String get resolvedSlashedSeller => 'Se penalizó el depósito del vendedor.';
 
   @override
-  String get resolvedSlashedBoth => 'Se penalizaron las fianzas de los dos.';
+  String get resolvedSlashedBoth => 'Se penalizaron los depósitos de los dos.';
 
   @override
-  String get detailBonds => 'Fianzas';
+  String get detailBonds => 'Depósitos';
 
   @override
   String get detailPreviousStatus => 'Estado antes de la disputa';

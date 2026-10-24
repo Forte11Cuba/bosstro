@@ -104,9 +104,9 @@ void main() {
     final core = _held(bonds: false);
     await _pump(tester, core);
     await _open(tester, 'Pagar al comprador');
-    expect(find.text('Fianzas'), findsNothing);
+    expect(find.text('Depósitos'), findsNothing);
     expect(find.text('No penalizar'), findsNothing);
-    expect(find.textContaining('ianza', skipOffstage: false), findsNothing);
+    expect(find.textContaining('epósito', skipOffstage: false), findsNothing);
     await tester.tap(_answer('Pagar al comprador'));
     await tester.pumpAndSettle();
     expect(core.bonds, [BondSlash.noSlash]);
@@ -117,11 +117,11 @@ void main() {
     final core = _held(bonds: null);
     await _pump(tester, core);
     await _open(tester, 'Pagar al comprador');
-    expect(find.text('Fianzas'), findsNothing);
+    expect(find.text('Depósitos'), findsNothing);
     expect(find.text('No penalizar'), findsNothing);
     await _scrollScreenTo(
       tester,
-      find.textContaining('Bosstro no sabe si este nodo usa fianzas'),
+      find.textContaining('Bosstro no sabe si este nodo usa depósitos'),
     );
     await tester.tap(_answer('Pagar al comprador'));
     await tester.pumpAndSettle();
@@ -139,7 +139,7 @@ void main() {
       await _open(tester, 'Pagar al comprador');
       await _scrollScreenTo(
         tester,
-        find.textContaining('Bosstro no sabe si este nodo usa fianzas'),
+        find.textContaining('Bosstro no sabe si este nodo usa depósitos'),
       );
       expect(tester.takeException(), isNull);
     });
@@ -183,7 +183,7 @@ void main() {
 
     expect(core.bonds, [BondSlash.seller]);
     expect(find.text('Resuelta: pagaste al comprador'), findsOneWidget);
-    expect(find.text('Se penalizó la fianza del vendedor.'), findsOneWidget);
+    expect(find.text('Se penalizó el depósito del vendedor.'), findsOneWidget);
   });
 
   testWidgets('a party with no bond: nothing resolved, choose again', (
@@ -200,7 +200,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(core.bonds, [BondSlash.both]);
-    expect(find.text('Esa parte no depositó fianza'), findsOneWidget);
+    expect(find.text('Esa parte no dejó depósito'), findsOneWidget);
     expect(find.text('Resuelta: devolviste al vendedor'), findsNothing);
     await tester.tap(find.text('Elegir otra opción'));
     await tester.pumpAndSettle();
@@ -215,7 +215,7 @@ void main() {
     await tester.tap(_answer('Devolver al vendedor'));
     await tester.pumpAndSettle();
     expect(core.bonds, [BondSlash.both, BondSlash.buyer]);
-    expect(find.text('Se penalizó la fianza del comprador.'), findsOneWidget);
+    expect(find.text('Se penalizó el depósito del comprador.'), findsOneWidget);
   });
 
   testWidgets('a closed dispute tells which bonds were slashed', (
@@ -243,7 +243,7 @@ void main() {
       200,
       scrollable: _info(),
     );
-    expect(find.text('Fianzas'), findsOneWidget);
+    expect(find.text('Depósitos'), findsOneWidget);
     expect(find.text('Penalizar al vendedor'), findsOneWidget);
   });
 
@@ -261,7 +261,7 @@ void main() {
         isButton: true,
         hasTapAction: true,
         label:
-            'Penalizar al comprador. El comprador pierde su fianza; el vendedor puede reclamar su parte.',
+            'Penalizar al comprador. El comprador pierde su depósito; el vendedor puede reclamar su parte.',
       ),
     );
     handle.dispose();
