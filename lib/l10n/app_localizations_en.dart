@@ -1033,13 +1033,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The node reopened it, or it belongs to another key. It is no longer in Your disputes.';
 
   @override
-  String get detailSelectTitle => 'Choose a dispute';
-
-  @override
-  String get detailSelectBody =>
-      'Its data and the chats with the buyer and the seller show here.';
-
-  @override
   String get chatSenderYou => 'You';
 
   @override

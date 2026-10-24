@@ -29,7 +29,7 @@ import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 NavigatorState? _openOn;
 
 /// Open the full-screen confirmation of [resolution] for [disputeId], over
-/// everything (the shell and the tablet split view). Returns once it closed.
+/// everything (the shell and the detail). Returns once it closed.
 Future<void> openResolutionScreen(
   BuildContext context, {
   required String disputeId,

@@ -1820,18 +1820,6 @@ abstract class AppLocalizations {
   /// **'The node reopened it, or it belongs to another key. It is no longer in Your disputes.'**
   String get detailNotYoursBody;
 
-  /// Tablet split view: shown on the right before a dispute is chosen
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a dispute'**
-  String get detailSelectTitle;
-
-  /// Explanation under detailSelectTitle
-  ///
-  /// In en, this message translates to:
-  /// **'Its data and the chats with the buyer and the seller show here.'**
-  String get detailSelectBody;
-
   /// Sender label of the solver's own chat message
   ///
   /// In en, this message translates to:

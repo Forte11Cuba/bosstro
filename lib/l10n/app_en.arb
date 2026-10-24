@@ -1272,14 +1272,6 @@
   "@detailNotYoursBody": {
     "description": "Explanation under detailNotYoursTitle"
   },
-  "detailSelectTitle": "Choose a dispute",
-  "@detailSelectTitle": {
-    "description": "Tablet split view: shown on the right before a dispute is chosen"
-  },
-  "detailSelectBody": "Its data and the chats with the buyer and the seller show here.",
-  "@detailSelectBody": {
-    "description": "Explanation under detailSelectTitle"
-  },
   "chatSenderYou": "You",
   "@chatSenderYou": {
     "description": "Sender label of the solver's own chat message"

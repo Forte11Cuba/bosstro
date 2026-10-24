@@ -1035,13 +1035,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'El nodo la reabrió, o es de otra clave. Ya no está en Tus disputas.';
 
   @override
-  String get detailSelectTitle => 'Elige una disputa';
-
-  @override
-  String get detailSelectBody =>
-      'Aquí se ven sus datos y los chats con el comprador y el vendedor.';
-
-  @override
   String get chatSenderYou => 'Tú';
 
   @override

@@ -7,9 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/core/app_theme.dart';
-import 'package:bosstro/features/disputes/providers/detail_providers.dart';
 import 'package:bosstro/features/disputes/providers/pending_providers.dart';
-import 'package:bosstro/features/disputes/screens/dispute_detail_screen.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/in_progress_dispute_row.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
@@ -24,8 +22,9 @@ import 'package:bosstro/shared/widgets/tab_app_bar.dart';
 /// one that has waited longest first (Mostrix's Disputes Management), and
 /// under them the ones it held that closed, read only. Recover
 /// a dispute opens from its header (Mostrix's Shift+R) and from its empty
-/// state. A tap on a dispute opens its detail and chats: pushed on a phone,
-/// beside the list from [AppBreakpoints.tablet] on.
+/// state. A tap on a dispute opens its detail and chats on a screen of its
+/// own, at any width: on a wide window too the detail needs the room (the
+/// chat, the files, the resolution), so there is no split view.
 class InProgressScreen extends ConsumerWidget {
   const InProgressScreen({super.key});
 
@@ -67,21 +66,10 @@ class _InProgressBody extends ConsumerWidget {
       ),
       AsyncData(:final value?)
           when value.disputes.isNotEmpty || value.closed.isNotEmpty =>
-        LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth < AppBreakpoints.tablet) {
-              return _InProgressList(
-                disputes: value.disputes,
-                closed: value.closed,
-                onOpen: (id) => context.push(AppRoute.disputeDetail(id)),
-              );
-            }
-            return _SplitView(
-              disputes: value.disputes,
-              closed: value.closed,
-              width: constraints.maxWidth,
-            );
-          },
+        _InProgressList(
+          disputes: value.disputes,
+          closed: value.closed,
+          onOpen: (id) => context.push(AppRoute.disputeDetail(id)),
         ),
       AsyncData() => ListEmptyState(
         sticker: 'thinking',
@@ -107,7 +95,6 @@ class _InProgressList extends ConsumerStatefulWidget {
     required this.disputes,
     required this.closed,
     required this.onOpen,
-    this.selected,
   });
 
   final List<TakenDisputeSummary> disputes;
@@ -115,9 +102,6 @@ class _InProgressList extends ConsumerStatefulWidget {
   /// The disputes this key held that closed, after a heading.
   final List<TakenDisputeSummary> closed;
   final ValueChanged<String> onOpen;
-
-  /// The dispute open beside the list (tablet).
-  final String? selected;
 
   @override
   ConsumerState<_InProgressList> createState() => _InProgressListState();
@@ -146,7 +130,6 @@ class _InProgressListState extends ConsumerState<_InProgressList> {
     key: ValueKey(dispute.disputeId),
     dispute: dispute,
     now: _now,
-    selected: dispute.disputeId == widget.selected,
     onTap: () => widget.onOpen(dispute.disputeId),
   );
 
@@ -190,58 +173,6 @@ class _InProgressListState extends ConsumerState<_InProgressList> {
       itemCount: items.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, i) => items[i],
-    );
-  }
-}
-
-/// The tablet layout: the list on the left, the chosen dispute's detail on
-/// the right. A dispute that leaves the list (it closed) stays open there,
-/// read only, until another is chosen.
-class _SplitView extends ConsumerWidget {
-  const _SplitView({
-    required this.disputes,
-    required this.closed,
-    required this.width,
-  });
-
-  final List<TakenDisputeSummary> disputes;
-  final List<TakenDisputeSummary> closed;
-  final double width;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final pal = ShellPalette.of(context);
-    final selected = ref.watch(selectedDisputeProvider);
-    final listWidth = (width * 0.4).clamp(300.0, 420.0);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          width: listWidth,
-          child: _InProgressList(
-            disputes: disputes,
-            closed: closed,
-            selected: selected,
-            onOpen:
-                (id) => ref.read(selectedDisputeProvider.notifier).state = id,
-          ),
-        ),
-        VerticalDivider(width: 1, thickness: 1, color: pal.border),
-        Expanded(
-          child:
-              selected == null
-                  ? ListEmptyState(
-                    sticker: 'dispute',
-                    title: l10n.detailSelectTitle,
-                    body: l10n.detailSelectBody,
-                  )
-                  : DisputeDetailView(
-                    key: ValueKey(selected),
-                    disputeId: selected,
-                  ),
-        ),
-      ],
     );
   }
 }
