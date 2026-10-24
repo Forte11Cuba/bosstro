@@ -12,6 +12,8 @@ import 'package:bosstro/features/disputes/screens/dispute_detail_screen.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/detail_segments.dart';
 import 'package:bosstro/features/disputes/widgets/in_progress_dispute_row.dart';
+import 'package:bosstro/features/observer/widgets/observer_card.dart';
+import 'package:bosstro/features/resolution/widgets/resolution_card.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
 
 import '../../support/screen_harness.dart';
@@ -251,7 +253,7 @@ void main() {
                   matching: find.byType(Scrollable),
                 )
                 .first,
-        last: _shown(find.byType(OrderDataCard)).last,
+        last: _shown(find.byType(ResolutionCard)),
       );
     });
 
@@ -304,6 +306,30 @@ void main() {
         textScale: 1,
       );
       expect(find.text('Esta disputa ya no es tuya'), findsOneWidget);
+    });
+
+    testWidgets('the facts come first, the resolution last', (tester) async {
+      // Tall enough that the whole list is built.
+      setSurface(tester, width: 600, height: 3000);
+      await _pump(
+        tester,
+        _held(),
+        location: AppRoute.disputeDetail(_a),
+        textScale: 1,
+      );
+      double top(Finder finder) => tester.getTopLeft(finder).dy;
+      final cards = _shown(find.byType(OrderDataCard));
+      expect(cards, findsNWidgets(3));
+      expect(top(find.text('ID de la disputa')), lessThan(top(cards.at(1))));
+      expect(top(find.text('ID de la orden')), lessThan(top(cards.at(2))));
+      expect(
+        top(find.text('Clave de trade del comprador')),
+        lessThan(top(_shown(find.byType(ObserverCard)))),
+      );
+      expect(
+        top(_shown(find.byType(ObserverCard))),
+        lessThan(top(_shown(find.byType(ResolutionCard)))),
+      );
     });
 
     testWidgets('ids and keys copy whole', (tester) async {

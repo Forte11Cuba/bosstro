@@ -13,10 +13,11 @@ import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 
 /// The Info segment of the dispute detail: what the take told this solver,
 /// as label → value rows (DS-CMP-24). Ids and keys read short and copy whole
-/// (DS-CMP-22); a value the node did not send reads "Not known". Under the
-/// dispute's own facts: while it is open, the way to resolve it (phase 6);
-/// once closed, how it ended; then the way into the chat between the parties
-/// (phase 5c).
+/// (DS-CMP-22); a value the node did not send reads "Not known". The facts
+/// come first (the dispute, with how it ended once closed; the order; the
+/// parties' keys), then the way into the chat between the parties (phase
+/// 5c), and last, while it is open, the way to resolve it (phase 6): the
+/// irreversible step comes after everything it is decided on.
 class DisputeInfoPane extends StatelessWidget {
   const DisputeInfoPane({super.key, required this.detail});
 
@@ -106,12 +107,6 @@ class DisputeInfoPane extends StatelessWidget {
               ),
           ],
         ),
-        if (!detail.isClosed) ...[
-          const SizedBox(height: 12),
-          ResolutionCard(detail: detail),
-        ],
-        const SizedBox(height: 12),
-        ObserverCard(disputeId: detail.disputeId),
         const SizedBox(height: 12),
         OrderDataCard(
           rows: [
@@ -186,6 +181,12 @@ class DisputeInfoPane extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        ObserverCard(disputeId: detail.disputeId),
+        if (!detail.isClosed) ...[
+          const SizedBox(height: 12),
+          ResolutionCard(detail: detail),
+        ],
       ],
     );
   }
