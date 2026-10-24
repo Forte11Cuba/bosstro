@@ -1396,8 +1396,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'The seller\'s hold invoice is canceled: the buyer receives nothing from this trade.';
 
   @override
-  String get resolveBondsNote =>
-      'Bonds, if any, go back to both parties; none is slashed.';
+  String get resolveBondsUnknown =>
+      'Bosstro does not know whether this node uses bonds: its info could not be read or does not say. If there are any, none is slashed.';
 
   @override
   String get resolveIrreversible =>

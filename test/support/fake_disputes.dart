@@ -194,9 +194,10 @@ class FakeDisputesCore implements DisputesCore {
           id: detail.disputeId,
           status: status,
           resolvedAs: resolvedAs,
-          bondSlash: resolvedAs == ResolvedAs.cooperativelyCanceled
-              ? BondSlash.noSlash
-              : bond,
+          bondSlash:
+              resolvedAs == ResolvedAs.cooperativelyCanceled
+                  ? BondSlash.noSlash
+                  : bond,
           bondsEnabled: detail.bondsEnabled,
         );
       }
@@ -281,7 +282,7 @@ DisputeDetail sampleDetail({
   DisputeStatus status = DisputeStatus.inProgress,
   ResolvedAs? resolvedAs,
   BondSlash? bondSlash,
-  bool bondsEnabled = false,
+  bool? bondsEnabled = false,
   String? orderPreviousStatus = 'fiat-sent',
   Resolution? unanswered,
   String? orderId = '5b9e1f7e-6f0e-4b8a-9c3d-2e1f0a9b8c7d',

@@ -391,7 +391,7 @@
   "resolveTradeFiat": "Intercambio: {fiat}",
   "payBuyerOtherSide": "Se liquida la factura retenida del vendedor: el vendedor no recupera estos sats.",
   "refundSellerOtherSide": "Se cancela la factura retenida del vendedor: el comprador no recibe nada de este intercambio.",
-  "resolveBondsNote": "Las fianzas, si las hay, vuelven a las dos partes; no se penaliza ninguna.",
+  "resolveBondsUnknown": "Bosstro no sabe si este nodo usa fianzas: su información no se pudo leer o no lo dice. Si las hay, no se penaliza ninguna.",
   "resolveIrreversible": "No se puede deshacer. Una vez enviada, Bosstro nunca la vuelve a enviar por su cuenta.",
   "resolveWaiting": "Esperando la respuesta del nodo. Mantén Bosstro abierto.",
   "resolvedPaidTitle": "Resuelta: pagaste al comprador",
