@@ -217,9 +217,10 @@ pub struct DisputeDetail {
     /// (they had). `None` when the take did not keep it. Dart words it.
     pub order_previous_status: Option<String>,
     /// Whether the node uses anti-abuse bonds (`bond_enabled` in its cached
-    /// kind 38385): only then the solver chooses which to slash. `false`
-    /// when the info was never read, so nothing is offered blind.
-    pub bonds_enabled: bool,
+    /// kind 38385): only then the solver chooses which to slash. `None` when
+    /// it is not known (the info was never read, or it does not say): nothing
+    /// is offered blind, and Dart says that it is not known.
+    pub bonds_enabled: Option<bool>,
     /// What paying the buyer sends them, sats: the order amount less the
     /// node's fee (mostrod's `do_payment` pays `amount - fee`).
     pub buyer_payout: Option<i64>,

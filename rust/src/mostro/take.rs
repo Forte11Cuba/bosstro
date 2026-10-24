@@ -577,8 +577,7 @@ pub(crate) async fn detail(dispute_id: &str) -> anyhow::Result<Option<DisputeDet
         .await
         .ok()
         .flatten()
-        .and_then(|info| info.bond_enabled)
-        .unwrap_or(false);
+        .and_then(|info| info.bond_enabled);
     Ok(Some(detail))
 }
 
@@ -606,7 +605,7 @@ pub(crate) fn detail_of(row: &DisputeRecord, solver: &str) -> Option<DisputeDeta
         resolved_as: taken.resolved_as,
         bond_slash: taken.bond_slash,
         order_previous_status: taken.order_previous_status.clone(),
-        bonds_enabled: false,
+        bonds_enabled: None,
         buyer_payout: taken
             .amount
             .map(|amount| amount.saturating_sub(taken.fee.unwrap_or(0)).max(0)),
@@ -851,6 +850,9 @@ pub(crate) mod tests {
         assert_eq!(detail.amount, Some(50_000));
         assert_eq!(detail.buyer_pubkey.as_deref(), Some("bb"));
         assert!(!detail.is_closed);
+        // Whether the node uses bonds comes from its info, read apart:
+        // until then it is not known, never taken as "no".
+        assert_eq!(detail.bonds_enabled, None);
         assert_eq!(detail_of(&row, &"cd".repeat(32)), None, "another key");
         row.status = DisputeStatus::Settled;
         assert!(detail_of(&row, &"ab".repeat(32)).unwrap().is_closed);

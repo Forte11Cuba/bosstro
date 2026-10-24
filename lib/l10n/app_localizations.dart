@@ -2444,11 +2444,11 @@ abstract class AppLocalizations {
   /// **'The seller\'s hold invoice is canceled: the buyer receives nothing from this trade.'**
   String get refundSellerOtherSide;
 
-  /// Confirmation: what happens to the anti-abuse bonds (no slash in this version)
+  /// Confirmation: the node's info is missing or does not say whether it uses anti-abuse bonds, so no slash can be chosen and none is sent
   ///
   /// In en, this message translates to:
-  /// **'Bonds, if any, go back to both parties; none is slashed.'**
-  String get resolveBondsNote;
+  /// **'Bosstro does not know whether this node uses bonds: its info could not be read or does not say. If there are any, none is slashed.'**
+  String get resolveBondsUnknown;
 
   /// Confirmation: the irreversibility warning, in red
   ///

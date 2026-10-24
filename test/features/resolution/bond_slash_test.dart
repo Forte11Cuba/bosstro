@@ -15,8 +15,9 @@ final _now = DateTime.fromMillisecondsSinceEpoch((_opened + 7200) * 1000);
 
 const _a = '8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c';
 
-/// A dispute this key holds, open, on a node that uses bonds or not.
-FakeDisputesCore _held({required bool bonds}) =>
+/// A dispute this key holds, open, on a node that uses bonds or not, or
+/// where that is not known (`null`).
+FakeDisputesCore _held({required bool? bonds}) =>
     FakeDisputesCore()
       ..held = [sampleTaken(id: _a)]
       ..details[_a] = sampleDetail(id: _a, bondsEnabled: bonds);
@@ -97,7 +98,7 @@ bool _chosen(WidgetTester tester, String label) =>
         .isNotEmpty;
 
 void main() {
-  testWidgets('a node without bonds offers no choice and sends none', (
+  testWidgets('a node without bonds says nothing of them and sends none', (
     tester,
   ) async {
     final core = _held(bonds: false);
@@ -105,9 +106,22 @@ void main() {
     await _open(tester, 'Pagar al comprador');
     expect(find.text('Fianzas'), findsNothing);
     expect(find.text('No penalizar'), findsNothing);
+    expect(find.textContaining('ianza', skipOffstage: false), findsNothing);
+    await tester.tap(_answer('Pagar al comprador'));
+    await tester.pumpAndSettle();
+    expect(core.bonds, [BondSlash.noSlash]);
+  });
+
+  testWidgets('where bonds are not known it says so, offers no choice and '
+      'sends none', (tester) async {
+    final core = _held(bonds: null);
+    await _pump(tester, core);
+    await _open(tester, 'Pagar al comprador');
+    expect(find.text('Fianzas'), findsNothing);
+    expect(find.text('No penalizar'), findsNothing);
     await _scrollScreenTo(
       tester,
-      find.textContaining('Las fianzas, si las hay'),
+      find.textContaining('Bosstro no sabe si este nodo usa fianzas'),
     );
     await tester.tap(_answer('Pagar al comprador'));
     await tester.pumpAndSettle();
@@ -118,6 +132,17 @@ void main() {
   // themes, with no overflow.
   for (final brightness in Brightness.values) {
     final theme = brightness.name;
+
+    testWidgets('bonds not known: the note fits, $theme', (tester) async {
+      setSurface(tester);
+      await _pump(tester, _held(bonds: null), brightness: brightness);
+      await _open(tester, 'Pagar al comprador');
+      await _scrollScreenTo(
+        tester,
+        find.textContaining('Bosstro no sabe si este nodo usa fianzas'),
+      );
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('a node with bonds: four choices, none by default, $theme', (
       tester,
@@ -137,8 +162,8 @@ void main() {
       }
       expect(_chosen(tester, 'No penalizar'), isTrue);
       expect(_chosen(tester, 'Penalizar al vendedor'), isFalse);
-      // The old note gives way to the choice.
-      expect(find.textContaining('Las fianzas, si las hay'), findsNothing);
+      // The choice, not the note of a node whose bonds are not known.
+      expect(find.textContaining('no sabe si este nodo'), findsNothing);
     });
   }
 

@@ -76,8 +76,9 @@ class _NotSent extends _Outcome {
 /// On a node that uses anti-abuse bonds (`bond_enabled` in its kind 38385,
 /// [DisputeDetail.bondsEnabled]) the solver also chooses whose bond is
 /// slashed, if anyone's (Mostrix's bond submenu): "Don't slash" by default.
-/// The choice goes in the same request; elsewhere nothing is offered and
-/// the request carries none.
+/// The choice goes in the same request. On a node without bonds nothing is
+/// offered or said; where it is not known, the screen says so, and the
+/// request carries no slash (mostrod then releases any bond).
 ///
 /// While the node answers, the answer shows its own spinner (DS-CMP-13) and
 /// there is no way back: leaving would lose what the node says. Then the
@@ -341,11 +342,14 @@ class _ConfirmationBody extends StatelessWidget {
           style: TextStyle(fontSize: 14, height: 1.45, color: pal.textBody),
         ),
         const SizedBox(height: 10),
-        if (detail.bondsEnabled) ...[
-          const SizedBox(height: 6),
-          _BondPicker(value: bond, onChanged: busy ? null : onBond),
-        ] else
-          Text(l10n.resolveBondsNote, style: secondary),
+        switch (detail.bondsEnabled) {
+          true => Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: _BondPicker(value: bond, onChanged: busy ? null : onBond),
+          ),
+          null => Text(l10n.resolveBondsUnknown, style: secondary),
+          false => const SizedBox.shrink(),
+        },
         const SizedBox(height: 16),
         _IrreversibleBanner(text: l10n.resolveIrreversible),
         if (busy) ...[

@@ -2488,7 +2488,7 @@ impl SseDecode for crate::api::take::DisputeDetail {
             <Option<crate::api::resolve::ResolvedAs>>::sse_decode(deserializer);
         let mut var_bondSlash = <Option<crate::api::resolve::BondSlash>>::sse_decode(deserializer);
         let mut var_orderPreviousStatus = <Option<String>>::sse_decode(deserializer);
-        let mut var_bondsEnabled = <bool>::sse_decode(deserializer);
+        let mut var_bondsEnabled = <Option<bool>>::sse_decode(deserializer);
         let mut var_buyerPayout = <Option<i64>>::sse_decode(deserializer);
         let mut var_sellerRefund = <Option<i64>>::sse_decode(deserializer);
         let mut var_unansweredResolution =
@@ -5309,7 +5309,7 @@ impl SseEncode for crate::api::take::DisputeDetail {
         <Option<crate::api::resolve::ResolvedAs>>::sse_encode(self.resolved_as, serializer);
         <Option<crate::api::resolve::BondSlash>>::sse_encode(self.bond_slash, serializer);
         <Option<String>>::sse_encode(self.order_previous_status, serializer);
-        <bool>::sse_encode(self.bonds_enabled, serializer);
+        <Option<bool>>::sse_encode(self.bonds_enabled, serializer);
         <Option<i64>>::sse_encode(self.buyer_payout, serializer);
         <Option<i64>>::sse_encode(self.seller_refund, serializer);
         <Option<crate::api::resolve::Resolution>>::sse_encode(

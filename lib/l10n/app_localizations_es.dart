@@ -1402,8 +1402,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Se cancela la factura retenida del vendedor: el comprador no recibe nada de este intercambio.';
 
   @override
-  String get resolveBondsNote =>
-      'Las fianzas, si las hay, vuelven a las dos partes; no se penaliza ninguna.';
+  String get resolveBondsUnknown =>
+      'Bosstro no sabe si este nodo usa fianzas: su información no se pudo leer o no lo dice. Si las hay, no se penaliza ninguna.';
 
   @override
   String get resolveIrreversible =>

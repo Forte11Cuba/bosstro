@@ -91,9 +91,10 @@ class DisputeDetail {
   final String? orderPreviousStatus;
 
   /// Whether the node uses anti-abuse bonds (`bond_enabled` in its cached
-  /// kind 38385): only then the solver chooses which to slash. `false`
-  /// when the info was never read, so nothing is offered blind.
-  final bool bondsEnabled;
+  /// kind 38385): only then the solver chooses which to slash. `None` when
+  /// it is not known (the info was never read, or it does not say): nothing
+  /// is offered blind, and Dart says that it is not known.
+  final bool? bondsEnabled;
 
   /// What paying the buyer sends them, sats: the order amount less the
   /// node's fee (mostrod's `do_payment` pays `amount - fee`).
@@ -129,7 +130,7 @@ class DisputeDetail {
     this.resolvedAs,
     this.bondSlash,
     this.orderPreviousStatus,
-    required this.bondsEnabled,
+    this.bondsEnabled,
     this.buyerPayout,
     this.sellerRefund,
     this.unansweredResolution,

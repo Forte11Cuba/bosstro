@@ -1769,9 +1769,9 @@
   "@refundSellerOtherSide": {
     "description": "Cancel confirmation: what happens to the other party"
   },
-  "resolveBondsNote": "Bonds, if any, go back to both parties; none is slashed.",
-  "@resolveBondsNote": {
-    "description": "Confirmation: what happens to the anti-abuse bonds (no slash in this version)"
+  "resolveBondsUnknown": "Bosstro does not know whether this node uses bonds: its info could not be read or does not say. If there are any, none is slashed.",
+  "@resolveBondsUnknown": {
+    "description": "Confirmation: the node's info is missing or does not say whether it uses anti-abuse bonds, so no slash can be chosen and none is sent"
   },
   "resolveIrreversible": "This cannot be undone. Once sent, Bosstro never sends it again by itself.",
   "@resolveIrreversible": {
