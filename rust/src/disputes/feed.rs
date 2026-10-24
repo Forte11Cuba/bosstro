@@ -876,9 +876,16 @@ mod tests {
         })
         .await;
 
-        // The updates said so, in order, for this node only.
+        // The updates said so, in order, for this node only. A row is stored
+        // before its update is sent, so the last one may still be on its
+        // way when the row reads closed: wait for it, do not just drain.
         let mut seen = Vec::new();
-        while let Ok(update) = rx.try_recv() {
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+        while seen.len() < 3 {
+            let left = deadline.saturating_duration_since(tokio::time::Instant::now());
+            let Ok(Ok(update)) = tokio::time::timeout(left, rx.recv()).await else {
+                break;
+            };
             assert_eq!(update.mostro_pubkey, node.public_key().to_hex());
             if let Some(d) = update.dispute {
                 seen.push((d.status, d.is_pending));
