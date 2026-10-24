@@ -1407,7 +1407,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String resolveTradeFiat(String fiat) {
-    return 'Intercambio: $fiat';
+    return 'Operación: $fiat';
   }
 
   @override
@@ -1416,7 +1416,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get refundSellerOtherSide =>
-      'Se cancela la factura retenida del vendedor: el comprador no recibe nada de este intercambio.';
+      'Se cancela la factura retenida del vendedor: el comprador no recibe nada de esta operación.';
 
   @override
   String get resolveBondsUnknown =>
@@ -1449,7 +1449,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get resolvedCoopBody =>
-      'El comprador y el vendedor cancelaron el intercambio entre ellos antes de tu petición, así que no pagaste ni devolviste nada. La disputa está cerrada.';
+      'El comprador y el vendedor cancelaron la operación entre ellos antes de tu petición, así que no pagaste ni devolviste nada. La disputa está cerrada.';
 
   @override
   String get readOnlySolverTitle => 'No puedes pagar ni devolver en este nodo';
