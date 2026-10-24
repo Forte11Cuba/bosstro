@@ -7,8 +7,8 @@ export 'package:bosstro/core/shell_palette.dart';
 
 // ── Responsive breakpoints ────────────────────────────────────────────────────
 
-/// Logical-pixel breakpoints (DS-SPC-4). Below [tablet] one column and the
-/// bottom bar; from [tablet] the dispute detail splits beside its list.
+/// Logical-pixel breakpoints (DS-SPC-4). The dispute detail opens on a
+/// screen of its own at any width (no split view since 2026-10-23).
 abstract final class AppBreakpoints {
   static const double tablet = 600;
   static const double desktop = 1200;

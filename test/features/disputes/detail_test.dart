@@ -149,8 +149,8 @@ Finder _sendButton() => _shown(
 );
 
 void main() {
-  // DS-A11Y-4: the detail, both chats and the split view at 320 dp (or a
-  // tablet), 2× text, Spanish, in both themes, with no overflow.
+  // DS-A11Y-4: the detail and both chats at 320 dp (and a wide window),
+  // 2× text, Spanish, in both themes, with no overflow.
   for (final brightness in Brightness.values) {
     final theme = brightness.name;
 
@@ -219,15 +219,18 @@ void main() {
       expect(find.text(note), findsOneWidget);
     });
 
-    testWidgets('the tablet split view fits, $theme', (tester) async {
-      setSurface(tester, width: 800, height: 1000);
+    testWidgets('a wide window opens the detail full screen, $theme', (
+      tester,
+    ) async {
+      setSurface(tester, width: 1280, height: 900);
       await _pump(tester, _held(), brightness: brightness);
-      expect(find.text('Elige una disputa'), findsOneWidget);
+      // No split view: the list alone, then the dispute on its own screen.
+      expect(find.byType(DisputeDetailView), findsNothing);
       await tester.tap(find.byType(InProgressDisputeRow).first);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.byType(DisputeDetailView), findsOneWidget);
-      expect(find.byType(DisputeDetailScreen), findsNothing, reason: 'beside');
+      expect(find.byType(DisputeDetailScreen), findsOneWidget);
+      expect(find.byType(InProgressDisputeRow), findsNothing);
       await _openSegment(tester, 'Comprador');
       expect(tester.takeException(), isNull);
       expect(find.byType(ChatBubble), findsWidgets);
@@ -255,21 +258,6 @@ void main() {
       expect(data.hasAction(SemanticsAction.tap), isTrue);
       expect(data.hint, 'Abrir la disputa');
       semantics.dispose();
-    });
-
-    testWidgets('the split view marks the open row and switches', (
-      tester,
-    ) async {
-      setSurface(tester, width: 900, height: 900);
-      await _pump(tester, _held(), textScale: 1);
-      final rows = find.byType(InProgressDisputeRow);
-      await tester.tap(rows.at(1));
-      await tester.pumpAndSettle();
-      expect(tester.widget<InProgressDisputeRow>(rows.at(1)).selected, isTrue);
-      expect(tester.widget<InProgressDisputeRow>(rows.at(0)).selected, isFalse);
-      await tester.tap(rows.at(0));
-      await tester.pumpAndSettle();
-      expect(tester.widget<InProgressDisputeRow>(rows.at(0)).selected, isTrue);
     });
   });
 

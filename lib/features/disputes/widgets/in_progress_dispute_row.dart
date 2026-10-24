@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:bosstro/core/app_theme.dart';
-import 'package:bosstro/core/disputes_palette.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
 import 'package:bosstro/features/resolution/screens/resolution_screen.dart'
@@ -14,15 +13,13 @@ import 'package:bosstro/shared/widgets/status_chip.dart';
 /// One dispute this solver holds: its status (lime, the solver's move,
 /// amendment 3), the amount in sats and fiat from the take's answer, who
 /// opened it, how long ago it was taken, and its short id, which copies the
-/// full one (DS-CMP-22). A closed one reads neutral, with how it ended. A tap opens its detail and chats ([onTap]); in the
-/// tablet split view the row open beside the list is [selected].
+/// full one (DS-CMP-22). A closed one reads neutral, with how it ended. A tap opens its detail and chats ([onTap]).
 class InProgressDisputeRow extends StatelessWidget {
   const InProgressDisputeRow({
     super.key,
     required this.dispute,
     required this.now,
     this.onTap,
-    this.selected = false,
   });
 
   final TakenDisputeSummary dispute;
@@ -31,7 +28,6 @@ class InProgressDisputeRow extends StatelessWidget {
   final DateTime now;
 
   final VoidCallback? onTap;
-  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +35,9 @@ class InProgressDisputeRow extends StatelessWidget {
     final pal = ShellPalette.of(context);
     return Semantics(
       button: onTap != null,
-      selected: selected,
       hint: onTap == null ? null : l10n.openDisputeHint,
       child: SurfaceCard(
         onTap: onTap,
-        borderColor:
-            selected ? DisputesPalette.of(context).segmentActiveBorder : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -51,11 +51,3 @@ class DisputeDetailNotifier
     }
   }
 }
-
-/// The dispute open beside the list in the tablet split view (In progress);
-/// none after a node or key change.
-final selectedDisputeProvider = StateProvider<String?>((ref) {
-  ref.watch(activeNodeProvider);
-  ref.watch(solverKeyProvider);
-  return null;
-});
