@@ -275,6 +275,8 @@
   "detailOpenedAt": "Aperta",
   "detailTakenAt": "Presa in carico",
   "detailAmount": "Importo",
+  "detailCurrency": "Valuta",
+  "detailFactsTitle": "Disputa e ordine",
   "detailFiatAmount": "Importo fiat",
   "detailPaymentMethod": "Metodo di pagamento",
   "detailPremium": "Premio",

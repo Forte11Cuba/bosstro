@@ -275,6 +275,8 @@
   "detailOpenedAt": "Eröffnet",
   "detailTakenAt": "Übernommen",
   "detailAmount": "Betrag",
+  "detailCurrency": "Währung",
+  "detailFactsTitle": "Streitfall und Order",
   "detailFiatAmount": "Fiat-Betrag",
   "detailPaymentMethod": "Zahlungsmethode",
   "detailPremium": "Aufschlag",

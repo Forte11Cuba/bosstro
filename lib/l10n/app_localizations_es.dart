@@ -998,6 +998,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get detailAmount => 'Monto';
 
   @override
+  String get detailCurrency => 'Moneda';
+
+  @override
+  String get detailFactsTitle => 'Disputa y orden';
+
+  @override
   String get detailFiatAmount => 'Monto en fiat';
 
   @override

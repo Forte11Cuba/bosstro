@@ -999,6 +999,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get detailAmount => 'Importo';
 
   @override
+  String get detailCurrency => 'Valuta';
+
+  @override
+  String get detailFactsTitle => 'Disputa e ordine';
+
+  @override
   String get detailFiatAmount => 'Importo fiat';
 
   @override

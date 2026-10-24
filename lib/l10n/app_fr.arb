@@ -275,6 +275,8 @@
   "detailOpenedAt": "Ouverture",
   "detailTakenAt": "Prise en charge",
   "detailAmount": "Montant",
+  "detailCurrency": "Devise",
+  "detailFactsTitle": "Litige et ordre",
   "detailFiatAmount": "Montant fiat",
   "detailPaymentMethod": "Moyen de paiement",
   "detailPremium": "Prime",

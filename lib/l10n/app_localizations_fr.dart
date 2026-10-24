@@ -1000,6 +1000,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get detailAmount => 'Montant';
 
   @override
+  String get detailCurrency => 'Devise';
+
+  @override
+  String get detailFactsTitle => 'Litige et ordre';
+
+  @override
   String get detailFiatAmount => 'Montant fiat';
 
   @override

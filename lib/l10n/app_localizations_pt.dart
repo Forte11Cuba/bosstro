@@ -1001,6 +1001,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get detailAmount => 'Valor';
 
   @override
+  String get detailCurrency => 'Moeda';
+
+  @override
+  String get detailFactsTitle => 'Disputa e ordem';
+
+  @override
   String get detailFiatAmount => 'Valor em fiat';
 
   @override

@@ -169,7 +169,12 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       expect(find.text('Disputa'), findsOneWidget);
+      // Folded until the solver opens it.
+      expect(find.text('Disputa y orden'), findsOneWidget);
+      expect(find.text('ID de la disputa'), findsNothing);
+      await openDisputeFacts(tester);
       expect(find.text('ID de la disputa'), findsOneWidget);
+      expect(tester.takeException(), isNull);
       // Every row, down to the last, fits.
       for (final text in [
         '75.000 sats',
@@ -278,7 +283,7 @@ void main() {
       await tester.tap(find.byType(InProgressDisputeRow).first);
       await tester.pumpAndSettle();
       expect(find.byType(DisputeDetailScreen), findsOneWidget);
-      expect(find.text('ID de la disputa'), findsOneWidget);
+      expect(find.text('Disputa y orden'), findsOneWidget);
     });
 
     testWidgets('a row says it opens the dispute', (tester) async {
@@ -317,11 +322,20 @@ void main() {
         location: AppRoute.disputeDetail(_a),
         textScale: 1,
       );
+      await openDisputeFacts(tester);
       double top(Finder finder) => tester.getTopLeft(finder).dy;
       final cards = _shown(find.byType(OrderDataCard));
-      expect(cards, findsNWidgets(3));
-      expect(top(find.text('ID de la disputa')), lessThan(top(cards.at(1))));
-      expect(top(find.text('ID de la orden')), lessThan(top(cards.at(2))));
+      expect(find.byType(CollapsibleDataCard), findsOneWidget);
+      expect(cards, findsOneWidget);
+      expect(
+        top(find.text('ID de la disputa')),
+        lessThan(top(find.text('ID de la orden'))),
+      );
+      expect(top(find.text('Comisión del nodo')), lessThan(top(cards)));
+      expect(
+        top(find.text('Moneda')),
+        lessThan(top(find.text('Monto en fiat'))),
+      );
       expect(
         top(find.text('Clave de trade del comprador')),
         lessThan(top(_shown(find.byType(ObserverCard)))),
@@ -349,6 +363,7 @@ void main() {
         location: AppRoute.disputeDetail(_a),
         textScale: 1,
       );
+      await openDisputeFacts(tester);
       await _scrollInfoTo(tester, find.text('ID de la orden'));
       await tester.tap(find.text('ID de la orden'));
       await tester.pump();

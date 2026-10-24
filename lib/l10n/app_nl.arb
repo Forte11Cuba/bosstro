@@ -275,6 +275,8 @@
   "detailOpenedAt": "Geopend",
   "detailTakenAt": "Opgepakt",
   "detailAmount": "Bedrag",
+  "detailCurrency": "Valuta",
+  "detailFactsTitle": "Dispuut en order",
   "detailFiatAmount": "Fiatbedrag",
   "detailPaymentMethod": "Betaalmethode",
   "detailPremium": "Premie",

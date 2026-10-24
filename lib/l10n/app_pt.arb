@@ -275,6 +275,8 @@
   "detailOpenedAt": "Aberta em",
   "detailTakenAt": "Assumida em",
   "detailAmount": "Valor",
+  "detailCurrency": "Moeda",
+  "detailFactsTitle": "Disputa e ordem",
   "detailFiatAmount": "Valor em fiat",
   "detailPaymentMethod": "Método de pagamento",
   "detailPremium": "Prêmio",

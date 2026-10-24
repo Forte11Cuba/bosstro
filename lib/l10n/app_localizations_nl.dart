@@ -1002,6 +1002,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get detailAmount => 'Bedrag';
 
   @override
+  String get detailCurrency => 'Valuta';
+
+  @override
+  String get detailFactsTitle => 'Dispuut en order';
+
+  @override
   String get detailFiatAmount => 'Fiatbedrag';
 
   @override

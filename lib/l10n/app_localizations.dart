@@ -1758,6 +1758,18 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get detailAmount;
 
+  /// Data row: the fiat currency the order trades in (its code, as CUP or EUR)
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get detailCurrency;
+
+  /// Title of the Info card that folds the dispute's and the order's facts; closed by default
+  ///
+  /// In en, this message translates to:
+  /// **'Dispute and order'**
+  String get detailFactsTitle;
+
   /// Data row: the order's fiat amount
   ///
   /// In en, this message translates to:
