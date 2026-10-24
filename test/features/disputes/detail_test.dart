@@ -12,6 +12,7 @@ import 'package:bosstro/features/disputes/screens/dispute_detail_screen.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
 import 'package:bosstro/features/disputes/widgets/detail_segments.dart';
 import 'package:bosstro/features/disputes/widgets/in_progress_dispute_row.dart';
+import 'package:bosstro/shared/widgets/order_data_card.dart';
 
 import '../../support/screen_harness.dart';
 
@@ -236,6 +237,37 @@ void main() {
       expect(find.byType(ChatBubble), findsWidgets);
     });
   }
+
+  group('System navigation bar', () {
+    testWidgets('the end of Info clears it', (tester) async {
+      setSurface(tester, padding: systemBars);
+      await _pump(tester, _held(), location: AppRoute.disputeDetail(_a));
+      await expectClearOfNavBar(
+        tester,
+        scrollable:
+            find
+                .descendant(
+                  of: find.byType(IndexedStack),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+        last: _shown(find.byType(OrderDataCard)).last,
+      );
+    });
+
+    testWidgets('the composer clears it', (tester) async {
+      setSurface(tester, padding: systemBars);
+      await _pump(tester, _held(), location: AppRoute.disputeDetail(_a));
+      await _openSegment(tester, 'Comprador');
+      // The composer's own box reaches the edge (its SafeArea pads inside
+      // it); its field is what must clear the bar.
+      final field = find.descendant(
+        of: _shown(find.byType(ChatComposer)),
+        matching: find.byType(TextField),
+      );
+      expect(tester.getBottomLeft(field).dy, lessThanOrEqualTo(640 - 48));
+    });
+  });
 
   group('In progress', () {
     testWidgets('a tap on a phone pushes the detail', (tester) async {

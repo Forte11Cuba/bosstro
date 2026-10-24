@@ -35,25 +35,30 @@ class RecoverScreen extends ConsumerWidget {
         title: l10n.recoverTitle,
         onBack: () => Navigator.of(context).maybePop(),
       ),
-      body: switch (candidates) {
-        AsyncError() => ListEmptyState(
-          sticker: 'thinking',
-          title: l10n.pendingLoadErrorTitle,
-          body: l10n.pendingLoadErrorBody,
-        ),
-        AsyncData(:final value?) when value.isNotEmpty => _RecoverList(
-          disputes: value,
-        ),
-        AsyncData() => ListEmptyState(
-          sticker: 'thinking',
-          title: l10n.recoverEmptyTitle,
-          body: l10n.recoverEmptyBody,
-        ),
-        _ => SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: ListSkeleton(label: l10n.loadingDisputes, rowHeight: 132),
-        ),
-      },
+      // Over the shell, with no bottom bar: the SafeArea keeps the last
+      // dispute clear of the system navigation bar (../app #267).
+      body: SafeArea(
+        top: false,
+        child: switch (candidates) {
+          AsyncError() => ListEmptyState(
+            sticker: 'thinking',
+            title: l10n.pendingLoadErrorTitle,
+            body: l10n.pendingLoadErrorBody,
+          ),
+          AsyncData(:final value?) when value.isNotEmpty => _RecoverList(
+            disputes: value,
+          ),
+          AsyncData() => ListEmptyState(
+            sticker: 'thinking',
+            title: l10n.recoverEmptyTitle,
+            body: l10n.recoverEmptyBody,
+          ),
+          _ => SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            child: ListSkeleton(label: l10n.loadingDisputes, rowHeight: 132),
+          ),
+        },
+      ),
     );
   }
 }

@@ -124,6 +124,30 @@ void main() {
     });
   }
 
+  testWidgets('the end of Recover clears the system navigation bar', (
+    tester,
+  ) async {
+    setSurface(tester, padding: systemBars);
+    final core =
+        FakeDisputesCore()
+          ..candidates = [
+            sampleDispute(id: _a, status: DisputeStatus.inProgress),
+            sampleDispute(id: _b, status: DisputeStatus.inProgress),
+          ];
+    await _pump(tester, core, location: AppRoute.recover);
+    await expectClearOfNavBar(
+      tester,
+      scrollable:
+          find
+              .descendant(
+                of: find.byType(RecoverScreen),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+      last: find.byType(PendingDisputeRow).last,
+    );
+  });
+
   group('taking from Pending', () {
     testWidgets('a confirmed take waits for the node in the dialog, then '
         'moves the dispute to Your disputes', (tester) async {
