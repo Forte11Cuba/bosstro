@@ -9,7 +9,7 @@ import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/boxed_field.dart';
 import 'package:bosstro/shared/widgets/mostro_modal.dart';
 
-/// Add a node by its public key, with an optional name (../app's
+/// Add a node by its public key, with an optional name (MostroP2P/app's
 /// `AddCustomNodeDialog`). Completes with the added node, or null when the
 /// solver backs out. The core checks the key: an error stays in the dialog,
 /// under the field (DS-CMP-15).

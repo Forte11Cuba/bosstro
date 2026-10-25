@@ -1,5 +1,5 @@
 //! Long-lived relay subscriptions that survive a relay being down when they
-//! are (re)issued. From ../app's `nostr/live_subs.rs`, with its logging
+//! are (re)issued. From MostroP2P/app's `nostr/live_subs.rs`, with its logging
 //! module replaced by `log`; phase 3's kind 38386 subscription is the first
 //! user (`crate::disputes::feed`).
 //!
@@ -9,8 +9,8 @@
 //! while a relay is disconnected therefore never exists on that relay, not
 //! even after it reconnects. Replacing a subscription (CLOSE + REQ) while the
 //! pool is offline — which is what a resume does — deletes it everywhere, for
-//! the rest of the session (in ../app the bulk kind-14 feed died exactly like
-//! that, and a buyer never saw the daemon's `add-invoice`).
+//! the rest of the session (in MostroP2P/app the bulk kind-14 feed died exactly
+//! like that, and a buyer never saw the daemon's `add-invoice`).
 //!
 //! So the intent is recorded here, apart from the SDK's registries, and
 //! [`LiveSubs::repair_relay`] re-issues whatever a relay is missing the moment
@@ -105,8 +105,8 @@ impl LiveSubs {
     /// For subscriptions whose caller needs coverage *now* (a per-trade
     /// watcher about to publish a request): nothing is recorded on failure.
     /// On success the intent is kept, so the relays that refused are repaired
-    /// when they connect. Kept from ../app for phase 4's take, which needs the
-    /// daemon's answer covered before it sends the request.
+    /// when they connect. Kept from MostroP2P/app for phase 4's take, which
+    /// needs the daemon's answer covered before it sends the request.
     #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) async fn open(
         &self,
@@ -449,8 +449,8 @@ mod tests {
         assert_eq!(missing, vec![absent.to_string(), stale.to_string()]);
     }
 
-    /// ../app's field failure: a subscription replaced while every relay was
-    /// down never came back although the relays did. In Bosstro that is a
+    /// MostroP2P/app's field failure: a subscription replaced while every relay
+    /// was down never came back although the relays did. In Bosstro that is a
     /// node switch made offline.
     #[tokio::test]
     async fn a_subscription_replaced_while_offline_is_reissued_when_the_relay_connects() {

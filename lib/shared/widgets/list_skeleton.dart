@@ -7,7 +7,7 @@ import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 /// The shimmer skeleton of a list that loads (DS-CMP-13), never a centered
 /// spinner: [count] placeholder blocks of [rowHeight], with the card radius
 /// and list spacing, in the inset tone pulsing one step lighter. From
-/// ../app's `OrderListSkeleton`.
+/// MostroP2P/app's `OrderListSkeleton`.
 ///
 /// The pulse stops when the platform asks for no animations (DS-MOT-3).
 /// Read as one [label] by screen readers.

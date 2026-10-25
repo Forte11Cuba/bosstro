@@ -1,7 +1,7 @@
-//! Asking a `Connected` relay whether it is still there. From ../app's
+//! Asking a `Connected` relay whether it is still there. From MostroP2P/app's
 //! `nostr/relay_probe.rs`, trimmed: its resume nudge
 //! (`reconnect_disconnected_now`) waits for a resume path, which Bosstro does
-//! not have yet. The issue and PR numbers below are ../app's.
+//! not have yet. The issue and PR numbers below are MostroP2P/app's.
 //!
 //! Every recovery path in this client is keyed on an **observed** change:
 //! a relay transitioning to `Disconnected`, the pool going `Online`, a relay

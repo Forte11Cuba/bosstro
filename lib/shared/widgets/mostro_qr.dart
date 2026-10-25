@@ -6,7 +6,7 @@ import 'package:qr/qr.dart';
 import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/qr_palette.dart';
 
-/// The Mostro QR, ported from ../app (MostroP2P/app#851), the website's
+/// The Mostro QR, ported from MostroP2P/app#851, the website's
 /// design (MostroP2P/MostroP2P.github.io#34): round dots, rounded finder eyes with a
 /// green centre and, when there is a [logo], a cleared centre that shows it.
 /// It sits on a white card in both themes; the card's margin is the quiet

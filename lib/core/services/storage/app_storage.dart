@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bosstro/core/services/storage/app_data_dir.dart'
     if (dart.library.js_interop) 'package:bosstro/core/services/storage/app_data_dir_web.dart';
 
-/// Where the Rust core keeps its persistent store (A4), from ../app's
+/// Where the Rust core keeps its persistent store (A4), from MostroP2P/app's
 /// `core/storage/db_location.dart`.
 ///
 /// On native platforms `init_db` takes a file path inside the app data

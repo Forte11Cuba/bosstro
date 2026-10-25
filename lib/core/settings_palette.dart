@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Tokens of settings, the node selector and the solver key screens, added
 /// on top of `ShellPalette`, which it shares for surfaces and text roles.
 ///
-/// Values are ../app's `SettingsPalette` for the same roles.
+/// Values are MostroP2P/app's `SettingsPalette` for the same roles.
 /// `test/core/settings_palette_contrast_test.dart` locks every text pair.
 @immutable
 class SettingsPalette {
@@ -50,7 +50,7 @@ class SettingsPalette {
   final Color dotOnline;
   final Color dotOffline;
 
-  /// The boxed field a key is pasted into (DS-CMP-11): ../app's invoice
+  /// The boxed field a key is pasted into (DS-CMP-11): MostroP2P/app's invoice
   /// textarea.
   final Color fieldFill;
   final Color fieldBorder;
@@ -71,7 +71,7 @@ class SettingsPalette {
   final Color warnBorder;
   final Color warnInk;
 
-  /// A node card's hairline, and the active node's lime one. ../app's
+  /// A node card's hairline, and the active node's lime one. MostroP2P/app's
   /// `NodeSelectorPalette.border` / `.borderSelected`.
   final Color cardBorder;
   final Color cardBorderSelected;
@@ -85,7 +85,7 @@ class SettingsPalette {
   final Color trustedInk;
 
   /// Fallback node avatar: the initial on a disc whose tint comes from the
-  /// node's name, never a generated identicon (../app).
+  /// node's name, never a generated identicon (MostroP2P/app).
   final Color avatarLimeBg;
   final Color avatarYellowBg;
   final Color avatarLimeInk;

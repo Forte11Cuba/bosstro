@@ -1,4 +1,4 @@
-//! Platform runtime shims, ported from ../app's `rt.rs`.
+//! Platform runtime shims, ported from MostroP2P/app's `rt.rs`.
 //!
 //! Native builds run on the Tokio runtime; `wasm32` has none, so task spawning
 //! and timers are backed by `wasm-bindgen-futures` and `wasmtimer`. Call sites

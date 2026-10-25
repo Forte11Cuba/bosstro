@@ -14,7 +14,7 @@ final relaysCoreProvider = Provider<RelaysCore>(
 /// publishes. Errors when the pool never started (`NotInitialized`).
 ///
 /// Not auto-disposed: the core's broadcast sender is process-wide and a
-/// pending `next()` cannot be cancelled from Dart (../app), so one
+/// pending `next()` cannot be cancelled from Dart (MostroP2P/app), so one
 /// subscription serves the whole process.
 final relaysProvider = AsyncNotifierProvider<RelaysNotifier, List<RelayInfo>>(
   RelaysNotifier.new,

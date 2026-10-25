@@ -32,8 +32,9 @@ Future<void> _startup(StartupSequence startup) async {
   await startup.required('loading the engine', () => RustLib.init());
 
   // The persistent store (A4): a SQLite file off the web, an IndexedDB
-  // database on it. Before anything that reads it. Optional, as in ../app:
-  // without it the session runs from memory and the node choice is not kept.
+  // database on it. Before anything that reads it. Optional, as in
+  // MostroP2P/app: without it the session runs from memory and the node choice
+  // is not kept.
   await startup.optional(
     'opening the local database',
     () => openDatabase(initDb: rust.initDb),

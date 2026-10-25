@@ -1,4 +1,4 @@
-//! The Mostro node registry and the active node (D5), from ../app's
+//! The Mostro node registry and the active node (D5), from MostroP2P/app's
 //! `api/nodes.rs` and `api/settings.rs` (`set_active_mostro_node`).
 //!
 //! The registry merges three sources into [`MostroNodeEntry`] rows:
@@ -7,7 +7,7 @@
 //! 2. nodes the solver added, persisted in the settings store,
 //! 3. cached kind 0 display metadata (name, picture, about, website).
 //!
-//! Unlike ../app there is no default node: until the solver picks one,
+//! Unlike MostroP2P/app there is no default node: until the solver picks one,
 //! [`active_node`] is `None` and nothing node-specific runs.
 //!
 //! Errors are stable markers (`PrivateKeyNotAllowed`, `InvalidPubkey`,
@@ -53,8 +53,8 @@ pub struct MostroNodePicture {
 }
 
 /// Serializes every load-modify-save cycle on the registry's settings blobs
-/// and the active-node write, as in ../app: the blobs are written whole, so
-/// two concurrent cycles would drop one side's update, and a removal must
+/// and the active-node write, as in MostroP2P/app: the blobs are written whole,
+/// so two concurrent cycles would drop one side's update, and a removal must
 /// not interleave with a selection of the same node. Never held across a
 /// relay round trip.
 static REGISTRY_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
@@ -122,8 +122,8 @@ fn is_trusted_pubkey(pubkey: &str) -> bool {
         .any(|n| n.pubkey == pubkey)
 }
 
-/// The trusted registry in the order the solver sees it: ../app's default
-/// node ("Mostro") first, then the communities in registry order.
+/// The trusted registry in the order the solver sees it: MostroP2P/app's
+/// default node ("Mostro") first, then the communities in registry order.
 fn trusted_in_display_order() -> Vec<&'static crate::config::TrustedNodeConfig> {
     let nodes = crate::config::TRUSTED_MOSTRO_NODES;
     nodes
@@ -138,8 +138,8 @@ fn trusted_in_display_order() -> Vec<&'static crate::config::TrustedNodeConfig> 
 }
 
 /// Drop custom entries whose pubkey has since joined the trusted registry,
-/// which would otherwise stay as an undeletable duplicate (../app). Returns
-/// whether anything was removed.
+/// which would otherwise stay as an undeletable duplicate (MostroP2P/app).
+/// Returns whether anything was removed.
 fn drop_promoted_customs(custom: &mut Vec<CustomNode>) -> bool {
     let before = custom.len();
     custom.retain(|n| !is_trusted_pubkey(&n.pubkey));
@@ -232,7 +232,8 @@ async fn save_metadata_cache(
     .await
 }
 
-/// The registry against `db`, with the cleanups ../app runs on every read.
+/// The registry against `db`, with the cleanups MostroP2P/app runs on every
+/// read.
 async fn list_in(db: &impl Storage, active: Option<&str>) -> Result<Vec<MostroNodeEntry>> {
     let custom = {
         let _guard = registry_lock().lock().await;
@@ -292,9 +293,9 @@ async fn remove_in(db: &impl Storage, pubkey: &str) -> Result<()> {
 
 // ── Public API: the registry ─────────────────────────────────────────────────
 
-/// The registry: "Mostro" (../app's default node) first, the other trusted
-/// communities in registry order, then the solver's own nodes in the order
-/// they were added, each merged with cached kind 0 metadata.
+/// The registry: "Mostro" (MostroP2P/app's default node) first, the other
+/// trusted communities in registry order, then the solver's own nodes in the
+/// order they were added, each merged with cached kind 0 metadata.
 ///
 /// An active node in neither list is auto-imported as a custom node, so the
 /// selector always shows the node in use.

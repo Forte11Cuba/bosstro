@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 /// The base palette: page, cards, the bottom bar, app bars, modals and the
 /// text roles every area shares. The area palettes ([DisputesPalette],
 /// [ResolutionPalette], [SettingsPalette]) add their own tokens on top of it,
-/// as `OrderBookPalette` is the base in ../app.
+/// as `OrderBookPalette` is the base in MostroP2P/app.
 ///
-/// Values are the canonical ones of the design guide (§2.3), which ../app's
-/// `OrderBookPalette` already holds. `ThemeData` is built from this palette
-/// (`app_theme.dart`), so a widget that leaves a value to the theme still
-/// gets it from here. Every text role / surface pair is locked by
+/// Values are the canonical ones of the design guide (§2.3), which
+/// MostroP2P/app's `OrderBookPalette` already holds. `ThemeData` is built from
+/// this palette (`app_theme.dart`), so a widget that leaves a value to the
+/// theme still gets it from here. Every text role / surface pair is locked by
 /// `test/core/shell_palette_contrast_test.dart`.
 @immutable
 class ShellPalette {
@@ -141,7 +141,8 @@ class ShellPalette {
     textBody: Color(0xFFD6DCE8),
     textSecondary: Color(0xFF8B97AD),
     textTertiary: Color(0xFF7E899E),
-    // ../app's handoff #6B7589 is 3.5:1 on the card — lightened to pass AA.
+    // MostroP2P/app's handoff #6B7589 is 3.5:1 on the card — lightened to
+    // pass AA.
     textFaint: Color(0xFF808A9E),
     divider: Color(0xFF4A5364),
     notif: Color(0xFFFF6B6B),

@@ -39,7 +39,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           onBack: () => context.pop(),
         ),
         // Over the shell, with no bottom bar: the SafeArea keeps the last
-        // warning clear of the system navigation bar (../app #267).
+        // warning clear of the system navigation bar (MostroP2P/app#267).
         body: SafeArea(
           top: false,
           child: SingleChildScrollView(

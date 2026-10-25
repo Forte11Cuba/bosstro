@@ -108,7 +108,7 @@ List<Override> fakeCoreOverrides({
 }
 
 /// A phone's system bars: a 24 dp status bar and a 48 dp navigation bar
-/// (three buttons), as ../app's layout tests. Android 15 draws the app
+/// (three buttons), as MostroP2P/app's layout tests. Android 15 draws the app
 /// behind them (edge to edge), so the app must keep its content clear.
 const systemBars = FakeViewPadding(top: 24, bottom: 48);
 

@@ -26,7 +26,7 @@ import 'package:bosstro/shared/widgets/snackbar.dart';
 /// with nowhere to go back to: choosing a node leads to the tabs. From
 /// Settings → Node: choosing one switches to it and returns.
 ///
-/// Tapping a card chooses it; there is no confirm button (../app). Each
+/// Tapping a card chooses it; there is no confirm button (MostroP2P/app). Each
 /// card's info button opens the node's instance info, which can choose it
 /// too.
 class ChooseNodeScreen extends ConsumerStatefulWidget {

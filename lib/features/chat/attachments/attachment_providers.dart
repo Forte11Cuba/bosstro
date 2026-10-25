@@ -10,8 +10,8 @@ import 'package:bosstro/features/solver_key/providers/solver_key_providers.dart'
 /// One attachment: its message in one conversation.
 typedef AttachmentRef = ({String disputeId, ChatParty party, String messageId});
 
-/// How many decrypted bytes stay in memory across bubbles, as ../app. Past
-/// it the oldest go, and are decrypted again from the encrypted cache when
+/// How many decrypted bytes stay in memory across bubbles, as MostroP2P/app.
+/// Past it the oldest go, and are decrypted again from the encrypted cache when
 /// scrolled back to.
 const int kDecryptedCacheBytes = 64 * 1024 * 1024;
 

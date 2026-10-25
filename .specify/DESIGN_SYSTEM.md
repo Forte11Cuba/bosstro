@@ -5,8 +5,10 @@ here can be accepted on its design; a proposal that breaks one is rejected, or i
 guide first (§13). Every rule has an ID, so a review can say "breaks DS-COL-3" instead of
 arguing taste.
 
-This is Mostro v2's design guide (`../app/.specify/DESIGN_SYSTEM.md`), copied so that Bosstro and
-`app` stay one visual family, with the **Bosstro amendments** applied in place and listed in §16.
+This is Mostro v2's design guide (MostroP2P/app's
+[`.specify/DESIGN_SYSTEM.md`](https://github.com/MostroP2P/app/blob/main/.specify/DESIGN_SYSTEM.md)),
+copied so that Bosstro and `app` stay one visual family, with the **Bosstro amendments** applied in
+place and listed in §16.
 Where `app`'s guide names one of its own widgets, Bosstro's port of that widget is named instead;
 a rule whose widget Bosstro has not needed yet still binds, and the widget is ported from `app`
 the first time a screen needs it.

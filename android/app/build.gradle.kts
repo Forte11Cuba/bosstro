@@ -28,10 +28,10 @@ if (hasReleaseKeystore) {
 }
 
 android {
-    // Must differ from ../app's `foundation.mostro.app`, or installing one replaces the other.
+    // Must differ from MostroP2P/app's `foundation.mostro.app`, or installing one replaces the other.
     namespace = "foundation.mostro.bosstro"
     compileSdk = flutter.compileSdkVersion
-    // Pinned (same as ../app) for reproducible Rust cross-compilation builds.
+    // Pinned (same as MostroP2P/app) for reproducible Rust cross-compilation builds.
     ndkVersion = "28.2.13676358"
 
     compileOptions {

@@ -17,8 +17,9 @@ abstract final class AppBreakpoints {
 // ── Border-radius tokens ───────────────────────────────────────────────────────
 
 /// The radii of the guide (DS-SHP-1), by role. Bosstro has no v1 layer, so
-/// none of ../app's v1 radii exist here, and their names (`card`, `button`,
-/// `input`, `chip`) stay unused: the design check reads them as v1 (DS-SHP-4).
+/// none of MostroP2P/app's v1 radii exist here, and their names (`card`,
+/// `button`, `input`, `chip`) stay unused: the design check reads them as v1
+/// (DS-SHP-4).
 abstract final class AppRadius {
   static const double pill = 999;
 

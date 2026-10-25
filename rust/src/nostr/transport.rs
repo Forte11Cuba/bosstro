@@ -1,6 +1,6 @@
 //! Mostro message transport, protocol v2 only: a NIP-44 encrypted, signed
 //! kind 14 event, delegated to `mostro_core::transport` so every Mostro
-//! client shares one implementation. Ported from ../app's
+//! client shares one implementation. Ported from MostroP2P/app's
 //! `rust/src/nostr/transport.rs`, trimmed to the typed daemon traffic: the
 //! chat envelope (`mostro_wrap` / `mostro_unwrap`) arrives with phase 5.
 //!

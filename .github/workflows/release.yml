@@ -2,11 +2,11 @@ name: Release
 
 # Pushing a tag `vX.Y.Z` publishes a GitHub release: signed Android APKs (one
 # per ABI) and the app bundle, generated release notes, and a PR that records
-# the release in CHANGELOG.md. ../app's release.yml with its Linux / Windows /
-# macOS / iOS builds left out: Bosstro releases Android only (AGENTS.md, A2).
-# Maintainer procedure, required secrets and how to recover from a failed
-# run: docs/RELEASING.md. test/ci/release_workflow_test.dart guards
-# the properties below that are easy to weaken by accident.
+# the release in CHANGELOG.md. MostroP2P/app's release.yml with its Linux /
+# Windows / macOS / iOS builds left out: Bosstro releases Android only
+# (AGENTS.md, A2). Maintainer procedure, required secrets and how to recover
+# from a failed run: docs/RELEASING.md. test/ci/release_workflow_test.dart
+# guards the properties below that are easy to weaken by accident.
 on:
   push:
     tags:
@@ -289,7 +289,7 @@ jobs:
             dist/*.aab
           if-no-files-found: error
 
-  # Runs whenever android succeeded and attaches what was built (../app's
+  # Runs whenever android succeeded and attaches what was built (MostroP2P/app's
   # shape, where a failed desktop build must not hold the APKs back).
   publish:
     name: Publish GitHub release

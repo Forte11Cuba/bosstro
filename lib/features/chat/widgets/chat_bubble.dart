@@ -13,12 +13,12 @@ import 'package:bosstro/l10n/app_localizations.dart';
 /// One chat message. This solver's own sit on the right on a lime tint, the
 /// party's on the left on the card surface; the sender is always named in
 /// words too, never by color alone (DS-COL-10). The look is the disputes
-/// palette's, not ../app's legacy chat (amendment 2).
+/// palette's, not MostroP2P/app's legacy chat (amendment 2).
 ///
 /// The text is the party's own and is not trusted: it is shown as plain
 /// text, with no links, no markup and nothing tappable in it.
 ///
-/// An attachment (its text is ../app's JSON) shows the file instead: an
+/// An attachment (its text is MostroP2P/app's JSON) shows the file instead: an
 /// image previewed once it is verified and decrypted, a PDF by its name and
 /// size, with Save.
 ///

@@ -7,9 +7,9 @@
 //! of any status, which carries the status changes that take a dispute off
 //! Pending. The second is Mostrix's history window (its list fetch:
 //! `create_mostro_list_fetch_filter`, 500 events, no `since`). Two filters
-//! rather than Mostrix's one, as ../app does for the order book: relays cap
-//! how many stored events one REQ replays (relay.mostro.network: 300), so on a
-//! busy node a bare limit could miss an old dispute still waiting.
+//! rather than Mostrix's one, as MostroP2P/app does for the order book: relays
+//! cap how many stored events one REQ replays (relay.mostro.network: 300), so
+//! on a busy node a bare limit could miss an old dispute still waiting.
 //!
 //! **Node switch.** The subscription ids carry the node, so a switch closes
 //! the old node's and opens the new node's, and an EOSE or event still in

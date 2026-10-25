@@ -1,5 +1,5 @@
 //! Sending and opening attachments, on top of the chat router. The flow is
-//! ../app's `send_attachment` / `download_attachment`, keyed between the
+//! MostroP2P/app's `send_attachment` / `download_attachment`, keyed between the
 //! solver key and the party's trade key:
 //!
 //! **Send.** The file is checked and cleaned by its bytes
@@ -138,7 +138,7 @@ pub(crate) async fn send_on(
     }
     report(upload_id, 0.9);
 
-    // 4. ../app's message: JPEG and PNG as `image_encrypted`, a PDF as
+    // 4. MostroP2P/app's message: JPEG and PNG as `image_encrypted`, a PDF as
     //    `file_encrypted` (`document`).
     let message = message_for(&shape, &blob, uploaded.url, file_name);
     let sent = router.send(dispute_id, party, &message.to_json()).await?;
@@ -155,7 +155,7 @@ struct Shape {
 }
 
 /// The JSON message of a prepared file and its blob, field for field as
-/// ../app writes it.
+/// MostroP2P/app writes it.
 fn message_for(
     shape: &Shape,
     blob: &[u8],
@@ -350,8 +350,8 @@ mod tests {
     }
 
     impl Party {
-        /// Send `file` to the solver as ../app does: encrypted with the key
-        /// of the party's trade key and the solver's pubkey, uploaded, and
+        /// Send `file` to the solver as MostroP2P/app does: encrypted with the
+        /// key of the party's trade key and the solver's pubkey, uploaded, and
         /// the JSON written in the chat. Returns the JSON.
         async fn send_file(&self, solver: &PublicKey, file: &[u8], name: &str) -> String {
             let key = file_enc::attachment_key(&self.keys, solver).unwrap();
@@ -362,7 +362,7 @@ mod tests {
             message.to_json()
         }
 
-        /// Open a file the solver sent, as ../app does.
+        /// Open a file the solver sent, as MostroP2P/app does.
         async fn open_file(&self, solver: &PublicKey, json: &str) -> Vec<u8> {
             let attachment = payload::parse(json).expect("an attachment");
             let blob = blossom::download_blob(&attachment.blossom_url, |_| {})
@@ -432,7 +432,8 @@ mod tests {
         })
         .await;
 
-        // The buyer reads ../app's JSON and opens the file with its own key.
+        // The buyer reads MostroP2P/app's JSON and opens the file with its own
+        // key.
         let read = b.buyer.read(&solver).await;
         let (_, json) = read.iter().find(|(from, _)| *from == solver).unwrap();
         let value: serde_json::Value = serde_json::from_str(json).unwrap();

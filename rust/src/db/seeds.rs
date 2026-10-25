@@ -1,5 +1,5 @@
-//! First-launch seed data, from ../app's `db/seeds.rs`: the default relays.
-//! Idempotent: nothing is written once any relay is stored.
+//! First-launch seed data, from MostroP2P/app's `db/seeds.rs`: the default
+//! relays. Idempotent: nothing is written once any relay is stored.
 use anyhow::Result;
 
 use crate::api::relays::{RelayInfo, RelaySource, RelayStatus};

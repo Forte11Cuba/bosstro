@@ -51,9 +51,9 @@ the app shows, verifies and saves (Save hands its bytes to a test saver, as
 the system's save dialog cannot be driven) byte for byte; then the solver
 sends a photo from the gallery (a test picker) to the seller, who decrypts
 it, and its EXIF (camera, GPS) must be gone. The party (`chat_party`, with
-`--send-file` / `--expect-file`) writes and reads ../app's format with code
-of its own. Blobs go to a local Blossom server (`blossom_server`), never a
-public one: the app reaches it only in a debug build, through
+`--send-file` / `--expect-file`) writes and reads MostroP2P/app's format
+with code of its own. Blobs go to a local Blossom server (`blossom_server`),
+never a public one: the app reaches it only in a debug build, through
 `BOSSTRO_TEST_BLOSSOM_SERVER` (`rust/src/nostr/blossom.rs`), the only
 `http://` origin it fetches from.
 
@@ -82,10 +82,10 @@ flutter test integration_test/attachments_against_local_mostrod_test.dart -d lin
 `observer_against_local_mostrod_test.dart` drives the phase 5c screens: the
 buyer and the seller write to each other in their own chat (`chat_party
 --peer <other pubkey> --say`), the seller sends a PDF there (`--send-file`,
-encrypted as ../app does under the two trade keys) and then shares the chat
-key with the solver (`--share-key`). The app takes the dispute, sees the
-disclosure in Info, reads both sides, shows the file as one that cannot be
-opened and offers no message field; a random key pasted opens nothing and
+encrypted as MostroP2P/app does under the two trade keys) and then shares
+the chat key with the solver (`--share-key`). The app takes the dispute,
+sees the disclosure in Info, reads both sides, shows the file as one that
+cannot be opened and offers no message field; a random key pasted opens nothing and
 says so; the right key (`--print-key`) pasted reads; Refresh brings a later
 message, none twice. Same defines as the attachments run (`E2E_FILES` needs
 only `bank-statement.pdf`), with one dispute:
@@ -146,9 +146,9 @@ The setup (no keys are written here; generate your own):
   home: two daemons with one key on one relay would both answer. Solvers are
   rows in its `users` table: `is_solver = 1`, `category` 1 (Read) or 2
   (Read-Write).
-- **The parties:** `../mostro-cli`, **built from its current main** (0.16.3;
-  an older build cannot read mostrod 0.20's answers: "Error serializing
-  message"), one `MCLI_DIR` per party so each has its own keys, with
+- **The parties:** MostroP2P/mostro-cli, **built from its current main**
+  (0.16.3; an older build cannot read mostrod 0.20's answers: "Error
+  serializing message"), one `MCLI_DIR` per party so each has its own keys, with
   `MOSTRO_PUBKEY`, `RELAYS` (the local relay only) and `TRANSPORT=nip44`.
   Each dispute: the seller's `neworder -k sell … -a <sats>`; the buyer's
   `takesell -o <order> -i <invoice>` with carol's invoice for `sats - fee`

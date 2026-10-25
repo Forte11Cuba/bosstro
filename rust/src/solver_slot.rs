@@ -1,6 +1,6 @@
 //! The solver slot: crate-internal, so it lives outside `crate::api`, where
 //! the bridge codegen would scan it. The transitions that use it are in
-//! `api::solver`. Same shape as ../app's `IdentitySlot`.
+//! `api::solver`. Same shape as MostroP2P/app's `IdentitySlot`.
 
 use nostr_sdk::prelude::Keys;
 use tokio::sync::{Mutex, RwLock};

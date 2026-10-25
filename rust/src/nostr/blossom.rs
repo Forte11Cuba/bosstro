@@ -1,6 +1,6 @@
-//! Blossom blob storage (BUD-01 / BUD-02) for chat attachments, from ../app's
-//! `nostr/blossom.rs`. Uploads the way ../app does, so the URLs either app
-//! sends are ones the other can fetch:
+//! Blossom blob storage (BUD-01 / BUD-02) for chat attachments, from
+//! MostroP2P/app's `nostr/blossom.rs`. Uploads the way MostroP2P/app does, so
+//! the URLs either app sends are ones the other can fetch:
 //!
 //! * `PUT {server}/upload` with `application/octet-stream`: the blob is
 //!   ciphertext, whatever the file was.
@@ -20,7 +20,7 @@ use crate::attachments::MAX_BLOB_BYTES;
 
 /// Servers tried in order; the first that accepts the upload is used.
 ///
-/// ../app's list: they accept opaque blobs (media-only servers sniff the
+/// MostroP2P/app's list: they accept opaque blobs (media-only servers sniff the
 /// content and refuse ciphertext) and keep them indefinitely (dispute
 /// evidence must not expire).
 pub const BLOSSOM_SERVERS: &[&str] = &[
@@ -32,9 +32,9 @@ pub const BLOSSOM_SERVERS: &[&str] = &[
 ];
 
 /// How long one upload or download may take: 25 MB on a slow mobile link.
-/// ../app's timeout.
+/// MostroP2P/app's timeout.
 const TRANSFER_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(300);
-/// Lifetime of the upload authorisation, as ../app.
+/// Lifetime of the upload authorisation, as MostroP2P/app.
 const AUTH_TTL_SECS: i64 = 3600;
 /// Most redirects a download follows (never off https).
 #[cfg(not(target_arch = "wasm32"))]
@@ -168,9 +168,9 @@ fn upload_auth(sha256: &str) -> anyhow::Result<String> {
 }
 
 /// The same client on both targets: hyper natively, the browser's `fetch` on
-/// the web (a CORS request from a cross-origin isolated page; ../app's servers
-/// answer `Access-Control-Allow-Origin: *`, and one whose preflight does not
-/// name `Authorization` refuses the upload, so the next is tried). The
+/// the web (a CORS request from a cross-origin isolated page; MostroP2P/app's
+/// servers answer `Access-Control-Allow-Origin: *`, and one whose preflight
+/// does not name `Authorization` refuses the upload, so the next is tried). The
 /// timeout is set per request: the wasm builder has none. Natively a redirect
 /// may not leave https, as the node pictures.
 fn http_client() -> anyhow::Result<reqwest::Client> {
@@ -286,7 +286,7 @@ impl Received {
     }
 }
 
-/// A minimal HTTP/1.1 server for Blossom tests, from ../app.
+/// A minimal HTTP/1.1 server for Blossom tests, from MostroP2P/app.
 #[cfg(all(test, not(target_arch = "wasm32")))]
 pub(crate) mod test_server {
     use std::sync::{Arc, Mutex};

@@ -1,5 +1,5 @@
 //! What may be attached, decided by the bytes — never by the file name or a
-//! MIME type the platform or a party claims. From ../app's
+//! MIME type the platform or a party claims. From MostroP2P/app's
 //! `attachments/media.rs`.
 //!
 //! Sent: JPEG, PNG and PDF. Images are decoded and re-encoded before they
@@ -9,7 +9,7 @@
 //! decompression bombs.
 //!
 //! Received: only JPEG, PNG and PDF are shown or saved, again by their bytes
-//! once decrypted ([`check_received`]). ../app sends nothing else.
+//! once decrypted ([`check_received`]). MostroP2P/app sends nothing else.
 use std::io::Cursor;
 
 use anyhow::{anyhow, bail, Result};
@@ -21,7 +21,7 @@ use crate::attachments::MAX_ATTACHMENT_BYTES;
 const MAX_IMAGE_SIDE: u32 = 10_000;
 /// Memory the decoder may allocate: bounds a decompression bomb.
 const MAX_DECODE_ALLOC: u64 = 256 * 1024 * 1024;
-/// JPEG quality of the re-encoded image, as ../app.
+/// JPEG quality of the re-encoded image, as MostroP2P/app.
 const JPEG_QUALITY: u8 = 90;
 /// Longest file name kept, in characters.
 const MAX_NAME_CHARS: usize = 120;

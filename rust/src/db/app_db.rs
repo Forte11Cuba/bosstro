@@ -1,4 +1,4 @@
-//! Global persistent-storage singleton, as in ../app.
+//! Global persistent-storage singleton, as in MostroP2P/app.
 //!
 //! Dart calls [`init_db`] once on startup with the platform's location. Every
 //! Rust function that needs persistence calls [`db()`]; before [`init_db`]

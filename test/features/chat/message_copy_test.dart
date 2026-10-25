@@ -17,7 +17,7 @@ import '../../support/screen_harness.dart';
 const _id = '8a0c1e64-0d3b-4c39-9a3e-3a1f1f0f4b2c';
 final _now = DateTime.fromMillisecondsSinceEpoch(1700005000 * 1000);
 
-/// A chat key as ../app discloses it (never a real one).
+/// A chat key as MostroP2P/app discloses it (never a real one).
 const _key =
     'Shared key: 0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0';
 

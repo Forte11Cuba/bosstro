@@ -8,10 +8,10 @@ import 'package:bosstro/features/nodes/widgets/node_avatar.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/utils/short_id.dart';
 
-/// One node of the selector, trimmed from ../app's `NodeCard` to what a
+/// One node of the selector, trimmed from MostroP2P/app's `NodeCard` to what a
 /// solver picks a node by: its face and name, whether it is a trusted
 /// community or one they added, its region, its short pubkey, and which one
-/// is active. The order-book figures of ../app's card (liquidity, fee,
+/// is active. The order-book figures of MostroP2P/app's card (liquidity, fee,
 /// currencies) are left out: a solver does not choose where to trade.
 ///
 /// The whole card selects the node; the info button opens its instance info.

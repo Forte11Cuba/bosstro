@@ -5,7 +5,7 @@ import 'package:bosstro/features/chat/attachments/attachment_picker.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/widgets/mostro_modal.dart';
 
-/// Asks where the file comes from, from ../app. Resolves to null when
+/// Asks where the file comes from, from MostroP2P/app. Resolves to null when
 /// dismissed. The camera row is offered only where there is one.
 Future<AttachmentSource?> showAttachSheet(
   BuildContext context, {

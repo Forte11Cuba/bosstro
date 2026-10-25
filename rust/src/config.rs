@@ -1,23 +1,24 @@
-//! Compiled-in defaults for the Mostro network, from ../app's `config.rs`.
+//! Compiled-in defaults for the Mostro network, from MostroP2P/app's
+//! `config.rs`.
 //!
-//! Used on first launch, when no relay or node is stored yet. Unlike ../app,
-//! there is **no default active node**: a solver works for the node that
-//! registered their key, so Bosstro waits until they pick it
+//! Used on first launch, when no relay or node is stored yet. Unlike
+//! MostroP2P/app, there is **no default active node**: a solver works for the
+//! node that registered their key, so Bosstro waits until they pick it
 //! ([`active_mostro_pubkey`] is `None` until then).
 
 use std::sync::RwLock;
 
 /// Relays seeded on first launch: the three the default Mostro node lists in
-/// its kind 10002 relay list, as in ../app. A node's own list is added to
-/// them as soon as it is the active node (`api::relays`).
+/// its kind 10002 relay list, as in MostroP2P/app. A node's own list is added
+/// to them as soon as it is the active node (`api::relays`).
 pub const DEFAULT_RELAYS: &[&str] = &[
     "wss://relay.mostro.network",
     "wss://mostro-p2p.tech",
     "wss://relay.shadowbip.com",
 ];
 
-/// ../app's default Mostro daemon. Here it is only one of the trusted nodes,
-/// never selected on its own.
+/// MostroP2P/app's default Mostro daemon. Here it is only one of the trusted
+/// nodes, never selected on its own.
 pub const DEFAULT_MOSTRO_PUBKEY: &str =
     "82fa8cb978b43c79b2156585bac2c011176a21d2aead6d9f7c575c005be88390";
 
@@ -33,8 +34,9 @@ pub struct TrustedNodeConfig {
     pub region: &'static str,
 }
 
-/// Trusted Mostro communities, mirrored from ../app's `TRUSTED_MOSTRO_NODES`
-/// (itself from mostro.community). **Keep in sync** with it.
+/// Trusted Mostro communities, mirrored from MostroP2P/app's
+/// `TRUSTED_MOSTRO_NODES` (itself from mostro.community). **Keep in sync** with
+/// it.
 pub const TRUSTED_MOSTRO_NODES: &[TrustedNodeConfig] = &[
     TrustedNodeConfig {
         pubkey: "00000235a3e904cfe1213a8a54d6f1ec1bef7cc6bfaabd6193e82931ccf1366a",
@@ -108,7 +110,7 @@ mod tests {
     use super::*;
 
     /// The seeded relays are the ones the default node announces in its kind
-    /// 10002 list, in its order (as in ../app).
+    /// 10002 list, in its order (as in MostroP2P/app).
     #[test]
     fn default_relays_are_the_default_node_relay_list() {
         assert_eq!(

@@ -1,5 +1,5 @@
-//! IndexedDB storage backend — wasm only. From ../app's `db/indexeddb.rs`,
-//! trimmed to Bosstro's stores.
+//! IndexedDB storage backend — wasm only. From MostroP2P/app's
+//! `db/indexeddb.rs`, trimmed to Bosstro's stores.
 //!
 //! Each record is keyed the way the SQLite table keys its row: settings by
 //! key, relays by URL (a JSON document), node pictures by node pubkey (the
@@ -8,10 +8,10 @@
 //! JSON document), chat messages by `node:dispute:party:solver:message id`
 //! (a JSON document), observed chat messages by `node:dispute:solver:message
 //! id` (a JSON document), attachment blobs by their SHA-256 (the encrypted bytes
-//! as a `Uint8Array`, with a JSON index entry for the trim, as ../app). This
-//! backend has no compound writes: each method is one `put` or `delete` (a
+//! as a `Uint8Array`, with a JSON index entry for the trim, as MostroP2P/app).
+//! This backend has no compound writes: each method is one `put` or `delete` (a
 //! picture's or a blob's bytes and index in one transaction), so it needs
-//! none of ../app's `web_lock`.
+//! none of MostroP2P/app's `web_lock`.
 //!
 //! Its callers can still read, modify and write back: `api::nodes` does so
 //! with the registry's settings blobs (`CUSTOM_MOSTRO_NODES`,
@@ -21,7 +21,7 @@
 //! `crate::disputes::feed` does the same with a dispute row (read, merge,
 //! save); two tabs merge the same relay events, so at worst one tab writes a
 //! revision the other already replaced, and the next event corrects it.
-//! Accepted for the web (A2; AGENTS.md → "Accepted limits"); ../app's
+//! Accepted for the web (A2; AGENTS.md → "Accepted limits"); MostroP2P/app's
 //! `web_lock` is the fix if it ever matters.
 use anyhow::{anyhow, Result};
 use indexed_db_futures::prelude::*;

@@ -12,7 +12,7 @@ class DetailSegment<T> {
 }
 
 /// The pill segmented control of the dispute detail (Info / Buyer / Seller),
-/// after ../app's `PillSegmented`, on the disputes palette: every option
+/// after MostroP2P/app's `PillSegmented`, on the disputes palette: every option
 /// always visible, the chosen one tinted lime and named as selected, each a
 /// 48-dp target (DS-CMP-6).
 ///

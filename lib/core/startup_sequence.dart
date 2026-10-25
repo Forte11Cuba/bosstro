@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:bosstro/core/startup_failure.dart';
 
 /// Runs [body] and, if it throws, paints the failure surface naming the step
-/// (../app's `startup_sequence.dart`, without its web smoke-test probe:
+/// (MostroP2P/app's `startup_sequence.dart`, without its web smoke-test probe:
 /// Bosstro has no web smoke test).
 ///
 /// Without it an exception in startup means runApp never runs and Flutter

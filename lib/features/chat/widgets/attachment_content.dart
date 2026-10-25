@@ -10,7 +10,7 @@ import 'package:bosstro/features/chat/screens/attachment_viewer_screen.dart';
 import 'package:bosstro/features/chat/services/chat_core.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
-/// Widest an image is drawn inside a bubble, as ../app.
+/// Widest an image is drawn inside a bubble, as MostroP2P/app.
 const double kImageBubbleMaxWidth = 240;
 
 /// The shape a bubble keeps before its image is decrypted: the sender's
@@ -24,7 +24,8 @@ double imageBubbleAspectRatio(int? width, int? height) {
 }
 
 /// An image in the chat: downloaded, verified and decrypted when it shows,
-/// as ../app, and decoded at the size drawn. Tapping it opens the viewer.
+/// as MostroP2P/app, and decoded at the size drawn. Tapping it opens the
+/// viewer.
 class AttachmentImage extends ConsumerWidget {
   const AttachmentImage({
     super.key,

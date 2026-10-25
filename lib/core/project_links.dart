@@ -5,7 +5,7 @@
 /// is the offer, so it must keep pointing at this app's repository. GitHub
 /// redirects a transferred repository, so a move to another owner does not
 /// break it. The startup failure screen names the issues page itself, as
-/// ../app's does: it depends on nothing.
+/// MostroP2P/app's does: it depends on nothing.
 const sourceCodeRepository = 'Forte11Cuba/bosstro';
 
 const sourceCodeUrl = 'https://github.com/$sourceCodeRepository';

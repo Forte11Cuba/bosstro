@@ -15,8 +15,8 @@ import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/primary_button.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 
-/// Settings → Relays (from ../app's `relays_screen.dart`): every relay in
-/// use with its status in words, where it came from, a remove button, and
+/// Settings → Relays (from MostroP2P/app's `relays_screen.dart`): every relay
+/// in use with its status in words, where it came from, a remove button, and
 /// "Add relay" under the list. Updates live as relays connect and drop.
 ///
 /// The relays a node announced and the solver removed are not listed: they

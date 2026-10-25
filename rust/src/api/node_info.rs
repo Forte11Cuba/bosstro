@@ -19,7 +19,7 @@ pub(crate) const MOSTRO_INSTANCE_INFO_KIND: u16 = 38385;
 const STALE_AFTER_SECS: i64 = 604_800;
 
 /// How long a fetch waits for relays, and how long it keeps listening after
-/// the first copy in case that relay held a stale one (../app).
+/// the first copy in case that relay held a stale one (MostroP2P/app).
 const FETCH_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(10);
 const FETCH_GRACE: std::time::Duration = std::time::Duration::from_millis(750);
 

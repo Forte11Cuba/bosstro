@@ -1,7 +1,7 @@
-//! Persistent storage (A4), from ../app's `rust/src/db/`, trimmed to what
-//! Bosstro uses: the settings key-value store, the relays, the node pictures
-//! (phase 2), the disputes (phase 3), the dispute chat and its attachment
-//! cache (phase 5), the observed chats (phase 5c).
+//! Persistent storage (A4), from MostroP2P/app's `rust/src/db/`, trimmed to
+//! what Bosstro uses: the settings key-value store, the relays, the node
+//! pictures (phase 2), the disputes (phase 3), the dispute chat and its
+//! attachment cache (phase 5), the observed chats (phase 5c).
 //!
 //! One [`Storage`] trait, two backends picked at compile time
 //! (`app_db.rs`): SQLite through `sqlx` on native (Android, Linux),
@@ -79,8 +79,8 @@ pub mod settings_keys {
 
 /// Storage trait — implemented by SQLite (native) and IndexedDB (wasm).
 ///
-/// `#[allow(async_fn_in_trait)]` instead of `async-trait`, as in ../app: the
-/// futures are not required to be `Send`. Callers reach a concrete backend
+/// `#[allow(async_fn_in_trait)]` instead of `async-trait`, as in MostroP2P/app:
+/// the futures are not required to be `Send`. Callers reach a concrete backend
 /// through `app_db::db()`, whose futures are `Send` on native (`sqlx`).
 #[allow(async_fn_in_trait)]
 pub trait Storage: Send + Sync {

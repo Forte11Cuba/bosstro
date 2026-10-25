@@ -7,7 +7,7 @@ import 'package:bosstro/l10n/app_localizations.dart';
 ///
 /// Only the names live here: which languages exist comes from the ARB files
 /// (`AppLocalizations.supportedLocales`), and a test fails while a language
-/// has no name here. Portuguese is Brazil's, as ../app's.
+/// has no name here. Portuguese is Brazil's, as MostroP2P/app's.
 const Map<String, String> languageNames = {
   'en': 'English',
   'es': 'Español',
