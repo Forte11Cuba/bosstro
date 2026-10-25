@@ -172,9 +172,13 @@ jobs:
         run: dart tool/design_check.dart --base "origin/$BASE_REF"
 
   # The target the app is built for (A2). Compiles the Kotlin side, the plugin
-  # graph and the Rust core for every Android ABI through cargokit.
+  # graph and the Rust core through cargokit, as a release build: R8 shrinks
+  # only a release, and a plugin whose classes it strips or cannot resolve
+  # ("Missing classes detected while running R8") breaks only that build. The
+  # same command as the published APKs, signed with the debug key here
+  # (build.gradle.kts falls back to it without android/key.properties).
   android:
-    name: Android (debug APK)
+    name: Android (release APKs, debug key)
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -193,7 +197,7 @@ jobs:
       - name: Install Rust Android targets
         uses: dtolnay/rust-toolchain@1.97.0
         with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+          targets: aarch64-linux-android,armv7-linux-androideabi
 
       - name: Cache cargo registry and target
         uses: Swatinem/rust-cache@v2
@@ -210,8 +214,18 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
-      - name: Build debug APK
-        run: flutter build apk --debug
+      # v7 + v8 only, one APK per ABI: what a release ships.
+      - name: Build release APKs
+        run: |
+          flutter build apk --release --split-per-abi \
+            --target-platform android-arm,android-arm64
+
+      - name: Check the APKs were built
+        run: |
+          set -euo pipefail
+          for abi in armeabi-v7a arm64-v8a; do
+            ls -lh "build/app/outputs/flutter-apk/app-$abi-release.apk"
+          done
 
   # Linux desktop: a development and convenience target, without the Android-only
   # key protections (PlatformCapabilities). Compiles the GTK runner, the plugin
