@@ -7,6 +7,10 @@ version: 0.1.0+1
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
+  # The Android build relies on the Flutter 3.47 Gradle plugin applying Kotlin itself
+  # (android/app/build.gradle.kts has no kotlin-android plugin). An older SDK fails
+  # here, at pub get, instead of deep inside Gradle.
+  flutter: ">=3.47.0"
 
 dependencies:
   flutter:
