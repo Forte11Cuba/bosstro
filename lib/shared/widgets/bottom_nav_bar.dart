@@ -10,7 +10,7 @@ typedef NavDestination = ({IconData icon, IconData activeIcon, String label});
 
 /// Bottom navigation bar: Pending · In progress · Settings.
 ///
-/// As in ../app: on the navigation surface under a hairline, each
+/// As in MostroP2P/app: on the navigation surface under a hairline, each
 /// destination a 20-dp icon over a 10-dp label, lime when active, the content
 /// centred in a 76-dp bar above the system inset.
 class BottomNavBar extends StatelessWidget {

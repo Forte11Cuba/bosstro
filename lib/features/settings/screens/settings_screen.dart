@@ -173,7 +173,7 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                 ],
                 // The version is not a setting, so it sits outside the
-                // cards, last and small, as ../app shows it: there when
+                // cards, last and small, as MostroP2P/app shows it: there when
                 // support asks for it, and nothing to tap.
                 const SizedBox(height: 4),
                 const _VersionLine(),

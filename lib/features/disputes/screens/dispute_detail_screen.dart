@@ -34,7 +34,7 @@ class DisputeDetailScreen extends StatelessWidget {
       ),
       // Over the shell, with no bottom bar: Android draws the app behind the
       // system navigation bar, so the SafeArea keeps the end of Info clear of
-      // it (../app #267).
+      // it (MostroP2P/app#267).
       body: SafeArea(
         top: false,
         child: DisputeDetailView(disputeId: disputeId),

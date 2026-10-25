@@ -3,8 +3,8 @@
 
 `icons/bosstro.png` is the source art: the Mostro mascot as a judge, holding a
 gavel, inside a gold ring, on a transparent square (D11, A8 in AGENTS.md). It
-is a variant of ../app's icon, not a copy, so a phone with both apps shows two
-different icons. This script writes:
+is a variant of MostroP2P/app's icon, not a copy, so a phone with both apps
+shows two different icons. This script writes:
 
 - `icons/bosstro-<side>.png` (1024 … 16): the disc on transparent corners.
   1024 is the master, and the source of the Android launcher icons (legacy

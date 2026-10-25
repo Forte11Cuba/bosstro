@@ -3,7 +3,7 @@
 /// File names here are the contract with the workflows that upload them;
 /// test/ci/release_workflow_test.dart holds the two sides equal.
 ///
-/// ../app's, Android only: Bosstro releases no desktop or iOS build
+/// MostroP2P/app's, Android only: Bosstro releases no desktop or iOS build
 /// (AGENTS.md, A2).
 library;
 

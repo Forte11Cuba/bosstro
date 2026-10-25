@@ -1,9 +1,9 @@
-//! The chat message that carries an attachment, from ../app's
+//! The chat message that carries an attachment, from MostroP2P/app's
 //! `attachments/payload.rs`.
 //!
 //! A JSON object sent as the text of an ordinary chat message (the inner
-//! kind 1 of the chat envelope). Two shapes, every field as ../app writes and
-//! parses it:
+//! kind 1 of the chat envelope). Two shapes, every field as MostroP2P/app
+//! writes and parses it:
 //!
 //! ```json
 //! {"type":"image_encrypted","blossom_url":"https://…/<sha256>","nonce":"<hex>",
@@ -13,9 +13,9 @@
 //!  "mime_type":"application/pdf","original_size":1,"filename":"…","encrypted_size":29}
 //! ```
 //!
-//! `nonce` repeats the one at the head of the blob. ../app's parser requires
-//! the field (a plain `String`, no default), so it is sent; readers decrypt
-//! with the blob's own.
+//! `nonce` repeats the one at the head of the blob. MostroP2P/app's parser
+//! requires the field (a plain `String`, no default), so it is sent; readers
+//! decrypt with the blob's own.
 use serde::{Deserialize, Serialize};
 
 use crate::attachments::media::sanitize_filename;
@@ -28,7 +28,7 @@ pub enum AttachmentPayload {
     /// A JPEG or PNG, previewed inline.
     #[serde(rename = "image_encrypted")]
     Image(ImagePayload),
-    /// Anything else; from ../app, a PDF (`file_type` `document`).
+    /// Anything else; from MostroP2P/app, a PDF (`file_type` `document`).
     #[serde(rename = "file_encrypted")]
     File(FilePayload),
 }
@@ -87,7 +87,7 @@ pub struct IncomingAttachment {
 /// not name the blob's hash, a size over the limit — is `None`, and the
 /// message stays text.
 pub fn parse(text: &str) -> Option<IncomingAttachment> {
-    // ../app only considers text that starts with `{`.
+    // MostroP2P/app only considers text that starts with `{`.
     if !text.trim_start().starts_with('{') {
         return None;
     }
@@ -138,7 +138,8 @@ pub(crate) mod tests {
     pub(crate) const HASH: &str =
         "b1674191a88ec5cdd733e4240a81803105dc412d6c6708d53ab94fc248f4f553";
 
-    // ../app's own test samples (`attachments/payload.rs`), byte for byte.
+    // MostroP2P/app's own test samples (`attachments/payload.rs`), byte for
+    // byte.
     pub(crate) fn app_image() -> String {
         format!(
             r#"{{"type":"image_encrypted","blossom_url":"https://cdn.hzrd149.com/{HASH}","nonce":"0102030405060708090a0b0c","mime_type":"image/jpeg","original_size":524288,"width":1920,"height":1080,"filename":"receipt.jpg","encrypted_size":524316}}"#
@@ -151,8 +152,8 @@ pub(crate) mod tests {
         )
     }
 
-    /// ../app's parser, as it is: its structs have exactly these fields, no
-    /// defaults, so a missing or mistyped field fails it. Kept apart from
+    /// MostroP2P/app's parser, as it is: its structs have exactly these fields,
+    /// no defaults, so a missing or mistyped field fails it. Kept apart from
     /// ours so a change to ours is caught.
     mod app_parser {
         #[derive(serde::Deserialize)]
@@ -212,7 +213,7 @@ pub(crate) mod tests {
     fn plain_text_and_other_json_stay_text() {
         assert!(parse("hola, ya te transferí").is_none());
         assert!(parse(r#"{"type":"file","url":"https://x/y","name":"a"}"#).is_none());
-        // An image missing width/height is malformed for ../app too.
+        // An image missing width/height is malformed for MostroP2P/app too.
         assert!(parse(&app_image().replace(r#""width":1920,"height":1080,"#, "")).is_none());
         // So is one without the nonce.
         assert!(

@@ -1,4 +1,4 @@
-//! SQLite storage backend — native platforms only. From ../app's
+//! SQLite storage backend — native platforms only. From MostroP2P/app's
 //! `db/sqlite.rs`, trimmed to Bosstro's tables.
 //!
 //! The schema is versioned with `sqlx` migrations (`rust/migrations/`,
@@ -37,7 +37,7 @@ const OBSERVED_COLUMNS: &str = "mostro_pubkey, dispute_id, solver_pubkey, messag
 const CHANNEL_WHERE: &str =
     "mostro_pubkey = ? AND dispute_id = ? AND party = ? AND solver_pubkey = ?";
 
-/// Size of the connection pool, as in ../app.
+/// Size of the connection pool, as in MostroP2P/app.
 const MAX_CONNECTIONS: u32 = 4;
 
 pub struct SqliteStorage {
@@ -396,7 +396,7 @@ impl Storage for SqliteStorage {
     }
 
     /// The newest blobs stay, the oldest go (the row id breaks ties within
-    /// a second), in one statement, as ../app.
+    /// a second), in one statement, as MostroP2P/app.
     async fn trim_attachment_blobs(&self, cap: u64) -> Result<()> {
         sqlx::query(
             "DELETE FROM attachment_blobs WHERE sha256 IN (

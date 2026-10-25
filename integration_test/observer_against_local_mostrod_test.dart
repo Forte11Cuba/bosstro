@@ -1,7 +1,7 @@
 // The phase 5c screens against a real mostrod and relay, on Linux, by hand:
 // the buyer and the seller of a dispute write to each other in their own
-// chat, as ../app does (one sends a file), the seller shares the chat key
-// with the solver, and the app reads that chat, read only: the file shows
+// chat, as MostroP2P/app does (one sends a file), the seller shares the chat
+// key with the solver, and the app reads that chat, read only: the file shows
 // and cannot be opened. Then a wrong key and the right one are pasted.
 // The parties are played by `rust/examples/chat_party.rs` with their trade
 // keys; files go to a local Blossom server (`blossom_server`). Never against

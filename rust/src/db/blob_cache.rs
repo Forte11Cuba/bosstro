@@ -1,4 +1,4 @@
-//! Eviction for the attachment cache, from ../app's `db/blob_cache.rs`.
+//! Eviction for the attachment cache, from MostroP2P/app's `db/blob_cache.rs`.
 //!
 //! SQLite trims its `attachment_blobs` table in one statement. IndexedDB has
 //! no such query, so the web backend keeps a small index entry per blob and
@@ -7,14 +7,14 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Most bytes of encrypted attachments a device keeps, as ../app: a few
+/// Most bytes of encrypted attachments a device keeps, as MostroP2P/app: a few
 /// dozen full-size files, far more photos.
 #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
 pub(crate) const ATTACHMENT_CACHE_BYTES: u64 = 300 * 1024 * 1024;
 
-/// Most bytes a browser keeps, as ../app. Smaller than native's: the origin's
-/// quota is shared with everything else the app stores, and a write over
-/// quota fails the cache, never the download.
+/// Most bytes a browser keeps, as MostroP2P/app. Smaller than native's: the
+/// origin's quota is shared with everything else the app stores, and a write
+/// over quota fails the cache, never the download.
 #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
 pub(crate) const WEB_ATTACHMENT_CACHE_BYTES: u64 = 100 * 1024 * 1024;
 

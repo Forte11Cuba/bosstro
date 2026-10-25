@@ -67,7 +67,7 @@ class Picked extends PickOutcome {
 PickOutcome checkPicked(PickedAttachment file) =>
     file.size > kMaxAttachmentBytes ? const PickTooLarge() : Picked(file);
 
-/// The platform pickers behind the attach sheet, from ../app.
+/// The platform pickers behind the attach sheet, from MostroP2P/app.
 ///
 /// Photos and the camera go through `image_picker` (the system photo picker
 /// on Android, a file dialog on Linux); PDFs through `file_picker`. What is

@@ -11,15 +11,15 @@ import 'package:bosstro/features/observer/services/observer_core.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
 /// One message of the chat between the parties. The buyer's sit on the
-/// left on a lime tint, the seller's on the right on the sell tint, as ../app
-/// colors the two sides of an order; the side is named in words too
-/// (DS-COL-10). The text is the party's own and is shown as plain text: no
+/// left on a lime tint, the seller's on the right on the sell tint, as
+/// MostroP2P/app colors the two sides of an order; the side is named in words
+/// too (DS-COL-10). The text is the party's own and is shown as plain text: no
 /// links, no markup, nothing tappable.
 ///
-/// A file shows by its name and type and cannot be opened: ../app encrypts
-/// the files of this chat with a key the chat key does not give. The bubble
-/// says so and how to get it (ask that party for it in their chat with the
-/// solver, where files open).
+/// A file shows by its name and type and cannot be opened: MostroP2P/app
+/// encrypts the files of this chat with a key the chat key does not give. The
+/// bubble says so and how to get it (ask that party for it in their chat with
+/// the solver, where files open).
 ///
 /// A long press copies the message, or a file's name ([messageCopier]).
 class ObservedBubble extends StatelessWidget {

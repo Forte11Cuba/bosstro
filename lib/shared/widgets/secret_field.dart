@@ -4,7 +4,7 @@ import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/settings_palette.dart';
 
 /// The boxed field a secret key is pasted or typed into (DS-CMP-11, after
-/// ../app's `PasteField`), hidden by default with a show / hide toggle.
+/// MostroP2P/app's `PasteField`), hidden by default with a show / hide toggle.
 ///
 /// Every state is set here (DS-CMP-19). Hidden, it is one line — Flutter
 /// obscures single-line fields only; shown, it wraps so the whole key can be

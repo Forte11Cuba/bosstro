@@ -122,8 +122,8 @@ class ObservedMessage {
   final PlatformInt64 createdAt;
 
   /// Set when the text is a well-formed attachment. It cannot be opened:
-  /// ../app encrypts the files of this chat with the raw ECDH secret of
-  /// the two trade keys, which the shared key does not give.
+  /// MostroP2P/app encrypts the files of this chat with the raw ECDH secret
+  /// of the two trade keys, which the shared key does not give.
   final ChatAttachment? attachment;
 
   const ObservedMessage({

@@ -1,6 +1,6 @@
 import 'package:flutter/painting.dart';
 
-/// Inks of the Mostro QR (`MostroQr`), ported from ../app: near-black
+/// Inks of the Mostro QR (`MostroQr`), ported from MostroP2P/app: near-black
 /// modules and finder rings, green finder centres, on white.
 ///
 /// The same in both themes: a scanner needs dark modules on a light ground,

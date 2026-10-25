@@ -2,9 +2,9 @@
 //! (`AdminSettle`) or refund the seller (`AdminCancel`).
 //!
 //! The request carries the dispute's **order** id, not its dispute id
-//! (`../mostro/src/app/admin_settle.rs`, `get_order`): the one the take's
-//! `SolverDisputeInfo` named. It goes to the active node over transport v2,
-//! signed with the solver key, and its answer comes through the same router
+//! (MostroP2P/mostro's `src/app/admin_settle.rs`, `get_order`): the one the
+//! take's `SolverDisputeInfo` named. It goes to the active node over transport
+//! v2, signed with the solver key, and its answer comes through the same router
 //! as a take's (`crate::mostro::replies`). Sats move only on the node's side;
 //! this end never retries a request on its own (`crate::mostro::resolve`).
 //!

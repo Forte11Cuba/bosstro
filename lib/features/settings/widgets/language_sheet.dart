@@ -15,7 +15,7 @@ Future<void> showLanguageSheet(BuildContext context) => showMostroSheet<void>(
   builder: (_) => const LanguageSheet(),
 );
 
-/// The choice of the app's language, as ../app's language selector, with
+/// The choice of the app's language, as MostroP2P/app's language selector, with
 /// "System language" first: the default, and the way back to it.
 class LanguageSheet extends ConsumerWidget {
   const LanguageSheet({super.key});
@@ -33,7 +33,7 @@ class LanguageSheet extends ConsumerWidget {
       Navigator.of(context).pop();
       if (code == current) return;
       // After the sheet is gone: a new locale rebuilds the whole app, and
-      // ../app found that doing it under an open sheet trips Flutter's
+      // MostroP2P/app found that doing it under an open sheet trips Flutter's
       // inherited-widget assertions.
       SchedulerBinding.instance.addPostFrameCallback(
         (_) => notifier.choose(code),

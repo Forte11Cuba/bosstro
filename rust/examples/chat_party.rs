@@ -13,23 +13,23 @@
 //! message with exactly `text`, signed by the solver key, is on the relay,
 //! and fails otherwise. Prints what it reads as `solver: …` / `party: …`.
 //!
-//! Attachments, as ../app sends and opens them, written here from the format
-//! rather than from Bosstro's code, so the run checks one against the other:
-//! `--send-file` encrypts the file (JPEG, PNG or PDF) with ChaCha20-Poly1305
-//! under the raw ECDH x of the party's trade key and the solver's pubkey,
-//! uploads it to `--blossom` (a local test server, `blossom_server`) with a
-//! kind 24242 authorisation signed by a throwaway key, and writes ../app's
-//! JSON in the chat. `--expect-file` waits for the solver's newest
-//! attachment, downloads it, checks its hash against the URL, decrypts it and
-//! writes it to the path, printing its type.
+//! Attachments, as MostroP2P/app sends and opens them, written here from the
+//! format rather than from Bosstro's code, so the run checks one against the
+//! other: `--send-file` encrypts the file (JPEG, PNG or PDF) with
+//! ChaCha20-Poly1305 under the raw ECDH x of the party's trade key and the
+//! solver's pubkey, uploads it to `--blossom` (a local test server,
+//! `blossom_server`) with a kind 24242 authorisation signed by a throwaway key,
+//! and writes MostroP2P/app's JSON in the chat. `--expect-file` waits for the
+//! solver's newest attachment, downloads it, checks its hash against the URL,
+//! decrypts it and writes it to the path, printing its type.
 //!
-//! The parties' own chat (phase 5c), as ../app writes it: with `--peer`, the
-//! other party's trade pubkey, `--say` and `--send-file` go to the chat
+//! The parties' own chat (phase 5c), as MostroP2P/app writes it: with `--peer`,
+//! the other party's trade pubkey, `--say` and `--send-file` go to the chat
 //! between the two parties instead (the envelope keyed between the two trade
 //! keys, the inner event signed by this party; a file encrypted under the raw
-//! ECDH x of the two trade keys, ../app's `send_file`). `--share-key` sends
-//! the solver, in this party's dispute chat, `Shared key: ` + the secret of
-//! that chat's `K_conv`, as ../app's `share_chat_key_with_solver`.
+//! ECDH x of the two trade keys, MostroP2P/app's `send_file`). `--share-key`
+//! sends the solver, in this party's dispute chat, `Shared key: ` + the secret
+//! of that chat's `K_conv`, as MostroP2P/app's `share_chat_key_with_solver`.
 //! `--print-key` prints that secret (`key: …`) for a test to paste, and
 //! `--print-pubkey` this party's trade pubkey (`pubkey: …`), the other's peer.
 
@@ -207,8 +207,8 @@ async fn main() -> Result<(), Failure> {
     Err(format!("the solver's message {expected:?} never arrived").into())
 }
 
-/// The file key: the raw ECDH x-coordinate, unhashed, as ../app, with the
-/// solver or (in the parties' own chat) the other party.
+/// The file key: the raw ECDH x-coordinate, unhashed, as MostroP2P/app, with
+/// the solver or (in the parties' own chat) the other party.
 fn file_key(party: &Keys, counterpart: &PublicKey) -> Result<[u8; 32], Failure> {
     let shared = SharedKey::derive(party.secret_key(), counterpart)?;
     Ok(shared.keys().secret_key().to_secret_bytes())
@@ -231,7 +231,7 @@ fn hex(bytes: &[u8]) -> String {
 }
 
 /// Encrypt and upload the file at `path` for `counterpart`; the JSON message
-/// ../app writes.
+/// MostroP2P/app writes.
 async fn upload_file(
     party: &Keys,
     counterpart: &PublicKey,

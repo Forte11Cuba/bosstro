@@ -13,8 +13,8 @@ import 'package:bosstro/shared/widgets/snackbar.dart';
 /// A file the solver picked and confirmed, read into memory.
 typedef AttachmentToSend = ({String name, Uint8List bytes});
 
-/// The paperclip's steps before an upload, from ../app: the source sheet,
-/// the pick, the size check, the confirmation and the read.
+/// The paperclip's steps before an upload, from MostroP2P/app: the source
+/// sheet, the pick, the size check, the confirmation and the read.
 ///
 /// Resolves to null when the solver backed out or the file cannot be sent;
 /// then the solver was already told why. [onBusy] brackets the pick and the

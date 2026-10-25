@@ -4,7 +4,7 @@ import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/core/settings_palette.dart';
 
 /// `Paste` and `Scan QR` under a field that takes a pasted or scanned value
-/// on a screen (Log in), ported from ../app: same shape, different weight — [accent] carries the lime tint of the path
+/// on a screen (Log in), ported from MostroP2P/app: same shape, different weight — [accent] carries the lime tint of the path
 /// the user is meant to take. Inside a modal they are `ModalLink`s instead
 /// (DS-CMP-1), as in the Cashu wallet's dialogs.
 class InputSourceAction extends StatelessWidget {

@@ -57,8 +57,8 @@ class NodeInfoScreen extends ConsumerWidget {
       ),
       // Over the shell, with no bottom bar when the node is the active one:
       // the SafeArea keeps the end of the page clear of the system
-      // navigation bar (../app #267). With the bar below, the Scaffold has
-      // already taken the inset away and the SafeArea adds nothing.
+      // navigation bar (MostroP2P/app#267). With the bar below, the Scaffold
+      // has already taken the inset away and the SafeArea adds nothing.
       body: SafeArea(
         top: false,
         child: RefreshIndicator(

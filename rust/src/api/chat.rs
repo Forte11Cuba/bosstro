@@ -6,7 +6,7 @@
 //! Rust keeps the messages (one row per channel and inner event id) and
 //! announces every change on [`on_chat_updates`]; Dart reads the thread again.
 //!
-//! Attachments (part 2) are messages too: their text is ../app's JSON
+//! Attachments (part 2) are messages too: their text is MostroP2P/app's JSON
 //! (`crate::attachments::payload`), read into [`ChatAttachment`]. Dart hands
 //! over the bytes of a picked file and gets a received one back decrypted, in
 //! memory; the key, the encryption, the upload, the hash check and the type
@@ -82,7 +82,8 @@ pub struct ChatMessageView {
 pub enum ChatAttachmentKind {
     /// Sent as an image (`image_encrypted`): previewed in the bubble.
     Image,
-    /// Sent as a file (`file_encrypted`; from ../app, a PDF): name and size.
+    /// Sent as a file (`file_encrypted`; from MostroP2P/app, a PDF): name and
+    /// size.
     File,
 }
 
@@ -212,9 +213,9 @@ pub async fn retry_chat_message(
 /// Send the file `bytes` (picked by the solver, named `file_name`) to
 /// `party`: checked and cleaned by its bytes (JPEG, PNG or PDF, at most
 /// 25 MiB; images re-encoded without metadata), encrypted with the key shared
-/// with the party, uploaded to Blossom, and sent as ../app's JSON message.
-/// Returns the message as stored, `Sending`, as [`send_chat_message`]; a
-/// message that then fails is retried with [`retry_chat_message`] (the file
+/// with the party, uploaded to Blossom, and sent as MostroP2P/app's JSON
+/// message. Returns the message as stored, `Sending`, as [`send_chat_message`];
+/// a message that then fails is retried with [`retry_chat_message`] (the file
 /// is not uploaded again). `upload_id`, chosen by Dart, names the upload on
 /// [`on_attachment_progress`]. A refusal before the message exists
 /// (`UploadFailed`, …) leaves nothing stored: Dart keeps the bytes for a

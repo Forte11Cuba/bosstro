@@ -1,9 +1,9 @@
 /// The one dialog and the one bottom sheet the app asks a question with.
 ///
-/// Ported from ../app, where before these existed every modal styled itself:
-/// six corner radii, five CTA colours, four button heights and three scrims.
-/// The geometry lives here rather than in a global button theme so it applies to
-/// modal actions only — an in-page button keeps its own size.
+/// Ported from MostroP2P/app, where before these existed every modal styled
+/// itself: six corner radii, five CTA colours, four button heights and three
+/// scrims. The geometry lives here rather than in a global button theme so it
+/// applies to modal actions only — an in-page button keeps its own size.
 ///
 /// Both surfaces take the same [ModalAction] pair, so a question asked in a
 /// dialog and the same question asked in a sheet answer with the same buttons.

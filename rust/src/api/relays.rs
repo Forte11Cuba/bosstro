@@ -1,5 +1,6 @@
 //! The relay pool, across the bridge. A thin facade over
-//! [`crate::nostr::relay_pool::RelayPool`], from ../app's `api/nostr.rs`.
+//! [`crate::nostr::relay_pool::RelayPool`], from MostroP2P/app's
+//! `api/nostr.rs`.
 //!
 //! One relay list for the device (not one per node): the defaults, the
 //! relays the solver adds, and those the active node announces in its kind
@@ -48,7 +49,7 @@ pub enum ConnectionState {
     Reconnecting,
 }
 
-/// A relay of the list. Same shape as ../app's `RelayInfo`, plus
+/// A relay of the list. Same shape as MostroP2P/app's `RelayInfo`, plus
 /// `announced_by`.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct RelayInfo {
@@ -83,7 +84,8 @@ pub(crate) fn pool() -> Result<&'static Arc<RelayPool>> {
 /// Call after `init_db` and `rehydrate_active_node`. A second call in the
 /// same process re-attaches to the pool it already has and returns `Ok`:
 /// Android can destroy the Flutter engine while the process lives on, and the
-/// next launch runs `main()` again against the same Rust statics (../app).
+/// next launch runs `main()` again against the same Rust statics
+/// (MostroP2P/app).
 pub async fn initialize_relays() -> Result<()> {
     if POOL.get().is_some() {
         log::info!("[relay] pool already running — re-attaching");
@@ -130,7 +132,7 @@ pub async fn initialize_relays() -> Result<()> {
 
     // Each time the pool comes online, the active node's relay list and
     // instance info are read again. Subscribed before the state is read, so
-    // an `Online` sent in between is not lost (../app).
+    // an `Online` sent in between is not lost (MostroP2P/app).
     let rx = pool.subscribe_connection_state();
     let current = pool.connection_state().await;
     crate::rt::spawn(watch_online(rx, current));

@@ -3,15 +3,15 @@
 //!
 //! **The key.** The parties' own chat is the chat envelope keyed between
 //! their two trade keys: ECDH, then HKDF into `K_conv` and `K_sign`
-//! (`mostro_core::chat`). A party of ../app discloses `K_conv`'s secret to
-//! the solver by sending, in its dispute chat with this key, exactly
+//! (`mostro_core::chat`). A party of MostroP2P/app discloses `K_conv`'s secret
+//! to the solver by sending, in its dispute chat with this key, exactly
 //! `"Shared key: "` + 64 hex characters (`share_chat_key_with_solver`,
 //! `CHAT_KEY_PREFIX`). It is taken only from a message whose verified inner
 //! signer is that party on its own conversation: never from this key's own
 //! messages, never from the other party, never in another format (the same
-//! check as ../app's `note_chat_key_share_echo`). The solver can also paste
-//! one ([`parse_pasted`]): it is kept only when it opens a message of this
-//! dispute, and only in memory (`Router::pasted`), forgotten when the key
+//! check as MostroP2P/app's `note_chat_key_share_echo`). The solver can also
+//! paste one ([`parse_pasted`]): it is kept only when it opens a message of
+//! this dispute, and only in memory (`Router::pasted`), forgotten when the key
 //! changes or the app stops. No key is stored: a disclosed one is a stored
 //! chat message already (accepted limit, A4).
 //!
@@ -32,14 +32,15 @@
 //! author as the expected one: one `p` tag, the future bound, the 64 KiB
 //! size, both signatures, inner kind 1, the inner/outer time skew. The inner
 //! signers allowed are the buyer's and the seller's trade keys the take
-//! named (../app signs the inner event with the sender's trade key); anyone
-//! else is dropped, never guessed. The inner id is the message's identity.
+//! named (MostroP2P/app signs the inner event with the sender's trade key);
+//! anyone else is dropped, never guessed. The inner id is the message's
+//! identity.
 //!
-//! **Attachments** in this chat cannot be opened: ../app encrypts them with
-//! the raw ECDH secret of the two trade keys (`send_file` →
+//! **Attachments** in this chat cannot be opened: MostroP2P/app encrypts them
+//! with the raw ECDH secret of the two trade keys (`send_file` →
 //! `attachment_key`), which `K_conv` does not give (HKDF is one-way). They
 //! are shown by their name and type, never tried with `K_conv` (Mostrix
-//! does; it fails on ../app's files).
+//! does; it fails on MostroP2P/app's files).
 //!
 //! Nothing logs a key or a message's content.
 
@@ -56,8 +57,8 @@ use crate::api::observer::{KeyDisclosure, ObservedChat, ObservedMessage, Observe
 use crate::db::Storage;
 use crate::disputes::DisputeRecord;
 
-/// What a party's disclosure starts with (../app `CHAT_KEY_PREFIX`). Fixed
-/// and untranslated: the same in every language the parties write.
+/// What a party's disclosure starts with (MostroP2P/app `CHAT_KEY_PREFIX`).
+/// Fixed and untranslated: the same in every language the parties write.
 pub const KEY_PREFIX: &str = "Shared key: ";
 
 /// How long before the dispute was opened a read starts.
@@ -84,7 +85,8 @@ fn hex_key(hex: &str) -> Option<SharedKey> {
 }
 
 /// The key a disclosure message carries: exactly [`KEY_PREFIX`] and 64 hex
-/// characters, as ../app writes it and `note_chat_key_share_echo` reads it.
+/// characters, as MostroP2P/app writes it and `note_chat_key_share_echo` reads
+/// it.
 pub fn parse_disclosure(text: &str) -> Option<SharedKey> {
     hex_key(text.strip_prefix(KEY_PREFIX)?)
 }

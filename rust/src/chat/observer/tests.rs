@@ -1,8 +1,8 @@
 //! The observed chat against a relay: the parties of a dispute write to each
-//! other as ../app does (the chat envelope keyed between their two trade
+//! other as MostroP2P/app does (the chat envelope keyed between their two trade
 //! keys, the inner event signed by the writer's trade key), one of them
-//! discloses the key to the solver as ../app's `share_chat_key_with_solver`
-//! does, and the solver reads.
+//! discloses the key to the solver as MostroP2P/app's
+//! `share_chat_key_with_solver` does, and the solver reads.
 
 use std::sync::Mutex;
 use std::time::Duration;
@@ -17,7 +17,8 @@ use crate::chat::channel_keys;
 use crate::chat::router::tests::{bench, bench_with, Bench, Party, DISPUTE_A};
 use crate::disputes::feed::Store;
 
-/// The key of the buyer ↔ seller chat, as ../app derives it on either side.
+/// The key of the buyer ↔ seller chat, as MostroP2P/app derives it on either
+/// side.
 fn p2p_keys(b: &Bench) -> (Keys, Keys) {
     let from_buyer = channel_keys(&b.buyer.keys, &b.seller.keys.public_key()).unwrap();
     let from_seller = channel_keys(&b.seller.keys, &b.buyer.keys.public_key()).unwrap();
@@ -25,12 +26,13 @@ fn p2p_keys(b: &Bench) -> (Keys, Keys) {
     from_buyer
 }
 
-/// What ../app's `chat_key_disclosure` writes.
+/// What MostroP2P/app's `chat_key_disclosure` writes.
 fn disclosure_text(conv: &Keys) -> String {
     format!("Shared key: {}", conv.secret_key().to_secret_hex())
 }
 
-/// `from` writes `text` to `to` in their own chat, as ../app's `send_message`.
+/// `from` writes `text` to `to` in their own chat, as MostroP2P/app's
+/// `send_message`.
 async fn p2p_say(from: &Party, to: &Party, text: &str) -> Event {
     let (conv, sign) = channel_keys(&from.keys, &to.keys.public_key()).unwrap();
     let event = wrap_chat_message(&from.keys, &conv, &sign, text)
@@ -133,7 +135,7 @@ async fn a_disclosure_is_taken_only_from_its_party() {
         Err(ObserverError::NoSharedKey)
     );
 
-    // Now the buyer shares it as ../app does, and then the seller too.
+    // Now the buyer shares it as MostroP2P/app does, and then the seller too.
     b.buyer.say(&solver, &text).await;
     b.wait_for(DISPUTE_A, ChatParty::Buyer, 3).await;
     let state = b.router.observed(DISPUTE_A).await.unwrap();
@@ -165,8 +167,8 @@ async fn a_disclosure_is_taken_only_from_its_party() {
     assert!(parties.contains(&ChatParty::Seller));
 }
 
-/// The parties' own chat, built as ../app builds it, reads with the key one
-/// of them shared: both sides, oldest first, each named by its signer, kept
+/// The parties' own chat, built as MostroP2P/app builds it, reads with the key
+/// one of them shared: both sides, oldest first, each named by its signer, kept
 /// once however many times it is read.
 #[tokio::test]
 async fn a_conversation_built_as_app_reads_with_the_shared_key() {
@@ -317,7 +319,7 @@ async fn a_pasted_key_reads_and_goes_with_the_solver_key() {
     );
 }
 
-/// A file of the parties' chat, encrypted as ../app encrypts it (the raw
+/// A file of the parties' chat, encrypted as MostroP2P/app encrypts it (the raw
 /// ECDH of the two trade keys), shows as an attachment with its sanitized
 /// name and type, and does not open with `K_conv`.
 #[tokio::test]

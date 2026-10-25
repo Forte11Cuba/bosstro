@@ -17,7 +17,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 /// Call after `init_db` and `rehydrate_active_node`. A second call in the
 /// same process re-attaches to the pool it already has and returns `Ok`:
 /// Android can destroy the Flutter engine while the process lives on, and the
-/// next launch runs `main()` again against the same Rust statics (../app).
+/// next launch runs `main()` again against the same Rust statics
+/// (MostroP2P/app).
 Future<void> initializeRelays() =>
     RustLib.instance.api.crateApiRelaysInitializeRelays();
 
@@ -67,7 +68,7 @@ abstract class RelayStatusStream implements RustOpaqueInterface {
 /// one is trying, Offline otherwise.
 enum ConnectionState { online, offline, reconnecting }
 
-/// A relay of the list. Same shape as ../app's `RelayInfo`, plus
+/// A relay of the list. Same shape as MostroP2P/app's `RelayInfo`, plus
 /// `announced_by`.
 class RelayInfo {
   final String url;

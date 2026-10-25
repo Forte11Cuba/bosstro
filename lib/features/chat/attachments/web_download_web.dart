@@ -1,4 +1,4 @@
-/// Web implementation of `web_download.dart`, from ../app.
+/// Web implementation of `web_download.dart`, from MostroP2P/app.
 library;
 
 import 'dart:async';

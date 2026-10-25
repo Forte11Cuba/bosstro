@@ -23,7 +23,7 @@ final openExternalUrlProvider = Provider<Future<bool> Function(Uri)>(
 );
 
 /// The AGPLv3 notice the FSF recommends programs display, kept verbatim and
-/// **not** localized, as ../app: a translated licence has no legal force
+/// **not** localized, as MostroP2P/app: a translated licence has no legal force
 /// (<https://www.gnu.org/licenses/translations.html>), so every locale shows
 /// the English original and only the dialog's title is translated. The full
 /// text is `LICENSE`.
@@ -43,17 +43,18 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.''';
 
-/// Characters of a commit hash shown on a row, as ../app.
+/// Characters of a commit hash shown on a row, as MostroP2P/app.
 const int shortHashLength = 7;
 
-/// [hash] cut to [shortHashLength] (../app's `shortHash`).
+/// [hash] cut to [shortHashLength] (MostroP2P/app's `shortHash`).
 String shortHash(String hash) =>
     hash.length <= shortHashLength ? hash : hash.substring(0, shortHashLength);
 
-/// Settings → About, ../app's About for what Bosstro has: the version and the
-/// commit the build was made from (../app's Application rows), the licence
-/// and the source code — the offer AGPL section 13 asks of an app that talks
-/// to its users over a network. The node's data is Settings → Node info.
+/// Settings → About, MostroP2P/app's About for what Bosstro has: the version
+/// and the commit the build was made from (MostroP2P/app's Application rows),
+/// the licence and the source code — the offer AGPL section 13 asks of an app
+/// that talks to its users over a network. The node's data is Settings →
+/// Node info.
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
@@ -121,7 +122,7 @@ class AboutScreen extends ConsumerWidget {
                 OrderDataRow(
                   icon: Icons.info_outline_rounded,
                   label: l10n.aboutVersionLabel,
-                  // ../app's version pill: "v2.1.0".
+                  // MostroP2P/app's version pill: "v2.1.0".
                   value: OrderDataValue('v$version', figures: true),
                 ),
                 if (commit.isNotEmpty)
@@ -183,7 +184,7 @@ class AboutScreen extends ConsumerWidget {
 }
 
 /// Opens [url] in the external browser. With no app to hand it to, the link
-/// is offered on a snackbar instead, with a copy action (../app's).
+/// is offered on a snackbar instead, with a copy action (MostroP2P/app's).
 Future<void> _openExternal(
   BuildContext context,
   WidgetRef ref,

@@ -6,7 +6,7 @@ import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/providers/node_providers.dart';
 import 'package:bosstro/features/nodes/services/nodes_core.dart';
 
-/// A node's face (from ../app's `NodeAvatar`): its kind 0 picture as the
+/// A node's face (from MostroP2P/app's `NodeAvatar`): its kind 0 picture as the
 /// device keeps it, else from its URL, else its initial on a tint derived
 /// from its name. Decorative: the name next to it says who the node is.
 class NodeAvatar extends ConsumerWidget {

@@ -112,10 +112,10 @@ final activeNodeEntryProvider = Provider<MostroNodeEntry?>((ref) {
 
 // ── Pictures ─────────────────────────────────────────────────────────────────
 
-/// A node's kind 0 picture as the device keeps it, or null (from ../app's
-/// `node_picture_provider.dart`). Resolves once the picture is decoded into
-/// the image cache; bytes that do not decode are forgotten, so the avatar
-/// loads the URL and the next sync downloads the picture again.
+/// A node's kind 0 picture as the device keeps it, or null (from
+/// MostroP2P/app's `node_picture_provider.dart`). Resolves once the picture is
+/// decoded into the image cache; bytes that do not decode are forgotten, so the
+/// avatar loads the URL and the next sync downloads the picture again.
 final nodePictureProvider = FutureProvider.family<MostroNodePicture?, String>((
   ref,
   pubkey,

@@ -132,8 +132,8 @@ void main() {
       // Arrange
       final publish = job('publish');
 
-      // Assert — ../app's shape, without its desktop and iOS builds (A2):
-      // the notes are rendered for the assets that exist.
+      // Assert — MostroP2P/app's shape, without its desktop and iOS builds
+      // (A2): the notes are rendered for the assets that exist.
       expect(publish, contains('needs: [prepare, android]'));
       expect(publish, contains("needs.android.result == 'success'"));
       expect(publish, contains('--assets-dir dist'));

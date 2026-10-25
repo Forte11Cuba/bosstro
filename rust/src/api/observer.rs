@@ -2,7 +2,7 @@
 //! seller of a dispute this key holds wrote to each other in their own chat,
 //! read with the key of that conversation.
 //!
-//! A party of ../app sends the solver, in its dispute chat, the text
+//! A party of MostroP2P/app sends the solver, in its dispute chat, the text
 //! `"Shared key: "` + the 64-hex secret of its trade's `K_conv`
 //! (`share_chat_key_with_solver`). `K_conv` decrypts the conversation but
 //! cannot sign as its `pub(K_sign)`, so the grant is read only by
@@ -44,8 +44,8 @@ pub struct ObservedMessage {
     /// The inner event's `created_at` (Unix seconds), as the writer set it.
     pub created_at: i64,
     /// Set when the text is a well-formed attachment. It cannot be opened:
-    /// ../app encrypts the files of this chat with the raw ECDH secret of
-    /// the two trade keys, which the shared key does not give.
+    /// MostroP2P/app encrypts the files of this chat with the raw ECDH secret
+    /// of the two trade keys, which the shared key does not give.
     pub attachment: Option<ChatAttachment>,
 }
 

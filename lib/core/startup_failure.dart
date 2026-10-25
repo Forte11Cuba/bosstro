@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:bosstro/core/app_theme.dart' show AppFonts;
 
-/// Painted instead of the app when startup fails before it can be (../app's
-/// `startup_failure.dart`).
+/// Painted instead of the app when startup fails before it can be
+/// (MostroP2P/app's `startup_failure.dart`).
 ///
 /// Deliberately dependency-free: no localization, no app theme, no Rust, no
 /// SharedPreferences. Any of those can be the thing that failed, and a rescue
-/// surface that needs what broke is a second blank page (../app #227, #389).
+/// surface that needs what broke is a second blank page
+/// (MostroP2P/app#227, #389).
 ///
 /// [step] names the startup step that threw, phrased to read inside the
 /// sentence below ("It failed while loading the engine."). That name is the

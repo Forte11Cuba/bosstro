@@ -1,9 +1,10 @@
-//! Chat attachment encryption: ChaCha20-Poly1305, from ../app's
+//! Chat attachment encryption: ChaCha20-Poly1305, from MostroP2P/app's
 //! `crypto/file_enc.rs`.
 //!
 //! A blob is `[12-byte nonce][ciphertext + 16-byte tag]`, no associated data,
-//! a random nonce per file: byte for byte what ../app uploads to Blossom, so
-//! either app opens the other's files. A reader takes the nonce from the blob.
+//! a random nonce per file: byte for byte what MostroP2P/app uploads to
+//! Blossom, so either app opens the other's files. A reader takes the nonce
+//! from the blob.
 //!
 //! The key is [`attachment_key`]: the raw ECDH x-coordinate between the
 //! solver key and the party's trade key. It is derived in memory when a file
@@ -24,14 +25,14 @@ pub const NONCE_BYTES: usize = 12;
 pub const TAG_BYTES: usize = 16;
 
 /// The ChaCha20-Poly1305 key for the attachments between `own` and
-/// `counterpart`: the raw x-coordinate of their ECDH, **not** hashed (../app
-/// `attachment_key` → `ecdh::raw_shared_x`; the hashed form would make every
-/// file unreadable across the apps). Symmetric: the party derives the same
-/// key from its trade key and the solver's pubkey.
+/// `counterpart`: the raw x-coordinate of their ECDH, **not** hashed
+/// (MostroP2P/app `attachment_key` → `ecdh::raw_shared_x`; the hashed form
+/// would make every file unreadable across the apps). Symmetric: the party
+/// derives the same key from its trade key and the solver's pubkey.
 ///
 /// Read from mostro-core's ECDH (`SharedKey`, the same x the chat keys start
-/// from) rather than ../app's own k256 code: the vector test below proves
-/// they agree.
+/// from) rather than MostroP2P/app's own k256 code: the vector test below
+/// proves they agree.
 pub fn attachment_key(own: &Keys, counterpart: &PublicKey) -> Result<Zeroizing<[u8; 32]>> {
     let shared = SharedKey::derive(own.secret_key(), counterpart)
         .map_err(|e| anyhow!("attachment key not derived: {e}"))?;
@@ -61,8 +62,8 @@ fn encrypt_file_with_nonce(
     Ok(out)
 }
 
-/// Decrypt a blob made by [`encrypt_file`] (or by ../app). A blob altered in
-/// any byte, or sealed under another key, fails the tag.
+/// Decrypt a blob made by [`encrypt_file`] (or by MostroP2P/app). A blob
+/// altered in any byte, or sealed under another key, fails the tag.
 pub fn decrypt_file(blob: &[u8], key: &[u8; 32]) -> Result<Vec<u8>> {
     if blob.len() < NONCE_BYTES + TAG_BYTES {
         return Err(anyhow!("encrypted data too short: {} bytes", blob.len()));
@@ -114,9 +115,9 @@ mod tests {
         assert_ne!(a[..NONCE_BYTES], b[..NONCE_BYTES]);
     }
 
-    // ../app's cross-client vector (`crypto/file_enc.rs`, #589): the chat
-    // spec's test-vector keys, plaintext "Mostro v1 attachment vector" and
-    // nonce 01..0c. The same key and blob ../app derives and writes.
+    // MostroP2P/app's cross-client vector (`crypto/file_enc.rs`, #589): the
+    // chat spec's test-vector keys, plaintext "Mostro v1 attachment vector" and
+    // nonce 01..0c. The same key and blob MostroP2P/app derives and writes.
     const ALICE_SK: &str = "548f68890c49fa42f104c60352395e60ff030b0b407e955f1eed1400d6c0347a";
     const BOB_SK: &str = "f258e73f07386d37133718b6127f873dd7c391b8f43b331ff8254034a13d2943";
     const APP_FILE_KEY: &str = "def6633a53d07d1e829484c4d4bdbbeed2f4b14c21743e63871c174338e39475";

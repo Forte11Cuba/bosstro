@@ -8,7 +8,7 @@ import 'package:bosstro/features/chat/attachments/upload_controller.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 
 /// The solver's file on its way out: its progress, or why it failed and
-/// what can be done, from ../app. Replaced by the message once the core
+/// what can be done, from MostroP2P/app. Replaced by the message once the core
 /// returns it. There is no cancel: an upload cannot be stopped midway, and a
 /// bubble that said "cancelled" while the file still reached the party
 /// would lie.

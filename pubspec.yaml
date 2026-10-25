@@ -18,8 +18,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # Bridge: Rust core ↔ Flutter UI. Same exact pin as ../app and rust/Cargo.toml
-  # (scripts/frb-generate.sh refuses to generate when they disagree).
+  # Bridge: Rust core ↔ Flutter UI. Same exact pin as MostroP2P/app and
+  # rust/Cargo.toml (scripts/frb-generate.sh refuses to generate when they
+  # disagree).
   flutter_rust_bridge: 2.11.1
   rust:
     path: rust_builder
@@ -40,21 +41,22 @@ dependencies:
   qr: ^3.0.2
   share_plus: ^12.0.1
 
-  # About opens the source code in the browser (as ../app).
+  # About opens the source code in the browser (as MostroP2P/app).
   url_launcher: ^6.3.3
 
   # Where the database file lives (lib/core/services/app_storage.dart): the
-  # app data directory, the XDG data dir on Linux. Same packages as ../app.
+  # app data directory, the XDG data dir on Linux. Same packages as
+  # MostroP2P/app.
   path_provider: ^2.1.5
   path: ^1.9.1
 
-  # Loading skeletons (DS-CMP-13), as ../app.
+  # Loading skeletons (DS-CMP-13), as MostroP2P/app.
   shimmer: ^3.0.0
 
-  # Chat attachments, as ../app: PDFs and the save dialog (file_picker; SAF on
-  # Android), gallery and camera (image_picker), and the browser download of a
-  # saved file on the web (web). file_picker is ahead of ../app's ^8.3.7: 8.x
-  # compiles against Android 34, and AGP 9 refuses it next to
+  # Chat attachments, as MostroP2P/app: PDFs and the save dialog (file_picker;
+  # SAF on Android), gallery and camera (image_picker), and the browser download
+  # of a saved file on the web (web). file_picker is ahead of MostroP2P/app's
+  # ^8.3.7: 8.x compiles against Android 34, and AGP 9 refuses it next to
   # flutter_plugin_android_lifecycle 2.0.35, which needs 36; 10.x compiles
   # against Flutter's own compileSdk.
   file_picker: ^10.3.7
@@ -84,8 +86,8 @@ flutter:
     - assets/fonts/noto_flags/LICENSE.txt
 
   # Brand typography, bundled so the app never fetches fonts at runtime (the
-  # same assets as ../app). Outfit is the UI face; Manrope sets the figures
-  # (amounts, sats), whose tabular digits line up. Both are OFL-1.1: the
+  # same assets as MostroP2P/app). Outfit is the UI face; Manrope sets the
+  # figures (amounts, sats), whose tabular digits line up. Both are OFL-1.1: the
   # licences ship as assets and are registered with the LicenseRegistry at
   # startup (lib/core/font_licenses.dart).
   fonts:
@@ -107,14 +109,14 @@ flutter:
         - asset: assets/fonts/manrope/Manrope-Bold.ttf
           weight: 700
     # The flags of Noto Color Emoji (OFL), a fallback in both themes
-    # (DS-TYP-8). Copied from ../app, which builds it with
+    # (DS-TYP-8). Copied from MostroP2P/app, which builds it with
     # tool/flags_font/build_font.py.
     - family: NotoFlags
       fonts:
         - asset: assets/fonts/noto_flags/NotoFlags.ttf
 
-# Launcher icon: a variant of ../app's (D11, A8), so the two apps can be told
-# apart when both are installed. icons/bosstro.png is the art; every other
+# Launcher icon: a variant of MostroP2P/app's (D11, A8), so the two apps can be
+# told apart when both are installed. icons/bosstro.png is the art; every other
 # format in icons/ is built from it by:
 #   python3 tool/launcher_icon/build_sources.py
 # and the icons regenerated from it with:

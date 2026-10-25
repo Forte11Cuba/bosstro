@@ -14,11 +14,12 @@ crate-type = ["cdylib", "staticlib"]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
 [dependencies]
-# Same exact pin as pubspec.yaml and ../app (scripts/frb-generate.sh checks it).
+# Same exact pin as pubspec.yaml and MostroP2P/app (scripts/frb-generate.sh
+# checks it).
 flutter_rust_bridge = "=2.11.1"
 
-# Nostr & Mostro protocol. Same versions as ../app, so transport v2, the chat
-# envelope and attachments can be ported from it without a version gap.
+# Nostr & Mostro protocol. Same versions as MostroP2P/app, so transport v2, the
+# chat envelope and attachments can be ported from it without a version gap.
 nostr-sdk = { version = "0.45", default-features = false }
 # nostr-sdk 0.45 no longer carries the NIP feature flags: they live on `nostr`
 # itself and none are on by default (feature unification applies them to
@@ -26,11 +27,11 @@ nostr-sdk = { version = "0.45", default-features = false }
 nostr = { version = "0.45", default-features = false, features = ["std", "nip44"] }
 mostro-core = "0.17.3"
 # Dispute ids (the kind 38386 `d` tag) are UUIDs. Already in the tree through
-# mostro-core; same declaration as ../app.
+# mostro-core; same declaration as MostroP2P/app.
 uuid = { version = "1", features = ["v4"] }
 
 # Serialization: the rows Storage keeps as JSON documents (relays, the node
-# registry's settings blobs), as in ../app.
+# registry's settings blobs), as in MostroP2P/app.
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
@@ -38,22 +39,23 @@ serde_json = "1"
 anyhow = "1"
 
 # Logging. No logger is installed yet, so records go nowhere; the calls are
-# kept as in ../app for when one is.
+# kept as in MostroP2P/app for when one is.
 log = "0.4"
 
 # `Stream` for reading a relay query as it arrives (nostr/first_answer.rs).
-# Already in the tree through nostr-sdk. Same crate as ../app.
+# Already in the tree through nostr-sdk. Same crate as MostroP2P/app.
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
 
 # Wipes the solver's secret as it arrives over the bridge, until it is parsed
-# into `Keys` (whose `SecretKey` wipes itself on drop). Same crate as ../app.
+# into `Keys` (whose `SecretKey` wipes itself on drop). Same crate as
+# MostroP2P/app.
 zeroize = "1"
 
 # Chat attachments (phase 5, `attachments/`, `crypto/file_enc.rs`,
 # `nostr/blossom.rs`): ChaCha20-Poly1305 blobs, the Blossom hash and its
 # kind 24242 authorisation header, and images re-encoded without metadata.
-# Same versions and features as ../app; all but `image` are already in the
-# tree through nostr.
+# Same versions and features as MostroP2P/app; all but `image` are already in
+# the tree through nostr.
 hex = "0.4"
 base64 = "0.22"
 chacha20poly1305 = "0.10"
@@ -62,16 +64,16 @@ rand = { version = "0.8", features = ["getrandom"] }
 sha2 = "0.10"
 
 # Native only (Android, Linux): the Tokio runtime and SQLite do not compile to
-# wasm32. The web build gets its own block below, as in ../app.
+# wasm32. The web build gets its own block below, as in MostroP2P/app.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time"] }
 sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros", "migrate"] }
 # Node pictures (node_pictures.rs) and the Blossom transfers of chat
-# attachments (nostr/blossom.rs). Same features as ../app's native block,
+# attachments (nostr/blossom.rs). Same features as MostroP2P/app's native block,
 # minus `json` (only its push uses it).
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
 
-# Web only (scripts/build-web.sh). Same crates and reasons as ../app.
+# Web only (scripts/build-web.sh). Same crates and reasons as MostroP2P/app.
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # tokio's sync primitives (the solver slot's locks) are runtime-agnostic and
 # compile to wasm; nothing else of tokio does.
@@ -94,7 +96,8 @@ getrandom_04 = { package = "getrandom", version = "0.4", features = ["wasm_js"] 
 universal-time = { version = "0.3", default-features = false }
 
 # Tests only: `MockRelay` (an in-process relay) is behind nostr-sdk's
-# `local-relay` feature. Native only — it pulls in `tokio/net`. As ../app.
+# `local-relay` feature. Native only — it pulls in `tokio/net`. As
+# MostroP2P/app.
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 nostr-sdk = { version = "0.45", default-features = false, features = ["local-relay"] }
 # A throwaway HTTP server for the picture download tests (node_pictures.rs).

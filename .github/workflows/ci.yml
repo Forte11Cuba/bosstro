@@ -15,13 +15,14 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # FRB_VERSION is the same as ../app and is checked against pubspec.yaml and
-  # rust/Cargo.toml by scripts/frb-generate.sh. Flutter is ahead of ../app
-  # (3.41.9) on purpose; keep it equal to the local Flutter (CLAUDE.md).
+  # FRB_VERSION is the same as MostroP2P/app and is checked against pubspec.yaml
+  # and rust/Cargo.toml by scripts/frb-generate.sh. Flutter is ahead of
+  # MostroP2P/app (3.41.9) on purpose; keep it equal to the local Flutter
+  # (CLAUDE.md).
   FLUTTER_VERSION: "3.47.7"
   FRB_VERSION: "2.11.1"
   CARGO_EXPAND_VERSION: "1.0.123"
-  # Same as ../app's web build.
+  # Same as MostroP2P/app's web build.
   WASM_PACK_VERSION: "0.15.0"
 
 jobs:
@@ -308,6 +309,7 @@ jobs:
         run: ./scripts/build-web.sh
 
       # --pwa-strategy=none: Flutter's service worker would take the same scope
-      # as coi-serviceworker.min.js and evict the isolation shim (as in ../app).
+      # as coi-serviceworker.min.js and evict the isolation shim (as in
+      # MostroP2P/app).
       - name: Build web app
         run: flutter build web --pwa-strategy=none

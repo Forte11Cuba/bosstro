@@ -65,7 +65,7 @@ class DisputesPalette {
   final Color chipNeutralDot;
 
   /// The Info / Buyer / Seller control of the dispute detail: a pill track,
-  /// the chosen segment tinted lime (as ../app's `PillSegmented`).
+  /// the chosen segment tinted lime (as MostroP2P/app's `PillSegmented`).
   final Color segmentTrack;
   final Color segmentActiveFill;
   final Color segmentActiveBorder;
@@ -74,7 +74,7 @@ class DisputesPalette {
 
   /// Chat bubbles. The solver's own sit on a lime tint, the party's on the
   /// card surface; the sender is always named in words too (DS-COL-10). The
-  /// legacy purple and hue bubbles of ../app are not used (amendment 2).
+  /// legacy purple and hue bubbles of MostroP2P/app are not used (amendment 2).
   final Color bubbleMineFill;
   final Color bubbleMineBorder;
   final Color bubblePartyFill;
@@ -92,8 +92,8 @@ class DisputesPalette {
 
   /// The chat between the parties, read with a chat key (phase 5c): the
   /// buyer's bubbles on a lime tint, the seller's on the sell tint, as
-  /// ../app colors the two sides of an order (amendment 8 to DS-COL-9: here
-  /// lime and sell name a side, not the solver's turn or a danger). The
+  /// MostroP2P/app colors the two sides of an order (amendment 8 to DS-COL-9:
+  /// here lime and sell name a side, not the solver's turn or a danger). The
   /// side is always named in words too (DS-COL-10). Text and time are
   /// [bubbleInk] and [bubbleMeta].
   final Color observedBuyerFill;

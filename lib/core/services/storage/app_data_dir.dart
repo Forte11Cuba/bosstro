@@ -1,9 +1,9 @@
 /// Where the app keeps its own files: the SQLite database (A4).
 ///
-/// Ported from ../app's `core/storage/app_data_dir.dart`. Deliberately NOT
-/// `getApplicationDocumentsDirectory()` on Linux: that is the user's visible
-/// Documents folder. Per the XDG Base Directory spec app state belongs in
-/// `$XDG_DATA_HOME` (default `~/.local/share`). Android keeps its documents
+/// Ported from MostroP2P/app's `core/storage/app_data_dir.dart`. Deliberately
+/// NOT `getApplicationDocumentsDirectory()` on Linux: that is the user's
+/// visible Documents folder. Per the XDG Base Directory spec app state belongs
+/// in `$XDG_DATA_HOME` (default `~/.local/share`). Android keeps its documents
 /// directory, which is already app-private.
 ///
 /// Native only: the web build gets `app_data_dir_web.dart` through a

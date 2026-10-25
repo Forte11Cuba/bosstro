@@ -1,10 +1,10 @@
 //! The pictures of the registry's nodes, kept on the device.
 //!
-//! Ported from ../app's `node_pictures.rs`. A node's face — the `picture`
-//! of its kind 0 profile — is what the node selector and the node info show
-//! beside it. The bytes are downloaded when the profile is ([`sync`], after
-//! every kind 0 refresh) and kept with the URL they came from: a picture is
-//! fetched again only when the profile names another URL, or when an earlier
+//! Ported from MostroP2P/app's `node_pictures.rs`. A node's face — the
+//! `picture` of its kind 0 profile — is what the node selector and the node
+//! info show beside it. The bytes are downloaded when the profile is ([`sync`],
+//! after every kind 0 refresh) and kept with the URL they came from: a picture
+//! is fetched again only when the profile names another URL, or when an earlier
 //! download failed, instead of on every launch.
 //!
 //! The bytes are kept as served. Decoding them is the UI's job, as it was
@@ -227,7 +227,7 @@ mod tests {
     use std::sync::{Arc, Mutex as StdMutex};
 
     /// A server answering every request with `status` and `body`, recording
-    /// the request lines it saw. Returns its base URL. (../app's
+    /// the request lines it saw. Returns its base URL. (MostroP2P/app's
     /// `blossom::test_server`, reduced to what these tests read.)
     async fn serve(status: u16, body: Vec<u8>) -> (String, Arc<StdMutex<Vec<String>>>) {
         use tokio::io::{AsyncReadExt, AsyncWriteExt};

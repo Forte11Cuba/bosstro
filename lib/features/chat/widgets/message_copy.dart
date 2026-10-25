@@ -8,7 +8,7 @@ import 'package:bosstro/shared/providers/device_security_providers.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/snackbar.dart';
 
-/// A chat key a party disclosed (../app's `share_chat_key_with_solver`):
+/// A chat key a party disclosed (MostroP2P/app's `share_chat_key_with_solver`):
 /// `Shared key: ` and the 64-hex secret of a conversation's `K_conv`.
 final _chatKey = RegExp(r'Shared key:\s*[0-9a-fA-F]{64}');
 

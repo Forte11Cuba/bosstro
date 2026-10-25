@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bosstro/features/chat/attachments/web_download.dart';
 
-/// Saves a decrypted attachment where the solver chooses, from ../app.
+/// Saves a decrypted attachment where the solver chooses, from MostroP2P/app.
 ///
 /// The one path that writes the plaintext to disk, and only through the
 /// system's save dialog: the solver picks the place and the name (Android:

@@ -2,8 +2,8 @@
 // all local, on Linux, by hand (README.md here): a party sends the solver an
 // image and a PDF, the solver sees and saves them, and the solver sends a
 // photo the party decrypts. The party is `rust/examples/chat_party.rs`, which
-// writes and reads ../app's format on its own (it shares no code with the
-// app). Never against a real node or a public Blossom server.
+// writes and reads MostroP2P/app's format on its own (it shares no code with
+// the app). Never against a real node or a public Blossom server.
 import 'dart:io';
 import 'dart:typed_data';
 

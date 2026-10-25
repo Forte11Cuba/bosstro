@@ -9,13 +9,13 @@
 //! stay, read only.
 //!
 //! **One subscription for them all.** Relays cap concurrent REQs per
-//! connection (strfry: 20; nos.lol refused ../app's one-per-order REQs), so
-//! the channels share one long-lived kind 14 REQ, `authors` = every channel's
-//! `pub(K_sign)` (Mostrix `live_chat_filters`), through `nostr::live_subs`.
-//! Each event goes to its conversation by its outer author. The REQ is
-//! rebuilt only when the set of authors changes, make-before-break (Mostrix
-//! `resubscribe`): the new one, under a new id, is issued before the old one
-//! closes, so nothing published meanwhile falls between them. Past
+//! connection (strfry: 20; nos.lol refused MostroP2P/app's one-per-order REQs),
+//! so the channels share one long-lived kind 14 REQ, `authors` = every
+//! channel's `pub(K_sign)` (Mostrix `live_chat_filters`), through
+//! `nostr::live_subs`. Each event goes to its conversation by its outer author.
+//! The REQ is rebuilt only when the set of authors changes, make-before-break
+//! (Mostrix `resubscribe`): the new one, under a new id, is issued before the
+//! old one closes, so nothing published meanwhile falls between them. Past
 //! [`MAX_AUTHORS_PER_REQ`] authors the set is split into a few REQs.
 //!
 //! **Since.** The REQ starts at the earliest of its channels' starts: each

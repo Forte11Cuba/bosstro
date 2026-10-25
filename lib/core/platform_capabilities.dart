@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart'
 /// the web branch. Callers use the getters below.
 abstract final class PlatformCapabilities {
   /// Scanning a QR code with the camera. `mobile_scanner` has no Linux
-  /// implementation, and on web the key is pasted, as in ../app
+  /// implementation, and on web the key is pasted, as in MostroP2P/app
   /// (`qrInputFor`).
   static bool scanQrOn(bool isWeb, TargetPlatform platform) =>
       !isWeb && platform == TargetPlatform.android;

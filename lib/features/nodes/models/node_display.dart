@@ -2,7 +2,7 @@ import 'package:bosstro/features/nodes/services/nodes_core.dart';
 import 'package:bosstro/l10n/app_localizations.dart';
 import 'package:bosstro/shared/utils/short_id.dart';
 
-/// ../app's default node, the first of the registry. Its kind 0 name is
+/// MostroP2P/app's default node, the first of the registry. Its kind 0 name is
 /// used once known; until then it is called by its brand.
 const mostroNodePubkey =
     '82fa8cb978b43c79b2156585bac2c011176a21d2aead6d9f7c575c005be88390';
@@ -27,7 +27,7 @@ String? regionPlace(String? region) {
   return place.trim().isEmpty ? null : place.trim();
 }
 
-/// A node's title (from ../app's `nodeDisplayName`): the solver's or the
+/// A node's title (from MostroP2P/app's `nodeDisplayName`): the solver's or the
 /// kind 0 name, then the region's place, then "Mostro" for the default node,
 /// then the short pubkey.
 String nodeDisplayName(MostroNodeEntry entry) {

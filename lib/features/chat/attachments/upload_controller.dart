@@ -9,7 +9,7 @@ import 'package:bosstro/features/chat/services/chat_core.dart';
 enum UploadStatus { uploading, failed }
 
 /// A file on its way out, shown as the solver's own bubble until the core
-/// returns the message it sent, from ../app's `PendingUpload`.
+/// returns the message it sent, from MostroP2P/app's `PendingUpload`.
 @immutable
 class PendingUpload {
   const PendingUpload({

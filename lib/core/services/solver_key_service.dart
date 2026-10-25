@@ -128,7 +128,7 @@ class SolverKeyService {
   String previewNpub(String secret) =>
       _withSecretBytes(secret, _core.previewNpub);
 
-  /// Makes [secret] the solver key: the safe replace of ../app's
+  /// Makes [secret] the solver key: the safe replace of MostroP2P/app's
   /// `IdentityService._replaceLoadedIdentity`.
   ///
   /// Unload the key Rust holds, load the new one, and only then write

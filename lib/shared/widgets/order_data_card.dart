@@ -8,8 +8,8 @@ import 'package:bosstro/shared/utils/short_id.dart';
 import 'package:bosstro/shared/widgets/snackbar.dart';
 
 /// Label → value facts (DS-CMP-24) and the copyable id row (DS-CMP-22),
-/// ported from ../app's `order_detail_cards.dart` and kept under the names
-/// the design guide cites.
+/// ported from MostroP2P/app's `order_detail_cards.dart` and kept under the
+/// names the design guide cites.
 
 /// A block on the page: surface fill, hairline border, radius 18, no
 /// elevation (DS-CMP-8). With [onTap] it is `Material` + `InkWell`, so the

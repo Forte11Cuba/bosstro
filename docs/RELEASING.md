@@ -4,8 +4,9 @@ A release is cut by **pushing a tag** `vMAJOR.MINOR.PATCH`. `.github/workflows/r
 does the rest: it builds and signs the Android APKs and the app bundle, writes the release
 notes, publishes the GitHub release and opens a PR that records it in `CHANGELOG.md`.
 
-This is `../app`'s release (MostroP2P/app), the reference for this setup, with its Linux,
-Windows, macOS and iOS builds left out: Bosstro releases **Android only** (AGENTS.md, A2).
+This is [MostroP2P/app](https://github.com/MostroP2P/app)'s release, the reference for this
+setup, with its Linux, Windows, macOS and iOS builds left out: Bosstro releases **Android
+only** (AGENTS.md, A2).
 
 Versions start at **0.1.0**, the version `main` already carries, and follow
 [Semantic Versioning](https://semver.org/): patch for fixes, minor for features.
@@ -51,7 +52,7 @@ Android only installs an update signed with the **same certificate** as the inst
 The key below is therefore the identity of the app for its whole life: **lose it and no
 existing user can ever update; leak it and anyone can ship an "update"**. Generate it once,
 keep an offline backup, and never commit it (`android/.gitignore` excludes it). It is Bosstro's
-own key, not `../app`'s: a leak of one must not let anyone ship an update of the other.
+own key, not MostroP2P/app's: a leak of one must not let anyone ship an update of the other.
 
 ```bash
 keytool -genkeypair -v -keystore bosstro-release.jks -alias bosstro \
@@ -60,7 +61,7 @@ base64 -w0 bosstro-release.jks        # value of ANDROID_KEYSTORE_FILE
 ```
 
 Secrets of the `release` environment (Settings → Environments → `release`), same names as
-`../app`'s:
+MostroP2P/app's:
 
 | Secret | Value |
 | --- | --- |

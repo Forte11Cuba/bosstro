@@ -100,7 +100,7 @@ void main() {
     }
   });
 
-  testWidgets('the version as ../app writes it, and the commit\'s hash', (
+  testWidgets('the version as MostroP2P/app writes it, and the commit hash', (
     tester,
   ) async {
     // Act
@@ -181,7 +181,7 @@ void main() {
   });
 
   group('shortHash', () {
-    test('cuts a hash to seven characters, as ../app', () {
+    test('cuts a hash to seven characters, as MostroP2P/app', () {
       expect(shortHash(_commit), '1a2b3c4');
     });
 

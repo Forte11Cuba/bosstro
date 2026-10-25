@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Guards the Android manifest's opt-out of Auto Backup (as ../app's #873).
+/// Guards the Android manifest's opt-out of Auto Backup (as MostroP2P/app#873).
 ///
 /// `android:allowBackup` defaults to `true`: Android then uploads the app's
 /// data directory to Google Drive and restores it at every reinstall. The

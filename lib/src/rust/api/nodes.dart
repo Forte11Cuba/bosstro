@@ -11,9 +11,9 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`
 // These functions are ignored (category: IgnoreBecauseOwnerTyShouldIgnore): `default`
 
-/// The registry: "Mostro" (../app's default node) first, the other trusted
-/// communities in registry order, then the solver's own nodes in the order
-/// they were added, each merged with cached kind 0 metadata.
+/// The registry: "Mostro" (MostroP2P/app's default node) first, the other
+/// trusted communities in registry order, then the solver's own nodes in the
+/// order they were added, each merged with cached kind 0 metadata.
 ///
 /// An active node in neither list is auto-imported as a custom node, so the
 /// selector always shows the node in use.

@@ -1,13 +1,13 @@
-//! Relay pool — manages connections to Nostr relays. From ../app's
+//! Relay pool — manages connections to Nostr relays. From MostroP2P/app's
 //! `nostr/relay_pool.rs`.
 //!
 //! Connection state is derived: Online if ≥1 relay is connected, Reconnecting
 //! while one is trying, Offline otherwise.
 //!
 //! Since phase 3 keeps a live subscription (the active node's kind 38386), the
-//! pool also runs ../app's liveness probe (`relay_probe.rs`): a `Connected`
-//! relay that has gone quiet is asked whether it still answers, and bounced
-//! when it does not, so `live_subs` re-issues its subscriptions.
+//! pool also runs MostroP2P/app's liveness probe (`relay_probe.rs`): a
+//! `Connected` relay that has gone quiet is asked whether it still answers, and
+//! bounced when it does not, so `live_subs` re-issues its subscriptions.
 use anyhow::{anyhow, Result};
 use nostr_sdk::prelude::*;
 // The SDK re-exports its own `RelayStatus`; alias it to keep ours unambiguous.
@@ -294,7 +294,7 @@ impl RelayPool {
     ///
     /// `ClientNotification` in nostr-sdk 0.45 carries no relay-level status
     /// transitions, so polling `client.relay(url).status()` is the available
-    /// mechanism (as in ../app).
+    /// mechanism (as in MostroP2P/app).
     fn spawn_status_monitor(self: &Arc<Self>) {
         let client = self.client.clone();
         let relays = self.relays.clone();
@@ -348,7 +348,7 @@ impl RelayPool {
     }
 
     /// Stamp every relay we hear from, so the probe can skip the ones that
-    /// are plainly working (../app).
+    /// are plainly working (MostroP2P/app).
     ///
     /// One pool-owned receiver rather than instrumenting each consumer: the
     /// signal has to outlive any single subscription being dropped and
@@ -377,7 +377,7 @@ impl RelayPool {
     }
 
     /// Ask a quiet `Connected` relay whether it is still there, and bounce
-    /// its connection when it does not answer (../app).
+    /// its connection when it does not answer (MostroP2P/app).
     ///
     /// The reconnect is the point: it produces the `→Connected` transition
     /// `live_subs` repairs on, and that repair re-REQs — which is what
@@ -440,7 +440,7 @@ fn status_poll_interval(since_start: Duration, has_connected: bool) -> Duration 
 
 /// Derive the state from `relays` and send it on `tx` only if it differs
 /// from what was last sent. Every publisher goes through here, so one shared
-/// gate decides what is a transition (../app PR #364). The caller holds the
+/// gate decides what is a transition (MostroP2P/app#364). The caller holds the
 /// `relays` read guard, so a newer state is never sent before an older one.
 fn broadcast_if_changed(
     last: &Mutex<Option<ConnectionState>>,
@@ -786,7 +786,7 @@ mod tests {
         assert!(err.to_string().contains("RelayAlreadyExists"));
     }
 
-    /// All publishers share one gate (../app PR #364): after a removal sent
+    /// All publishers share one gate (MostroP2P/app#364): after a removal sent
     /// `Reconnecting` directly, the monitor's next `Online` still gets out.
     #[tokio::test]
     async fn direct_and_monitor_publishers_share_one_gate() {
