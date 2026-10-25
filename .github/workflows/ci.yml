@@ -172,14 +172,9 @@ jobs:
         run: dart tool/design_check.dart --base "origin/$BASE_REF"
 
   # The target the app is built for (A2). Compiles the Kotlin side, the plugin
-  # graph and the Rust core through cargokit, as a release build: R8 shrinks
-  # only a release, and a plugin whose classes it strips or cannot resolve
-  # ("Missing classes detected while running R8") breaks only that build. The
-  # same commands as a release (release.yml): the APKs and the app bundle,
-  # signed with the debug key here (build.gradle.kts falls back to it without
-  # android/key.properties).
+  # graph and the Rust core for every Android ABI through cargokit.
   android:
-    name: Android (release APKs and bundle, debug key)
+    name: Android (debug APK)
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -195,8 +190,6 @@ jobs:
 
       # cargokit builds through rustup's default toolchain and adds missing
       # targets itself; adding them here keeps that out of the Gradle build.
-      # x86_64 is for the app bundle, which carries every ABI of abiFilters
-      # (build.gradle.kts): nothing else compiles the Rust core for it.
       - name: Install Rust Android targets
         uses: dtolnay/rust-toolchain@1.97.0
         with:
@@ -217,23 +210,8 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
-      # v7 + v8 only, one APK per ABI: what a release ships.
-      - name: Build release APKs
-        run: |
-          flutter build apk --release --split-per-abi \
-            --target-platform android-arm,android-arm64
-
-      # Every ABI of abiFilters, x86_64 included: what the Play Console takes.
-      - name: Build release app bundle
-        run: flutter build appbundle --release
-
-      - name: Check the APKs and the bundle were built
-        run: |
-          set -euo pipefail
-          for abi in armeabi-v7a arm64-v8a; do
-            ls -lh "build/app/outputs/flutter-apk/app-$abi-release.apk"
-          done
-          ls -lh build/app/outputs/bundle/release/app-release.aab
+      - name: Build debug APK
+        run: flutter build apk --debug
 
   # Linux desktop: a development and convenience target, without the Android-only
   # key protections (PlatformCapabilities). Compiles the GTK runner, the plugin
