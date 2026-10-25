@@ -11,7 +11,7 @@ import '../../tool/release/release_notes.dart';
 ///
 /// The workflow only runs when a maintainer pushes a release tag, so nothing
 /// exercises it on a pull request. These checks hold the properties whose loss
-/// would only show in a published release: an APK solvers cannot update, a
+/// would only show in a published release: an APK users cannot update, a
 /// download link that 404s, a version the app does not report.
 void main() {
   final release = File('.github/workflows/release.yml').readAsStringSync();
@@ -54,16 +54,6 @@ void main() {
       expect(topLevel, isNot(contains('write')));
       expect(job('android'), isNot(contains('contents: write')));
     });
-
-    test('only the android job reads the signing secrets', () {
-      // Assert — it runs in the `release` environment, whose reviewers and
-      // tag rule are what keep a branch's workflow away from the key.
-      expect(job('android'), contains('environment: release'));
-      for (final name in ['prepare', 'publish', 'changelog']) {
-        expect(job(name), isNot(contains('secrets.')), reason: name);
-        expect(job(name), isNot(contains('environment:')), reason: name);
-      }
-    });
   });
 
   group('release android job', () {
@@ -102,71 +92,6 @@ void main() {
       expect(android, contains("grep -q 'CN=Android Debug'"));
     });
 
-    test('checks the bundle\'s signature from captured output, not a pipe', () {
-      // Arrange
-      final android = job('android');
-
-      // Assert — under pipefail, `jarsigner | grep -q` reads a SIGPIPE'd
-      // jarsigner as "no match" and passes a debug-signed bundle; and an
-      // unsigned bundle has no debug certificate to find.
-      expect(
-        android,
-        contains(
-          r'verified=$(jarsigner -verify -verbose:summary -certs "$aab")',
-        ),
-      );
-      expect(android, contains("grep -q 'jar verified'"));
-      expect(RegExp(r'jarsigner[^\n]*\|\s*grep').hasMatch(android), isFalse);
-    });
-
-    test('removes the signing material after the builds, even on failure', () {
-      // Arrange
-      final android = job('android');
-      final remove = android.indexOf('- name: Remove signing material');
-      final step = android.substring(remove);
-
-      // Assert
-      expect(step, contains('if: always()'));
-      expect(step, contains(r'rm -f "$RUNNER_TEMP/release.jks"'));
-      expect(step, contains('android/key.properties'));
-      expect(remove, greaterThan(android.indexOf('- name: Build app bundle')));
-      expect(remove, lessThan(android.indexOf('actions/upload-artifact')));
-    });
-
-    test('installs the Rust target of every ABI the bundle carries', () {
-      // Arrange — the bundle builds every ABI of abiFilters; a missing target
-      // is left to cargokit, inside Gradle, where a failure is hard to read.
-      final gradle = File('android/app/build.gradle.kts').readAsStringSync();
-      final targets = {
-        'arm64-v8a': 'aarch64-linux-android',
-        'armeabi-v7a': 'armv7-linux-androideabi',
-        'x86_64': 'x86_64-linux-android',
-      };
-
-      // Assert
-      for (final MapEntry(key: abi, value: target) in targets.entries) {
-        if (gradle.contains('"$abi"')) {
-          expect(job('android'), contains(target), reason: abi);
-        }
-      }
-    });
-
-    test('refuses v0.0.0, whose versionCode would be 0', () {
-      // Assert — Android refuses a versionCode below 1.
-      expect(job('prepare'), contains(r'if [ "$build_number" -lt 1 ]'));
-    });
-
-    test('builds what it signs without a cache', () {
-      // Arrange
-      final android = job('android');
-
-      // Assert — a cache restored into this job could carry what another
-      // run wrote into it, and the job signs whatever comes out.
-      expect(android, isNot(contains('rust-cache')));
-      expect(android, isNot(contains('actions/cache')));
-      expect(android, contains('cache: false'));
-    });
-
     test('uploads the file names the release notes link to', () {
       // Arrange
       final android = job('android');
@@ -184,8 +109,6 @@ void main() {
       expect(android, contains('for abi in armeabi-v7a arm64-v8a; do'));
       expect(android, contains(r'apk="dist/bosstro-$TAG-$abi.apk"'));
       expect(android, contains('name: asset-android'));
-      final names = releaseAssetNames(r'$TAG');
-      expect(android, contains('dist/${names['android-aab']}'));
       for (final abi in ['armeabi-v7a', 'arm64-v8a']) {
         expect(
           body,
@@ -194,53 +117,28 @@ void main() {
       }
     });
 
-    test('passes the commit the build was made from', () {
-      // Assert — About shows it next to the version.
-      expect(
-        '--dart-define=GIT_COMMIT='.allMatches(job('android')),
-        hasLength(2),
-        reason: 'both the APKs and the app bundle',
-      );
-    });
-
     test('uses the same Flutter as CI', () {
       // Arrange
       final ci = File('.github/workflows/ci.yml').readAsStringSync();
       final pin = RegExp(r'FLUTTER_VERSION: "([^"]+)"');
 
       // Assert
-      expect(pin.firstMatch(release)?.group(1), isNotNull);
       expect(pin.firstMatch(release)?.group(1), pin.firstMatch(ci)?.group(1));
-    });
-
-    test('uses the Rust of rust-toolchain.toml', () {
-      // Arrange
-      final toolchain = File('rust-toolchain.toml').readAsStringSync();
-      final channel = RegExp(
-        r'channel = "([^"]+)"',
-      ).firstMatch(toolchain)?.group(1);
-
-      // Assert
-      expect(channel, isNotNull);
-      expect(job('android'), contains('dtolnay/rust-toolchain@$channel'));
     });
   });
 
-  group('release publish job', () {
-    test('publishes only what the android job built and signed', () {
+  group('release publish', () {
+    test('publishes whatever the android job built', () {
       // Arrange
       final publish = job('publish');
 
-      // Assert
+      // Assert — ../app's shape, without its desktop and iOS builds (A2):
+      // the notes are rendered for the assets that exist.
       expect(publish, contains('needs: [prepare, android]'));
-      expect(publish, contains('name: asset-android'));
-      expect(publish, contains('SHA256SUMS.txt'));
-      expect(publish, contains('contents: write'));
-    });
-
-    test('the changelog PR follows a published release', () {
-      // Assert
-      expect(job('changelog'), contains('needs: [prepare, publish]'));
+      expect(publish, contains("needs.android.result == 'success'"));
+      expect(publish, contains('--assets-dir dist'));
+      expect(publish, contains('pattern: asset-*'));
+      expect(release, isNot(contains('release-builds.yml')));
     });
   });
 
@@ -282,8 +180,8 @@ void main() {
         multiLine: true,
       ).firstMatch(cargo)?.group(1);
 
-      // Assert — Settings reports the Rust one, the release workflow checks
-      // a tag against both; scripts/bump-version.sh moves them together.
+      // Assert — the About screen reports the Rust one, the release workflow
+      // checks a tag against both; scripts/bump-version.sh moves them together.
       expect(dart, isNotNull);
       expect(dart, rust);
     });

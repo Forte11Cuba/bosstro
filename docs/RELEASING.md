@@ -1,14 +1,14 @@
 # Releasing
 
 A release is cut by **pushing a tag** `vMAJOR.MINOR.PATCH`. `.github/workflows/release.yml`
-does the rest: it builds and signs the Android APKs and the app bundle, writes the release notes,
-publishes the GitHub release and opens a PR that records it in `CHANGELOG.md`.
+does the rest: it builds and signs the Android APKs and the app bundle, writes the release
+notes, publishes the GitHub release and opens a PR that records it in `CHANGELOG.md`.
 
-A release is **Android only**. Linux and the web build and run for development, without the
-Android-only protections of the solver key (AGENTS.md, A2), so no release offers them.
+This is `../app`'s release (MostroP2P/app), the reference for this setup, with its Linux,
+Windows, macOS and iOS builds left out: Bosstro releases **Android only** (AGENTS.md, A2).
 
-Versions follow [Semantic Versioning](https://semver.org/): patch for fixes, minor for features.
-The first release is **0.1.0**, the version `main` already carries.
+Versions start at **0.1.0**, the version `main` already carries, and follow
+[Semantic Versioning](https://semver.org/): patch for fixes, minor for features.
 
 ## Cutting a release
 
@@ -31,31 +31,27 @@ command serves both runs:
    branch you are on) with an annotated `v0.1.1` and pushes the tag.
 
 It never merges a PR and never deletes a tag: a tag that already exists on `origin` is refused
-with the commands to remove it. For the first release, `main` already says `0.1.0`, so
-`./scripts/release.sh 0.1.0` goes straight to step 3.
+with the commands to remove it. To cut a release at a version `main` already carries (the
+first one, `0.1.0`), step 3 applies directly.
 
 The workflow refuses the tag — before building anything — when:
 
 - it is not `vX.Y.Z` (no `-rc1`, no `+build`);
 - the tagged commit is **not on `main`**;
-- `pubspec.yaml`, `rust/Cargo.toml` or `rust/Cargo.lock` does not already say `X.Y.Z`.
-  Settings reports `CARGO_PKG_VERSION`, so a tag the source disagrees with would ship an app
-  that lies about its version. A Rust test and `test/ci/release_workflow_test.dart` keep the
-  files equal;
+- `pubspec.yaml` or `rust/Cargo.toml` does not already say `X.Y.Z`. The About screen reports
+  `CARGO_PKG_VERSION`, so a tag the source disagrees with would ship an app that lies about
+  its version. `test/ci/release_workflow_test.dart` keeps the two files equal;
 - `MINOR` or `PATCH` is above 99 (see *Android version codes*).
 
 ## One-time setup
-
-These need a repository **admin**.
 
 ### Signing key (required)
 
 Android only installs an update signed with the **same certificate** as the installed app.
 The key below is therefore the identity of the app for its whole life: **lose it and no
-existing solver can ever update; leak it and anyone can ship an "update"** to the people who
-hold the keys that settle disputes. Generate it once, keep an offline backup, and never commit
-it (`android/.gitignore` excludes it). Use a key of Bosstro's own, not Mostro's: a leak of one
-must not let anyone ship an update of the other.
+existing user can ever update; leak it and anyone can ship an "update"**. Generate it once,
+keep an offline backup, and never commit it (`android/.gitignore` excludes it). It is Bosstro's
+own key, not `../app`'s: a leak of one must not let anyone ship an update of the other.
 
 ```bash
 keytool -genkeypair -v -keystore bosstro-release.jks -alias bosstro \
@@ -63,7 +59,7 @@ keytool -genkeypair -v -keystore bosstro-release.jks -alias bosstro \
 base64 -w0 bosstro-release.jks        # value of ANDROID_KEYSTORE_FILE
 ```
 
-Secrets of the `release` environment (Settings → Environments → `release`), the same names as
+Secrets of the `release` environment (Settings → Environments → `release`), same names as
 `../app`'s:
 
 | Secret | Value |
@@ -74,8 +70,7 @@ Secrets of the `release` environment (Settings → Environments → `release`), 
 | `ANDROID_KEY_ALIAS` | key alias (`bosstro` above) |
 
 With a secret missing the run fails at "Check signing secrets". There is deliberately no
-fallback to the debug key, and the job re-checks the certificate of each finished APK and of
-the app bundle.
+fallback to the debug key, and the job re-checks the certificate of each finished APK.
 
 GitHub never shows a secret again once it is set, and the `release` environment admits only
 release tags (see *Repository settings*), so no workflow pushed to a branch can hand them back
@@ -84,7 +79,7 @@ GitHub.
 
 To sign a build locally, create `android/key.properties` (`storeFile`, `storePassword`,
 `keyPassword`, `keyAlias`); without it a release build uses the debug key, which is fine for
-`flutter run --release`, and must never be distributed.
+`flutter run --release` and must never be distributed.
 
 ### Repository settings
 
@@ -96,8 +91,9 @@ To sign a build locally, create `android/key.properties` (`storeFile`, `storePas
   - a **tag ruleset** (Settings → Rules → Rulesets) limiting creation of `v*` to admins;
   - **required reviewers on the `release` environment** (Settings → Environments). The
     `android` job — the only one that sees the signing key — runs in it, so the run then
-    waits for an admin's approval before anything is signed. Keeping the four secrets at
-    environment scope keeps them from every job that does not name `release`;
+    waits for an admin's approval before anything is signed. Moving the four secrets from
+    repository to environment scope keeps them from every job that does not name `release`;
+    one that does, in any workflow, gets them once it passes the environment's rules;
   - **only release tags may deploy to it** (same page → Deployment branches and tags →
     Selected branches and tags → a *Tag* rule `v*.*.*`). A job from any other ref then fails
     instead of waiting for approval: an approval always means a release, and a workflow
@@ -112,11 +108,9 @@ To sign a build locally, create `android/key.properties` (`storeFile`, `storePas
 | `bosstro-vX.Y.Z.aab` | Android App Bundle for the Play Console (all ABIs, same key) — not installable on a phone |
 | `SHA256SUMS.txt` | checksums of the above |
 
-An `x86_64` APK is not shipped (an emulator ABI). The file names are a contract between the
-workflow and `tool/release/downloads.dart`, which writes the *Downloads* section;
+An Android `x86_64` APK is not shipped (an emulator ABI). The file names are a contract between
+the workflow and `tool/release/downloads.dart`, which writes the *Downloads* section;
 `test/ci/release_workflow_test.dart` holds the two sides equal.
-
-Each build passes `--dart-define=GIT_COMMIT=<sha>`, the commit it was made from.
 
 ### Release notes and CHANGELOG.md
 
@@ -130,27 +124,25 @@ Both are printed by `tool/release_notes.dart` from the same data, so they cannot
   *Breaking Changes*; anything else under *Other Changes*). **A good PR title is the
   changelog line** — fix the title before merging, not the changelog after.
 - *Contributors* are the authors of those PRs (bots excluded); *New Contributors* are those
-  with no PR merged before this release (none on the first release).
+  with no PR merged before this release.
 - `chore(release): …` PRs (version bumps, the changelog PR itself) are left out.
 
 `CHANGELOG.md` is generated: fix a wrong entry by re-running the release (below), not by hand.
-It does not exist until the first release's changelog PR adds it.
 
 ### Android version codes
 
 `versionCode = MAJOR·10000 + MINOR·100 + PATCH`, to which Flutter's `--split-per-abi` adds
-`1000` (v7) or `2000` (v8): `v0.1.0` ships as 1100 and 2100, `v1.0.0` as 11000 and 12000. It
-is derived from the tag alone, so it is ordered like the versions whatever branch or rebuild
-produced it — hence the limit of 99 on `MINOR` and `PATCH`.
+`1000` (v7) or `2000` (v8): `v0.1.1` ships as 1101 and 2101. It is derived from the tag
+alone, so it is ordered like the versions whatever branch or rebuild produced it — hence the
+limit of 99 on `MINOR` and `PATCH`.
 
 ## When a run fails
 
 Nothing is published until the `publish` job, so a failure before it leaves no trace: fix the
 cause on `main` and **re-run the workflow** from the Actions tab (same tag, same commit). If
 the fix needs a new commit, merge it, delete the tag (`git push origin :v0.1.1 && git tag -d
-v0.1.1`) and run `./scripts/release.sh 0.1.1` again: it tags the new `main`. Re-running after
-a release exists updates its notes and replaces its assets in place, and the changelog job
-rewrites that version's section instead of adding a second one.
+v0.1.1`) and run `./scripts/release.sh 0.1.1` again: it tags the new `main`. Re-running after a release exists updates its notes and replaces its assets in
+place, and the changelog job rewrites that version's section instead of adding a second one.
 
 A PR opened by `GITHUB_TOKEN` does not trigger workflows: **close and reopen** the changelog
 PR to start CI on it.

@@ -333,8 +333,9 @@ class ReleaseNotes {
     return '## [$version] - $day\n\n${renderChanges()}';
   }
 
-  /// The description of the GitHub release.
-  String renderReleaseBody() {
+  /// The description of the GitHub release. [assets] names the files that
+  /// were built, when not all of them were (see [renderDownloads]).
+  String renderReleaseBody({Set<String>? assets}) {
     final out =
         StringBuffer()
           ..writeln('# ⚖️ Bosstro $tag\n')
@@ -342,7 +343,13 @@ class ReleaseNotes {
             'The mobile app for Mostro dispute solvers: take a dispute, chat '
             'with the buyer and the seller, and settle or cancel it.\n',
           )
-          ..writeln(renderDownloads(tag: tag, repositoryUrl: _repositoryUrl))
+          ..writeln(
+            renderDownloads(
+              tag: tag,
+              repositoryUrl: _repositoryUrl,
+              assets: assets,
+            ),
+          )
           ..writeln("## 📋 What's changed\n")
           ..write(renderChanges());
 

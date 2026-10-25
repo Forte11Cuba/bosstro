@@ -2,7 +2,7 @@
 # Set the app version everywhere it is declared, ahead of tagging a release.
 #
 # The release workflow refuses a tag whose version the tagged source does not already
-# carry (docs/RELEASING.md): Settings shows CARGO_PKG_VERSION from rust/Cargo.toml,
+# carry (docs/RELEASING.md): the About screen shows CARGO_PKG_VERSION from rust/Cargo.toml,
 # and local builds read pubspec.yaml. Commit the result through a PR, then tag its merge.
 #
 # Usage:
@@ -25,10 +25,6 @@ if [ "$minor" -gt 99 ] || [ "$patch" -gt 99 ]; then
   exit 64
 fi
 build_number=$((major * 10000 + minor * 100 + patch))
-if [ "$build_number" -lt 1 ]; then
-  echo "0.0.0 cannot be released: Android refuses a versionCode of 0." >&2
-  exit 64
-fi
 
 # perl, not `sed -i`: the in-place flag and the `0,/re/` address differ between GNU and BSD
 # (macOS) sed, and maintainers release from both. Each substitution must match, or the

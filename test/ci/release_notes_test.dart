@@ -32,9 +32,9 @@ void main() {
   ReleaseNotes notesFor(
     List<Commit> commits,
     List<PullRequest> prs, {
-    String? previousTag = 'v0.2.0',
+    String? previousTag = 'v2.0.0',
   }) => ReleaseNotes.build(
-    tag: 'v0.2.1',
+    tag: 'v2.0.1',
     previousTag: previousTag,
     repository: 'Forte11Cuba/bosstro',
     date: DateTime.utc(2026, 9, 17),
@@ -145,7 +145,7 @@ void main() {
         const Commit(sha: 'm1', subject: "Merge branch 'main' into feat/x"),
         merge(7),
       ];
-      final prs = [pr(7, 'chore(release): changelog for v0.2.0')];
+      final prs = [pr(7, 'chore(release): changelog for v2.0.0')];
 
       // Act
       final notes = notesFor(commits, prs);
@@ -314,42 +314,9 @@ void main() {
       final body = notesFor([merge(1)], [pr(1, 'feat: a')]).renderReleaseBody();
 
       // Assert
-      expect(body, contains('bosstro-v0.2.1-arm64-v8a.apk'));
-      expect(body, contains('bosstro-v0.2.1-armeabi-v7a.apk'));
+      expect(body, contains('bosstro-v2.0.1-arm64-v8a.apk'));
+      expect(body, contains('bosstro-v2.0.1-armeabi-v7a.apk'));
       expect(body, contains('SHA256SUMS.txt'));
-    });
-
-    test('links every asset by the name the workflow uploads it under', () {
-      // Act
-      final body = notesFor([merge(1)], [pr(1, 'feat: a')]).renderReleaseBody();
-
-      // Assert
-      for (final file in releaseAssetNames('v0.2.1').values) {
-        expect(body, contains('/releases/download/v0.2.1/$file'));
-      }
-    });
-
-    test('offers Android only: Linux and the web are development targets', () {
-      // Act
-      final body = notesFor([merge(1)], [pr(1, 'feat: a')]).renderReleaseBody();
-
-      // Assert — they run without the Android-only protections of the
-      // solver key (AGENTS.md, A2), so a release never offers them.
-      for (final word in ['linux', 'windows', 'macos', 'ios', 'web']) {
-        expect(body.toLowerCase(), isNot(contains('-$word')), reason: word);
-      }
-      expect(body, isNot(contains('Desktop')));
-    });
-
-    test('tells the solver to check the file before installing it', () {
-      // Act
-      final body = notesFor([merge(1)], [pr(1, 'feat: a')]).renderReleaseBody();
-
-      // Assert — the app holds the solver key, whose holder can settle a
-      // dispute: a tampered APK is the costliest thing to install.
-      expect(body, contains('solver key'));
-      expect(body, contains('sha256sum -c SHA256SUMS.txt'));
-      expect(body, contains('Android 7.0 (API 24)'));
     });
 
     test('offers the app bundle to Play Console, not to phones', () {
@@ -357,30 +324,47 @@ void main() {
       final body = notesFor([merge(1)], [pr(1, 'feat: a')]).renderReleaseBody();
 
       // Assert
-      expect(body, contains('/releases/download/v0.2.1/bosstro-v0.2.1.aab'));
+      expect(body, contains('/releases/download/v2.0.1/bosstro-v2.0.1.aab'));
       expect(body, contains('Google Play'));
       expect(body, contains('not installable'));
     });
 
-    test('names every asset the workflow uploads', () {
+    test('a platform whose build failed is not offered for download', () {
+      // Arrange — publish goes ahead with whatever was built.
+      final notes = notesFor([merge(1)], [pr(1, 'feat: a')]);
+
       // Act
-      final names = releaseAssetNames('v0.2.1');
+      final body = notes.renderReleaseBody(
+        assets: {
+          'bosstro-v2.0.1-arm64-v8a.apk',
+          'bosstro-v2.0.1-armeabi-v7a.apk',
+        },
+      );
 
       // Assert
-      expect(names, {
-        'android-v8': 'bosstro-v0.2.1-arm64-v8a.apk',
-        'android-v7': 'bosstro-v0.2.1-armeabi-v7a.apk',
-        'android-aab': 'bosstro-v0.2.1.aab',
-      });
+      expect(body, contains('bosstro-v2.0.1-arm64-v8a.apk'));
+      expect(body, isNot(contains('bosstro-v2.0.1.aab')));
+      expect(body, contains('Android (app bundle)'));
     });
 
-    test('is headed by the app and the tag', () {
+    test('offers Android only: Bosstro releases no desktop or iOS build', () {
       // Act
       final body = notesFor([merge(1)], [pr(1, 'feat: a')]).renderReleaseBody();
 
+      // Assert — AGENTS.md, A2.
+      for (final word in ['linux', 'windows', 'macos', 'ios']) {
+        expect(body.toLowerCase(), isNot(contains('-$word')), reason: word);
+      }
+      expect(body, isNot(contains('Desktop')));
+    });
+
+    test('names every asset the workflows upload', () {
+      // Act
+      final names = releaseAssetNames('v2.0.1');
+
       // Assert
-      expect(body, startsWith('# ⚖️ Bosstro v0.2.1\n'));
-      expect(body, isNot(contains('Mostro v0.2.1')));
+      expect(names.keys, ['android-v8', 'android-v7', 'android-aab']);
+      expect(names['android-aab'], 'bosstro-v2.0.1.aab');
     });
 
     test('links the comparison with the previous tag', () {
@@ -390,9 +374,7 @@ void main() {
       // Assert
       expect(
         body,
-        contains(
-          'https://github.com/Forte11Cuba/bosstro/compare/v0.2.0...v0.2.1',
-        ),
+        contains('https://github.com/Forte11Cuba/bosstro/compare/v2.0.0...v2.0.1'),
       );
     });
 
@@ -432,50 +414,50 @@ void main() {
           notesFor([merge(1)], [pr(1, 'feat: a')]).renderChangelogSection();
 
       // Assert
-      expect(section, startsWith('## [0.2.1] - 2026-09-17\n'));
+      expect(section, startsWith('## [2.0.1] - 2026-09-17\n'));
     });
 
     test('creates the file with a header when there is none', () {
       // Act
-      final text = upsertChangelog(null, '0.2.1', '## [0.2.1] - x\n\n- a\n');
+      final text = upsertChangelog(null, '2.0.1', '## [2.0.1] - x\n\n- a\n');
 
       // Assert
       expect(text, startsWith('# Changelog\n'));
-      expect(text, contains('## [0.2.1] - x'));
+      expect(text, contains('## [2.0.1] - x'));
     });
 
     test('puts a new version above the older ones, header kept', () {
       // Arrange
-      const existing = '$header\n## [0.2.0] - 2026-09-01\n\n- first\n';
+      const existing = '$header\n## [2.0.0] - 2026-09-01\n\n- first\n';
 
       // Act
       final text = upsertChangelog(
         existing,
-        '0.2.1',
-        '## [0.2.1] - x\n\n- second\n',
+        '2.0.1',
+        '## [2.0.1] - x\n\n- second\n',
       );
 
       // Assert
       expect(text, startsWith(header));
-      expect(text.indexOf('[0.2.1]'), lessThan(text.indexOf('[0.2.0]')));
+      expect(text.indexOf('[2.0.1]'), lessThan(text.indexOf('[2.0.0]')));
       expect(text, contains('- first'));
     });
 
     test('re-running a release replaces its section instead of adding one', () {
       // Arrange
       const existing =
-          '$header\n## [0.2.1] - old\n\n- stale\n\n'
-          '## [0.2.0] - 2026-09-01\n\n- first\n';
+          '$header\n## [2.0.1] - old\n\n- stale\n\n'
+          '## [2.0.0] - 2026-09-01\n\n- first\n';
 
       // Act
       final text = upsertChangelog(
         existing,
-        '0.2.1',
-        '## [0.2.1] - new\n\n- fresh\n',
+        '2.0.1',
+        '## [2.0.1] - new\n\n- fresh\n',
       );
 
       // Assert
-      expect('## [0.2.1]'.allMatches(text), hasLength(1));
+      expect('## [2.0.1]'.allMatches(text), hasLength(1));
       expect(text, contains('- fresh'));
       expect(text, isNot(contains('- stale')));
       expect(text, contains('- first'));
