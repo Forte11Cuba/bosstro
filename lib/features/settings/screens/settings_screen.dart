@@ -24,7 +24,7 @@ import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 import 'package:bosstro/shared/widgets/tab_app_bar.dart';
 
-/// Settings tab: the app's language; the active node and its relays,
+/// Settings tab: the app's language and About; the active node and its relays,
 /// whether this key is a solver there and its permission (once the node's
 /// answers told); the solver key (npub, backup, and log out, the one
 /// destructive row, last); and the app's version as a quiet line at the
@@ -81,6 +81,11 @@ class SettingsScreen extends ConsumerWidget {
                         final code => languageName(code),
                       },
                       onTap: () => showLanguageSheet(context),
+                    ),
+                    SettingsRow(
+                      icon: Icons.info_outline_rounded,
+                      label: l10n.aboutTitle,
+                      onTap: () => context.push(AppRoute.about),
                     ),
                   ],
                 ),

@@ -9,6 +9,7 @@ import 'package:bosstro/features/disputes/screens/recover_screen.dart';
 import 'package:bosstro/features/nodes/screens/choose_node_screen.dart';
 import 'package:bosstro/features/nodes/screens/node_info_screen.dart';
 import 'package:bosstro/features/nodes/screens/relays_screen.dart';
+import 'package:bosstro/features/settings/screens/about_screen.dart';
 import 'package:bosstro/features/settings/screens/settings_screen.dart';
 import 'package:bosstro/features/shell/screens/home_shell.dart';
 import 'package:bosstro/features/solver_key/screens/backup_screen.dart';
@@ -44,6 +45,9 @@ abstract final class AppRoute {
   /// The node selector from Settings → Node.
   static const settingsNode = '/settings/node';
   static const relays = '/settings/relays';
+
+  /// The app's version, licence and source code, from Settings.
+  static const about = '/settings/about';
 
   /// A node's instance info.
   static String nodeInfo(String pubkey) => '/node/$pubkey';
@@ -171,6 +175,11 @@ GoRouter buildRouter({
                     path: 'relays',
                     parentNavigatorKey: rootKey,
                     builder: (context, state) => const RelaysScreen(),
+                  ),
+                  GoRoute(
+                    path: 'about',
+                    parentNavigatorKey: rootKey,
+                    builder: (context, state) => const AboutScreen(),
                   ),
                 ],
               ),

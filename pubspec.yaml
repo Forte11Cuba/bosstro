@@ -40,6 +40,9 @@ dependencies:
   qr: ^3.0.2
   share_plus: ^12.0.1
 
+  # About opens the source code in the browser (as ../app).
+  url_launcher: ^6.3.3
+
   # Where the database file lives (lib/core/services/app_storage.dart): the
   # app data directory, the XDG data dir on Linux. Same packages as ../app.
   path_provider: ^2.1.5

@@ -210,6 +210,54 @@ abstract class AppLocalizations {
   /// **'Same as your device: {language}'**
   String languageSystemDetail(String language);
 
+  /// The About screen: its title, and the Settings row that opens it
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutTitle;
+
+  /// Under the app's name on About
+  ///
+  /// In en, this message translates to:
+  /// **'The app for Mostro dispute solvers'**
+  String get aboutTagline;
+
+  /// About row label: the app's licence; its value is aboutLicenseName
+  ///
+  /// In en, this message translates to:
+  /// **'License'**
+  String get aboutLicense;
+
+  /// The licence's short name, the same in every language
+  ///
+  /// In en, this message translates to:
+  /// **'AGPLv3+'**
+  String get aboutLicenseName;
+
+  /// Title of the dialog with the licence notice, which stays in English (a translated licence has no legal force)
+  ///
+  /// In en, this message translates to:
+  /// **'GNU Affero General Public License v3'**
+  String get aboutLicenseDialogTitle;
+
+  /// About row label: opens the app's repository in the browser
+  ///
+  /// In en, this message translates to:
+  /// **'Source code'**
+  String get aboutSourceCode;
+
+  /// About row label: opens the licences of the libraries and fonts the app ships
+  ///
+  /// In en, this message translates to:
+  /// **'Open-source licenses'**
+  String get aboutOpenSourceLicenses;
+
+  /// Snackbar when no browser took the source code link; the link was copied instead
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the browser: link copied'**
+  String get aboutLinkCopied;
+
   /// Snackbar confirming a value was copied to the clipboard
   ///
   /// In en, this message translates to:

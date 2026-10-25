@@ -64,6 +64,32 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get aboutTitle => 'À propos';
+
+  @override
+  String get aboutTagline => 'L\'application des solvers de litiges Mostro';
+
+  @override
+  String get aboutLicense => 'Licence';
+
+  @override
+  String get aboutLicenseName => 'AGPLv3+';
+
+  @override
+  String get aboutLicenseDialogTitle =>
+      'Licence publique générale Affero GNU v3';
+
+  @override
+  String get aboutSourceCode => 'Code source';
+
+  @override
+  String get aboutOpenSourceLicenses => 'Licences open source';
+
+  @override
+  String get aboutLinkCopied =>
+      'Impossible d\'ouvrir le navigateur : lien copié';
+
+  @override
   String get copied => 'Copié';
 
   @override

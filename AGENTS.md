@@ -303,7 +303,10 @@ most often:
 - Every new screen has a widget test at 2× text, 320 dp, in Spanish, with no overflow, and joins
   `test/l10n/all_locales_fit_test.dart`, which lays it out in every locale.
 - Every string from `AppLocalizations`, in every ARB file, with the words of the glossary
-  (`.specify/DESIGN_SYSTEM.md` §9) and of `app`'s translations.
+  (`.specify/DESIGN_SYSTEM.md` §9) and of `app`'s translations. Two exceptions, as `app`: the
+  startup failure screen (`lib/core/startup_failure.dart`), English and dependency-free because
+  it shows when localization or the theme may be what failed, and the AGPL notice on About,
+  which stays in English (a translated licence has no legal force).
 
 ## Workflow
 
