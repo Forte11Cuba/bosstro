@@ -74,16 +74,16 @@
       }
     }
   },
-  "aboutTitle": "About",
-  "@aboutTitle": {
+  "aboutScreenTitle": "About",
+  "@aboutScreenTitle": {
     "description": "The About screen: its title, and the Settings row that opens it"
   },
   "aboutTagline": "The app for Mostro dispute solvers",
   "@aboutTagline": {
     "description": "Under the app's name on About"
   },
-  "aboutLicense": "License",
-  "@aboutLicense": {
+  "aboutLicenseLabel": "License",
+  "@aboutLicenseLabel": {
     "description": "About row label: the app's licence; its value is aboutLicenseName"
   },
   "aboutLicenseName": "AGPLv3+",
@@ -94,17 +94,29 @@
   "@aboutLicenseDialogTitle": {
     "description": "Title of the dialog with the licence notice, which stays in English (a translated licence has no legal force)"
   },
-  "aboutSourceCode": "Source code",
-  "@aboutSourceCode": {
+  "aboutSourceCodeLabel": "Source code",
+  "@aboutSourceCodeLabel": {
     "description": "About row label: opens the app's repository in the browser"
   },
-  "aboutOpenSourceLicenses": "Open-source licenses",
-  "@aboutOpenSourceLicenses": {
-    "description": "About row label: opens the licences of the libraries and fonts the app ships"
+  "aboutAppSection": "Application",
+  "@aboutAppSection": {
+    "description": "Group header for the app's own rows: on the About screen (license, source code) and as the first group of the node technical data screen and of its copied text (version, commit)"
   },
-  "aboutLinkCopied": "Couldn't open the browser: link copied",
-  "@aboutLinkCopied": {
-    "description": "Snackbar when no browser took the source code link; the link was copied instead"
+  "aboutVersionLabel": "Version",
+  "@aboutVersionLabel": {
+    "description": "About screen — Version row label"
+  },
+  "aboutCommitHashLabel": "Commit Hash",
+  "@aboutCommitHashLabel": {
+    "description": "About screen — Commit Hash row label"
+  },
+  "copyButtonLabel": "Copy",
+  "@copyButtonLabel": {
+    "description": "Generic copy action button label (e.g. in SnackBar actions)"
+  },
+  "linkCopiedToClipboard": "Link copied to clipboard",
+  "@linkCopiedToClipboard": {
+    "description": "Snackbar shown after copying a link to clipboard"
   },
   "copied": "Copied",
   "@copied": {

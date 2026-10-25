@@ -84,7 +84,7 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     SettingsRow(
                       icon: Icons.info_outline_rounded,
-                      label: l10n.aboutTitle,
+                      label: l10n.aboutScreenTitle,
                       onTap: () => context.push(AppRoute.about),
                     ),
                   ],

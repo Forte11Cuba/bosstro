@@ -64,13 +64,13 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get aboutTitle => 'Über';
+  String get aboutScreenTitle => 'Über';
 
   @override
   String get aboutTagline => 'Die App für Solver von Mostro-Streitfällen';
 
   @override
-  String get aboutLicense => 'Lizenz';
+  String get aboutLicenseLabel => 'Lizenz';
 
   @override
   String get aboutLicenseName => 'AGPLv3+';
@@ -79,13 +79,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aboutLicenseDialogTitle => 'GNU Affero General Public License v3';
 
   @override
-  String get aboutSourceCode => 'Quellcode';
+  String get aboutSourceCodeLabel => 'Quellcode';
 
   @override
-  String get aboutOpenSourceLicenses => 'Open-Source-Lizenzen';
+  String get aboutAppSection => 'Anwendung';
 
   @override
-  String get aboutLinkCopied => 'Browser ließ sich nicht öffnen: Link kopiert';
+  String get aboutVersionLabel => 'Version';
+
+  @override
+  String get aboutCommitHashLabel => 'Commit-Hash';
+
+  @override
+  String get copyButtonLabel => 'Kopieren';
+
+  @override
+  String get linkCopiedToClipboard => 'Link in die Zwischenablage kopiert';
 
   @override
   String get copied => 'Kopiert';

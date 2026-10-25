@@ -100,26 +100,25 @@ void main() {
     }
   });
 
-  testWidgets('names the version and the commit the build was made from', (
+  testWidgets('the version as ../app writes it, and the commit\'s hash', (
     tester,
   ) async {
     // Act
     await _about(tester);
 
     // Assert
-    expect(find.text('Bosstro'), findsOneWidget);
-    expect(find.text('$fakeAppVersion · 1a2b3c4'), findsOneWidget);
+    expect(find.text('v$fakeAppVersion'), findsOneWidget);
+    expect(find.text('Commit Hash'), findsOneWidget);
+    expect(find.text('1a2b3c4'), findsOneWidget);
   });
 
-  testWidgets('a build that named no commit shows the version alone', (
-    tester,
-  ) async {
+  testWidgets('a build that named no commit has no commit row', (tester) async {
     // Act
     await _about(tester, commit: '');
 
     // Assert
-    expect(find.text(fakeAppVersion), findsOneWidget);
-    expect(find.textContaining('·'), findsNothing);
+    expect(find.text('v$fakeAppVersion'), findsOneWidget);
+    expect(find.text('Commit Hash'), findsNothing);
   });
 
   testWidgets('the licence notice stays in English in every language', (
@@ -162,7 +161,7 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
   });
 
-  testWidgets('with no browser to take it, the link is copied and said so', (
+  testWidgets('with no browser to take it, the link is offered to copy', (
     tester,
   ) async {
     // Arrange
@@ -171,36 +170,23 @@ void main() {
 
     // Act
     await tester.tap(find.text('Source code'));
-    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(sourceCodeUrl), findsOneWidget);
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
 
     // Assert
     expect(copied, [sourceCodeUrl]);
-    expect(find.text("Couldn't open the browser: link copied"), findsOne);
+    expect(find.text('Link copied to clipboard'), findsOne);
   });
 
-  testWidgets('Open-source licenses opens the licence page', (tester) async {
-    // Arrange
-    await _about(tester);
-
-    // Act
-    await tester.tap(find.text('Open-source licenses'));
-    await tester.pumpAndSettle();
-
-    // Assert — the fonts' OFL is registered there (font_licenses.dart).
-    expect(find.byType(LicensePage), findsOneWidget);
-  });
-
-  group('AboutScreen.buildLabel', () {
-    test('shortens the commit to seven characters', () {
-      expect(AboutScreen.buildLabel('0.1.0', _commit), '0.1.0 · 1a2b3c4');
+  group('shortHash', () {
+    test('cuts a hash to seven characters, as ../app', () {
+      expect(shortHash(_commit), '1a2b3c4');
     });
 
-    test('keeps a commit that is already short', () {
-      expect(AboutScreen.buildLabel('0.1.0', 'abc'), '0.1.0 · abc');
-    });
-
-    test('is the version alone without a commit', () {
-      expect(AboutScreen.buildLabel('0.1.0', ''), '0.1.0');
+    test('keeps a hash that is already short', () {
+      expect(shortHash('abc'), 'abc');
     });
   });
 }

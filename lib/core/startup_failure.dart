@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:bosstro/core/app_theme.dart' show AppFonts;
-import 'package:bosstro/core/project_links.dart';
 
-/// Painted instead of the app when startup fails before it can be (from
-/// ../app's `startup_failure.dart`).
+/// Painted instead of the app when startup fails before it can be (../app's
+/// `startup_failure.dart`).
 ///
 /// Deliberately dependency-free: no localization, no app theme, no Rust, no
-/// providers. Any of those can be the thing that failed, and a rescue surface
-/// that needs what broke is a second blank page. So it is the one screen in
-/// English only, with its colors written here (each pinned at 4.5:1 or more
-/// by `startup_failure_contrast_test.dart`).
+/// SharedPreferences. Any of those can be the thing that failed, and a rescue
+/// surface that needs what broke is a second blank page (../app #227, #389).
 ///
 /// [step] names the startup step that threw, phrased to read inside the
 /// sentence below ("It failed while loading the engine."). That name is the
-/// whole point of this screen: "Bosstro won't open" is unactionable, "it
-/// failed loading the engine" is a starting point — both for the solver
-/// reporting it and for whoever reads the report.
+/// whole point of this screen: "Bosstro won't open" is unactionable, "it failed
+/// loading the engine" is a starting point — both for the person reporting it
+/// and for whoever reads the report.
 class StartupFailureApp extends StatelessWidget {
   const StartupFailureApp({super.key, required this.step, this.error});
 
@@ -25,14 +21,18 @@ class StartupFailureApp extends StatelessWidget {
 
   /// What was thrown, rendered as a second, selectable line.
   ///
-  /// On Android and Linux there is no console for the solver hitting this to
-  /// read, so the step name alone is all they could report. Selectable so it
+  /// On Android, iOS and Linux there is no console for the person hitting this
+  /// to read, so the step name alone is all they could report. Selectable so it
   /// can be copied into that report, and capped so a runaway toString does not
-  /// bury the sentence above it.
+  /// bury the sentence above it — the screen scrolls, but the first thing on it
+  /// should still be the one line that says what failed.
   final Object? error;
 
   static const int _maxErrorChars = 300;
 
+  /// This screen's four colors, named so each one is written once and
+  /// `startup_failure_contrast_test.dart` can pin its ratio against
+  /// [background]. They are hard-coded on purpose: no app theme or palette.
   @visibleForTesting
   static const background = Color(0xFF1D212C);
 
@@ -45,7 +45,8 @@ class StartupFailureApp extends StatelessWidget {
   static const body = Color(0xFFB0B6C3);
 
   /// The cause and the footer, at 12 px, the smallest text here: 5.3:1 on
-  /// [background].
+  /// [background], above the 4.5:1 WCAG AA minimum. The cause is the line
+  /// people read out.
   @visibleForTesting
   static const detail = Color(0xFF8C94A8);
 
@@ -54,11 +55,20 @@ class StartupFailureApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       // Only the family name: the font is a bundled asset, and if it fails to
-      // load Flutter falls back to the platform face instead of throwing.
+      // load Flutter falls back to the platform face instead of throwing, so
+      // this adds nothing that can be what failed (DS-TYP-1).
       theme: ThemeData(fontFamily: AppFonts.ui),
-      // On the web the initial route is the browser's URL, and Flutter's
-      // default handling pushes one route per path segment: a deep URL would
-      // stack copies of this screen. Returning the list yields exactly one.
+      // On the web the initial route is the browser's URL, and a startup
+      // failure is usually met on a reload of some deep path. Flutter's default
+      // handling walks that path segment by segment and pushes one route per
+      // segment, so `/orders/abc/detail` answered by `onGenerateRoute` alone
+      // stacks four identical copies of this screen: `canPop()` is true and
+      // browser or Android back "navigates" to a clone. Returning the list
+      // directly yields exactly one route for any URL.
+      //
+      // `onGenerateRoute` still has to be here — MaterialApp requires a way to
+      // build routes for anything after the first, and refuses to construct
+      // without one.
       onGenerateInitialRoutes:
           (_) => [MaterialPageRoute<void>(builder: _buildBody)],
       onGenerateRoute: (_) => MaterialPageRoute<void>(builder: _buildBody),
@@ -66,8 +76,11 @@ class StartupFailureApp extends StatelessWidget {
   }
 
   /// Both lines as one block, so a pasted report carries the step as well as
-  /// the cause. The cause goes in whole: the clipboard has no layout to
-  /// protect.
+  /// the cause. The cause alone loses half of what makes it actionable.
+  ///
+  /// The cause goes in whole. `_shortError` caps what the screen draws, and
+  /// the clipboard has no layout to protect: a long panic message would reach
+  /// the issue tracker already cut.
   String _report() {
     final cause = error == null ? '' : '\n${error!}';
     return 'Bosstro could not start: $step$cause';
@@ -109,29 +122,32 @@ class StartupFailureApp extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
+        // Air under the title: one title line more than the base gap,
+        // derived from the same numbers that size the title.
         const SizedBox(height: 12 + _titleSize * _titleLineHeight),
         if (cause != null) ...[sentence, const SizedBox(height: 8)],
         // The copy buttons sit next to what they copy — the cause when there
-        // is one, otherwise the step — in one shared column. The link has its
-        // own: typing a URL off a failure screen is where a report gets
-        // abandoned.
+        // is one, otherwise the step — and in one shared column, so they line
+        // up vertically. The link has its own: typing a URL off a failure
+        // screen, often on a phone, is where a report gets abandoned.
         _copyTable(context, [
           ('Copy details', _report(), cause ?? sentence),
           (
             'Copy link',
-            issuesUrl,
-            Text(
-              'Please report this at\n${issuesUrl.substring('https://'.length)}',
+            _issuesUrl,
+            const Text(
+              'Please report this at\ngithub.com/Forte11Cuba/bosstro/issues',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: body, fontSize: 13),
+              style: TextStyle(color: body, fontSize: 13),
             ),
           ),
         ]),
       ],
     );
 
-    // Clearing the app's data is deliberately not offered as a fix, and why
-    // is spelled out: the secret key is kept only on this device.
+    // Clearing app data is deliberately not suggested as a fix, and the reason
+    // not to is spelled out: "it removes your key" does not say what that
+    // costs, and the cost is what lets someone decide.
     const footer = Padding(
       padding: EdgeInsets.only(top: 32),
       child: Text(
@@ -144,6 +160,8 @@ class StartupFailureApp extends StatelessWidget {
     );
 
     return Scaffold(
+      // Hard-coded rather than taken from the app theme: the theme is built
+      // from settings this screen exists to survive the loss of.
       backgroundColor: background,
       body: SafeArea(
         child: LayoutBuilder(
@@ -151,8 +169,11 @@ class StartupFailureApp extends StatelessWidget {
             const vertical = 32.0;
             return SingleChildScrollView(
               // Scrollable so a long cause on a short screen moves out of the
-              // way instead of overflowing. Side padding grows on wide
-              // windows so lines stay at most 520 wide.
+              // way instead of overflowing: an unhandled overflow paints the
+              // striped warning over the one screen that has to stay readable.
+              //
+              // Side padding grows on wide windows so lines stay at most 520
+              // wide; a Center would drop the minimum height the footer needs.
               padding: EdgeInsets.symmetric(
                 horizontal: ((viewport.maxWidth - 520) / 2).clamp(
                   24.0,
@@ -162,7 +183,8 @@ class StartupFailureApp extends StatelessWidget {
               ),
               child: ConstrainedBox(
                 // At least the screen's height, so the warning sits at the
-                // bottom as a footer when there is room.
+                // bottom as a footer when there is room, and below everything
+                // else when there is not.
                 constraints: BoxConstraints(
                   minHeight: (viewport.maxHeight - 2 * vertical).clamp(
                     0.0,
@@ -171,6 +193,8 @@ class StartupFailureApp extends StatelessWidget {
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // The empty first slot centres the main block between the
+                  // top and the footer.
                   children: [const SizedBox.shrink(), main, footer],
                 ),
               ),
@@ -184,11 +208,17 @@ class StartupFailureApp extends StatelessWidget {
   static const _titleSize = 26.0;
   static const _titleLineHeight = 1.4;
 
-  /// Each row's content with a copy button to its right: a three-column
-  /// table whose side columns share the leftover width, so the contents are
-  /// centred and the buttons line up. The middle column never takes more
-  /// than the screen minus a tap target on each side, so a long text wraps
-  /// instead of pushing the buttons off the screen.
+  static const _issuesUrl = 'https://github.com/Forte11Cuba/bosstro/issues';
+
+  /// Each row's content with a copy button to its right.
+  ///
+  /// A table with three columns: the side columns share the leftover width
+  /// equally, so the contents are centred on the screen by construction, and
+  /// every button lives in the same right-hand column, so they line up
+  /// vertically. The middle column is as wide as the widest content but never
+  /// wider than the screen minus a tap target (kMinInteractiveDimension, what
+  /// IconButton needs) on each side, so a long text wraps instead of pushing
+  /// the buttons off the screen.
   Widget _copyTable(
     BuildContext context,
     List<(String tooltip, String text, Widget content)> rows,
@@ -225,8 +255,9 @@ class StartupFailureApp extends StatelessWidget {
     );
   }
 
-  /// Awaited: on the web the write can be refused, and "Copied" over an empty
-  /// clipboard sends someone off with nothing to paste.
+  /// Awaited: on the web the write can be refused (no permission, not a secure
+  /// context), and "Copied" over an empty clipboard sends someone off with
+  /// nothing to paste.
   Widget _copyButton(BuildContext context, String tooltip, String text) {
     return IconButton(
       tooltip: tooltip,

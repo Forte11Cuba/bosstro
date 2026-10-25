@@ -214,7 +214,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'About'**
-  String get aboutTitle;
+  String get aboutScreenTitle;
 
   /// Under the app's name on About
   ///
@@ -226,7 +226,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'License'**
-  String get aboutLicense;
+  String get aboutLicenseLabel;
 
   /// The licence's short name, the same in every language
   ///
@@ -244,19 +244,37 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Source code'**
-  String get aboutSourceCode;
+  String get aboutSourceCodeLabel;
 
-  /// About row label: opens the licences of the libraries and fonts the app ships
+  /// Group header for the app's own rows: on the About screen (license, source code) and as the first group of the node technical data screen and of its copied text (version, commit)
   ///
   /// In en, this message translates to:
-  /// **'Open-source licenses'**
-  String get aboutOpenSourceLicenses;
+  /// **'Application'**
+  String get aboutAppSection;
 
-  /// Snackbar when no browser took the source code link; the link was copied instead
+  /// About screen — Version row label
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t open the browser: link copied'**
-  String get aboutLinkCopied;
+  /// **'Version'**
+  String get aboutVersionLabel;
+
+  /// About screen — Commit Hash row label
+  ///
+  /// In en, this message translates to:
+  /// **'Commit Hash'**
+  String get aboutCommitHashLabel;
+
+  /// Generic copy action button label (e.g. in SnackBar actions)
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyButtonLabel;
+
+  /// Snackbar shown after copying a link to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied to clipboard'**
+  String get linkCopiedToClipboard;
 
   /// Snackbar confirming a value was copied to the clipboard
   ///

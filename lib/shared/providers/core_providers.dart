@@ -8,7 +8,7 @@ final appVersionProvider = Provider<String>((ref) => rust.appVersion());
 
 /// The commit this build was made from, `--dart-define=GIT_COMMIT` (the
 /// release workflow passes it, docs/RELEASING.md); empty for a build that set
-/// none. About shows it next to the version.
+/// none. About shows it under the version, as ../app.
 final appCommitProvider = Provider<String>(
   (ref) => const String.fromEnvironment('GIT_COMMIT'),
 );

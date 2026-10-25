@@ -304,7 +304,7 @@ void main() {
       testWidgets('About and the licence dialog', (tester) async {
         await _pump(tester, locale, AppRoute.about);
         await _fitsToTheEnd(tester, 'About');
-        await _tapText(tester, l10n.aboutLicense);
+        await _tapText(tester, l10n.aboutLicenseLabel);
         expect(find.byType(MostroDialog), findsOneWidget);
         await _fitsToTheEnd(
           tester,
