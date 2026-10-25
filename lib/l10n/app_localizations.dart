@@ -210,6 +210,72 @@ abstract class AppLocalizations {
   /// **'Same as your device: {language}'**
   String languageSystemDetail(String language);
 
+  /// The About screen: its title, and the Settings row that opens it
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutScreenTitle;
+
+  /// Under the app's name on About
+  ///
+  /// In en, this message translates to:
+  /// **'The app for Mostro dispute solvers'**
+  String get aboutTagline;
+
+  /// About row label: the app's licence; its value is aboutLicenseName
+  ///
+  /// In en, this message translates to:
+  /// **'License'**
+  String get aboutLicenseLabel;
+
+  /// The licence's short name, the same in every language
+  ///
+  /// In en, this message translates to:
+  /// **'AGPLv3+'**
+  String get aboutLicenseName;
+
+  /// Title of the dialog with the licence notice, which stays in English (a translated licence has no legal force)
+  ///
+  /// In en, this message translates to:
+  /// **'GNU Affero General Public License v3'**
+  String get aboutLicenseDialogTitle;
+
+  /// About row label: opens the app's repository in the browser
+  ///
+  /// In en, this message translates to:
+  /// **'Source code'**
+  String get aboutSourceCodeLabel;
+
+  /// Group header for the app's own rows: on the About screen (license, source code) and as the first group of the node technical data screen and of its copied text (version, commit)
+  ///
+  /// In en, this message translates to:
+  /// **'Application'**
+  String get aboutAppSection;
+
+  /// About screen — Version row label
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get aboutVersionLabel;
+
+  /// About screen — Commit Hash row label
+  ///
+  /// In en, this message translates to:
+  /// **'Commit Hash'**
+  String get aboutCommitHashLabel;
+
+  /// Generic copy action button label (e.g. in SnackBar actions)
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyButtonLabel;
+
+  /// Snackbar shown after copying a link to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied to clipboard'**
+  String get linkCopiedToClipboard;
+
   /// Snackbar confirming a value was copied to the clipboard
   ///
   /// In en, this message translates to:

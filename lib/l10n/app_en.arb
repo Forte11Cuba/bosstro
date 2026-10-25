@@ -74,6 +74,50 @@
       }
     }
   },
+  "aboutScreenTitle": "About",
+  "@aboutScreenTitle": {
+    "description": "The About screen: its title, and the Settings row that opens it"
+  },
+  "aboutTagline": "The app for Mostro dispute solvers",
+  "@aboutTagline": {
+    "description": "Under the app's name on About"
+  },
+  "aboutLicenseLabel": "License",
+  "@aboutLicenseLabel": {
+    "description": "About row label: the app's licence; its value is aboutLicenseName"
+  },
+  "aboutLicenseName": "AGPLv3+",
+  "@aboutLicenseName": {
+    "description": "The licence's short name, the same in every language"
+  },
+  "aboutLicenseDialogTitle": "GNU Affero General Public License v3",
+  "@aboutLicenseDialogTitle": {
+    "description": "Title of the dialog with the licence notice, which stays in English (a translated licence has no legal force)"
+  },
+  "aboutSourceCodeLabel": "Source code",
+  "@aboutSourceCodeLabel": {
+    "description": "About row label: opens the app's repository in the browser"
+  },
+  "aboutAppSection": "Application",
+  "@aboutAppSection": {
+    "description": "Group header for the app's own rows: on the About screen (license, source code) and as the first group of the node technical data screen and of its copied text (version, commit)"
+  },
+  "aboutVersionLabel": "Version",
+  "@aboutVersionLabel": {
+    "description": "About screen — Version row label"
+  },
+  "aboutCommitHashLabel": "Commit Hash",
+  "@aboutCommitHashLabel": {
+    "description": "About screen — Commit Hash row label"
+  },
+  "copyButtonLabel": "Copy",
+  "@copyButtonLabel": {
+    "description": "Generic copy action button label (e.g. in SnackBar actions)"
+  },
+  "linkCopiedToClipboard": "Link copied to clipboard",
+  "@linkCopiedToClipboard": {
+    "description": "Snackbar shown after copying a link to clipboard"
+  },
   "copied": "Copied",
   "@copied": {
     "description": "Snackbar confirming a value was copied to the clipboard"

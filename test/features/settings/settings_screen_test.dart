@@ -36,6 +36,25 @@ void main() {
     );
   });
 
+  testWidgets('About is a row of the App group, after the language', (
+    tester,
+  ) async {
+    // Arrange
+    await _settings(tester);
+    final language = _top(tester, find.text('Language'));
+    final about = _top(tester, find.text('About'));
+    final node = _top(tester, find.text('NODE'));
+
+    // Act
+    await tester.tap(find.text('About'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(about, greaterThan(language));
+    expect(about, lessThan(node));
+    expect(find.text('Source code'), findsOneWidget, reason: 'About opened');
+  });
+
   testWidgets('the version is a quiet line at the end, not a row', (
     tester,
   ) async {

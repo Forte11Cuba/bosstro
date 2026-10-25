@@ -64,6 +64,39 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get aboutScreenTitle => 'Über';
+
+  @override
+  String get aboutTagline => 'Die App für Solver von Mostro-Streitfällen';
+
+  @override
+  String get aboutLicenseLabel => 'Lizenz';
+
+  @override
+  String get aboutLicenseName => 'AGPLv3+';
+
+  @override
+  String get aboutLicenseDialogTitle => 'GNU Affero General Public License v3';
+
+  @override
+  String get aboutSourceCodeLabel => 'Quellcode';
+
+  @override
+  String get aboutAppSection => 'Anwendung';
+
+  @override
+  String get aboutVersionLabel => 'Version';
+
+  @override
+  String get aboutCommitHashLabel => 'Commit-Hash';
+
+  @override
+  String get copyButtonLabel => 'Kopieren';
+
+  @override
+  String get linkCopiedToClipboard => 'Link in die Zwischenablage kopiert';
+
+  @override
   String get copied => 'Kopiert';
 
   @override

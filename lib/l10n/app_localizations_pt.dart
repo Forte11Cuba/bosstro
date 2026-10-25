@@ -64,6 +64,40 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get aboutScreenTitle => 'Sobre';
+
+  @override
+  String get aboutTagline => 'O app dos solvers de disputas do Mostro';
+
+  @override
+  String get aboutLicenseLabel => 'Licença';
+
+  @override
+  String get aboutLicenseName => 'AGPLv3+';
+
+  @override
+  String get aboutLicenseDialogTitle => 'Licença Pública Geral Affero GNU v3';
+
+  @override
+  String get aboutSourceCodeLabel => 'Código-fonte';
+
+  @override
+  String get aboutAppSection => 'Aplicativo';
+
+  @override
+  String get aboutVersionLabel => 'Versão';
+
+  @override
+  String get aboutCommitHashLabel => 'Hash do commit';
+
+  @override
+  String get copyButtonLabel => 'Copiar';
+
+  @override
+  String get linkCopiedToClipboard =>
+      'Link copiado para a área de transferência';
+
+  @override
   String get copied => 'Copiado';
 
   @override

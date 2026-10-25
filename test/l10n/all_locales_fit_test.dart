@@ -300,6 +300,18 @@ void main() {
         await _pump(tester, locale, AppRoute.nodeInfo(cubaPubkey));
         await _fitsToTheEnd(tester, 'Node info');
       });
+
+      testWidgets('About and the licence dialog', (tester) async {
+        await _pump(tester, locale, AppRoute.about);
+        await _fitsToTheEnd(tester, 'About');
+        await _tapText(tester, l10n.aboutLicenseLabel);
+        expect(find.byType(MostroDialog), findsOneWidget);
+        await _fitsToTheEnd(
+          tester,
+          'Licence dialog',
+          within: find.byType(MostroDialog),
+        );
+      });
     });
   }
 }
