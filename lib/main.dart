@@ -76,6 +76,11 @@ Future<void> _startup(StartupSequence startup) async {
       debugPrint(
         '[startup] stored solver key not loaded: ${e.cause.runtimeType}',
       );
+    } catch (e) {
+      // restore() wraps every failure in StoredKeyUnreadable, so this is a
+      // bug. Its text never reaches the failure screen, its copy button or
+      // the log: it could quote what the storage held.
+      throw StateError('the stored key failed to load (${e.runtimeType})');
     }
   });
 
