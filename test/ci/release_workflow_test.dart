@@ -102,17 +102,58 @@ void main() {
       expect(android, contains("grep -q 'CN=Android Debug'"));
     });
 
-    test('removes the signing material even when the build fails', () {
+    test('checks the bundle\'s signature from captured output, not a pipe', () {
       // Arrange
       final android = job('android');
-      final step = android.substring(
-        android.indexOf('- name: Remove signing material'),
+
+      // Assert — under pipefail, `jarsigner | grep -q` reads a SIGPIPE'd
+      // jarsigner as "no match" and passes a debug-signed bundle; and an
+      // unsigned bundle has no debug certificate to find.
+      expect(
+        android,
+        contains(
+          r'verified=$(jarsigner -verify -verbose:summary -certs "$aab")',
+        ),
       );
+      expect(android, contains("grep -q 'jar verified'"));
+      expect(RegExp(r'jarsigner[^\n]*\|\s*grep').hasMatch(android), isFalse);
+    });
+
+    test('removes the signing material after the builds, even on failure', () {
+      // Arrange
+      final android = job('android');
+      final remove = android.indexOf('- name: Remove signing material');
+      final step = android.substring(remove);
 
       // Assert
       expect(step, contains('if: always()'));
       expect(step, contains(r'rm -f "$RUNNER_TEMP/release.jks"'));
       expect(step, contains('android/key.properties'));
+      expect(remove, greaterThan(android.indexOf('- name: Build app bundle')));
+      expect(remove, lessThan(android.indexOf('actions/upload-artifact')));
+    });
+
+    test('installs the Rust target of every ABI the bundle carries', () {
+      // Arrange — the bundle builds every ABI of abiFilters; a missing target
+      // is left to cargokit, inside Gradle, where a failure is hard to read.
+      final gradle = File('android/app/build.gradle.kts').readAsStringSync();
+      final targets = {
+        'arm64-v8a': 'aarch64-linux-android',
+        'armeabi-v7a': 'armv7-linux-androideabi',
+        'x86_64': 'x86_64-linux-android',
+      };
+
+      // Assert
+      for (final MapEntry(key: abi, value: target) in targets.entries) {
+        if (gradle.contains('"$abi"')) {
+          expect(job('android'), contains(target), reason: abi);
+        }
+      }
+    });
+
+    test('refuses v0.0.0, whose versionCode would be 0', () {
+      // Assert — Android refuses a versionCode below 1.
+      expect(job('prepare'), contains(r'if [ "$build_number" -lt 1 ]'));
     });
 
     test('builds what it signs without a cache', () {

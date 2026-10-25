@@ -83,6 +83,11 @@ jobs:
             exit 1
           fi
           build_number=$((major * 10000 + minor * 100 + patch))
+          # Android refuses a versionCode of 0 (v0.0.0).
+          if [ "$build_number" -lt 1 ]; then
+            echo "::error::v0.0.0 cannot be released: its versionCode would be 0."
+            exit 1
+          fi
 
           {
             echo "tag=$TAG"
@@ -179,12 +184,14 @@ jobs:
 
       # The Rust of rust-toolchain.toml and ci.yml. cargokit adds a missing
       # target itself; doing it here keeps that download out of the Gradle
-      # build, where a failure is much harder to read. No cargo cache: this
-      # job signs what it builds, so it builds from a clean slate.
+      # build, where a failure is much harder to read. x86_64 is for the app
+      # bundle, which carries every ABI of abiFilters (build.gradle.kts). No
+      # cargo cache: this job signs what it builds, so it builds from a clean
+      # slate.
       - name: Install Rust Android targets
         uses: dtolnay/rust-toolchain@1.97.0
         with:
-          targets: aarch64-linux-android,armv7-linux-androideabi
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -225,7 +232,7 @@ jobs:
             exit 1
           fi
           keys=$(sed -n 's/^\([^,]*\),.*PrivateKeyEntry.*/\1/p' <<< "$listing")
-          if ! grep -qix -- "$ANDROID_KEY_ALIAS" <<< "$keys"; then
+          if ! grep -qixF -- "$ANDROID_KEY_ALIAS" <<< "$keys"; then
             echo "::error::ANDROID_KEY_ALIAS names no private key in the keystore. Private keys in it: $(paste -sd ' ' <<< "$keys")"
             exit 1
           fi
@@ -278,7 +285,16 @@ jobs:
           done
           aab="dist/bosstro-$TAG.aab"
           mv build/app/outputs/bundle/release/app-release.aab "$aab"
-          if jarsigner -verify -verbose:summary -certs "$aab" | grep -q 'CN=Android Debug'; then
+          # Captured, not piped into `grep -q`: under pipefail, jarsigner
+          # killed by SIGPIPE after grep's first match would read as "no
+          # match" and pass a debug-signed bundle.
+          verified=$(jarsigner -verify -verbose:summary -certs "$aab")
+          if ! grep -q 'jar verified' <<< "$verified"; then
+            echo "$verified"
+            echo "::error::$aab is not signed."
+            exit 1
+          fi
+          if grep -q 'CN=Android Debug' <<< "$verified"; then
             echo "::error::$aab is signed with the debug key."
             exit 1
           fi

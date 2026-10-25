@@ -286,4 +286,19 @@ exit 0
     expect(run.exitCode, 64);
     expect(ghLog.existsSync(), isFalse);
   });
+
+  test('bump-version refuses 0.0.0, whose versionCode would be 0', () {
+    // Act
+    final run = Process.runSync(
+      'bash',
+      ['scripts/bump-version.sh', '0.0.0'],
+      workingDirectory: clone.path,
+      environment: env,
+    );
+
+    // Assert
+    expect(run.exitCode, 64);
+    expect(run.stderr, contains('versionCode'));
+    expect(gitOut(['status', '--porcelain']), isEmpty);
+  });
 }
