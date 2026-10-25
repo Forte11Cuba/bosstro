@@ -66,8 +66,9 @@ rust/src/nostr/      # the relay pool, live subscriptions, liveness probe, event
 rust/migrations/     # sqlx migrations; never edit one that shipped, add a new file
 rust_builder/        # cargokit glue, copied from app
 icons/               # the emblem and every icon format built from it
-scripts/             # frb-generate.sh, check-generated.sh, build-web.sh, test-web-storage.sh
-tool/                # design_check.dart, launcher_icon/build_sources.py
+scripts/             # frb-generate.sh, check-generated.sh, build-web.sh, test-web-storage.sh, release.sh, bump-version.sh
+tool/                # design_check.dart, launcher_icon/build_sources.py, release_notes.dart + release/
+docs/RELEASING.md    # how a release is cut, signed and published
 .specify/DESIGN_SYSTEM.md
 ```
 
@@ -143,7 +144,8 @@ tool/                # design_check.dart, launcher_icon/build_sources.py
   when they disagree. Install the CLI with
   `cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked` (and `cargo-expand`).
 - The app version lives in `pubspec.yaml` and `rust/Cargo.toml`; bump both together (a Rust test
-  fails when they drift).
+  fails when they drift). `./scripts/release.sh X.Y.Z` does it, through a PR, and then tags the
+  release (`docs/RELEASING.md`); never tag by hand.
 
 ### Commands
 
@@ -160,6 +162,7 @@ flutter run -d linux             # desktop, for development (README → "Linux a
 ./scripts/test-web-storage.sh    # the IndexedDB storage tests, in headless Chrome
 flutter run -d chrome --web-header=Cross-Origin-Opener-Policy=same-origin --web-header=Cross-Origin-Embedder-Policy=require-corp
 python3 tool/launcher_icon/build_sources.py && dart run flutter_launcher_icons  # after changing icons/bosstro.png
+./scripts/release.sh 0.1.1       # run twice: the version PR, then the tag (docs/RELEASING.md)
 ```
 
 ## Key handling
@@ -313,6 +316,9 @@ One PR per phase; long phases split into phased PRs. Conventional commits, branc
 
 Phases: 0 scaffold · 1 solver key · 2 nodes and relays · 3 pending disputes · 4 take dispute ·
 5 dispute detail and chat · 5c observer · 6 resolution · 7 manual verification on a device ·
-8 release. Serbero and notifications are post-MVP.
+8 release (`docs/RELEASING.md`). Serbero and notifications are post-MVP.
+
+A PR's title is its line in the release notes and `CHANGELOG.md` (`tool/release_notes.dart`
+groups by its conventional-commit type): write it for the solver who reads the release.
 
 Mostrix is read at tag **v0.3.8** or later.
