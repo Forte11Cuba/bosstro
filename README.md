@@ -12,8 +12,41 @@ the architecture of [Mostro v2](https://github.com/MostroP2P/app): a Rust core (
 protocol, persistence) with a Flutter UI, bridged by
 [flutter_rust_bridge](https://github.com/fzyzcjy/flutter_rust_bridge).
 
-> **Status:** phase 1 — solver key. Log in with an nsec or create a new one; the key lives in
-> secure storage and in the Rust core. Nodes and disputes arrive in the next phases.
+> **Status:** the MVP is complete (phases 0–6). Next are the manual verification on a device
+> (phase 7) and the first release (phase 8). Serbero and notifications come after the MVP.
+
+## What it does
+
+- **Your solver key.** Log in with the nsec the node operator added as a solver, or create a
+  new one and hand its npub to the operator. The key lives in the Android Keystore-backed
+  secure storage and in the Rust core, never anywhere else; the node's own key never enters
+  the app.
+- **One node at a time.** Pick Mostro, a trusted community, or your own node, and the relays
+  it uses.
+- **Pending disputes** of the node, live, and **take** one. Bosstro learns from the node's
+  answers whether your key is a solver there, and whether it is Read or Read-Write.
+- **Your disputes:** in progress and closed. A take that got no answer is recovered by taking
+  it again.
+- **Chat** with the buyer and the seller of each dispute you hold, end-to-end encrypted, with
+  images and PDFs. When a party shares their chat key, read the conversation between the
+  buyer and the seller too.
+- **Resolve:** pay the buyer or refund the seller (Read-Write solvers).
+- In English, Spanish, Italian, French, German, Dutch and Brazilian Portuguese.
+
+## Install
+
+Android 7.0 or later. Download the APK from the
+[Releases page](https://github.com/Forte11Cuba/bosstro/releases): `arm64-v8a` for almost any
+phone, `armeabi-v7a` for an old or entry-level one on a 32-bit Android. Check it against the
+release's `SHA256SUMS.txt` before installing: the app holds a key that can settle disputes.
+
+Use a key of its own: never the nsec of a trading app (Mostro, Mostrix's trader key), or the
+two roles are linked publicly.
+
+## Security
+
+The key handling is described under "Key handling" in [AGENTS.md](AGENTS.md). Report a
+vulnerability privately, as [SECURITY.md](SECURITY.md) explains — never in a public issue.
 
 ## Building
 
