@@ -40,6 +40,24 @@ Android 7.0 or later. Download the APK from the
 phone, `armeabi-v7a` for an old or entry-level one on a 32-bit Android. Check it against the
 release's `SHA256SUMS.txt` before installing: the app holds a key that can settle disputes.
 
+`SHA256SUMS.txt` comes with the APK, so it only proves the download is whole; the signing
+certificate proves who built it. Every Bosstro release is signed with the same key, and
+Android refuses an update signed with any other. Its package name and certificate SHA-256, in
+the form [AppVerifier](https://github.com/soupslurpr/AppVerifier) takes:
+
+```text
+foundation.mostro.bosstro
+63:92:27:84:C2:E3:2A:F4:B6:03:0F:5E:2A:18:1F:74:9B:F6:95:E5:2F:1C:A8:45:7E:98:CB:05:D2:9E:B3:4B
+```
+
+Or with `apksigner` from the Android SDK build-tools, which prints it without the colons:
+
+```bash
+apksigner verify --print-certs bosstro-v0.1.0-arm64-v8a.apk
+# Signer #1 certificate DN: CN=Bosstro, O=MostroP2P
+# Signer #1 certificate SHA-256 digest: 63922784c2e32af4b6030f5e2a181f749bf695e52f1ca8457e98cb05d29eb34b
+```
+
 Use a key of its own: never the nsec of a trading app (Mostro, Mostrix's trader key), or the
 two roles are linked publicly.
 
