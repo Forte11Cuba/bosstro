@@ -137,7 +137,7 @@ class StartupFailureApp extends StatelessWidget {
             'Copy link',
             _issuesUrl,
             const Text(
-              'Please report this at\ngithub.com/Forte11Cuba/bosstro/issues',
+              'Please report this at\ngithub.com/MostroP2P/bosstro/issues',
               textAlign: TextAlign.center,
               style: TextStyle(color: body, fontSize: 13),
             ),
@@ -209,7 +209,7 @@ class StartupFailureApp extends StatelessWidget {
   static const _titleSize = 26.0;
   static const _titleLineHeight = 1.4;
 
-  static const _issuesUrl = 'https://github.com/Forte11Cuba/bosstro/issues';
+  static const _issuesUrl = 'https://github.com/MostroP2P/bosstro/issues';
 
   /// Each row's content with a copy button to its right.
   ///

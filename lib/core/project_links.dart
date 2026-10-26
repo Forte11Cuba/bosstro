@@ -6,6 +6,6 @@
 /// redirects a transferred repository, so a move to another owner does not
 /// break it. The startup failure screen names the issues page itself, as
 /// MostroP2P/app's does: it depends on nothing.
-const sourceCodeRepository = 'Forte11Cuba/bosstro';
+const sourceCodeRepository = 'MostroP2P/bosstro';
 
 const sourceCodeUrl = 'https://github.com/$sourceCodeRepository';

@@ -285,7 +285,7 @@ void main() {
       // without the secret key loses the account.
       await tester.pumpWidget(const StartupFailureApp(step: 'starting up'));
       expect(
-        find.textContaining('github.com/Forte11Cuba/bosstro/issues'),
+        find.textContaining('github.com/MostroP2P/bosstro/issues'),
         findsOneWidget,
       );
       expect(find.textContaining('secret key'), findsOneWidget);
@@ -316,7 +316,7 @@ void main() {
       await tester.tap(find.byTooltip('Copy link'));
       await tester.pump();
 
-      expect(copied, ['https://github.com/Forte11Cuba/bosstro/issues']);
+      expect(copied, ['https://github.com/MostroP2P/bosstro/issues']);
       expect(find.text('Copied'), findsOneWidget);
     });
 

@@ -36,7 +36,7 @@ protocol, persistence) with a Flutter UI, bridged by
 ## Install
 
 Android 7.0 or later. Download the APK from the
-[Releases page](https://github.com/Forte11Cuba/bosstro/releases): `arm64-v8a` for almost any
+[Releases page](https://github.com/MostroP2P/bosstro/releases): `arm64-v8a` for almost any
 phone, `armeabi-v7a` for an old or entry-level one on a 32-bit Android. Check it against the
 release's `SHA256SUMS.txt` before installing: the app holds a key that can settle disputes.
 

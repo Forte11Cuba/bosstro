@@ -99,7 +99,7 @@ void main() {
           ReleaseNotes.build(
             tag: 'v9.9.9',
             previousTag: null,
-            repository: 'Forte11Cuba/bosstro',
+            repository: 'MostroP2P/bosstro',
             date: DateTime.utc(2026),
             commits: const [],
             pullRequests: const [],
