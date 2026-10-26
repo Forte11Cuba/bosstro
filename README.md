@@ -12,8 +12,8 @@ the architecture of [Mostro v2](https://github.com/MostroP2P/app): a Rust core (
 protocol, persistence) with a Flutter UI, bridged by
 [flutter_rust_bridge](https://github.com/fzyzcjy/flutter_rust_bridge).
 
-> **Status:** the MVP is complete (phases 0–6). Next are the manual verification on a device
-> (phase 7) and the first release (phase 8). Serbero and notifications come after the MVP.
+> **Status:** the MVP is complete, verified on a device and released: v0.1.0 was the first
+> release. Serbero and notifications come next.
 
 ## What it does
 
