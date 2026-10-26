@@ -146,10 +146,10 @@ jobs:
     needs: prepare
     runs-on: ubuntu-24.04
     timeout-minutes: 90
-    # The only job that sees the signing key. Anyone with write access can push
-    # a tag, so give this environment required reviewers (Settings →
-    # Environments → release) and the run waits for an admin before it signs
-    # anything. Without that setting the environment changes nothing.
+    # The only job that sees the signing key. The environment admits only
+    # `v*.*.*` tags and a tag ruleset lets only admins create them, so an admin
+    # pushing the tag is the approval, and no workflow pushed to a branch can
+    # read the key (docs/RELEASING.md → Repository settings).
     environment: release
     steps:
       - uses: actions/checkout@v7
