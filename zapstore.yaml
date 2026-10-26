@@ -1,0 +1,57 @@
+repository: https://github.com/MostroP2P/bosstro
+description: |
+  The mobile app for Mostro dispute solvers.
+
+  When a trade on the Mostro peer-to-peer exchange goes wrong, a dispute solver steps in. Bosstro brings the admin side of Mostrix to the phone: see the disputes open on your node, take one, talk to the buyer and the seller, and settle it. Built with Flutter and a Rust core, like the Mostro app.
+
+  Bosstro is for solvers: the operator of a Mostro node has to add your key as a dispute solver first. To buy or sell Bitcoin, use the Mostro app.
+
+  Key Features:
+
+    - Pending disputes: every open dispute on your node, live over Nostr
+    - Your disputes: take one and follow it until it closes
+    - Private chat with the buyer and the seller, end-to-end encrypted (NIP-44), with images and PDFs
+    - Read the trade chat between the parties when one of them shares its key with you
+    - Resolve: pay the buyer or refund the seller (Read-Write solvers)
+    - Choose your node: Mostro, a trusted community, or your own
+    - Your solver key stays on your device, in Android Keystore-backed storage
+    - Multi-Language: English, Spanish, Italian, French, German, Dutch, and Brazilian Portuguese
+    - Open source: AGPLv3 licensed and fully auditable
+summary: Take, chat and settle Mostro disputes from your phone.
+tags:
+    - peer-to-peer
+    - p2p
+    - security
+    - privacy
+    - android
+    - bitcoin
+    - lightning
+    - nostr
+    - mostro
+    - dispute-resolution
+    - freedom-tech
+license: AGPL-3.0-or-later
+website: https://mostro.network
+# Store images, 1242 × 2688, kept out of assets/ so the app does not bundle
+# them. The first three are one panorama and must stay in this order.
+images:
+    - docs/zapstore/01_hero.png
+    - docs/zapstore/02_hero.png
+    - docs/zapstore/03_hero.png
+    - docs/zapstore/04_pending.png
+    - docs/zapstore/05_disputes.png
+    - docs/zapstore/06_chat.png
+    - docs/zapstore/07_observe.png
+    - docs/zapstore/08_resolve.png
+    - docs/zapstore/09_nodes.png
+supported_nips:
+    - "01"
+    - "13"
+    - "17"
+    - "19"
+    - "21"
+    - "40"
+    - "44"
+    - "65"
+metadata_sources:
+    - github
