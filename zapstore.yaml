@@ -35,15 +35,15 @@ website: https://mostro.network
 # Store images, 1242 × 2688, kept out of assets/ so the app does not bundle
 # them. The first three are one panorama and must stay in this order.
 images:
-    - docs/zapstore/01_hero.png
-    - docs/zapstore/02_hero.png
-    - docs/zapstore/03_hero.png
-    - docs/zapstore/04_pending.png
-    - docs/zapstore/05_disputes.png
-    - docs/zapstore/06_chat.png
-    - docs/zapstore/07_observe.png
-    - docs/zapstore/08_resolve.png
-    - docs/zapstore/09_nodes.png
+    - docs/zapstore/01_hero.jpg
+    - docs/zapstore/02_hero.jpg
+    - docs/zapstore/03_hero.jpg
+    - docs/zapstore/04_pending.jpg
+    - docs/zapstore/05_disputes.jpg
+    - docs/zapstore/06_chat.jpg
+    - docs/zapstore/07_observe.jpg
+    - docs/zapstore/08_resolve.jpg
+    - docs/zapstore/09_nodes.jpg
 supported_nips:
     - "01"
     - "13"
