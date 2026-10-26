@@ -36,7 +36,7 @@ void main() {
   }) => ReleaseNotes.build(
     tag: 'v2.0.1',
     previousTag: previousTag,
-    repository: 'Forte11Cuba/bosstro',
+    repository: 'MostroP2P/bosstro',
     date: DateTime.utc(2026, 9, 17),
     commits: commits,
     pullRequests: prs,
@@ -264,7 +264,7 @@ void main() {
         text,
         contains(
           '- **chat:** scroll to the last message '
-          '([#2](https://github.com/Forte11Cuba/bosstro/pull/2)) by @bob',
+          '([#2](https://github.com/MostroP2P/bosstro/pull/2)) by @bob',
         ),
       );
     });
@@ -374,7 +374,9 @@ void main() {
       // Assert
       expect(
         body,
-        contains('https://github.com/Forte11Cuba/bosstro/compare/v2.0.0...v2.0.1'),
+        contains(
+          'https://github.com/MostroP2P/bosstro/compare/v2.0.0...v2.0.1',
+        ),
       );
     });
 

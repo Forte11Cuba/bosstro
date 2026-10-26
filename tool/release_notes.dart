@@ -2,7 +2,7 @@
 // Run by .github/workflows/release.yml; see docs/RELEASING.md to run it by hand.
 //
 //   dart run tool/release_notes.dart \
-//     --tag v0.1.1 [--previous-tag v0.1.0] --repository Forte11Cuba/bosstro \
+//     --tag v0.1.1 [--previous-tag v0.1.0] --repository MostroP2P/bosstro \
 //     --commits commits.tsv --pull-requests prs.json \
 //     --body-out RELEASE_BODY.md --changelog CHANGELOG.md [--assets-dir dist]
 //

@@ -150,14 +150,14 @@ void main() {
     // Arrange — the AGPL section 13 offer of the source.
     final browser = _Browser();
     await _about(tester, browser: browser);
-    expect(find.text(sourceCodeRepository), findsOneWidget);
+    expect(find.text('MostroP2P/bosstro'), findsOneWidget);
 
     // Act
     await tester.tap(find.text('Source code'));
     await tester.pumpAndSettle();
 
     // Assert
-    expect(browser.opened, [Uri.parse(sourceCodeUrl)]);
+    expect(browser.opened, [Uri.parse('https://github.com/MostroP2P/bosstro')]);
     expect(find.byType(SnackBar), findsNothing);
   });
 
