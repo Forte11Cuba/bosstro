@@ -87,18 +87,23 @@ To sign a build locally, create `android/key.properties` (`storeFile`, `storePas
 - **Settings → Actions → General → "Allow GitHub Actions to create and approve pull
   requests"** — for the changelog PR. Without it the release is still published and the
   `changelog` job fails with the branch name to open the PR from by hand.
-- **Restrict who can release.** Anyone with write access can push a tag, and a `vX.Y.Z` tag on
-  `main` is all the workflow asks for. Do all three:
-  - a **tag ruleset** (Settings → Rules → Rulesets) limiting creation of `v*` to admins;
-  - **required reviewers on the `release` environment** (Settings → Environments). The
-    `android` job — the only one that sees the signing key — runs in it, so the run then
-    waits for an admin's approval before anything is signed. Moving the four secrets from
-    repository to environment scope keeps them from every job that does not name `release`;
-    one that does, in any workflow, gets them once it passes the environment's rules;
-  - **only release tags may deploy to it** (same page → Deployment branches and tags →
-    Selected branches and tags → a *Tag* rule `v*.*.*`). A job from any other ref then fails
-    instead of waiting for approval: an approval always means a release, and a workflow
-    pushed to a branch cannot read the key even with one.
+- **Restrict who can release.** A `vX.Y.Z` tag on `main` is all the workflow asks for, so
+  whoever can push one can release. Do both:
+  - a **tag ruleset** (Settings → Rules → Rulesets) on `v*` restricting creations, updates and
+    deletions, with **Repository admin** on its bypass list (*Always allow*). Only an admin can
+    then push a release tag, so `./scripts/release.sh X.Y.Z` run by an admin is the approval.
+    Check the bypass list after moving the repository: the move to MostroP2P left it empty,
+    and then nobody could release;
+  - **only release tags may deploy to the `release` environment** (Settings → Environments →
+    `release` → Deployment branches and tags → Selected branches and tags → a *Tag* rule
+    `v*.*.*`). The `android` job — the only one that sees the signing key — runs in it.
+    Moving the four secrets from repository to environment scope keeps them from every job
+    that does not name `release`; this rule keeps them from one that does but runs from any
+    other ref, so a workflow pushed to a branch cannot read the key.
+
+  The environment has no required reviewers: with the tag limited to admins, an approval
+  would only ask the same admin twice. (MostroP2P/app, which does not restrict its tags,
+  relies on them instead.)
 
 ## What a release contains
 
