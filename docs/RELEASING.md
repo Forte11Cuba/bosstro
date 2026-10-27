@@ -2,7 +2,8 @@
 
 A release is cut by **pushing a tag** `vMAJOR.MINOR.PATCH`. `.github/workflows/release.yml`
 does the rest: it builds and signs the Android APKs and the app bundle, writes the release
-notes, publishes the GitHub release and opens a PR that records it in `CHANGELOG.md`.
+notes, publishes the GitHub release, lists it on [Zapstore](https://zapstore.dev/apps/foundation.mostro.bosstro)
+and opens a PR that records it in `CHANGELOG.md`.
 
 This is [MostroP2P/app](https://github.com/MostroP2P/app)'s release, the reference for this
 setup, with its Linux, Windows, macOS and iOS builds left out: Bosstro releases **Android
@@ -96,7 +97,8 @@ To sign a build locally, create `android/key.properties` (`storeFile`, `storePas
     and then nobody could release;
   - **only release tags may deploy to the `release` environment** (Settings → Environments →
     `release` → Deployment branches and tags → Selected branches and tags → a *Tag* rule
-    `v*.*.*`). The `android` job — the only one that sees the signing key — runs in it.
+    `v*.*.*`). The `android` job — the only one that sees the signing key — runs in it, and
+    so does the `zapstore` job, for the Zapstore key (below).
     Moving the four secrets from repository to environment scope keeps them from every job
     that does not name `release`; this rule keeps them from one that does but runs from any
     other ref, so a workflow pushed to a branch cannot read the key.
@@ -104,6 +106,44 @@ To sign a build locally, create `android/key.properties` (`storeFile`, `storePas
   The environment has no required reviewers: with the tag limited to admins, an approval
   would only ask the same admin twice. (MostroP2P/app, which does not restrict its tags,
   relies on them instead.)
+
+### Zapstore
+
+Once the GitHub release is out, the `zapstore` job runs `zsp publish --quiet zapstore.yaml`:
+zsp takes the `arm64-v8a` APK of the latest GitHub release, and the listing (description,
+images, tags) from the tagged commit's `zapstore.yaml`. It signs as Mostro's Zapstore
+publisher, `npub1m0str0kss9282qw6mlslgrdgagw8n63qy9qagtv26ar0p7k282dqx30dna`, the key that
+also lists MostroP2P/app. The listing and its certificate proof (below) belong to that key:
+any other key would publish a second, unrelated Bosstro, so `zapstore.yaml` names it
+(`pubkey`) and zsp refuses to sign with another.
+
+| Secret of the `release` environment | Value |
+| --- | --- |
+| `ZAPSTORE_SIGN_WITH` | that key's `nsec1…` |
+
+Whoever holds it can publish anything on Zapstore as Mostro, so it is kept like the APK key:
+an environment secret, read only from a release tag. Without it the job fails at "Check
+Zapstore secret", after the GitHub release is out. A NIP-46 `bunker://` URL does not work from
+CI as it is: zsp keeps the bunker's client key under `~/.config/zsp`, which every runner
+starts without.
+
+**Certificate proof.** Zapstore links the APK's signing certificate to the publisher with a
+kind 30509 event that expires (the current one on 2027-10-26). The job does not renew it:
+`--quiet` skips certificate linking, and a runner has no keystore. Renew it by hand before it
+expires, with the nsec in `SIGN_WITH`:
+
+```bash
+zsp identity --link-key bosstro-release-for-zsp.jks --key-alias bosstro
+```
+
+zsp reads only JKS ([zapstore/zsp#24](https://github.com/zapstore/zsp/issues/24)), so that is
+a JKS copy of the release keystore (`keytool -importkeystore -srckeystore
+bosstro-release.jks -destkeystore bosstro-release-for-zsp.jks -deststoretype JKS`). An expired
+proof does not stop installs; the Zapstore client just skips the check.
+
+**Upgrading zsp:** change `ZSP_VERSION` and `ZSP_SHA256` in the job together. The digest is
+the `linux-amd64` asset's: `gh release view vX.Y.Z --repo zapstore/zsp --json assets --jq
+'.assets[] | select(.name | endswith("linux-amd64")) | .digest'`.
 
 ## What a release contains
 
@@ -149,6 +189,13 @@ cause on `main` and **re-run the workflow** from the Actions tab (same tag, same
 the fix needs a new commit, merge it, delete the tag (`git push origin :v0.1.1 && git tag -d
 v0.1.1`) and run `./scripts/release.sh 0.1.1` again: it tags the new `main`. Re-running after a release exists updates its notes and replaces its assets in
 place, and the changelog job rewrites that version's section instead of adding a second one.
+
+A failed `zapstore` job leaves the GitHub release and the changelog PR as they are: only
+Zapstore is missing the version. **Re-run failed jobs** from the run: a release Zapstore
+already lists is a no-op. zsp always takes the latest GitHub release, so the job publishes only
+while its tag is the latest one; a re-run of an older tag leaves Zapstore as it is, with a
+warning. By hand, from a checkout of the tag:
+`zsp publish zapstore.yaml` (it asks how to sign when `SIGN_WITH` is not set).
 
 A PR opened by `GITHUB_TOKEN` does not trigger workflows: **close and reopen** the changelog
 PR to start CI on it.

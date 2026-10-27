@@ -1,4 +1,7 @@
 repository: https://github.com/MostroP2P/bosstro
+# Mostro's Zapstore publisher, which also lists MostroP2P/app. zsp refuses to
+# sign with any other key (docs/RELEASING.md → Zapstore).
+pubkey: npub1m0str0kss9282qw6mlslgrdgagw8n63qy9qagtv26ar0p7k282dqx30dna
 description: |
   The mobile app for Mostro dispute solvers.
 
