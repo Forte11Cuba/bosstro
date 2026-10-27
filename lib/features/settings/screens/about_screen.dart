@@ -141,6 +141,7 @@ class AboutScreen extends ConsumerWidget {
                   icon: Icons.code_rounded,
                   label: l10n.aboutSourceCodeLabel,
                   value: sourceCodeRepository,
+                  valueIsData: true,
                   onTap: () => _openExternal(context, ref, sourceCodeUrl),
                 ),
               ],

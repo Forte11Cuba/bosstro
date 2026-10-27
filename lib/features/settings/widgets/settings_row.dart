@@ -17,6 +17,7 @@ class SettingsRow extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.value,
+    this.valueIsData = false,
     this.opens = true,
     this.danger = false,
   });
@@ -25,6 +26,10 @@ class SettingsRow extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final String? value;
+
+  /// Keys, URLs and counts are set in the figures face, so they line up from
+  /// row to row (DS-TYP-2); any other value is interface text.
+  final bool valueIsData;
 
   /// Whether the row leads to another screen or sheet (the chevron).
   final bool opens;
@@ -52,28 +57,44 @@ class SettingsRow extends StatelessWidget {
                   color: danger ? pal.dangerText : pal.textTertiary,
                 ),
                 const SizedBox(width: 10),
+                // As OrderDataRow, the read-only rows of the same cards: label
+                // and value each get up to half the row, and spaceBetween
+                // keeps the value flush right, against the chevron, whatever
+                // the label leaves unused.
                 Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(fontSize: 13, color: ink),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          label,
+                          style: TextStyle(fontSize: 13, color: ink),
+                        ),
+                      ),
+                      if (value case final text?) ...[
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            text,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                              fontFamily:
+                                  valueIsData ? AppFonts.figures : AppFonts.ui,
+                              fontSize: 12,
+                              fontWeight:
+                                  valueIsData
+                                      ? FontWeight.w500
+                                      : FontWeight.w400,
+                              color: pal.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                if (value case final text?) ...[
-                  const SizedBox(width: 10),
-                  Flexible(
-                    child: Text(
-                      text,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
-                      style: TextStyle(
-                        fontFamily: AppFonts.mono,
-                        fontSize: 12,
-                        color: pal.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
                 if (opens) ...[
                   const SizedBox(width: 6),
                   Icon(

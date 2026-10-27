@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/core/app_routes.dart';
+import 'package:bosstro/core/app_theme.dart';
+import 'package:bosstro/features/settings/widgets/settings_row.dart';
 
 import '../../support/screen_harness.dart';
 
@@ -81,5 +83,40 @@ void main() {
       isFalse,
     );
     semantics.dispose();
+  });
+  testWidgets('every row ends at the same place: values flush right, then '
+      'the chevron', (tester) async {
+    await _settings(tester);
+    final chevrons = find.byIcon(Icons.chevron_right_rounded);
+    expect(chevrons, findsWidgets);
+    final ends = {
+      for (final element in chevrons.evaluate())
+        tester.getTopRight(find.byWidget(element.widget)).dx,
+    };
+    expect(ends, hasLength(1), reason: 'one column of chevrons');
+
+    // A value sits against its chevron, whatever its length.
+    for (final value in ['System language', 'npub10elfc…zvjptg']) {
+      final row = find.ancestor(
+        of: find.text(value),
+        matching: find.byType(SettingsRow),
+      );
+      expect(row, findsOneWidget, reason: value);
+      final chevron = find.descendant(of: row, matching: chevrons);
+      expect(
+        tester.getTopLeft(chevron).dx - tester.getTopRight(find.text(value)).dx,
+        lessThanOrEqualTo(12),
+        reason: value,
+      );
+    }
+  });
+
+  testWidgets('a value reads in the interface face; a key, in the figures '
+      'face', (tester) async {
+    await _settings(tester);
+    String? family(String text) =>
+        tester.widget<Text>(find.text(text)).style?.fontFamily;
+    expect(family('System language'), anyOf(isNull, AppFonts.ui));
+    expect(family('npub10elfc…zvjptg'), AppFonts.figures);
   });
 }
