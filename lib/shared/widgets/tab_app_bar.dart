@@ -139,31 +139,38 @@ class TabHeader extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         redesignSidePadding,
-        4,
+        0,
         // The action's own padding lines its label up with the content.
         action == null ? redesignSidePadding : redesignSidePadding - 10,
-        action == null ? 12 : 4,
+        0,
       ),
-      // The action follows the title on its line while both fit, and moves
-      // under it when they do not (a long title, a large text scale).
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 8,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w600,
-                color: pal.textPrimary,
+      // The line is as tall as an action's target (DS-CMP-6) in every tab,
+      // with or without one, so the title sits at the same height in each
+      // and does not jump from tab to tab.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        // The action follows the title on its line while both fit, and moves
+        // under it when they do not (a long title, a large text scale).
+        child: Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          runAlignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w600,
+                  color: pal.textPrimary,
+                ),
               ),
             ),
-          ),
-          if (action case final a?) a,
-        ],
+            if (action case final a?) a,
+          ],
+        ),
       ),
     );
   }
