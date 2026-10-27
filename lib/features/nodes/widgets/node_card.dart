@@ -41,12 +41,12 @@ class NodeCard extends StatelessWidget {
     final name = nodeDisplayName(entry);
     final place = regionPlace(entry.region);
     final flag = regionFlag(entry.region);
-    final subtitle = [
+    // The place is text; the short key a figure, as MostroP2P/app sets it.
+    final where = [
       // Many kind 0 names carry the flag already (`Kmbalache 🇨🇺`).
       if (flag != null && !name.contains(flag)) flag,
       if (place != null && place != name) place,
-      shortOrderId(entry.pubkey),
-    ].join(' · ');
+    ];
 
     return Material(
       color: shell.surface,
@@ -86,10 +86,21 @@ class NodeCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              subtitle,
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  for (final part in where)
+                                    TextSpan(text: '$part · '),
+                                  TextSpan(
+                                    text: shortOrderId(entry.pubkey),
+                                    style: const TextStyle(
+                                      fontFamily: AppFonts.figures,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                               style: TextStyle(
-                                fontFamily: AppFonts.mono,
                                 fontSize: 11,
                                 color: shell.textSecondary,
                               ),
