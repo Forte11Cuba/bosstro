@@ -124,6 +124,7 @@ class SettingsScreen extends ConsumerWidget {
                                 link.connected,
                                 link.total,
                               ),
+                      valueIsData: true,
                       onTap: () => context.push(AppRoute.relays),
                     ),
                     // Known only from the node's answers (D12).
@@ -154,6 +155,7 @@ class SettingsScreen extends ConsumerWidget {
                         icon: Icons.qr_code_rounded,
                         label: l10n.settingsNpub,
                         value: shortOrderId(key.npub, head: 10, tail: 6),
+                        valueIsData: true,
                         onTap: () => _showNpub(context, key.npub),
                       ),
                       SettingsRow(
