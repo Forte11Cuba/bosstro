@@ -27,6 +27,10 @@ NavigatorState? _openOn;
 ///
 /// The detail opens with `go`, under In progress: Back leads to Your
 /// disputes, where the dispute stays, not to the list it was taken from.
+///
+/// [context] is usually the row's, and the row may be gone by the answer
+/// (the node republishes the dispute in progress first), so the end is said
+/// from the root navigator's context, which stays.
 Future<void> openTakeDialog(
   BuildContext context, {
   required String disputeId,
@@ -42,10 +46,10 @@ Future<void> openTakeDialog(
       barrierDismissible: false,
       builder: (_) => TakeDialog(disputeId: disputeId, kind: kind),
     );
-    if (taken == true && context.mounted) {
-      final l10n = AppLocalizations.of(context);
+    if (taken == true && navigator.mounted) {
+      final l10n = AppLocalizations.of(navigator.context);
       showMostroSnackBar(
-        context,
+        navigator.context,
         kind == TakeKind.take ? l10n.takeTakenSnack : l10n.recoverTakenSnack,
       );
       router.go(AppRoute.disputeDetail(disputeId));
