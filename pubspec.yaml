@@ -3,7 +3,7 @@ description: "Bosstro — the Mostro dispute solver's mobile app"
 publish_to: 'none'
 
 # Bump together with rust/Cargo.toml `version` (rust/src/api/mod.rs tests it).
-version: 0.1.0+1
+version: 0.1.1+101
 
 environment:
   sdk: ">=3.7.0 <4.0.0"
