@@ -194,8 +194,9 @@ A failed `zapstore` job leaves the GitHub release and the changelog PR as they a
 Zapstore is missing the version. **Re-run failed jobs** from the run: a release Zapstore
 already lists is a no-op. zsp always takes the latest GitHub release, so the job publishes only
 while its tag is the latest one; a re-run of an older tag leaves Zapstore as it is, with a
-warning. By hand, from a checkout of the tag:
-`zsp publish zapstore.yaml` (it asks how to sign when `SIGN_WITH` is not set).
+warning. By hand, from a checkout of the latest release's tag (`gh release view --json
+tagName --jq .tagName`), for the same reason: `zsp publish zapstore.yaml` (it asks how to sign
+when `SIGN_WITH` is not set).
 
 A PR opened by `GITHUB_TOKEN` does not trigger workflows: **close and reopen** the changelog
 PR to start CI on it.

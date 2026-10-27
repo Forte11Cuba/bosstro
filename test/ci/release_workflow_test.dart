@@ -161,10 +161,25 @@ void main() {
       // tag would list the newest APK with the older tag's zapstore.yaml.
       expect(zapstore, contains('gh release view --json tagName'));
       expect(zapstore, contains(r'TAG: ${{ needs.prepare.outputs.tag }}'));
+      expect(zapstore, contains(r'if [ "$latest" = "$TAG" ]; then'));
+      expect(zapstore, contains(r'echo "publish=true" >> "$GITHUB_OUTPUT"'));
+      expect(zapstore, contains(r'echo "publish=false" >> "$GITHUB_OUTPUT"'));
       expect(
         zapstore.split("if: steps.latest.outputs.publish == 'true'").length - 1,
-        2,
-        reason: 'both installing and running zsp wait for the check',
+        3,
+        reason: 'the secret check, installing and running zsp wait for it',
+      );
+    });
+
+    test('a skipped re-run does not need the secret', () {
+      // Arrange
+      final zapstore = job('zapstore');
+
+      // Assert — a re-run of an older tag is skipped with a warning, even
+      // when ZAPSTORE_SIGN_WITH is missing.
+      expect(
+        zapstore.indexOf('name: Check this is the latest release'),
+        lessThan(zapstore.indexOf('name: Check Zapstore secret')),
       );
     });
 

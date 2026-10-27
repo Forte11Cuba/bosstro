@@ -381,15 +381,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Check Zapstore secret
-        env:
-          ZAPSTORE_SIGN_WITH: ${{ secrets.ZAPSTORE_SIGN_WITH }}
-        run: |
-          if [ -z "$ZAPSTORE_SIGN_WITH" ]; then
-            echo "::error::Missing secret ZAPSTORE_SIGN_WITH of the release environment (docs/RELEASING.md). The GitHub release is out; only Zapstore is missing it."
-            exit 1
-          fi
-
       # zsp takes the latest release whatever tag runs it: a re-run of an older
       # tag would list the newest APK with this tag's zapstore.yaml.
       - name: Check this is the latest release
@@ -406,6 +397,16 @@ jobs:
           else
             echo "::warning::The latest release is $latest, not $TAG: Zapstore is left as it is."
             echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check Zapstore secret
+        if: steps.latest.outputs.publish == 'true'
+        env:
+          ZAPSTORE_SIGN_WITH: ${{ secrets.ZAPSTORE_SIGN_WITH }}
+        run: |
+          if [ -z "$ZAPSTORE_SIGN_WITH" ]; then
+            echo "::error::Missing secret ZAPSTORE_SIGN_WITH of the release environment (docs/RELEASING.md). The GitHub release is out; only Zapstore is missing it."
+            exit 1
           fi
 
       # The binary runs with the key in its environment: pinned, and checked
