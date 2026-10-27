@@ -36,6 +36,7 @@ class InProgressDisputeRow extends StatelessWidget {
       button: onTap != null,
       hint: onTap == null ? null : l10n.openDisputeHint,
       child: SurfaceCard(
+        padding: disputeCardPadding,
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,6 +114,7 @@ class ClosedDisputeRow extends StatelessWidget {
       button: onTap != null,
       hint: onTap == null ? null : l10n.openDisputeHint,
       child: SurfaceCard(
+        padding: disputeCardPadding,
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

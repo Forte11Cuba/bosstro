@@ -6,9 +6,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:bosstro/core/app_routes.dart';
 import 'package:bosstro/features/disputes/providers/pending_providers.dart';
 import 'package:bosstro/features/disputes/services/disputes_core.dart';
+import 'package:bosstro/features/disputes/widgets/in_progress_dispute_row.dart';
 import 'package:bosstro/features/disputes/widgets/pending_dispute_row.dart';
 import 'package:bosstro/l10n/app_localizations_en.dart';
 import 'package:bosstro/shared/widgets/list_skeleton.dart';
+import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/status_chip.dart';
 
 import '../../support/screen_harness.dart';
@@ -47,6 +49,41 @@ Future<void> _afterUpdates(WidgetTester tester) async {
 }
 
 void main() {
+  // The id closes every dispute card; its 48-dp copy target must not leave
+  // the card twice as much room under it as over the chip.
+  final cards = <String, Widget>{
+    'Pending': PendingDisputeRow(dispute: sampleDispute(id: _a), now: _now),
+    'In progress': InProgressDisputeRow(
+      dispute: sampleTaken(id: _a),
+      now: _now,
+      onTap: () {},
+    ),
+    'Closed': ClosedDisputeRow(
+      dispute: sampleTaken(id: _a, status: DisputeStatus.settled),
+      now: _now,
+      onTap: () {},
+    ),
+  };
+  for (final MapEntry(key: name, value: row) in cards.entries) {
+    testWidgets('a $name card has even room over its chip and under its id', (
+      tester,
+    ) async {
+      setSurface(tester, width: 400, height: 800);
+      // In a list, as the tabs show it: as tall as its lines.
+      await pumpWidgetAlone(
+        tester,
+        ListView(children: [row]),
+        locale: const Locale('en'),
+      );
+      final card = tester.getRect(find.byType(SurfaceCard));
+      final chip = tester.getRect(find.byType(StatusChip));
+      final id = tester.getRect(find.byIcon(Icons.copy_rounded));
+      final over = chip.top - card.top;
+      final under = card.bottom - id.bottom;
+      expect((under - over).abs(), lessThanOrEqualTo(4), reason: '$under');
+    });
+  }
+
   // DS-A11Y-4 with rows on screen: 320 dp, 2× text, Spanish, both themes.
   for (final brightness in Brightness.values) {
     testWidgets('the list fits at 320 dp, 2× text, es, ${brightness.name}', (
