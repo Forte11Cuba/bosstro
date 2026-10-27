@@ -429,6 +429,44 @@ void main() {
     expect(core.permission, SolverPermission.readWrite);
   });
 
+  testWidgets('the confirmation names the action once, in its headline', (
+    tester,
+  ) async {
+    setSurface(tester);
+    await _pump(tester, _held());
+    await _open(tester, 'Pagar al comprador');
+    expect(find.text('¿Pagar al comprador?'), findsOneWidget);
+    // No title in the app bar to repeat it: only the way back.
+    final bar = find.descendant(
+      of: find.byType(ResolutionScreen),
+      matching: find.byType(AppBar),
+    );
+    expect(find.descendant(of: bar, matching: find.byType(Text)), findsNothing);
+    expect(find.byTooltip('Atrás'), findsOneWidget);
+  });
+
+  testWidgets('the outcome is centred, as a dialog says how it ended', (
+    tester,
+  ) async {
+    setSurface(tester, width: 400, height: 800);
+    await _pump(tester, _held());
+    await _open(tester, 'Pagar al comprador');
+    await _scrollScreenTo(tester, _answer('Pagar al comprador'));
+    await tester.tap(_answer('Pagar al comprador'));
+    await tester.pumpAndSettle();
+
+    final middle = tester.getCenter(find.byType(ResolutionScreen)).dx;
+    final title = find.text('Resuelta: pagaste al comprador');
+    expect(tester.getCenter(title).dx, closeTo(middle, 1));
+    expect(tester.widget<Text>(title).textAlign, TextAlign.center);
+    expect(
+      tester.getCenter(find.byIcon(Icons.check_circle_outline_rounded)).dx,
+      closeTo(middle, 1),
+    );
+    final body = find.textContaining('El nodo liquidó');
+    expect(tester.widget<Text>(body).textAlign, TextAlign.center);
+  });
+
   testWidgets('a double tap opens one confirmation', (tester) async {
     setSurface(tester);
     await _pump(tester, _held(), brightness: Brightness.dark);
