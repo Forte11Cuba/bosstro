@@ -99,7 +99,7 @@ docs/RELEASING.md    # how a release is cut, signed and published
   `pow_first_contact` would freeze a web tab for a while.
 - **A take-over of your dispute goes unseen until you try to resolve it:** when a Read-Write
   solver takes over a dispute this key holds, the node republishes it `in-progress` and the
-  38386 does not say who holds it, so it stays in Your disputes. Settle and cancel learn it
+  38386 does not say who holds it, so it stays in My disputes. Settle and cancel learn it
   from `IsNotYourDispute` / `DisputeTakenByAdmin` and drop the take then.
 - **A resolution with no answer is remembered in memory only:** the detail warns that the node
   may have acted on it while the request is still waited for (ten minutes, this process). After

@@ -16,7 +16,7 @@ import 'package:bosstro/shared/widgets/redesign_app_bar.dart';
 import 'package:bosstro/shared/widgets/warning_note.dart';
 
 /// Recover a dispute (Mostrix's Shift+R picker): the active node's disputes
-/// in progress that are not among Your disputes here. The node does not say
+/// in progress that are not in My disputes here. The node does not say
 /// who holds one, so the list mixes this solver's lost takes with other
 /// solvers' disputes, and the screen says so. One at a time, each behind a
 /// confirmation: never in bulk.

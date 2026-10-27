@@ -134,14 +134,14 @@ void main() {
       await tester.tap(find.text('Take dispute'));
       await _until(
         tester,
-        find.text('Dispute taken. It is in Your disputes.'),
+        find.text('Dispute taken. It is in My disputes.'),
         what: 'the take',
       );
       await tester.tap(find.text('In progress'));
       await _until(
         tester,
         find.byType(InProgressDisputeRow),
-        what: 'Your disputes',
+        what: 'My disputes',
       );
       final row = tester.widget<InProgressDisputeRow>(
         find.byType(InProgressDisputeRow).first,
@@ -168,7 +168,7 @@ void main() {
       await tester.tap(find.byType(PendingDisputeRow).first);
       await _until(tester, find.text('Recover dispute'));
       await tester.tap(find.text('Recover dispute'));
-      final recovered = find.text('Dispute recovered. It is in Your disputes.');
+      final recovered = find.text('Dispute recovered. It is in My disputes.');
       final refused = find.text('Another solver holds this dispute');
       await _until(
         tester,
@@ -183,17 +183,17 @@ void main() {
         '${recovered.evaluate().isNotEmpty ? 'recovered' : 'cannot take over'}',
       );
       expect(recovered, findsOneWidget);
-      // Back on Your disputes, it is listed with the one taken in step 2.
+      // Back on My disputes, it is listed with the one taken in step 2.
       await tester.pageBack();
       await _until(
         tester,
         find.byWidgetPredicate(
           (w) => w is InProgressDisputeRow && w.dispute.disputeId == candidate,
         ),
-        what: 'the recovered dispute in Your disputes',
+        what: 'the recovered dispute in My disputes',
       );
       debugPrint(
-        '[e2e] Your disputes: '
+        '[e2e] My disputes: '
         '${find.byType(InProgressDisputeRow).evaluate().length} rows',
       );
     },

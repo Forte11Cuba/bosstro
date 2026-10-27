@@ -34,7 +34,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun litige de ce nœud n\'attend de solver. Quand une transaction en ouvre un, il apparaît ici pour que vous le preniez en charge.';
 
   @override
-  String get inProgressTitle => 'Vos litiges';
+  String get inProgressTitle => 'Mes litiges';
 
   @override
   String get inProgressEmptyTitle => 'Aucun litige en cours';
@@ -826,14 +826,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get takeDisputeBody =>
-      'Vous devenez son solver : le nœud prévient l\'acheteur et le vendeur, et le litige passe dans Vos litiges. Ne prenez en charge qu\'un litige que vous pouvez mener jusqu\'au bout.';
+      'Vous devenez son solver : le nœud prévient l\'acheteur et le vendeur, et le litige passe dans Mes litiges. Ne prenez en charge qu\'un litige que vous pouvez mener jusqu\'au bout.';
 
   @override
   String get takeDisputeAnswer => 'Prendre en charge';
 
   @override
   String get takeTakenSnack =>
-      'Litige pris en charge. Il est dans Vos litiges.';
+      'Litige pris en charge. Il est dans Mes litiges.';
 
   @override
   String get recoverAction => 'Récupérer';
@@ -843,14 +843,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recoverNote =>
-      'Le nœud ne publie pas qui détient un litige. Cette liste montre donc tous les litiges en cours sur ce nœud qui ne sont pas dans Vos litiges sur ce téléphone : les vôtres dont la réponse s\'est perdue, et ceux d\'autres solvers. Récupérez-les un par un.';
+      'Le nœud ne publie pas qui détient un litige. Cette liste montre donc tous les litiges en cours sur ce nœud qui ne sont pas dans Mes litiges sur ce téléphone : les vôtres dont la réponse s\'est perdue, et ceux d\'autres solvers. Récupérez-les un par un.';
 
   @override
   String get recoverEmptyTitle => 'Rien à récupérer';
 
   @override
   String get recoverEmptyBody =>
-      'Aucun litige en cours sur ce nœud ne manque dans Vos litiges.';
+      'Aucun litige en cours sur ce nœud ne manque dans Mes litiges.';
 
   @override
   String get recoverDisputeHint => 'Récupérer le litige';
@@ -866,7 +866,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recoverDisputeAnswer => 'Récupérer le litige';
 
   @override
-  String get recoverTakenSnack => 'Litige récupéré. Il est dans Vos litiges.';
+  String get recoverTakenSnack => 'Litige récupéré. Il est dans Mes litiges.';
 
   @override
   String get notSolverTitle => 'Vous n\'êtes pas solver sur ce nœud';
@@ -901,7 +901,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noAnswerBody =>
-      'Votre demande lui est peut-être parvenue malgré tout : Bosstro ne l\'a donc pas renvoyée. Dans un moment, regardez dans Vos litiges, ou redemandez le litige depuis Récupérer un litige.';
+      'Votre demande lui est peut-être parvenue malgré tout : Bosstro ne l\'a donc pas renvoyée. Dans un moment, regardez dans Mes litiges, ou redemandez le litige depuis Récupérer un litige.';
 
   @override
   String get takeFailedTitle => 'La demande n\'a pas été envoyée';
@@ -1085,7 +1085,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get detailNotYoursBody =>
-      'Le nœud l\'a rouvert, ou il appartient à une autre clé. Il n\'est plus dans Vos litiges.';
+      'Le nœud l\'a rouvert, ou il appartient à une autre clé. Il n\'est plus dans Mes litiges.';
 
   @override
   String get chatSenderYou => 'Vous';
@@ -1498,7 +1498,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get takenOverBody =>
-      'Le nœud l\'a donné à un autre solver : rien n\'a donc été payé ni remboursé. Il a quitté Vos litiges.';
+      'Le nœud l\'a donné à un autre solver : rien n\'a donc été payé ni remboursé. Il a quitté Mes litiges.';
 
   @override
   String get notInDisputeTitle => 'Cet ordre n\'est plus en litige';
@@ -1530,7 +1530,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get resolveBackToDispute => 'Retour au litige';
 
   @override
-  String get resolveGoToDisputes => 'Aller à Vos litiges';
+  String get resolveGoToDisputes => 'Aller à Mes litiges';
 
   @override
   String get closedPaidBuyer => 'Vous avez payé l\'acheteur';

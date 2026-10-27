@@ -34,7 +34,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ninguna disputa de este nodo está esperando solver. Cuando una operación abra una, aparecerá aquí para que la tomes.';
 
   @override
-  String get inProgressTitle => 'Tus disputas';
+  String get inProgressTitle => 'Mis disputas';
 
   @override
   String get inProgressEmptyTitle => 'No hay disputas en curso';
@@ -825,13 +825,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get takeDisputeBody =>
-      'Pasas a ser su solver: el nodo avisa al comprador y al vendedor, y la disputa pasa a Tus disputas. Toma solo una disputa que puedas atender hasta el final.';
+      'Pasas a ser su solver: el nodo avisa al comprador y al vendedor, y la disputa pasa a Mis disputas. Toma solo una disputa que puedas atender hasta el final.';
 
   @override
   String get takeDisputeAnswer => 'Tomar la disputa';
 
   @override
-  String get takeTakenSnack => 'Disputa tomada. Está en Tus disputas.';
+  String get takeTakenSnack => 'Disputa tomada. Está en Mis disputas.';
 
   @override
   String get recoverAction => 'Recuperar';
@@ -841,14 +841,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get recoverNote =>
-      'El nodo no publica quién tiene una disputa. Por eso esta lista muestra todas las disputas en curso de este nodo que no están en Tus disputas en este teléfono: las tuyas cuya respuesta se perdió y las de otros solvers. Recupéralas de una en una.';
+      'El nodo no publica quién tiene una disputa. Por eso esta lista muestra todas las disputas en curso de este nodo que no están en Mis disputas en este teléfono: las tuyas cuya respuesta se perdió y las de otros solvers. Recupéralas de una en una.';
 
   @override
   String get recoverEmptyTitle => 'Nada que recuperar';
 
   @override
   String get recoverEmptyBody =>
-      'No falta en Tus disputas ninguna disputa en curso de este nodo.';
+      'No falta en Mis disputas ninguna disputa en curso de este nodo.';
 
   @override
   String get recoverDisputeHint => 'Recuperar la disputa';
@@ -864,7 +864,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get recoverDisputeAnswer => 'Recuperar la disputa';
 
   @override
-  String get recoverTakenSnack => 'Disputa recuperada. Está en Tus disputas.';
+  String get recoverTakenSnack => 'Disputa recuperada. Está en Mis disputas.';
 
   @override
   String get notSolverTitle => 'No eres solver en este nodo';
@@ -899,7 +899,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noAnswerBody =>
-      'Puede que tu petición le llegara igualmente, así que Bosstro no la volvió a enviar. En un momento, mira en Tus disputas o vuelve a pedirla desde Recuperar una disputa.';
+      'Puede que tu petición le llegara igualmente, así que Bosstro no la volvió a enviar. En un momento, mira en Mis disputas o vuelve a pedirla desde Recuperar una disputa.';
 
   @override
   String get takeFailedTitle => 'La petición no se envió';
@@ -1083,7 +1083,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get detailNotYoursBody =>
-      'El nodo la reabrió, o es de otra clave. Ya no está en Tus disputas.';
+      'El nodo la reabrió, o es de otra clave. Ya no está en Mis disputas.';
 
   @override
   String get chatSenderYou => 'Tú';
@@ -1493,7 +1493,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get takenOverBody =>
-      'El nodo se la dio a otro solver, así que no se pagó ni se devolvió nada. Ha salido de Tus disputas.';
+      'El nodo se la dio a otro solver, así que no se pagó ni se devolvió nada. Ha salido de Mis disputas.';
 
   @override
   String get notInDisputeTitle => 'Esta orden ya no está en disputa';
@@ -1525,7 +1525,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get resolveBackToDispute => 'Volver a la disputa';
 
   @override
-  String get resolveGoToDisputes => 'Ir a Tus disputas';
+  String get resolveGoToDisputes => 'Ir a Mis disputas';
 
   @override
   String get closedPaidBuyer => 'Pagaste al comprador';

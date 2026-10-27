@@ -34,7 +34,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Geen enkel dispuut op deze node wacht op een solver. Wordt er in een trade een dispuut geopend, dan verschijnt het hier zodat je het kunt oppakken.';
 
   @override
-  String get inProgressTitle => 'Jouw disputen';
+  String get inProgressTitle => 'Mijn disputen';
 
   @override
   String get inProgressEmptyTitle => 'Geen lopende disputen';
@@ -827,13 +827,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get takeDisputeBody =>
-      'Je wordt er de solver van: de node laat het de koper en de verkoper weten, en het dispuut gaat naar Jouw disputen. Pak alleen een dispuut op dat je tot het einde kunt afhandelen.';
+      'Je wordt er de solver van: de node laat het de koper en de verkoper weten, en het dispuut gaat naar Mijn disputen. Pak alleen een dispuut op dat je tot het einde kunt afhandelen.';
 
   @override
   String get takeDisputeAnswer => 'Dispuut oppakken';
 
   @override
-  String get takeTakenSnack => 'Dispuut opgepakt. Het staat in Jouw disputen.';
+  String get takeTakenSnack => 'Dispuut opgepakt. Het staat in Mijn disputen.';
 
   @override
   String get recoverAction => 'Terughalen';
@@ -843,14 +843,14 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get recoverNote =>
-      'De node publiceert niet wie een dispuut in handen heeft. Daarom toont deze lijst elk lopend dispuut op deze node dat op deze telefoon niet bij Jouw disputen staat: die van jou waarvan het antwoord verloren ging, en die van andere solvers. Haal ze één voor één terug.';
+      'De node publiceert niet wie een dispuut in handen heeft. Daarom toont deze lijst elk lopend dispuut op deze node dat op deze telefoon niet bij Mijn disputen staat: die van jou waarvan het antwoord verloren ging, en die van andere solvers. Haal ze één voor één terug.';
 
   @override
   String get recoverEmptyTitle => 'Niets om terug te halen';
 
   @override
   String get recoverEmptyBody =>
-      'Er ontbreekt geen enkel lopend dispuut van deze node in Jouw disputen.';
+      'Er ontbreekt geen enkel lopend dispuut van deze node in Mijn disputen.';
 
   @override
   String get recoverDisputeHint => 'Dispuut terughalen';
@@ -867,7 +867,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get recoverTakenSnack =>
-      'Dispuut teruggehaald. Het staat in Jouw disputen.';
+      'Dispuut teruggehaald. Het staat in Mijn disputen.';
 
   @override
   String get notSolverTitle => 'Je bent geen solver op deze node';
@@ -902,7 +902,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get noAnswerBody =>
-      'Je verzoek kan de node toch hebben bereikt, dus Bosstro heeft het niet opnieuw verstuurd. Kijk zo meteen in Jouw disputen, of vraag het opnieuw aan via Dispuut terughalen.';
+      'Je verzoek kan de node toch hebben bereikt, dus Bosstro heeft het niet opnieuw verstuurd. Kijk zo meteen in Mijn disputen, of vraag het opnieuw aan via Dispuut terughalen.';
 
   @override
   String get takeFailedTitle => 'Het verzoek is niet verstuurd';
@@ -1086,7 +1086,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get detailNotYoursBody =>
-      'De node heeft het heropend, of het hoort bij een andere sleutel. Het staat niet meer in Jouw disputen.';
+      'De node heeft het heropend, of het hoort bij een andere sleutel. Het staat niet meer in Mijn disputen.';
 
   @override
   String get chatSenderYou => 'Jij';
@@ -1502,7 +1502,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get takenOverBody =>
-      'De node heeft het aan een andere solver gegeven, dus er is niets betaald of terugbetaald. Het staat niet meer in Jouw disputen.';
+      'De node heeft het aan een andere solver gegeven, dus er is niets betaald of terugbetaald. Het staat niet meer in Mijn disputen.';
 
   @override
   String get notInDisputeTitle => 'Deze order is niet meer in dispuut';
@@ -1534,7 +1534,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get resolveBackToDispute => 'Terug naar het dispuut';
 
   @override
-  String get resolveGoToDisputes => 'Naar Jouw disputen';
+  String get resolveGoToDisputes => 'Naar Mijn disputen';
 
   @override
   String get closedPaidBuyer => 'Je hebt de koper betaald';

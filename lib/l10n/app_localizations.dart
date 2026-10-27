@@ -159,7 +159,7 @@ abstract class AppLocalizations {
   /// Header of the In progress tab: disputes this solver took
   ///
   /// In en, this message translates to:
-  /// **'Your disputes'**
+  /// **'My disputes'**
   String get inProgressTitle;
 
   /// Empty state title of the In progress tab
@@ -1497,7 +1497,7 @@ abstract class AppLocalizations {
   /// Body of the take confirmation
   ///
   /// In en, this message translates to:
-  /// **'You become its solver: the node tells the buyer and the seller, and the dispute moves to Your disputes. Take only a dispute you can see through.'**
+  /// **'You become its solver: the node tells the buyer and the seller, and the dispute moves to My disputes. Take only a dispute you can follow to the end.'**
   String get takeDisputeBody;
 
   /// Answer of the take confirmation; repeats the opener's verb (DS-CMP-26, glossary: take a dispute)
@@ -1509,10 +1509,10 @@ abstract class AppLocalizations {
   /// Snackbar once the node gave the solver the dispute
   ///
   /// In en, this message translates to:
-  /// **'Dispute taken. It is in Your disputes.'**
+  /// **'Dispute taken. It is in My disputes.'**
   String get takeTakenSnack;
 
-  /// Label of the action in the Your disputes header that opens Recover a dispute
+  /// Label of the action in the My disputes header that opens Recover a dispute
   ///
   /// In en, this message translates to:
   /// **'Recover'**
@@ -1527,7 +1527,7 @@ abstract class AppLocalizations {
   /// Note at the top of Recover a dispute
   ///
   /// In en, this message translates to:
-  /// **'The node does not publish who holds a dispute. So this list shows every dispute in progress on this node that is not among Your disputes on this phone: yours whose answer was lost, and other solvers\'. Recover them one at a time.'**
+  /// **'The node does not publish who holds a dispute. So this list shows every dispute in progress on this node that is not in My disputes on this phone: yours whose answer was lost, and other solvers\'. Recover them one at a time.'**
   String get recoverNote;
 
   /// Recover a dispute with no candidate
@@ -1539,7 +1539,7 @@ abstract class AppLocalizations {
   /// Explanation under recoverEmptyTitle
   ///
   /// In en, this message translates to:
-  /// **'No dispute in progress on this node is missing from Your disputes.'**
+  /// **'No dispute in progress on this node is missing from My disputes.'**
   String get recoverEmptyBody;
 
   /// Screen-reader hint of a Recover row: tapping it opens the recover confirmation
@@ -1569,7 +1569,7 @@ abstract class AppLocalizations {
   /// Snackbar once the node gave the dispute back
   ///
   /// In en, this message translates to:
-  /// **'Dispute recovered. It is in Your disputes.'**
+  /// **'Dispute recovered. It is in My disputes.'**
   String get recoverTakenSnack;
 
   /// Banner on Pending and take outcome when the node refused a dispute waiting for a solver
@@ -1629,7 +1629,7 @@ abstract class AppLocalizations {
   /// Body under noAnswerTitle
   ///
   /// In en, this message translates to:
-  /// **'Your request may have reached it all the same, so Bosstro did not send it again. In a moment, look in Your disputes, or ask again from Recover a dispute.'**
+  /// **'Your request may have reached it all the same, so Bosstro did not send it again. In a moment, look in My disputes, or ask again from Recover a dispute.'**
   String get noAnswerBody;
 
   /// Take outcome when the request could not leave
@@ -1923,7 +1923,7 @@ abstract class AppLocalizations {
   /// Explanation under detailNotYoursTitle
   ///
   /// In en, this message translates to:
-  /// **'The node reopened it, or it belongs to another key. It is no longer in Your disputes.'**
+  /// **'The node reopened it, or it belongs to another key. It is no longer in My disputes.'**
   String get detailNotYoursBody;
 
   /// Sender label of the solver's own chat message
@@ -2058,7 +2058,7 @@ abstract class AppLocalizations {
   /// **'{sender}, {time}: {text}'**
   String chatMessageLabel(String sender, String time, String text);
 
-  /// Screen-reader hint of a row in Your disputes
+  /// Screen-reader hint of a row in My disputes
   ///
   /// In en, this message translates to:
   /// **'Open the dispute'**
@@ -2619,7 +2619,7 @@ abstract class AppLocalizations {
   /// Under takenOverTitle
   ///
   /// In en, this message translates to:
-  /// **'The node gave it to another solver, so nothing was paid or refunded. It has left Your disputes.'**
+  /// **'The node gave it to another solver, so nothing was paid or refunded. It has left My disputes.'**
   String get takenOverBody;
 
   /// Result: refused by the order's status
@@ -2673,7 +2673,7 @@ abstract class AppLocalizations {
   /// Result after a take-over: back to the In progress list
   ///
   /// In en, this message translates to:
-  /// **'Go to Your disputes'**
+  /// **'Go to My disputes'**
   String get resolveGoToDisputes;
 
   /// A closed dispute this key resolved by paying the buyer

@@ -34,7 +34,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Auf diesem Node wartet kein Streitfall auf einen Solver. Wenn ein Trade einen eröffnet, erscheint er hier, damit du ihn übernehmen kannst.';
 
   @override
-  String get inProgressTitle => 'Deine Streitfälle';
+  String get inProgressTitle => 'Meine Streitfälle';
 
   @override
   String get inProgressEmptyTitle => 'Keine Streitfälle in Bearbeitung';
@@ -827,14 +827,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get takeDisputeBody =>
-      'Du wirst sein Solver: Der Node benachrichtigt Käufer und Verkäufer, und der Streitfall wandert zu „Deine Streitfälle“. Übernimm nur einen Streitfall, den du bis zum Ende betreuen kannst.';
+      'Du wirst sein Solver: Der Node benachrichtigt Käufer und Verkäufer, und der Streitfall wandert zu „Meine Streitfälle“. Übernimm nur einen Streitfall, den du bis zum Ende betreuen kannst.';
 
   @override
   String get takeDisputeAnswer => 'Streitfall übernehmen';
 
   @override
   String get takeTakenSnack =>
-      'Streitfall übernommen. Du findest ihn unter „Deine Streitfälle“.';
+      'Streitfall übernommen. Du findest ihn unter „Meine Streitfälle“.';
 
   @override
   String get recoverAction => 'Zurückholen';
@@ -844,14 +844,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get recoverNote =>
-      'Der Node veröffentlicht nicht, wer einen Streitfall betreut. Deshalb zeigt diese Liste jeden Streitfall in Bearbeitung auf diesem Node, der auf diesem Telefon nicht unter „Deine Streitfälle“ steht: deine, deren Antwort verloren ging, und die anderer Solver. Hol sie einzeln zurück.';
+      'Der Node veröffentlicht nicht, wer einen Streitfall betreut. Deshalb zeigt diese Liste jeden Streitfall in Bearbeitung auf diesem Node, der auf diesem Telefon nicht unter „Meine Streitfälle“ steht: deine, deren Antwort verloren ging, und die anderer Solver. Hol sie einzeln zurück.';
 
   @override
   String get recoverEmptyTitle => 'Nichts zurückzuholen';
 
   @override
   String get recoverEmptyBody =>
-      'Unter „Deine Streitfälle“ fehlt kein Streitfall dieses Nodes, der in Bearbeitung ist.';
+      'Unter „Meine Streitfälle“ fehlt kein Streitfall dieses Nodes, der in Bearbeitung ist.';
 
   @override
   String get recoverDisputeHint => 'Streitfall zurückholen';
@@ -868,7 +868,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get recoverTakenSnack =>
-      'Streitfall zurückgeholt. Du findest ihn unter „Deine Streitfälle“.';
+      'Streitfall zurückgeholt. Du findest ihn unter „Meine Streitfälle“.';
 
   @override
   String get notSolverTitle => 'Du bist auf diesem Node kein Solver';
@@ -905,7 +905,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noAnswerBody =>
-      'Deine Anfrage hat ihn vielleicht trotzdem erreicht, daher hat Bosstro sie nicht erneut gesendet. Sieh gleich unter „Deine Streitfälle“ nach oder fordere den Streitfall über „Streitfall zurückholen“ erneut an.';
+      'Deine Anfrage hat ihn vielleicht trotzdem erreicht, daher hat Bosstro sie nicht erneut gesendet. Sieh gleich unter „Meine Streitfälle“ nach oder fordere den Streitfall über „Streitfall zurückholen“ erneut an.';
 
   @override
   String get takeFailedTitle => 'Die Anfrage wurde nicht gesendet';
@@ -1089,7 +1089,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get detailNotYoursBody =>
-      'Der Node hat ihn wieder geöffnet, oder er gehört zu einem anderen Schlüssel. Er ist nicht mehr unter „Deine Streitfälle“.';
+      'Der Node hat ihn wieder geöffnet, oder er gehört zu einem anderen Schlüssel. Er ist nicht mehr unter „Meine Streitfälle“.';
 
   @override
   String get chatSenderYou => 'Du';
@@ -1507,7 +1507,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get takenOverBody =>
-      'Der Node hat ihn einem anderen Solver gegeben, daher wurde nichts bezahlt oder erstattet. Er ist nicht mehr unter „Deine Streitfälle“.';
+      'Der Node hat ihn einem anderen Solver gegeben, daher wurde nichts bezahlt oder erstattet. Er ist nicht mehr unter „Meine Streitfälle“.';
 
   @override
   String get notInDisputeTitle =>
@@ -1540,7 +1540,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get resolveBackToDispute => 'Zurück zum Streitfall';
 
   @override
-  String get resolveGoToDisputes => 'Deine Streitfälle öffnen';
+  String get resolveGoToDisputes => 'Meine Streitfälle öffnen';
 
   @override
   String get closedPaidBuyer => 'Du hast den Käufer bezahlt';
