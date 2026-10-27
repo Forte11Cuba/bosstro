@@ -207,6 +207,35 @@ void main() {
       expect(find.byType(PendingDisputeRow), findsNothing);
     });
 
+    testWidgets('a take whose row leaves before the answer still opens the '
+        'dispute', (tester) async {
+      setSurface(tester, width: 400, height: 800);
+      final core = _withPending()..takeAnswer = Completer();
+      await _pump(tester, core, locale: const Locale('en'), textScale: 1);
+
+      await tester.tap(find.byType(PendingDisputeRow));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take dispute'));
+      await tester.pump();
+
+      // The node republishes the dispute in progress before its answer
+      // arrives: the row the dialog was opened from leaves the list.
+      core.disputes.clear();
+      core.push();
+      // Not settled: the busy answer button spins until the answer.
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump();
+      expect(find.byType(PendingDisputeRow), findsNothing);
+      expect(find.byType(TakeDialog), findsOneWidget);
+
+      core.takeAnswer!.complete();
+      await tester.pumpAndSettle();
+      expect(find.byType(TakeDialog), findsNothing);
+      // "Dispute taken", then the dispute.
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.byType(DisputeDetailScreen), findsOneWidget);
+    });
+
     testWidgets('a double tap opens one dialog and sends one take', (
       tester,
     ) async {
