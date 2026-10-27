@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bosstro/core/app_routes.dart';
+import 'package:bosstro/core/app_theme.dart';
 import 'package:bosstro/features/nodes/models/node_display.dart';
 import 'package:bosstro/features/nodes/screens/node_info_screen.dart';
 import 'package:bosstro/features/nodes/services/nodes_core.dart';
 import 'package:bosstro/shared/widgets/order_data_card.dart';
 import 'package:bosstro/shared/widgets/primary_button.dart';
+import 'package:bosstro/shared/utils/short_id.dart';
 
 import '../../support/screen_harness.dart';
 
@@ -204,6 +206,33 @@ void main() {
       expect(mostro.dy, lessThan(cuba.dy));
       expect(find.text('TRUSTED'), findsNWidgets(2));
       expect(find.text('Add your own node'), findsOneWidget);
+    });
+
+    testWidgets('a node\'s place reads as text, its short key in figures', (
+      tester,
+    ) async {
+      await open(tester);
+      final line =
+          tester
+              .widget<RichText>(
+                find.byWidgetPredicate(
+                  (w) =>
+                      w is RichText && w.text.toPlainText().contains('Cuba ·'),
+                ),
+              )
+              .text;
+      expect(line.style?.fontFamily, isNot(AppFonts.mono));
+      final spans = <TextSpan>[];
+      line.visitChildren((span) {
+        if (span is TextSpan && span.text != null) spans.add(span);
+        return true;
+      });
+      final key = spans.singleWhere((s) => s.text == shortOrderId(cubaPubkey));
+      expect(key.style?.fontFamily, AppFonts.figures);
+      expect(
+        spans.where((s) => s != key).map((s) => s.style?.fontFamily),
+        everyElement(isNull),
+      );
     });
 
     testWidgets('after onboarding there is no way back', (tester) async {
