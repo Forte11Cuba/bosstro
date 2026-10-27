@@ -12,9 +12,11 @@ const double redesignSidePadding = 18;
 /// [actions] are placed verbatim, so each screen sets its own right inset to
 /// [redesignSidePadding]. A null [onBack] drops the arrow — a terminal step
 /// with nowhere to go back to — and the title moves to the side padding.
+/// A null [title] leaves the bar to the way back, for a screen whose own
+/// headline names it (a full-screen confirmation).
 PreferredSizeWidget redesignAppBar(
   BuildContext context, {
-  required String title,
+  String? title,
   required VoidCallback? onBack,
   List<Widget> actions = const [],
 }) {
@@ -33,15 +35,18 @@ PreferredSizeWidget redesignAppBar(
               onPressed: onBack,
             ),
     titleSpacing: onBack == null ? redesignSidePadding : 0,
-    title: Text(
-      title,
-      style: TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.3,
-        color: pal.textPrimary,
+    title: switch (title) {
+      final text? => Text(
+        text,
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
+          color: pal.textPrimary,
+        ),
       ),
-    ),
+      null => null,
+    },
     actions: actions.isEmpty ? null : actions,
   );
 }

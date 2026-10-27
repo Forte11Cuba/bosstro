@@ -146,9 +146,10 @@ class _ResolutionScreenState extends ConsumerState<ResolutionScreen> {
       canPop: !_busy,
       child: Scaffold(
         backgroundColor: pal.bg,
+        // No title: the confirmation's headline names the action ("Pay the
+        // buyer?"), and the outcome says how it ended.
         appBar: redesignAppBar(
           context,
-          title: _pay ? l10n.payBuyerAction : l10n.refundSellerAction,
           onBack: _busy ? null : () => Navigator.of(context).pop(),
         ),
         body: SafeArea(
@@ -413,7 +414,8 @@ class _IrreversibleBanner extends StatelessWidget {
 }
 
 /// How the request ended: an icon in the outcome's color, a title, what it
-/// means, and one way on.
+/// means, and one way on; centred, as a centred dialog (and an empty state)
+/// says it.
 class _OutcomeView extends StatelessWidget {
   const _OutcomeView({
     required this.outcome,
@@ -520,34 +522,33 @@ class _OutcomeView extends StatelessWidget {
       children: [
         Expanded(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              redesignSidePadding,
-              24,
-              redesignSidePadding,
-              24,
+            padding: const EdgeInsets.symmetric(
+              horizontal: redesignSidePadding,
+              vertical: 32,
             ),
             children: [
               Semantics(
                 liveRegion: true,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ExcludeSemantics(child: Icon(icon, size: 24, color: color)),
-                    const SizedBox(height: 12),
+                    ExcludeSemantics(child: Icon(icon, size: 44, color: color)),
+                    const SizedBox(height: 14),
                     Text(
                       title,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 19,
                         fontWeight: FontWeight.w700,
                         color: pal.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text(
                       body,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        height: 1.45,
+                        height: 1.5,
                         color: pal.textBody,
                       ),
                     ),
@@ -555,9 +556,10 @@ class _OutcomeView extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         slashed,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
-                          height: 1.45,
+                          height: 1.5,
                           fontWeight: FontWeight.w600,
                           color: pal.textBody,
                         ),
