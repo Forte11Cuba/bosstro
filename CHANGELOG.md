@@ -4,6 +4,30 @@ All notable changes to Bosstro are documented here, newest first. This file is
 written by the release workflow (docs/RELEASING.md) — do not edit it by hand.
 Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-10-27
+
+### 🐛 Bug Fixes
+
+- **l10n:** the middle tab's screen and every mention of it read My disputes ([#47](https://github.com/MostroP2P/bosstro/pull/47)) by @grunch
+- **resolution:** the outcome is centred, and the action is named once ([#46](https://github.com/MostroP2P/bosstro/pull/46)) by @grunch
+- a tab's title sits at the same height in every tab ([#43](https://github.com/MostroP2P/bosstro/pull/43)) by @grunch
+- **nodes:** a node's place reads as text in the node selector ([#45](https://github.com/MostroP2P/bosstro/pull/45)) by @grunch
+- **disputes:** a take opens the dispute even when its row is gone ([#40](https://github.com/MostroP2P/bosstro/pull/40)) by @grunch
+- **disputes:** dispute cards have as much room under the id as over the chip ([#42](https://github.com/MostroP2P/bosstro/pull/42)) by @grunch
+- **observer:** the chat card's actions line up with its text ([#44](https://github.com/MostroP2P/bosstro/pull/44)) by @grunch
+- **settings:** a row's value and chevron line up at its end ([#41](https://github.com/MostroP2P/bosstro/pull/41)) by @grunch
+
+### 📚 Documentation
+
+- the README status says v0.1.0 is out ([#38](https://github.com/MostroP2P/bosstro/pull/38)) by @grunch
+- publish the signing certificate to verify the APK ([#36](https://github.com/MostroP2P/bosstro/pull/36)) by @grunch
+- the release tag is the approval, no environment reviewers ([#35](https://github.com/MostroP2P/bosstro/pull/35)) by @grunch
+
+### 🧹 Chores
+
+- **zapstore:** store images as JPG, under Zapstore's upload limit ([#39](https://github.com/MostroP2P/bosstro/pull/39)) by @grunch
+- **zapstore:** add the Zapstore manifest and store images ([#37](https://github.com/MostroP2P/bosstro/pull/37)) by @grunch
+
 ## [0.1.0] - 2026-10-26
 
 ### ✨ Features
