@@ -263,7 +263,7 @@ Reuse before building (principle 4). These are the parts a new screen is assembl
 
 | ID | Rule | Check |
 |---|---|---|
-| DS-CMP-12 | **MUST.** A pushed screen uses `redesignAppBar()`. A tab root uses `TabAppBar`, the same bar in every tab: the Mostro mascot (`HeaderMascot`), the active node's name and its status in words. The bottom bar is `BottomNavBar` (Pending · In progress · Settings). An `AppBar` built in place sets `backgroundColor` and its icon and title colors from the palette. | auto, review |
+| DS-CMP-12 | **MUST.** A pushed screen uses `redesignAppBar()`. A tab root uses `TabAppBar`, the same bar in every tab: the Mostro mascot (`HeaderMascot`), the active node's name and its status in words. The bottom bar is `BottomNavBar` (Pending · My disputes · Settings). An `AppBar` built in place sets `backgroundColor` and its icon and title colors from the palette. | auto, review |
 | DS-CMP-18 | **MUST.** A `Scaffold` sets `backgroundColor` from the palette (`bg`). | auto |
 | DS-CMP-13 | **MUST.** A list that loads shows a shimmer skeleton in the shape of its rows (port `app`'s `OrderListSkeleton` for the dispute rows), never a centered spinner. A button that works shows its own spinner and keeps its size. | review |
 | DS-CMP-14 | **MUST.** An empty list explains itself: the mascot, a title, the reason, and the action that fixes it when there is one (`ListEmptyState`, `lib/shared/widgets/list_empty_state.dart`). | review |

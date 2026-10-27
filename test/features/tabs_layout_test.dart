@@ -33,7 +33,8 @@ void main() {
 
     await tester.tap(find.text('My disputes'));
     await tester.pumpAndSettle();
-    expect(find.text('Your disputes'), findsOneWidget);
+    // The tab and its title read the same.
+    expect(find.text('My disputes'), findsNWidgets(2));
 
     await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();

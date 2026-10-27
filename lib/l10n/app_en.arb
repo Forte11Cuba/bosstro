@@ -32,7 +32,7 @@
   "@pendingEmptyBody": {
     "description": "Empty state explanation of the Pending tab"
   },
-  "inProgressTitle": "Your disputes",
+  "inProgressTitle": "My disputes",
   "@inProgressTitle": {
     "description": "Header of the In progress tab: disputes this solver took"
   },
@@ -1021,7 +1021,7 @@
   "@takeDisputeTitle": {
     "description": "Title of the confirmation before taking a dispute"
   },
-  "takeDisputeBody": "You become its solver: the node tells the buyer and the seller, and the dispute moves to Your disputes. Take only a dispute you can see through.",
+  "takeDisputeBody": "You become its solver: the node tells the buyer and the seller, and the dispute moves to My disputes. Take only a dispute you can follow to the end.",
   "@takeDisputeBody": {
     "description": "Body of the take confirmation"
   },
@@ -1029,19 +1029,19 @@
   "@takeDisputeAnswer": {
     "description": "Answer of the take confirmation; repeats the opener's verb (DS-CMP-26, glossary: take a dispute)"
   },
-  "takeTakenSnack": "Dispute taken. It is in Your disputes.",
+  "takeTakenSnack": "Dispute taken. It is in My disputes.",
   "@takeTakenSnack": {
     "description": "Snackbar once the node gave the solver the dispute"
   },
   "recoverAction": "Recover",
   "@recoverAction": {
-    "description": "Label of the action in the Your disputes header that opens Recover a dispute"
+    "description": "Label of the action in the My disputes header that opens Recover a dispute"
   },
   "recoverTitle": "Recover a dispute",
   "@recoverTitle": {
     "description": "Title of the Recover a dispute screen, and the link to it"
   },
-  "recoverNote": "The node does not publish who holds a dispute. So this list shows every dispute in progress on this node that is not among Your disputes on this phone: yours whose answer was lost, and other solvers'. Recover them one at a time.",
+  "recoverNote": "The node does not publish who holds a dispute. So this list shows every dispute in progress on this node that is not in My disputes on this phone: yours whose answer was lost, and other solvers'. Recover them one at a time.",
   "@recoverNote": {
     "description": "Note at the top of Recover a dispute"
   },
@@ -1049,7 +1049,7 @@
   "@recoverEmptyTitle": {
     "description": "Recover a dispute with no candidate"
   },
-  "recoverEmptyBody": "No dispute in progress on this node is missing from Your disputes.",
+  "recoverEmptyBody": "No dispute in progress on this node is missing from My disputes.",
   "@recoverEmptyBody": {
     "description": "Explanation under recoverEmptyTitle"
   },
@@ -1069,7 +1069,7 @@
   "@recoverDisputeAnswer": {
     "description": "Answer of the recover confirmation; repeats the opener's verb (DS-CMP-26)"
   },
-  "recoverTakenSnack": "Dispute recovered. It is in Your disputes.",
+  "recoverTakenSnack": "Dispute recovered. It is in My disputes.",
   "@recoverTakenSnack": {
     "description": "Snackbar once the node gave the dispute back"
   },
@@ -1109,7 +1109,7 @@
   "@noAnswerTitle": {
     "description": "Take outcome when no answer arrived in time"
   },
-  "noAnswerBody": "Your request may have reached it all the same, so Bosstro did not send it again. In a moment, look in Your disputes, or ask again from Recover a dispute.",
+  "noAnswerBody": "Your request may have reached it all the same, so Bosstro did not send it again. In a moment, look in My disputes, or ask again from Recover a dispute.",
   "@noAnswerBody": {
     "description": "Body under noAnswerTitle"
   },
@@ -1338,7 +1338,7 @@
   "@detailNotYoursTitle": {
     "description": "Shown in the detail when the dispute is no longer held by this solver key"
   },
-  "detailNotYoursBody": "The node reopened it, or it belongs to another key. It is no longer in Your disputes.",
+  "detailNotYoursBody": "The node reopened it, or it belongs to another key. It is no longer in My disputes.",
   "@detailNotYoursBody": {
     "description": "Explanation under detailNotYoursTitle"
   },
@@ -1443,7 +1443,7 @@
   },
   "openDisputeHint": "Open the dispute",
   "@openDisputeHint": {
-    "description": "Screen-reader hint of a row in Your disputes"
+    "description": "Screen-reader hint of a row in My disputes"
   },
   "chatAttach": "Attach a file",
   "@chatAttach": {
@@ -1883,7 +1883,7 @@
   "@takenOverTitle": {
     "description": "Result: the node said the dispute is not this key's (taken over)"
   },
-  "takenOverBody": "The node gave it to another solver, so nothing was paid or refunded. It has left Your disputes.",
+  "takenOverBody": "The node gave it to another solver, so nothing was paid or refunded. It has left My disputes.",
   "@takenOverBody": {
     "description": "Under takenOverTitle"
   },
@@ -1919,7 +1919,7 @@
   "@resolveBackToDispute": {
     "description": "Result: the one action, back to the dispute detail"
   },
-  "resolveGoToDisputes": "Go to Your disputes",
+  "resolveGoToDisputes": "Go to My disputes",
   "@resolveGoToDisputes": {
     "description": "Result after a take-over: back to the In progress list"
   },

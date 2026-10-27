@@ -147,7 +147,7 @@ Future<void> takeDispute(WidgetTester tester, String dispute) async {
   await tester.tap(find.text('Take dispute'));
   await until(
     tester,
-    find.text('Dispute taken. It is in Your disputes.'),
+    find.text('Dispute taken. It is in My disputes.'),
     what: 'the take of $dispute',
   );
   // The confirmation floats over the message field for its two seconds;
@@ -157,7 +157,7 @@ Future<void> takeDispute(WidgetTester tester, String dispute) async {
   }
 }
 
-/// Open [dispute] from Your disputes (pushed, or beside the list).
+/// Open [dispute] from My disputes (pushed, or beside the list).
 Future<void> openDispute(WidgetTester tester, String dispute) async {
   if (find.byType(DisputeDetailScreen).evaluate().isNotEmpty) {
     await tester.pageBack();
@@ -167,7 +167,7 @@ Future<void> openDispute(WidgetTester tester, String dispute) async {
   final held = find.byWidgetPredicate(
     (w) => w is InProgressDisputeRow && w.dispute.disputeId == dispute,
   );
-  await until(tester, held, what: 'dispute $dispute in Your disputes');
+  await until(tester, held, what: 'dispute $dispute in My disputes');
   await tester.ensureVisible(held);
   await tester.tap(held);
   await until(

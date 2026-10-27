@@ -272,7 +272,7 @@ void main() {
         }
         final next =
             outcome == ResolveOutcome.takenOver
-                ? 'Ir a Tus disputas'
+                ? 'Ir a Mis disputas'
                 : 'Volver a la disputa';
         // One way on, no second action.
         expect(find.text(next), findsOneWidget);
@@ -281,7 +281,8 @@ void main() {
         expect(find.byType(ResolutionScreen), findsNothing);
         expect(core.resolutions, hasLength(1), reason: 'never retried');
         if (outcome == ResolveOutcome.takenOver) {
-          expect(find.text('Tus disputas'), findsOneWidget);
+          // The tab and its title read the same.
+          expect(find.text('Mis disputas'), findsNWidgets(2));
         }
       });
     }

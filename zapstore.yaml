@@ -9,7 +9,7 @@ description: |
   Key Features:
 
     - Pending disputes: every open dispute on your node, live over Nostr
-    - Your disputes: take one and follow it until it closes
+    - My disputes: take one and follow it until it closes
     - Private chat with the buyer and the seller, end-to-end encrypted (NIP-44), with images and PDFs
     - Read the trade chat between the parties when one of them shares its key with you
     - Resolve: pay the buyer or refund the seller (Read-Write solvers)

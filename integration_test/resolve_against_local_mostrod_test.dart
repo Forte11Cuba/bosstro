@@ -137,7 +137,7 @@ void main() {
       await tester.tap(find.text('Recover dispute'));
       await until(
         tester,
-        find.text('Dispute recovered. It is in Your disputes.'),
+        find.text('Dispute recovered. It is in My disputes.'),
         what: 'the take-over',
       );
       await tester.pageBack();

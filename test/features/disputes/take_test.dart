@@ -182,7 +182,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(TakeDialog), findsNothing);
       expect(
-        find.text('Dispute taken. It is in Your disputes.'),
+        find.text('Dispute taken. It is in My disputes.'),
         findsOneWidget,
       );
       // Straight to the dispute taken.
@@ -486,7 +486,7 @@ void main() {
 
       expect(core.takes, [_a], reason: 'never in bulk');
       expect(
-        find.text('Dispute recovered. It is in Your disputes.'),
+        find.text('Dispute recovered. It is in My disputes.'),
         findsOneWidget,
       );
       // Straight to the dispute recovered, in place of Recover.
