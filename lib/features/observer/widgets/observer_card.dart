@@ -51,40 +51,61 @@ class ObserverCard extends ConsumerWidget {
         chat.messages.isEmpty ? l10n.observerNoKey : l10n.observerStoredOnly,
     ];
 
+    // The actions' own 10-dp padding (their ink) fills the card's start:
+    // their icons line up with the title's, and the text keeps the card's
+    // 14.
+    const actionPadding = 10.0;
     return SurfaceCard(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        14 - actionPadding,
+        14,
+        14,
+        6,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.forum_outlined, size: 16, color: pal.textTertiary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.observerTitle,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: pal.textPrimary,
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: actionPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.forum_outlined,
+                      size: 16,
+                      color: pal.textTertiary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.observerTitle,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: pal.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                for (final line in lines)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      line,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: pal.textSecondary,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          for (final line in lines)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                line,
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.4,
-                  color: pal.textSecondary,
-                ),
-              ),
+              ],
             ),
+          ),
           const SizedBox(height: 4),
           Wrap(
             spacing: 4,

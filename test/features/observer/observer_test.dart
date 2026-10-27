@@ -8,6 +8,7 @@ import 'package:bosstro/features/chat/services/chat_core.dart';
 import 'package:bosstro/features/observer/screens/observer_screen.dart';
 import 'package:bosstro/features/observer/services/observer_core.dart';
 import 'package:bosstro/features/observer/widgets/observed_bubble.dart';
+import 'package:bosstro/features/observer/widgets/observer_card.dart';
 import 'package:bosstro/features/observer/widgets/paste_key_dialog.dart';
 
 import '../../support/screen_harness.dart';
@@ -337,6 +338,25 @@ void main() {
       expect(banner, findsOneWidget);
     });
   }
+
+  testWidgets('the card\'s actions line their icons up with its title', (
+    tester,
+  ) async {
+    await _pumpDetail(tester, _observer(_sharedByBuyer()));
+    await _scrollInfoTo(tester, find.text('Pegar una clave del chat'));
+    double start(IconData icon) =>
+        tester
+            .getTopLeft(
+              find.descendant(
+                of: find.byType(ObserverCard),
+                matching: find.byIcon(icon),
+              ),
+            )
+            .dx;
+    final title = start(Icons.forum_outlined);
+    expect(start(Icons.chat_outlined), title, reason: 'Read');
+    expect(start(Icons.key_rounded), title, reason: 'Paste a chat key');
+  });
 
   testWidgets('Paste fills the field from the clipboard', (tester) async {
     final observer = _observer(sampleObserved());
