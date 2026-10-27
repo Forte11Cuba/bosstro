@@ -39,6 +39,7 @@ class PendingDisputeRow extends StatelessWidget {
       button: onTap != null,
       hint: hint,
       child: SurfaceCard(
+        padding: disputeCardPadding,
         onTap: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,6 +81,11 @@ class PendingDisputeRow extends StatelessWidget {
     );
   }
 }
+
+/// The padding of a dispute card, which a [CopyableDisputeId] closes: none
+/// under it, as the id's 48-dp target already leaves 16 under its line,
+/// about the 14 over the card's chip.
+const disputeCardPadding = EdgeInsets.fromLTRB(14, 14, 14, 0);
 
 /// The short id and its copy icon, a 48-dp target that copies the full id.
 class CopyableDisputeId extends StatelessWidget {
